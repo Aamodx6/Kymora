@@ -1,4 +1,4 @@
-"""Benchmark tsxtract vs tsfresh on synthetic data.
+"""Benchmark tsxtractor vs tsfresh on synthetic data.
 
 Usage: python benches/bench_vs_tsfresh.py [n_series] [n_timesteps]
 """
@@ -6,7 +6,7 @@ import sys
 import time
 
 import numpy as np
-import tsxtract
+import tsxtractor
 
 
 def main():
@@ -17,12 +17,12 @@ def main():
     X = rng.standard_normal((n_series, n_steps))
 
     # warmup + timed run
-    tsxtract.extract_features(X[:100])
+    tsxtractor.extract_features(X[:100])
     t0 = time.perf_counter()
-    feats = tsxtract.extract_features(X)
+    feats = tsxtractor.extract_features(X)
     t_rust = time.perf_counter() - t0
     n_feat = feats.shape[1]
-    print(f"tsxtract: {n_series} series x {n_steps} steps, "
+    print(f"tsxtractor: {n_series} series x {n_steps} steps, "
           f"{n_feat} features: {t_rust:.3f}s", flush=True)
 
     try:

@@ -1,10 +1,10 @@
-"""tsxtract — fast time-series feature extraction with a Rust core.
+"""tsxtractor — fast time-series feature extraction with a Rust core.
 
 Usage:
-    import numpy as np, tsxtract
+    import numpy as np, tsxtractor
     X = np.random.randn(1000, 500)
-    feats = tsxtract.extract_features(X)   # (1000, n_features)
-    names = tsxtract.feature_names()
+    feats = tsxtractor.extract_features(X)   # (1000, n_features)
+    names = tsxtractor.feature_names()
 
 NaN policy: any NaN in a series makes all its features NaN (no silent imputation).
 """

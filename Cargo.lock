@@ -332,7 +332,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tsxtract"
+name = "tsxtractor"
 version = "0.1.0"
 dependencies = [
  "numpy",

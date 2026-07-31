@@ -1,4 +1,4 @@
-# tsxtract
+# tsxtractor
 
 Fast time-series feature extraction for Python, with a Rust core.
 
@@ -18,18 +18,18 @@ maturin develop --release   # from a clone, inside a virtualenv
 
 ```python
 import numpy as np
-import tsxtract
+import tsxtractor
 
 # batch: one row per series
 X = np.random.randn(10_000, 500)
-feats = tsxtract.extract_features(X)        # (10_000, 33) float64
-names = tsxtract.feature_names()            # column order
+feats = tsxtractor.extract_features(X)        # (10_000, 33) float64
+names = tsxtractor.feature_names()            # column order
 
 # ragged series of different lengths
-feats = tsxtract.extract_features([arr1, arr2, arr3])
+feats = tsxtractor.extract_features([arr1, arr2, arr3])
 
 # rolling windows over one long series
-feats = tsxtract.sliding_features(x, window=256, stride=64)
+feats = tsxtractor.sliding_features(x, window=256, stride=64)
 ```
 
 ## Features (33)
@@ -62,7 +62,7 @@ Measured on Windows 11, Python 3.14, 1000 series × 500 steps:
 
 | | features | time |
 |---|---|---|
-| tsxtract | 33 | 0.004 s |
+| tsxtractor | 33 | 0.004 s |
 | tsfresh (EfficientFCParameters) | 777 | 155 s |
 
 tsfresh computes far more features, so the honest number is per-feature
