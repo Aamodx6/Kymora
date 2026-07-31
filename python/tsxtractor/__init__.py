@@ -12,4 +12,4 @@ NaN policy: any NaN in a series makes all its features NaN (no silent imputation
 from ._core import extract_features, feature_names, sliding_features
 
 __all__ = ["extract_features", "sliding_features", "feature_names"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
