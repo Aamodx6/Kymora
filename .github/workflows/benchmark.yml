@@ -1,0 +1,46 @@
+name: Benchmark
+
+# Manual / weekly, never gating. Publishes numbers a stranger can reproduce on a
+# known runner instead of one laptop.
+on:
+  workflow_dispatch:
+    inputs:
+      n_series:
+        description: "Number of series"
+        default: "1000"
+      n_steps:
+        description: "Steps per series"
+        default: "500"
+  schedule:
+    - cron: "37 4 * * 1"
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[bench]"
+          maturin develop --release
+      - name: Record runner spec
+        run: |
+          echo "cores: $(nproc)" | tee -a "$GITHUB_STEP_SUMMARY"
+          python -c "import platform;print('python:', platform.python_version())" | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: |
+          python benches/bench_libraries.py \
+            --n-series ${{ github.event.inputs.n_series || '1000' }} \
+            --n-steps ${{ github.event.inputs.n_steps || '500' }} \
+            --json benches/results/latest.json \
+            --markdown benches/results/latest.md
+      - run: cat benches/results/latest.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benches/results/
