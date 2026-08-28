@@ -1,15 +1,98 @@
 """tsxtractor — fast time-series feature extraction with a Rust core.
 
+Extracts 33 curated statistical, temporal, and spectral features from batches of
+time series. The Rust core takes zero-copy views of your numpy buffers, releases
+the GIL, and parallelizes across the *series* dimension with rayon — so the
+speedup shows up on batches, not on a single short series.
+
 Usage:
     import numpy as np, tsxtractor
-    X = np.random.randn(1000, 500)
-    feats = tsxtractor.extract_features(X)   # (1000, n_features)
-    names = tsxtractor.feature_names()
 
-NaN policy: any NaN in a series makes all its features NaN (no silent imputation).
+    X = np.random.randn(1000, 500)
+    feats = tsxtractor.extract_features(X)      # (1000, 33) float64
+    names = tsxtractor.feature_names()          # stable column order
+    df = tsxtractor.extract_features_df(X)      # same, as a labeled DataFrame
+
+Error model — two separate categories:
+
+* Structural problems raise an exception: no series at all, a zero-length
+  series, a non-contiguous array, ``window``/``stride`` < 1, or ``window``
+  longer than the series all raise ``ValueError``; a wrong dtype or shape raises
+  ``TypeError``.
+* NaN is a value, not an error. Any NaN in a series makes all 33 of that
+  series' features NaN (no silent imputation). Features that are individually
+  undefined for an otherwise-valid series — autocorrelation or spectral features
+  of a constant series, change features of a length-1 series — are NaN on their
+  own while the rest compute normally.
+
+``feature_names()`` order is a stability guarantee: column ``i`` means the same
+feature for every release within a major version.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Sequence
 
 from ._core import extract_features, feature_names, sliding_features
 
-__all__ = ["extract_features", "sliding_features", "feature_names"]
-__version__ = "0.1.1"
+if TYPE_CHECKING:  # pragma: no cover
+    import numpy as np
+    import pandas as pd
+
+__all__ = [
+    "extract_features",
+    "extract_features_df",
+    "sliding_features",
+    "feature_names",
+    "__version__",
+]
+
+
+def _resolve_version() -> str:
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("tsxtractor")
+    except PackageNotFoundError:  # source tree without an installed dist
+        return "0.0.0.dev0"
+
+
+#: Package version, read from the installed distribution metadata (which maturin
+#: fills from ``pyproject.toml``/``Cargo.toml`` at build time).
+__version__: str = _resolve_version()
+
+
+def extract_features_df(
+    X: "np.ndarray | Sequence[np.ndarray]",
+) -> "pd.DataFrame":
+    """Same as :func:`extract_features`, returned as a labeled DataFrame.
+
+    Columns are :func:`feature_names` in order; the index is a plain
+    ``RangeIndex`` over the input series.
+
+    Requires pandas, which is an optional extra::
+
+        pip install "tsxtractor[pandas]"
+
+    Args:
+        X: 2D float64 array of shape ``(n_series, length)``, or a sequence of 1D
+            float64 arrays for ragged series.
+
+    Returns:
+        A ``(n_series, 33)`` DataFrame of float64 features.
+
+    Raises:
+        ImportError: if pandas is not installed.
+        ValueError: on structural problems with the input (see module docstring).
+        TypeError: on a wrong dtype or shape.
+    """
+    try:
+        import pandas as pd
+    except ImportError as exc:  # pragma: no cover - depends on environment
+        raise ImportError(
+            "extract_features_df requires pandas, which tsxtractor does not "
+            'install by default. Install it with: pip install "tsxtractor[pandas]"'
+        ) from exc
+
+    values: Any = extract_features(X)
+    return pd.DataFrame(values, columns=feature_names())

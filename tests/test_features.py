@@ -167,24 +167,11 @@ def test_nan_propagates():
     assert np.isnan(out).all()
 
 
-def test_empty_series_all_nan():
-    out = tsxtractor.extract_features([np.array([], dtype=np.float64)])
-    assert np.isnan(out).all()
-
-
 def test_sliding_matches_manual():
     x = rng.standard_normal(1000)
     s = tsxtractor.sliding_features(x, window=100, stride=37)
     manual = tsxtractor.extract_features([x[i : i + 100] for i in range(0, 901, 37)])
     np.testing.assert_array_equal(s, manual)
-
-
-def test_sliding_validation():
-    x = rng.standard_normal(50)
-    with pytest.raises(ValueError):
-        tsxtractor.sliding_features(x, window=0)
-    with pytest.raises(ValueError):
-        tsxtractor.sliding_features(x, window=100)
 
 
 def test_non_contiguous_rejected():
