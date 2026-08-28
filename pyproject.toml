@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "tsxtractor"
-version = "0.1.1"
+version = "0.2.0"
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"
 license = "MIT"
@@ -12,17 +12,30 @@ requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 keywords = ["time-series", "feature-extraction", "rust", "tsfresh", "machine-learning"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Information Analysis",
+    "Typing :: Typed",
 ]
+
+[project.optional-dependencies]
+# Core install stays numpy-only. pandas is needed only for extract_features_df().
+pandas = ["pandas>=1.5"]
+test = ["pytest>=7.0", "scipy>=1.10", "hypothesis>=6.100", "pandas>=1.5"]
+bench = ["pandas>=1.5", "tsfresh>=0.20", "pycatch22>=0.4.5", "tsfel>=0.1.6"]
+docs = ["mkdocs>=1.6", "mkdocs-material>=9.5"]
 
 [project.urls]
 Homepage = "https://github.com/Aamod007/Tsxtract"
 Repository = "https://github.com/Aamod007/Tsxtract"
 Issues = "https://github.com/Aamod007/Tsxtract/issues"
+Changelog = "https://github.com/Aamod007/Tsxtract/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"

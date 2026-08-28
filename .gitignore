@@ -5,3 +5,6 @@ __pycache__/
 *.so
 dist/
 .pytest_cache/
+*.pdb
+.hypothesis/
+site/
