@@ -40,7 +40,16 @@ pub const NAMES: &[&str] = &[
 ];
 
 /// Compute all features for one series into `out` (len == NAMES.len()).
-/// Any NaN in input propagates: all features become NaN. Empty input: all NaN.
+///
+/// Value contract (distinct from the structural validation in `extract.rs`):
+/// any NaN in the input propagates, so all 33 features become NaN. Features that
+/// are individually undefined for an otherwise-valid series (autocorrelation or
+/// spectral features of a constant series, change features of a length-1 series)
+/// are NaN on their own.
+///
+/// Empty input is rejected at the FFI boundary as a structural error; the
+/// `is_empty()` branch below is a defensive guard so this function stays
+/// panic-free if ever called directly.
 pub fn compute_all(x: &[f64], out: &mut [f64]) {
     debug_assert_eq!(out.len(), NAMES.len());
     if x.is_empty() || x.iter().any(|v| v.is_nan()) {
