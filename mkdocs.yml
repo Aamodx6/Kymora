@@ -1,0 +1,51 @@
+site_name: tsxtractor
+site_description: Batch time-series feature extraction for Python, with a Rust core.
+site_url: https://aamod007.github.io/Tsxtract/
+repo_url: https://github.com/Aamod007/Tsxtract
+repo_name: Aamod007/Tsxtract
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: {icon: material/weather-night, name: Switch to dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: {icon: material/weather-sunny, name: Switch to light mode}
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Quickstart: quickstart.md
+  - Feature reference: features.md
+  - NaN policy: nan-policy.md
+  - API reference: api.md
+  - Benchmarks: benchmarks.md
+  - Validation report: validation.md
+  - Migrating from tsfresh: migrating.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.highlight: {anchor_linenums: true}
+  - pymdownx.superfences
+  - pymdownx.details
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Aamod007/Tsxtract
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/tsxtractor/
