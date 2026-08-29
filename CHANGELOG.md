@@ -12,6 +12,29 @@ feature is a **major** version change; appending a new feature at the end is a
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-29
+
+A packaging-only release. No library code changed, so features, output order,
+and the NaN contract are identical to 0.2.0. 0.2.0 was tagged but never reached
+PyPI — its release run failed before the publish step — so this is the first
+0.2.x on PyPI, and the first release with wheels for Linux and macOS there.
+
+### Fixed
+- CI: every Python job aborted at `maturin develop` because `setup-python`
+  provides a bare interpreter and maturin requires a virtualenv. Jobs now create
+  and activate one, using a native Windows path on Windows runners where bash's
+  MSYS-style path was unreadable to maturin and silently ignored by PowerShell.
+- Release: the wheel smoke test passed `--no-index`, which also blocked numpy, so
+  the install could never resolve. numpy now comes from PyPI while tsxtractor
+  still comes only from the freshly built wheel.
+- `cargo fmt` drift in `src/extract.rs`, `src/features/temporal.rs`, and
+  `src/ffi.rs`.
+- `mypy` could not find pandas stubs; `pandas-stubs` is now installed in that
+  job.
+- Docs: `mkdocs build --strict` aborted on a `contributing.md` nav entry with no
+  corresponding page. Added `docs/contributing.md`, and the documentation site is
+  now published at https://aamod007.github.io/Tsxtract/.
+
 ## [0.2.0] - 2026-08-29
 
 The first release installable without a Rust toolchain on Linux and macOS.
@@ -76,7 +99,8 @@ an sdist build; that is fixed here.
   `sliding_features()`.
 - Windows x86_64 wheel and sdist only — see 0.2.0 for the full platform matrix.
 
-[Unreleased]: https://github.com/Aamod007/Tsxtract/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Aamod007/Tsxtract/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Aamod007/Tsxtract/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Aamod007/Tsxtract/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Aamod007/Tsxtract/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Aamod007/Tsxtract/releases/tag/v0.1.0
