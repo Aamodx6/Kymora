@@ -44,11 +44,11 @@ pub fn permutation_entropy(x: &[f64]) -> f64 {
         let (a, b, c) = (w[0], w[1], w[2]);
         // ordinal pattern index: ranks of (a,b,c) with ties broken by position (stable)
         let idx = match (a <= b, b <= c, a <= c) {
-            (true, true, _) => 0,      // a b c
-            (true, false, true) => 1,  // a c b
-            (false, _, true) => 2,     // b a c
-            (true, false, false) => 3, // c a b
-            (false, true, _) => 4,     // b c a
+            (true, true, _) => 0,       // a b c
+            (true, false, true) => 1,   // a c b
+            (false, _, true) => 2,      // b a c
+            (true, false, false) => 3,  // c a b
+            (false, true, _) => 4,      // b c a
             (false, false, false) => 5, // c b a
         };
         counts[idx] += 1;
@@ -73,9 +73,7 @@ pub fn number_of_peaks(x: &[f64], support: usize) -> f64 {
         return 0.0;
     }
     (support..n - support)
-        .filter(|&i| {
-            (1..=support).all(|d| x[i] > x[i - d] && x[i] > x[i + d])
-        })
+        .filter(|&i| (1..=support).all(|d| x[i] > x[i - d] && x[i] > x[i + d]))
         .count() as f64
 }
 

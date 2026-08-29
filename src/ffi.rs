@@ -50,9 +50,8 @@ pub fn extract_features<'py>(
         return Ok(extract::build_matrix(flat, nrows)?.into_pyarray(py));
     }
 
-    let list: Vec<PyReadonlyArray1<f64>> = x
-        .extract()
-        .map_err(|_| PyTypeError::new_err(TYPE_HELP))?;
+    let list: Vec<PyReadonlyArray1<f64>> =
+        x.extract().map_err(|_| PyTypeError::new_err(TYPE_HELP))?;
     let slices: Vec<&[f64]> = list
         .iter()
         .enumerate()

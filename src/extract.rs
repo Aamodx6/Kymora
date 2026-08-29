@@ -111,7 +111,10 @@ mod tests {
     fn zero_length_series_is_an_error() {
         let a = [1.0, 2.0];
         let rows: Vec<&[f64]> = vec![&a[..], &[]];
-        assert_eq!(validate_batch(&rows), Err(TsxError::EmptySeries { index: 1 }));
+        assert_eq!(
+            validate_batch(&rows),
+            Err(TsxError::EmptySeries { index: 1 })
+        );
     }
 
     #[test]
