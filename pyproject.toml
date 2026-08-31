@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "tsxtractor"
-version = "0.2.1"
+version = "0.3.0"
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"
 license = "MIT"

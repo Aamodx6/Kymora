@@ -12,6 +12,52 @@ feature is a **major** version change; appending a new feature at the end is a
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-31
+
+### Changed
+
+- Extraction is roughly **1.8x faster** end to end, with no change to any
+  feature value, the output column order, or the NaN contract. Measured on a
+  16-core Windows machine: 1000 x 500 series 2.46 ms -> 1.34 ms, 5000 x 500
+  11.07 ms -> 7.43 ms, 1000 x 2000 10.08 ms -> 5.32 ms. The reference tests
+  (`rtol=1e-9` against numpy/scipy) and the bit-exactness property tests are
+  unchanged and passing, and the Rust unit tests now assert that each rewritten
+  stage agrees with the readable form it replaced.
+
+  What changed inside:
+
+  - The spectral features use a real-to-complex FFT (`realfft`) instead of a
+    complex FFT over a zero-imaginary buffer, halving the transform work.
+  - Quantiles come from selection (`select_nth_unstable_by`) on the ten order
+    statistics they actually need, instead of a full sort -- 2.1x faster on the
+    largest single stage. Min and max moved into the first pass, which keeps
+    them out of the selection set for the cost of two comparisons per element.
+  - The per-series traversals are fused: one pass for the sums, extremes, NaN
+    check and constant check; one for the second, third and fourth central
+    moments; one for the difference features; one for all four threshold
+    features; one for all four autocorrelation lags.
+  - Permutation entropy and the peak count are branchless (an ordinal-pattern
+    lookup table, and non-short-circuiting comparisons), which removes the
+    mispredicted branches that dominated both on real data: 2.11 -> 0.67 and
+    1.98 -> 0.73 us/series respectively.
+  - The FFT workspace and the order-statistics buffer are thread-local, so
+    allocations scale with the number of threads rather than the number of
+    series.
+
+### Removed
+
+- The direct `rustfft` dependency, replaced by `realfft`. `realfft` wraps
+  `rustfft`, so the dependency tree is not shorter -- the transform is just the
+  right one for real input.
+
+### Fixed
+
+- Spectral entropy and spectral centroid now return NaN, rather than a value
+  derived from a non-finite total, when the power spectrum sums to something
+  that is not a positive finite number (reachable with infinities in the input).
+- Shannon entropy no longer produces NaN when a probability share underflows to
+  zero while its weight is positive.
+
 ## [0.2.1] - 2026-08-29
 
 A packaging-only release. No library code changed, so features, output order,
@@ -99,7 +145,8 @@ an sdist build; that is fixed here.
   `sliding_features()`.
 - Windows x86_64 wheel and sdist only — see 0.2.0 for the full platform matrix.
 
-[Unreleased]: https://github.com/Aamod007/Tsxtract/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/Aamod007/Tsxtract/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Aamod007/Tsxtract/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/Aamod007/Tsxtract/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Aamod007/Tsxtract/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Aamod007/Tsxtract/compare/v0.1.0...v0.1.1

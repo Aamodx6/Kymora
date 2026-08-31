@@ -1,0 +1,45 @@
+{
+  "n_series": 1000,
+  "n_steps": 500,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.14.6",
+  "cpu_count": 16,
+  "results": [
+    {
+      "library": "tsxtractor 0.2.1",
+      "n_features": 33,
+      "seconds": 0.0012495999981183559,
+      "skipped": null,
+      "notes": "Rust core, rayon across series, zero-copy input",
+      "runs": 5,
+      "per_feature_ms": 0.037866666609647145
+    },
+    {
+      "library": "catch22 (pycatch22)",
+      "n_features": 22,
+      "seconds": 1.0247704999928828,
+      "skipped": null,
+      "notes": "C core, single-threaded Python loop over series",
+      "runs": 2,
+      "per_feature_ms": 46.58047727240377
+    },
+    {
+      "library": "TSFEL (all domains)",
+      "n_features": 156,
+      "seconds": 7.154015899985097,
+      "skipped": null,
+      "notes": "Python/numba, per-series extractor calls",
+      "runs": 1,
+      "per_feature_ms": 45.85907628195575
+    },
+    {
+      "library": "tsfresh (EfficientFCParameters)",
+      "n_features": 777,
+      "seconds": 17.68331120000221,
+      "skipped": null,
+      "notes": "includes the long-format reshape, its required input form",
+      "runs": 1,
+      "per_feature_ms": 22.758444272847115
+    }
+  ]
+}

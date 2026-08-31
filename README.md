@@ -60,6 +60,18 @@ pip install -e ".[bench]"
 python benches/bench_libraries.py --n-series 1000 --n-steps 500
 ```
 
+| library | features | total time | series/s | ms/feature | vs tsxtractor |
+|---|---:|---:|---:|---:|---:|
+| **tsxtractor 0.2.1** | 33 | **1.2 ms** | 800,256 | 0.0379 | baseline |
+| `catch22` (pycatch22) | 22 | 1.02 s | 976 | 46.58 | 820x slower |
+| `TSFEL` (all domains) | 156 | 7.15 s | 140 | 45.86 | 5,725x slower |
+| `tsfresh` (EfficientFCParameters) | 777 | 17.68 s | 57 | 22.76 | 14,151x slower |
+
+1000 series x 500 steps, 16 cores, Windows 11, Python 3.14. Each library gets
+the best of as many runs as fit in a two-second budget. Feature counts differ,
+so `ms/feature` is the column to read for like-for-like work; `series/s` is the
+one that decides how long your batch job takes.
+
 The benchmark compares batch throughput against `tsfresh`, `catch22`, and
 `TSFEL` on the same input, timing each library end to end *including* the input
 reshaping it requires (tsfresh needs a long DataFrame; catch22 and TSFEL need a
@@ -68,9 +80,20 @@ per-series Python loop). It is run on a GitHub Linux runner by the
 are reproducible by a stranger rather than measured on one laptop; the latest
 committed run is in [`benches/results/`](benches/results/).
 
-These libraries compute different numbers of features, so total wall-clock time
-is not a like-for-like comparison — read the per-feature column alongside it.
-`catch22` is competitive per feature; the claim here is batch throughput.
+Two things drive the gap, and only one of them is engineering:
+
+- **Batch parallelism.** Every other library here is called once per series from
+  Python, so the batch cost is a serial loop plus per-call overhead. tsxtractor
+  takes the whole matrix across the FFI boundary once and spreads the series
+  over cores.
+- **A cheaper feature set.** All 33 features are O(n) or O(n log n) by
+  construction. `catch22` includes costlier estimators, which is why it stays
+  slower per feature even on a single series: on one 500-point series,
+  `catch22_all` takes 945 us (43 us/feature) against 9.4 us (0.28 us/feature)
+  for `extract_features`, both measured as best of 200 runs. That is a
+  difference in what is being computed, not only in how fast it is computed —
+  if you need those specific estimators, this table is not telling you to
+  switch.
 
 ## When not to use this
 
@@ -91,8 +114,8 @@ is not a like-for-like comparison — read the per-feature column alongside it.
 |---|---:|---|---|---|
 | **tsxtractor** | 33 | Rust + PyO3 | yes (rayon, across series) | curated, low-redundancy set; numpy-only dependency |
 | `tsfresh` | up to 1 558 | Python | no | most exhaustive; slowest by a wide margin at scale |
-| `TSFEL` | ~390 | Python | no | fast per feature; high within-set redundancy |
-| `catch22` | 22 | C | no | fastest per feature; fixed set; multi-language bindings |
+| `TSFEL` | ~390 | Python | no | broad domain coverage; high within-set redundancy |
+| `catch22` | 22 | C | no | fixed, literature-selected set; multi-language bindings |
 | `tsflex` | n/a | Python | no | windowing framework, not a feature bank — calls others |
 
 ## Features (33)

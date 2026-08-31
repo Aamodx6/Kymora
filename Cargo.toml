@@ -1,6 +1,6 @@
 [package]
 name = "tsxtractor"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 
 [lib]
@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.26", features = ["extension-module", "abi3-py310"] }
 numpy = "0.26"
 rayon = "1"
-rustfft = "6"
+realfft = "3.5.0"
 
 [profile.release]
 lto = true
