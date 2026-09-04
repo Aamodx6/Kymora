@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence
 
-from ._core import extract_features, feature_names, sliding_features
+from ._core import StreamingExtractor, extract_features, feature_names, sliding_features
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
@@ -43,6 +43,7 @@ __all__ = [
     "extract_features",
     "extract_features_df",
     "sliding_features",
+    "StreamingExtractor",
     "feature_names",
     "__version__",
 ]

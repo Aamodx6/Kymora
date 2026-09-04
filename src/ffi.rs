@@ -9,7 +9,7 @@
 //!
 //! No `panic!`, `unwrap`, or `expect` on a user-reachable path.
 
-use numpy::{IntoPyArray, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 
@@ -91,4 +91,49 @@ pub fn sliding_features<'py>(
 #[pyfunction]
 pub fn feature_names() -> Vec<&'static str> {
     features::NAMES.to_vec()
+}
+
+/// Streaming feature extractor for real-time sliding windows.
+#[pyclass(name = "StreamingExtractor")]
+pub struct PyStreamingExtractor {
+    inner: features::StreamingExtractor,
+}
+
+#[pymethods]
+impl PyStreamingExtractor {
+    #[new]
+    pub fn new(window_size: usize) -> PyResult<Self> {
+        if window_size < 2 {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "window_size must be at least 2",
+            ));
+        }
+        Ok(Self {
+            inner: features::StreamingExtractor::new(window_size),
+        })
+    }
+
+    #[getter]
+    pub fn window_size(&self) -> usize {
+        self.inner.window_size()
+    }
+
+    #[getter]
+    pub fn is_full(&self) -> bool {
+        self.inner.is_full()
+    }
+
+    pub fn push(&mut self, val: f64) -> bool {
+        self.inner.push(val)
+    }
+
+    pub fn reset(&mut self) {
+        self.inner.reset()
+    }
+
+    pub fn compute_features<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray1<f64>>> {
+        let mut feats = vec![0.0f64; features::NAMES.len()];
+        self.inner.compute_features(&mut feats);
+        Ok(feats.into_pyarray(py))
+    }
 }

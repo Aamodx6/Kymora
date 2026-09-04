@@ -30,6 +30,7 @@ def test_public_api_surface_is_exactly_what_is_documented():
         "extract_features",
         "extract_features_df",
         "sliding_features",
+        "StreamingExtractor",
         "feature_names",
         "__version__",
     }

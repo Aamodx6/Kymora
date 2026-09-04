@@ -18,5 +18,6 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ffi::extract_features, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::sliding_features, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::feature_names, m)?)?;
+    m.add_class::<ffi::PyStreamingExtractor>()?;
     Ok(())
 }

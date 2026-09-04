@@ -1,7 +1,10 @@
 pub mod entropy;
 pub mod spectral;
 pub mod stats;
+pub mod streaming;
 pub mod temporal;
+
+pub use streaming::StreamingExtractor;
 
 use std::cell::RefCell;
 
