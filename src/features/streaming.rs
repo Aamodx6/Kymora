@@ -210,8 +210,8 @@ impl StreamingExtractor {
     pub fn get_current_window(&self, out: &mut [f64]) {
         assert_eq!(out.len(), self.window_size);
         let w = self.window_size;
-        for i in 0..w {
-            out[i] = self.buffer[(self.head + i) % w];
+        for (i, val) in out.iter_mut().enumerate() {
+            *val = self.buffer[(self.head + i) % w];
         }
     }
 
