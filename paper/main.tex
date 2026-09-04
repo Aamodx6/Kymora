@@ -4,6 +4,7 @@
 \usepackage{amssymb}
 \usepackage{bm}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{url}
@@ -313,7 +314,7 @@ Normalized permutation entropy (order 3, delay 1)~\cite{bandt2002permutation} is
 Spectral features (dominant frequency, spectral centroid, spectral entropy) are computed using a real-to-complex Fast Fourier Transform (\texttt{realfft})~\cite{frigo2005design}. Because the input signal is purely real, the negative-frequency spectrum is redundant; \texttt{realfft} computes an $n/2$ complex transform, halving arithmetic operations relative to standard complex FFT algorithms.
 
 \subsection{Stateful Incremental Streaming Engine}
-For sliding-window telemetry, \tsxtract{} provides a streaming state engine (\texttt{Streaming}\allowbreak\texttt{Extractor} in \texttt{src/\allowbreak features/\allowbreak streaming.rs}) that maintains a circular ring buffer of capacity $W$. As new data points arrive, running power sums and linear trend covariance update incrementally in $O(1)$ arithmetic time:
+For sliding-window telemetry applications, \tsxtract{} provides a streaming state engine (\texttt{StreamingExtractor} in \texttt{src/features/}\allowbreak\texttt{streaming.rs}) that maintains a circular ring buffer of capacity $W$. As new data points arrive, running power sums and linear trend covariance update incrementally in $O(1)$ arithmetic time:
 \begin{equation}
 \label{eq:stream_power_sum}
 S_k \leftarrow S_k + x_{\text{new}}^k - x_{\text{old}}^k, \quad k \in \{1, 2, 3, 4\},
