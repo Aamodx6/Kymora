@@ -57,17 +57,17 @@ The 33 features are organized into six cohesive groups, all adhering to worst-ca
 # Empirical Validation & Benchmarks
 
 ## Downstream Classification Performance
-To prove that `tsxtractor`'s 33 features retain critical dynamical signals, we evaluated downstream classification utility on standard benchmarks from the UCR Time Series Archive [@dau2019ucr]. Training standard Random Forest classifiers on `tsxtractor` features yields 100.0% accuracy on canonical control and ECG waveforms, matching or exceeding exhaustive feature banks while extracting in a fraction of a millisecond.
+To verify that `tsxtractor`'s 33 features retain critical dynamical signals, we evaluated downstream classification utility on standard dynamic benchmarks (5-fold stratified cross-validation). Evaluating both Random Forest and Ridge Classifiers on `tsxtractor` features yields 96.5% to 100.0% accuracy across control, ECG, gesture, and power demand waveforms, matching or exceeding `catch22` while extracting in under 0.65~ms (300×--600× faster).
 
 ## Feature Orthogonality & Redundancy
 An empirical collinearity evaluation over 2,000 diverse time series (periodic, random walk, AR(1), non-stationary, chaotic, pulse) demonstrated that **83.3% of feature pairs exhibit low collinearity ($|r| < 0.70$)**. Principal Component Analysis confirmed that `tsxtractor` spans a high-dimensional feature subspace, avoiding the severe multi-collinearity of larger libraries.
 
 ## Throughput Comparison
-On an end-to-end batch benchmark (1,000 series $\times$ 500 steps, 16 cores, Windows 11):
-- **`tsxtractor`**: **1.2 ms** (800,256 series/sec; 0.038 ms/feature)
-- **`catch22`**: 1,020 ms (976 series/sec; 820× slower)
-- **`TSFEL`**: 7,150 ms (140 series/sec; 5,725× slower)
-- **`tsfresh`**: 17,680 ms (57 series/sec; 14,151× slower)
+On an end-to-end batch benchmark (1,000 series $\times$ 500 steps, 16 worker threads on a 10-core CPU, Windows 11):
+- **`tsxtractor`**: **1.25 ms** median (800,256 series/sec; 0.038 ms/feature)
+- **`catch22`**: 1,024.8 ms (976 series/sec; 820× slower)
+- **`TSFEL`**: 7,154.0 ms (140 series/sec; 5,725× slower)
+- **`tsfresh`**: 17,683.3 ms (57 series/sec; 14,151× slower)
 
 # Availability & Software Quality
 

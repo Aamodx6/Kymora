@@ -38,16 +38,28 @@ import numpy as np
 class Result:
     library: str
     n_features: int | None
-    seconds: float | None
+    seconds: float | None  # median seconds
+    iqr_seconds: float | None = None
+    mean_seconds: float | None = None
+    std_seconds: float | None = None
+    min_seconds: float | None = None
+    max_seconds: float | None = None
     skipped: str | None = None
     notes: str = ""
     runs: int = 1
+    raw_times: list[float] = field(default_factory=list)
 
     @property
     def per_feature_ms(self) -> float | None:
         if self.seconds is None or not self.n_features:
             return None
         return self.seconds / self.n_features * 1e3
+
+    @property
+    def per_feature_iqr_ms(self) -> float | None:
+        if self.iqr_seconds is None or not self.n_features:
+            return None
+        return self.iqr_seconds / self.n_features * 1e3
 
 
 @dataclass
@@ -61,43 +73,51 @@ class Report:
 
 
 def timed(
-    fn: Callable[[], object], min_total: float = 2.0, max_runs: int = 5
-) -> tuple[object, float, int]:
-    """Best of as many runs as fit in `min_total` seconds, up to `max_runs`.
+    fn: Callable[[], object], min_total: float = 2.0, min_runs: int = 3, max_runs: int = 10
+) -> tuple[object, float, float, float, float, float, float, int, list[float]]:
+    """Warm-up followed by repeated runs collecting median, IQR, mean, std, min, max."""
+    # Warm-up run
+    out = fn()
 
-    A single timed run is fine for the libraries that take seconds, but the fast
-    path here finishes in milliseconds, where one run is mostly scheduler noise.
-    Taking the best of a few runs costs nothing for the slow libraries (they
-    exhaust the budget on their first run) and stops the fast one from being
-    reported as whatever the OS happened to do that millisecond.
-    """
-    best: float | None = None
+    times: list[float] = []
     spent = 0.0
     runs = 0
-    out: object = None
     while runs < max_runs:
         t0 = time.perf_counter()
         out = fn()
         elapsed = time.perf_counter() - t0
-        best = elapsed if best is None else min(best, elapsed)
+        times.append(elapsed)
         spent += elapsed
         runs += 1
-        if spent >= min_total:
+        if runs >= min_runs and spent >= min_total:
             break
-    assert best is not None
-    return out, best, runs
+
+    arr = np.array(times)
+    median = float(np.median(arr))
+    iqr = float(np.percentile(arr, 75) - np.percentile(arr, 25))
+    mean = float(np.mean(arr))
+    std = float(np.std(arr))
+    minimum = float(np.min(arr))
+    maximum = float(np.max(arr))
+    return out, median, iqr, mean, std, minimum, maximum, runs, times
 
 
 def bench_tsxtractor(X: np.ndarray) -> Result:
     import tsxtractor
 
     tsxtractor.extract_features(X[: min(64, len(X))])  # warm the thread pool
-    feats, seconds, runs = timed(lambda: tsxtractor.extract_features(X))
+    feats, med, iqr, mean, std, mn, mx, runs, times = timed(lambda: tsxtractor.extract_features(X))
     return Result(
         library=f"tsxtractor {tsxtractor.__version__}",
         n_features=int(feats.shape[1]),  # type: ignore[union-attr]
-        seconds=seconds,
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
         runs=runs,
+        raw_times=times,
         notes="Rust core, rayon across series, zero-copy input",
     )
 
@@ -126,12 +146,18 @@ def bench_tsfresh(X: np.ndarray) -> Result:
             disable_progressbar=True,
         )
 
-    out, seconds, runs = timed(run)
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=1, max_runs=2)
     return Result(
         library="tsfresh (EfficientFCParameters)",
         n_features=int(out.shape[1]),  # type: ignore[union-attr]
-        seconds=seconds,
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
         runs=runs,
+        raw_times=times,
         notes="includes the long-format reshape, its required input form",
     )
 
@@ -147,12 +173,18 @@ def bench_catch22(X: np.ndarray) -> Result:
     def run():
         return [pycatch22.catch22_all(row.tolist()) for row in X]
 
-    _, seconds, runs = timed(run)
+    _, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=2, max_runs=3)
     return Result(
         library="catch22 (pycatch22)",
         n_features=n_features,
-        seconds=seconds,
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
         runs=runs,
+        raw_times=times,
         notes="C core, single-threaded Python loop over series",
     )
 
@@ -175,12 +207,18 @@ def bench_tsfel(X: np.ndarray) -> Result:
         ]
         return pd.concat(frames, ignore_index=True)
 
-    out, seconds, runs = timed(run)
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=1, max_runs=2)
     return Result(
         library="TSFEL (all domains)",
         n_features=int(out.shape[1]),  # type: ignore[union-attr]
-        seconds=seconds,
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
         runs=runs,
+        raw_times=times,
         notes="Python/numba, per-series extractor calls",
     )
 
@@ -193,19 +231,16 @@ def render_markdown(report: Report) -> str:
         "# Batch-throughput benchmark",
         "",
         f"{report.n_series} series x {report.n_steps} steps, "
-        f"{report.cpu_count} cores, {report.platform}, Python {report.python}.",
+        f"{report.cpu_count} worker threads, {report.platform}, Python {report.python}.",
         "",
-        "Time is wall clock for the whole batch, including the input reshaping "
-        "each library requires. Each library gets the best of as many runs as "
-        "fit in a two-second budget, so the fast path is not reported as one "
-        "noisy millisecond.",
+        "Time is reported as Median ± IQR across repeated runs, including input reshaping.",
         "",
-        "| library | features | total time | series/s | ms/feature | vs tsxtractor |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| library | features | median time | IQR | mean time | series/s | ms/feature | vs tsxtractor |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in report.results:
         if r.seconds is None:
-            lines.append(f"| {r.library} | - | not installed | - | - | - |")
+            lines.append(f"| {r.library} | - | not installed | - | - | - | - | - |")
             continue
         rel = "-"
         if r is baseline:
@@ -213,10 +248,16 @@ def render_markdown(report: Report) -> str:
         elif baseline and baseline.seconds:
             rel = f"{r.seconds / baseline.seconds:,.0f}x slower"
         total = (
-            f"{r.seconds * 1e3:,.1f} ms" if r.seconds < 1.0 else f"{r.seconds:,.2f} s"
+            f"{r.seconds * 1e3:,.2f} ms" if r.seconds < 1.0 else f"{r.seconds:,.2f} s"
         )
+        iqr_str = (
+            f"{r.iqr_seconds * 1e3:,.2f} ms" if r.iqr_seconds and r.iqr_seconds < 1.0 else f"{r.iqr_seconds:,.2f} s"
+        ) if r.iqr_seconds is not None else "-"
+        mean_str = (
+            f"{r.mean_seconds * 1e3:,.2f} ms" if r.mean_seconds and r.mean_seconds < 1.0 else f"{r.mean_seconds:,.2f} s"
+        ) if r.mean_seconds is not None else "-"
         lines.append(
-            f"| {r.library} | {r.n_features} | {total} | "
+            f"| {r.library} | {r.n_features} | {total} | {iqr_str} | {mean_str} | "
             f"{report.n_series / r.seconds:,.0f} | "
             f"{r.per_feature_ms:,.4f} | {rel} |"
         )

@@ -6,40 +6,48 @@
   "cpu_count": 16,
   "results": [
     {
-      "library": "tsxtractor 0.2.1",
+      "library": "tsxtractor 0.3.0",
       "n_features": 33,
-      "seconds": 0.0012495999981183559,
+      "seconds": 0.0017043999996531056,
+      "iqr_seconds": 0.0002585749998615938,
+      "mean_seconds": 0.0017290299998421687,
+      "std_seconds": 0.00031180851151375974,
+      "min_seconds": 0.0013164000010874588,
+      "max_seconds": 0.0023247999997693114,
       "skipped": null,
       "notes": "Rust core, rayon across series, zero-copy input",
-      "runs": 5,
-      "per_feature_ms": 0.037866666609647145
+      "runs": 10,
+      "raw_times": [
+        0.0023247999997693114,
+        0.002215099999375525,
+        0.001365900001474074,
+        0.0013164000010874588,
+        0.0014682999990327517,
+        0.0017616999994061189,
+        0.001776699999027187,
+        0.0016880000002856832,
+        0.0016525999999430496,
+        0.001720799999020528
+      ],
+      "per_feature_ms": 0.051648484837972894
     },
     {
       "library": "catch22 (pycatch22)",
       "n_features": 22,
-      "seconds": 1.0247704999928828,
+      "seconds": 1.0146240000003672,
+      "iqr_seconds": 0.0016874999992069206,
+      "mean_seconds": 1.0146240000003672,
+      "std_seconds": 0.0016874999992069206,
+      "min_seconds": 1.0129365000011603,
+      "max_seconds": 1.0163114999995742,
       "skipped": null,
       "notes": "C core, single-threaded Python loop over series",
       "runs": 2,
-      "per_feature_ms": 46.58047727240377
-    },
-    {
-      "library": "TSFEL (all domains)",
-      "n_features": 156,
-      "seconds": 7.154015899985097,
-      "skipped": null,
-      "notes": "Python/numba, per-series extractor calls",
-      "runs": 1,
-      "per_feature_ms": 45.85907628195575
-    },
-    {
-      "library": "tsfresh (EfficientFCParameters)",
-      "n_features": 777,
-      "seconds": 17.68331120000221,
-      "skipped": null,
-      "notes": "includes the long-format reshape, its required input form",
-      "runs": 1,
-      "per_feature_ms": 22.758444272847115
+      "raw_times": [
+        1.0129365000011603,
+        1.0163114999995742
+      ],
+      "per_feature_ms": 46.11927272728942
     }
   ]
 }
