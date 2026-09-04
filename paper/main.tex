@@ -115,11 +115,11 @@ Time-series analysis, feature engineering, high-performance computing, Rust, Pyt
 
 \section{Introduction}
 \label{sec:introduction}
-Feature-based time-series analysis transforms variable- or fixed-length ordered real-valued sequences into fixed-dimensional vectors of statistical, structural, and spectral properties~\cite{fulcher2014highly}. These summary representations enable classical tabular machine learning models---such as Gradient Boosted Trees and Random Forests---to perform classification, clustering, and anomaly detection on temporal data without incurring the prohibitive training and inference overheads of deep recurrent or transformer architectures~\cite{dau2019ucr}.
+Feature-based time-series analysis maps arbitrary-length ordered sequences into fixed-dimensional vectors of statistical, structural, and spectral properties~\cite{fulcher2014highly}. These summary representations enable classical tabular machine learning models---such as Gradient Boosted Trees and Random Forests---to perform classification, clustering, and anomaly detection on temporal data without incurring the prohibitive training and inference overheads of deep recurrent or transformer architectures~\cite{dau2019ucr}.
 
 Over the past decade, several influential software frameworks have emerged to standardize time-series feature engineering. Prominent among them are \tsfresh{}~\cite{christ2018tsfresh}, \catchtwentytwo{}~\cite{lubba2019catch22}, \tsfel{}~\cite{barandas2020tsfel}, and \hctsa{}~\cite{fulcher2014highly}. Despite widespread adoption, existing implementations reveal severe systems-level inefficiencies when scaled to massive batch workloads (e.g., millions of IoT sensor traces, financial tick records, or high-frequency biosignals):
 \begin{enumerate}
-    \item \textbf{Interpreter Boundary and GIL Bottlenecks}: While some libraries rely on compiled C kernels (e.g., \catchtwentytwo{}), their Python bindings invoke the native kernel sequentially per time series inside interpreted Python loops. This pattern incurs repeated FFI marshalling overhead and prevents true multi-core parallel scaling due to the CPython Global Interpreter Lock (GIL).
+    \item \textbf{Interpreter Boundary and GIL Contention}: While certain toolkits provide compiled C routines (e.g., \catchtwentytwo{}), their Python wrappers invoke the native kernel sequentially per series inside interpreted Python loops. This pattern incurs repeated FFI marshalling overhead and prevents true multi-core parallel scaling due to the CPython Global Interpreter Lock (GIL).
     \item \textbf{Defensive Memory Duplication}: Frameworks frequently require reshaping tabular inputs into long-format relational DataFrames, creating intermediate memory footprints that exceed the raw data size by an order of magnitude.
     \item \textbf{High Algorithmic Redundancy}: Exhaustive libraries compute hundreds to thousands of features (e.g., 777+ in \tsfresh{}, $\sim$390 in \tsfel{}). Dimensionality reduction studies have shown that as few as four principal components explain over 90\% of the variance across these extensive banks~\cite{barandas2020tsfel}, consuming substantial compute budgets on collinear metrics.
     \item \textbf{Sliding-Window Recomputation}: In streaming and rolling-window regimes, naive systems slice windows of length $W$ and recompute all features from scratch on every step, yielding an unfavorable $O(N \cdot W)$ total time complexity.
@@ -141,7 +141,7 @@ Time-series feature extraction libraries generally fall along a spectrum balanci
 \setlength{\tabcolsep}{3.5pt}
 \caption{Comparison of Established Time-Series Feature Extraction Systems. Notice that \tsxtract{} is the only framework combining native batch-parallel execution across series with zero-copy buffer ingestion and GIL release, targeting high-throughput batch pipelines.}
 \label{tab:comparison_landscape}
-\begin{tabular}{@{}lcccccp{4.5cm}@{}}
+\begin{tabular}{@{}lccccc>{\raggedright\arraybackslash}p{4.5cm}@{}}
 \toprule
 \textbf{System} & \textbf{Language/Core} & \textbf{Feature Count} & \textbf{Batch Parallelism} & \textbf{Memory Model} & \textbf{GIL Released} & \textbf{Target Niche / Architectural Trade-offs} \\
 \midrule
@@ -225,7 +225,7 @@ Once detached, the Rust runtime dispatches chunks across threads using Rayon's w
 To prevent allocator contention in multi-threaded execution, \tsxtract{} eliminates dynamic heap allocations within the inner loops. It maintains two thread-local memory pools:
 \begin{enumerate}
     \item \texttt{ORDER\_BUF}: A thread-local \texttt{RefCell<Vec<f64>>} used to partition elements during order-statistic selection without allocating per series.
-    \item \texttt{WORKSPACE}: A thread-local real-to-complex Fast Fourier Transform (FFT) planner and scratch buffer pool that caches execution plans per series length.
+    \item \texttt{WORKSPACE}: Thread-local real-to-complex FFT scratch buffers and planners that cache execution plans per series length.
 \end{enumerate}
 Consequently, memory allocation scales as $O(p)$ with the number of worker threads $p$, rather than $O(N)$ with the batch size.
 
@@ -313,7 +313,7 @@ Normalized permutation entropy (order 3, delay 1)~\cite{bandt2002permutation} is
 Spectral features (dominant frequency, spectral centroid, spectral entropy) are computed using a real-to-complex Fast Fourier Transform (\texttt{realfft})~\cite{frigo2005design}. Because the input signal is purely real, the negative-frequency spectrum is redundant; \texttt{realfft} computes an $n/2$ complex transform, halving arithmetic operations relative to standard complex FFT algorithms.
 
 \subsection{Stateful Incremental Streaming Engine}
-For sliding-window analysis, \tsxtract{} implements \texttt{StreamingExtractor} (\texttt{src/features/streaming.rs}), maintaining a circular ring buffer of capacity $W$. As new data points arrive, running power sums and linear trend covariance update incrementally in $O(1)$ arithmetic time:
+For sliding-window telemetry, \tsxtract{} provides a streaming state engine (\texttt{Streaming}\allowbreak\texttt{Extractor} in \texttt{src/\allowbreak features/\allowbreak streaming.rs}) that maintains a circular ring buffer of capacity $W$. As new data points arrive, running power sums and linear trend covariance update incrementally in $O(1)$ arithmetic time:
 \begin{equation}
 \label{eq:stream_power_sum}
 S_k \leftarrow S_k + x_{\text{new}}^k - x_{\text{old}}^k, \quad k \in \{1, 2, 3, 4\},
@@ -333,7 +333,7 @@ Table~\ref{tab:feature_inventory} categorizes the complete inventory of 33 featu
 \caption{Complete \tsxtract{} Feature Inventory and Algorithmic Complexity. All 33 features operate in $O(n)$ or $O(n \log n)$ time with bounded memory.}
 \label{tab:feature_inventory}
 \resizebox{\columnwidth}{!}{
-\begin{tabular}{@{}llccp{2.8cm}@{}}
+\begin{tabular}{@{}llcc>{\raggedright\arraybackslash}p{2.8cm}@{}}
 \toprule
 \textbf{Group} & \textbf{Feature Names} & \textbf{Time} & \textbf{Memory} & \textbf{Algorithmic Notes} \\
 \midrule
@@ -380,7 +380,7 @@ All benchmark experiments were conducted on an identical, dedicated host environ
 \end{itemize}
 
 \subsection{End-to-End Batch Benchmark Results}
-The benchmark script (\texttt{benches/\allowbreak bench\_libraries.py}) generates a synthetic batch of 1,000 independent Gaussian series ($N = 1000$, length $n = 500$) and executes each framework within a timed budget of at least 2.0 seconds, recording the minimum wall-clock time to avoid operating system scheduling artifacts. Each library is timed end-to-end, including mandatory input reshaping (e.g., long-format DataFrames for \tsfresh{}, serial loops for \catchtwentytwo{} and \tsfel{}).
+To evaluate end-to-end performance, our benchmark runner (\texttt{benches/\allowbreak bench\_libraries.py}) generates a synthetic batch of 1,000 independent Gaussian series ($N = 1000$, length $n = 500$) and executes each framework within a timed budget of at least 2.0 seconds, recording the minimum wall-clock time to avoid operating system scheduling artifacts. Each library is timed end-to-end, including mandatory input reshaping (e.g., long-format DataFrames for \tsfresh{}, serial loops for \catchtwentytwo{} and \tsfel{}).
 
 \begin{table*}[t]
 \centering
