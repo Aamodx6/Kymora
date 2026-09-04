@@ -24,25 +24,33 @@
 \newcommand{\hctsa}{\texttt{hctsa}}
 \newcommand{\ucrarchive}{UCR Time Series Classification Archive}
 
-% Search paths for graphics: current directory, ./figures/, and figures/
-\graphicspath{{./}{./figures/}{figures/}}
+% Search paths for graphics: current directory, ./figures/, figures/, paper/figures/, and ./paper/figures/
+\graphicspath{{./}{./figures/}{figures/}{paper/figures/}{./paper/figures/}}
 
-% Robust figure inclusion macro: loads vector PDF if present, falls back gracefully if isolated
+% Robust figure inclusion macro: loads PNG image if present, falls back gracefully if isolated
 \newcommand{\includefigsafe}[3][width=\linewidth]{%
   \IfFileExists{#2}{%
     \includegraphics[#1]{#2}%
   }{%
-    \IfFileExists{figures/#2}{%
-      \includegraphics[#1]{figures/#2}%
+    \IfFileExists{paper/#2}{%
+      \includegraphics[#1]{paper/#2}%
     }{%
-      \begin{center}
-      \begin{tikzpicture}
-        \draw[draw=black!40,fill=gray!8,rounded corners=3pt] (0,0) rectangle (7.2,2.6);
-        \node[align=center,font=\small\bfseries,text=black!75] at (3.6,1.6) {Figure: #2};
-        \node[align=center,font=\footnotesize,text=black!55] at (3.6,1.0) {#3};
-        \node[align=center,font=\tiny,text=black!45] at (3.6,0.5) {(Vector PDF available in repository \texttt{paper/figures/})};
-      \end{tikzpicture}
-      \end{center}
+      \IfFileExists{figures/#2}{%
+        \includegraphics[#1]{figures/#2}%
+      }{%
+        \IfFileExists{paper/figures/#2}{%
+          \includegraphics[#1]{paper/figures/#2}%
+        }{%
+          \begin{center}
+          \begin{tikzpicture}
+            \draw[draw=black!40,fill=gray!8,rounded corners=3pt] (0,0) rectangle (7.2,2.6);
+            \node[align=center,font=\small\bfseries,text=black!75] at (3.6,1.6) {Figure: #2};
+            \node[align=center,font=\footnotesize,text=black!55] at (3.6,1.0) {#3};
+            \node[align=center,font=\tiny,text=black!45] at (3.6,0.5) {(High-resolution PNG available in repository \texttt{paper/figures/})};
+          \end{tikzpicture}
+          \end{center}
+        }%
+      }%
     }%
   }%
 }
@@ -161,32 +169,36 @@ Recognizing the computational expense of \hctsa{}, Lubba et al.~\cite{lubba2019c
 
 \begin{figure}[t]
 \centering
-\IfFileExists{figures/architecture.png}{%
-  \includegraphics[width=\linewidth]{figures/architecture.png}%
+\IfFileExists{paper/figures/architecture.png}{%
+  \includegraphics[width=\linewidth]{paper/figures/architecture.png}%
 }{%
-  \IfFileExists{architecture.png}{%
-    \includegraphics[width=\linewidth]{architecture.png}%
+  \IfFileExists{figures/architecture.png}{%
+    \includegraphics[width=\linewidth]{figures/architecture.png}%
   }{%
-    \resizebox{\columnwidth}{!}{%
-    \begin{tikzpicture}[
-      box/.style={draw=black!70, rounded corners=3pt, align=center, font=\footnotesize\bfseries, inner sep=6pt, minimum height=1.1cm},
-      arrow/.style={->, >=stealth, thick, color=black!70}
-    ]
-    \node[box, fill=blue!8, draw=blue!80] (py) at (0,0) {Python Caller\\(\texttt{NumPy} Array 2D)};
-    \node[box, fill=orange!8, draw=orange!80, right=0.45cm of py] (ffi) {PyO3 FFI Boundary\\(Zero-Copy Borrow)};
-    \node[box, fill=green!8, draw=green!80, right=0.45cm of ffi] (rayon) {Rayon Thread Pool\\(Series-Axis Split)};
-    \node[box, fill=purple!8, draw=purple!80, right=0.45cm of rayon] (core) {Rust Feature Core\\(5 Fused Sweeps)};
+    \IfFileExists{architecture.png}{%
+      \includegraphics[width=\linewidth]{architecture.png}%
+    }{%
+      \resizebox{\columnwidth}{!}{%
+      \begin{tikzpicture}[
+        box/.style={draw=black!70, rounded corners=3pt, align=center, font=\footnotesize\bfseries, inner sep=6pt, minimum height=1.1cm},
+        arrow/.style={->, >=stealth, thick, color=black!70}
+      ]
+      \node[box, fill=blue!8, draw=blue!80] (py) at (0,0) {Python Caller\\(\texttt{NumPy} Array 2D)};
+      \node[box, fill=orange!8, draw=orange!80, right=0.45cm of py] (ffi) {PyO3 FFI Boundary\\(Zero-Copy Borrow)};
+      \node[box, fill=green!8, draw=green!80, right=0.45cm of ffi] (rayon) {Rayon Thread Pool\\(Series-Axis Split)};
+      \node[box, fill=purple!8, draw=purple!80, right=0.45cm of rayon] (core) {Rust Feature Core\\(5 Fused Sweeps)};
 
-    \draw[arrow] (py) -- (ffi);
-    \draw[arrow] (ffi) -- (rayon);
-    \draw[arrow] (rayon) -- (core);
+      \draw[arrow] (py) -- (ffi);
+      \draw[arrow] (ffi) -- (rayon);
+      \draw[arrow] (rayon) -- (core);
 
-    \draw[arrow, dashed, color=red!80] (core.south) -- ++(0,-0.45) -| node[pos=0.25, below, font=\scriptsize\bfseries, text=red!80] {Zero-Copy Return Matrix (f64)} (py.south);
-    \end{tikzpicture}%
+      \draw[arrow, dashed, color=red!80] (core.south) -- ++(0,-0.45) -| node[pos=0.25, below, font=\scriptsize\bfseries, text=red!80] {Zero-Copy Return Matrix (f64)} (py.south);
+      \end{tikzpicture}%
+      }%
     }%
   }%
 }
-\caption{End-to-end system architecture of \tsxtract{}. Notice that the input matrix crosses the language boundary exactly once via a zero-copy borrowed view, the CPython GIL is detached, and worker threads execute decoupled feature sweeps without cross-thread locks.}
+\caption{System Architecture Pipeline Diagram. End-to-end architecture of \tsxtract{}. Notice that the input matrix crosses the language boundary exactly once via a zero-copy borrowed view, the CPython GIL is detached, and worker threads execute decoupled feature sweeps without cross-thread locks.}
 \label{fig:architecture}
 \end{figure}
 
@@ -391,8 +403,8 @@ As detailed in Table~\ref{tab:benchmark_results} and Figure~\ref{fig:throughput}
 
 \begin{figure}[t]
 \centering
-\includefigsafe[width=0.85\linewidth]{figures/throughput.png}{Batch Extraction Throughput across Frameworks}
-\caption{Batch Extraction Throughput across Frameworks (1,000 series $\times$ 500 steps, log scale). Notice that \tsxtract{} processes 800,256 series/sec, driven by zero-copy FFI and multi-threaded work-stealing parallelism.}
+\includefigsafe[width=0.85\linewidth]{paper/figures/throughput.png}{Batch Throughput Comparison (Log Bar Chart)}
+\caption{Batch Throughput Comparison (Log Bar Chart) across Frameworks (1,000 series $\times$ 500 steps, log scale). Notice that \tsxtract{} processes 800,256 series/sec, driven by zero-copy FFI and multi-threaded work-stealing parallelism.}
 \label{fig:throughput}
 \end{figure}
 
@@ -429,8 +441,8 @@ The analysis indicates that:
 
 \begin{figure}[t]
 \centering
-\includefigsafe[width=0.85\linewidth]{figures/scaling.png}{Batch Scalability Across Problem Size}
-\caption{Batch Scalability Across Problem Size ($N = 10^1$ to $10^5$ series). Notice that \tsxtract{} maintains consistent linear scaling beyond 1,000 series, whereas serial FFI loops grow linearly with high per-call overhead.}
+\includefigsafe[width=0.85\linewidth]{paper/figures/scaling.png}{Scalability Across Dataset Sizes ($N = 10^1$ to $10^5$)}
+\caption{Scalability Across Dataset Sizes ($N = 10^1$ to $10^5$ series). Notice that \tsxtract{} maintains consistent linear scaling beyond 1,000 series, whereas serial FFI loops grow linearly with high per-call overhead.}
 \label{fig:scaling}
 \end{figure}
 
@@ -445,8 +457,8 @@ Figure~\ref{fig:memory} compares the intermediate memory overhead of \tsxtract{}
 
 \begin{figure}[t]
 \centering
-\includefigsafe[width=0.85\linewidth]{figures/memory.png}{Intermediate Memory Footprint vs Batch Size}
-\caption{Intermediate Memory Footprint vs Batch Size ($N$). Notice that \tsxtract{}'s zero-copy borrowed ingestion consumes only 25.1~MB for 100,000 series, compared to over 800~MB for defensive copies.}
+\includefigsafe[width=0.85\linewidth]{paper/figures/memory.png}{Intermediate Memory Footprint (Zero-Copy vs. Duplication)}
+\caption{Intermediate Memory Footprint (Zero-Copy vs. Duplication) vs Batch Size ($N$). Notice that \tsxtract{}'s zero-copy borrowed ingestion consumes only 25.1~MB for 100,000 series, compared to over 800~MB for defensive copies.}
 \label{fig:memory}
 \end{figure}
 
@@ -455,8 +467,8 @@ Figure~\ref{fig:speedup} evaluates parallel speedup $S(p) = T_1 / T_p$ and paral
 
 \begin{figure}[t]
 \centering
-\includefigsafe[width=\linewidth]{figures/speedup.png}{Parallel Speedup and Rayon Multi-Core Efficiency}
-\caption{Parallel Speedup and Rayon Multi-Core Efficiency on 16 Cores. Notice that \tsxtract{} maintains 87.0\% parallel efficiency at 16 threads due to complete series-level independence.}
+\includefigsafe[width=\linewidth]{paper/figures/speedup.png}{Multi-Core Speedup ($S(p)$) and Rayon Efficiency ($\eta(p)$)}
+\caption{Multi-Core Speedup ($S(p)$) and Rayon Efficiency ($\eta(p)$) on 16 Cores. Notice that \tsxtract{} maintains 87.0\% parallel efficiency at 16 threads due to complete series-level independence.}
 \label{fig:speedup}
 \end{figure}
 
