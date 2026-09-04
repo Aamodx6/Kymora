@@ -53,6 +53,7 @@ def plot_architecture():
                 ha="center", va="center", fontsize=8, color="#c62828")
 
     plt.tight_layout()
+    plt.savefig("paper/figures/architecture.png", dpi=300, bbox_inches="tight")
     plt.savefig("paper/figures/architecture.pdf", bbox_inches="tight")
     plt.close()
 
@@ -78,6 +79,7 @@ def plot_throughput():
                 ha="center", va="bottom", fontsize=8, weight="bold")
 
     plt.tight_layout()
+    plt.savefig("paper/figures/throughput.png", dpi=300, bbox_inches="tight")
     plt.savefig("paper/figures/throughput.pdf", bbox_inches="tight")
     plt.close()
 
@@ -106,6 +108,7 @@ def plot_scaling():
     ax.legend(frameon=True, loc="upper left")
 
     plt.tight_layout()
+    plt.savefig("paper/figures/scaling.png", dpi=300, bbox_inches="tight")
     plt.savefig("paper/figures/scaling.pdf", bbox_inches="tight")
     plt.close()
 
@@ -131,6 +134,7 @@ def plot_memory():
     ax.legend(frameon=True, loc="upper left")
 
     plt.tight_layout()
+    plt.savefig("paper/figures/memory.png", dpi=300, bbox_inches="tight")
     plt.savefig("paper/figures/memory.pdf", bbox_inches="tight")
     plt.close()
 
@@ -162,6 +166,7 @@ def plot_speedup():
     ax2.grid(True, linestyle="--", alpha=0.6)
 
     plt.tight_layout()
+    plt.savefig("paper/figures/speedup.png", dpi=300, bbox_inches="tight")
     plt.savefig("paper/figures/speedup.pdf", bbox_inches="tight")
     plt.close()
 
