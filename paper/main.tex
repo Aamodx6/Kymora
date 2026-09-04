@@ -131,7 +131,13 @@ To address these limitations, this paper investigates the following central rese
 \textit{Can a batch-oriented native implementation of classical time-series feature extraction reduce computational cost and memory overhead at scale while maintaining numerical correctness and practical downstream utility?}
 \end{quote}
 
-We present the design, algorithmic formulation, and empirical evaluation of \tsxtract{}, an open-source library featuring a high-performance Rust core exposed to Python via zero-copy PyO3 bindings.
+We present the design, algorithmic formulation, and empirical evaluation of \tsxtract{}, an open-source systems library with a high-performance Rust core exposed to Python via zero-copy PyO3 bindings. Specifically, this work makes the following contributions:
+\begin{enumerate}
+    \item \textbf{High-Throughput Batch Architecture}: A zero-copy buffer ingestion and GIL-detached parallel architecture that processes batches of time series concurrently across worker threads, achieving $>800,000$ series/sec on 16 threads.
+    \item \textbf{Micro-Architectural Algorithmic Optimizations}: Practical implementations of $O(n)$ Quickselect for 10 quantile ranks, real-to-complex FFT, branchless permutation entropy tables, and five fused memory sweeps.
+    \item \textbf{Incremental Streaming Engine}: An online rolling-window state accumulator maintaining circular buffer moments and trend covariance, reducing sliding-window extraction complexity from $O(N \cdot W)$ to $O(N)$.
+    \item \textbf{Empirical Evaluation and Correctness}: Comprehensive benchmarking against \tsfresh{}, \catchtwentytwo{}, and \tsfel{}, ablation experiments, and 98 automated correctness tests proving parity with NumPy/SciPy within $10^{-9}$ tolerance.
+\end{enumerate}
 
 \section{Background and Related Work}
 \label{sec:related_work}
