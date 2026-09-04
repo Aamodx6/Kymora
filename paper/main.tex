@@ -566,10 +566,7 @@ python benches/bench_libraries.py --n-series 1000 --n-steps 500
 
 \section{Conclusion}
 \label{sec:conclusion}
-This work examined whether a batch-oriented native implementation of classical time-series feature extraction can overcome the scaling bottlenecks of existing Python frameworks. The results demonstrate that by combining zero-copy FFI buffer ingestion, GIL release, multi-threaded work-stealing parallelism across series, and cache-aligned fused memory passes, \tsxtract{} achieves an extraction throughput exceeding 800,000 series/sec on 16 CPU cores. Furthermore, the integration of an $O(1)$ streaming state engine enables real-time sliding-window processing without computational explosions. By demonstrating that high extraction throughput can be achieved alongside numerical correctness and high downstream predictive accuracy, \tsxtract{} provides a practical systems foundation for scalable time-series feature engineering.
-
-\section*{Acknowledgements}
-The author thanks the open-source contributors and maintainers of the \texttt{PyO3}, \texttt{Rayon}, \texttt{realfft}, and \texttt{NumPy} ecosystems whose systems foundations made this high-performance implementation possible.
+This work examined whether a batch-oriented native implementation of classical time-series feature extraction can overcome the scaling bottlenecks of existing Python frameworks. The results demonstrate that by combining zero-copy FFI buffer ingestion, GIL release, multi-threaded work-stealing parallelism across series, and cache-aligned fused memory passes, \tsxtract{} achieves an extraction throughput exceeding 800,000 series/sec across 16 CPU threads. Furthermore, the integration of an $O(1)$ streaming state engine enables real-time sliding-window processing without computational explosions. By demonstrating that high extraction throughput can be achieved alongside numerical correctness and high downstream predictive accuracy, \tsxtract{} provides a practical systems foundation for scalable time-series feature engineering.
 
 % Fully self-contained IEEE bibliography: guarantees 0 errors on Overleaf / TeX Live without needing external .bib files
 \begin{thebibliography}{12}
