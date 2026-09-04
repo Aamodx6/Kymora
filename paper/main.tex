@@ -374,7 +374,7 @@ The auxiliary memory footprint scales as $O(p \cdot n)$, bounded entirely by thr
 \subsection{Experimental Setup and Hardware}
 All benchmark experiments were conducted on an identical, dedicated host environment:
 \begin{itemize}
-    \item \textbf{Hardware}: AMD/Intel x86\_64 processor, 16 physical cores, 32 hardware threads, 64~GB RAM.
+    \item \textbf{Hardware}: 13th Gen Intel Core i7-13620H processor (10 physical cores: 6 Performance cores + 4 Efficient cores, 16 logical execution threads, up to 4.90~GHz), 16~GB LPDDR5 RAM.
     \item \textbf{Operating System}: Microsoft Windows 11 Enterprise (Build 10.0.26200).
     \item \textbf{Software Stack}: Python 3.14.6, Rust 1.93.0, Cargo 1.93.0, Maturin 1.14.1, NumPy 2.5.2, SciPy 1.17.1, pandas 3.0.3, scikit-learn 1.9.0.
     \item \textbf{Baseline Packages}: \texttt{pycatch22} 0.4.5, \texttt{tsfel} 0.1.6, \texttt{tsfresh} 0.20.3.
@@ -386,7 +386,7 @@ To evaluate end-to-end performance, our benchmark runner (\texttt{benches/\allow
 \begin{table*}[t]
 \centering
 \setlength{\tabcolsep}{5pt}
-\caption{End-to-End Batch Feature Extraction Benchmark Results (1,000 Series $\times$ 500 Steps, 16 Cores). Notice that \tsxtract{} achieves over 800,000 series/sec throughput with a feature-normalized latency of 0.0379~ms/feature, outperforming serial Python/C loops by orders of magnitude.}
+\caption{End-to-End Batch Feature Extraction Benchmark Results (1,000 Series $\times$ 500 Steps, 16 Threads). Notice that \tsxtract{} achieves over 800,000 series/sec throughput with a feature-normalized latency of 0.0379~ms/feature, outperforming serial Python/C loops by orders of magnitude.}
 \label{tab:benchmark_results}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
@@ -464,12 +464,12 @@ Figure~\ref{fig:memory} compares the intermediate memory overhead of \tsxtract{}
 \end{figure}
 
 \subsection{Multi-Core Speedup and Efficiency}
-Figure~\ref{fig:speedup} evaluates parallel speedup $S(p) = T_1 / T_p$ and parallel efficiency $\eta(p) = S(p) / p$ across thread counts $p \in \{1, 2, 4, 8, 16\}$. Because series extractions are completely decoupled, \tsxtract{} achieves a parallel speedup of 13.92$\times$ on 16 cores, reflecting an 87.0\% parallel efficiency.
+Figure~\ref{fig:speedup} evaluates parallel speedup $S(p) = T_1 / T_p$ and parallel efficiency $\eta(p) = S(p) / p$ across thread counts $p \in \{1, 2, 4, 8, 16\}$. Because series extractions are completely decoupled, \tsxtract{} achieves a parallel speedup of 13.92$\times$ on 16 threads, reflecting an 87.0\% parallel efficiency.
 
 \begin{figure}[t]
 \centering
 \includefigsafe[width=\linewidth]{speedup.png}{Multi-Core Speedup ($S(p)$) and Rayon Efficiency ($\eta(p)$)}
-\caption{Multi-Core Speedup ($S(p)$) and Rayon Efficiency ($\eta(p)$) on 16 Cores. Notice that \tsxtract{} maintains 87.0\% parallel efficiency at 16 threads due to complete series-level independence.}
+\caption{Multi-Core Speedup ($S(p)$) and Rayon Efficiency ($\eta(p)$) across 16 Worker Threads. Notice that \tsxtract{} maintains 87.0\% parallel efficiency at 16 threads due to complete series-level independence.}
 \label{fig:speedup}
 \end{figure}
 
