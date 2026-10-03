@@ -13,11 +13,11 @@
 
 Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Tsxtract eliminates that trade-off.
 
-* ⚡ **Blazing Fast:** Computes up to **800,256 series/second** on standard hardware—outperforming `catch22` by **820×** and `tsfresh` by **14,000×**.
-* 🧠 **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No data duplication, no DataFrame melting, and zero intermediate memory ballooning.
-* 🎯 **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
-* 🔓 **Full Multi-Core Scaling (GIL-Free):** Releases Python’s Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
-* 🔄 **Real-Time Streaming Ready:** Compute streaming features with constant memory $O(1)$ state updates using the built-in `StreamingExtractor`.
+* **Blazing Fast:** Computes up to **800,256 series/second** on standard hardware—outperforming `catch22` by **820×** and `tsfresh` by **14,000×**.
+* **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No data duplication, no DataFrame melting, and zero intermediate memory ballooning.
+* **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
+* **Full Multi-Core Scaling (GIL-Free):** Releases Python's Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
+* **Real-Time Streaming Ready:** Compute streaming features with constant memory $O(1)$ state updates using the built-in `StreamingExtractor`.
 
 ---
 
@@ -200,4 +200,4 @@ Please check [`CONTRIBUTING.md`](https://github.com/Aamod007/Tsxtract/blob/main/
 
 Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamod007/Tsxtract/blob/main/LICENSE) for details.
 
-*Built with 🦀 Rust & 🐍 Python by [Aamod](https://github.com/Aamod007).*
+*Built with Rust and Python by [Aamod](https://github.com/Aamod007).*
