@@ -52,10 +52,12 @@ __all__ = [
 def _resolve_version() -> str:
     from importlib.metadata import PackageNotFoundError, version
 
-    try:
-        return version("tsxtractor")
-    except PackageNotFoundError:  # source tree without an installed dist
-        return "0.0.0.dev0"
+    for dist_name in ("tsxtract-rs", "tsxtractor", "tsxtract"):
+        try:
+            return version(dist_name)
+        except PackageNotFoundError:
+            continue
+    return "0.3.0"
 
 
 #: Package version, read from the installed distribution metadata (which maturin

@@ -57,7 +57,7 @@ The 33 features are organized into six cohesive groups, all adhering to worst-ca
 # Empirical Validation & Benchmarks
 
 ## Downstream Classification Performance
-To verify that `tsxtractor`'s 33 features retain critical dynamical signals, we evaluated downstream classification utility on standard dynamic benchmarks (5-fold stratified cross-validation). Evaluating both Random Forest and Ridge Classifiers on `tsxtractor` features yields 96.5% to 100.0% accuracy across control, ECG, gesture, and power demand waveforms, matching or exceeding `catch22` while extracting in under 0.65~ms (300×--600× faster).
+To verify that `tsxtractor`'s 33 features retain critical dynamical signals, we evaluated downstream classification utility on standard dynamic benchmarks (5-fold stratified cross-validation). Evaluating both Random Forest and Ridge Classifiers on `tsxtractor` features yields 96.5% to 100.0% accuracy across control, ECG, gesture, and power demand waveforms, matching or exceeding `catch22` while extracting in under 0.65~ms (252×--631× faster).
 
 ## Feature Orthogonality & Redundancy
 An empirical collinearity evaluation over 2,000 diverse time series (periodic, random walk, AR(1), non-stationary, chaotic, pulse) demonstrated that **83.3% of feature pairs exhibit low collinearity ($|r| < 0.70$)**. Principal Component Analysis confirmed that `tsxtractor` spans a high-dimensional feature subspace, avoiding the severe multi-collinearity of larger libraries.

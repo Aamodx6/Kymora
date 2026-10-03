@@ -120,22 +120,22 @@ jobs:
       - name: Install from wheel
         shell: bash
         run: |
-          # Dependencies come from PyPI; tsxtractor itself must come from the
+          # Dependencies come from PyPI; tsxtract-rs itself must come from the
           # freshly built wheel, so install it with --no-index --no-deps.
           python -m pip install --upgrade pip
           python -m pip install "numpy>=1.24"
-          python -m pip install --no-index --no-deps --find-links dist tsxtractor
+          python -m pip install --no-index --no-deps --find-links dist tsxtract-rs
       - name: Import and extract outside the source tree
         shell: bash
         run: |
           cd "$(mktemp -d)"
           python -c "
-          import numpy as np, tsxtractor
+          import numpy as np, tsxtract
           X = np.random.default_rng(0).standard_normal((64, 128))
-          f = tsxtractor.extract_features(X)
-          assert f.shape == (64, len(tsxtractor.feature_names())), f.shape
+          f = tsxtract.extract_features(X)
+          assert f.shape == (64, len(tsxtract.feature_names())), f.shape
           assert np.isfinite(f).all()
-          print('ok', tsxtractor.__version__, f.shape)
+          print('ok', tsxtract.__version__, f.shape)
           "
 
   publish:

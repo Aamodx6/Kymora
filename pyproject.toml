@@ -3,7 +3,7 @@ requires = ["maturin>=1.14,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "tsxtractor"
+name = "tsxtract-rs"
 version = "0.3.0"
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"

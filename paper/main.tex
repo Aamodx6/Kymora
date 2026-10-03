@@ -107,7 +107,7 @@ Uttar Pradesh, India\\
 \maketitle
 
 \begin{abstract}
-Extracting descriptive mathematical features from time series is a foundational primitive across machine learning, industrial Internet of Things (IoT), and signal processing. However, established Python frameworks such as \tsfresh{}, \catchtwentytwo{}, and \tsfel{} encounter severe throughput bottlenecks when processing large batches ($10^4$--$10^6$ series), driven by serial Foreign Function Interface (FFI) dispatch loops, Global Interpreter Lock (GIL) contention, defensive array copying, and high intra-feature redundancy. This paper investigates whether a batch-oriented systems architecture for classical time-series feature extraction can reduce computational latency and memory overhead at scale while preserving numerical precision and downstream predictive utility. We present \tsxtract{} (\tsxtractor{}), an open-source systems library with a multi-threaded Rust computational core. \tsxtract{} implements zero-copy NumPy buffer ingestion, releases the GIL, parallelizes work across the series dimension via work-stealing thread pools, and condenses time-domain scans into five cache-conscious fused memory sweeps. Furthermore, it introduces an incremental $O(1)$ stateful accumulator engine for running moments and trend covariance in sliding-window telemetry. On a benchmark of 1,000 series of length 500 using 16 worker threads on a 10-core/16-thread processor, \tsxtract{} achieves a median throughput of 800,256 series/sec (median execution time of 1.25~ms, IQR: 0.26~ms), outperforming single-series looped C and Python libraries by over two orders of magnitude in feature-normalized latency. Empirical evaluations on standard dynamic archetypes demonstrate strong predictive discriminability ($>96\%$ accuracy) with sub-millisecond extraction, while collinearity analysis across diverse dynamic regimes reveals that 83.3\% of feature pairs exhibit low correlation ($|r| < 0.70$).
+Extracting descriptive mathematical features from time series is a foundational primitive across machine learning, industrial Internet of Things (IoT), and signal processing. However, established Python frameworks such as \tsfresh{}, \catchtwentytwo{}, and \tsfel{} encounter severe throughput bottlenecks when processing large batches ($10^4$--$10^6$ series), driven by serial Foreign Function Interface (FFI) dispatch loops, Global Interpreter Lock (GIL) contention, defensive array copying, and high intra-feature redundancy. This paper investigates whether a batch-oriented systems architecture for classical time-series feature extraction can reduce computational latency and memory overhead at scale while preserving numerical precision and downstream predictive utility. We present \tsxtract{} (\tsxtractor{}), an open-source systems library with a multi-threaded Rust computational core. \tsxtract{} implements zero-copy NumPy buffer ingestion (performing no input-buffer copy during ingestion), releases the GIL, parallelizes work across the series dimension via work-stealing thread pools, and condenses time-domain scans into five cache-conscious fused memory sweeps. Furthermore, it introduces an incremental $O(1)$ stateful accumulator engine for running moments and trend covariance, reducing sliding-window extraction complexity from $O(TW)$ to $O(T)$ for $T$ streamed samples over window capacity $W$. On a benchmark of 1,000 series of length 500 using 16 worker threads on a 10-core/16-thread processor, \tsxtract{} achieves a median throughput of 800,256 series/sec (median execution time of 1.25~ms, IQR: 0.26~ms), outperforming single-series looped C and Python libraries by over two orders of magnitude in feature-normalized latency. Empirical evaluations on synthetic and canonical dynamic time-series tasks demonstrate strong predictive discriminability (96.5\%--100.0\% cross-validated accuracy) with sub-millisecond extraction, while collinearity analysis across diverse dynamic regimes reveals that 83.3\% of feature pairs exhibit low pairwise linear correlation ($|r| < 0.70$).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -123,7 +123,7 @@ Over the past decade, several influential software frameworks have emerged to st
     \item \textbf{Interpreter Boundary and GIL Contention}: While certain toolkits provide compiled C routines (e.g., \catchtwentytwo{}), their Python wrappers invoke the native kernel sequentially per series inside interpreted Python loops. This pattern incurs repeated FFI marshalling overhead and prevents true multi-core parallel scaling due to the CPython Global Interpreter Lock (GIL).
     \item \textbf{Defensive Memory Duplication}: Frameworks frequently require reshaping tabular inputs into long-format relational DataFrames, creating intermediate memory footprints that exceed the raw data size by an order of magnitude.
     \item \textbf{High Algorithmic Redundancy}: Exhaustive libraries compute hundreds to thousands of feature configurations (e.g., up to 1,558 in \tsfresh{} under \texttt{ComprehensiveFCParameters}, 777 in \texttt{EfficientFCParameters}, and $\sim$390 in \tsfel{}). Dimensionality reduction studies have shown that as few as four principal components explain over 90\% of the variance across these extensive banks~\cite{barandas2020tsfel}, consuming substantial compute budgets on collinear metrics.
-    \item \textbf{Sliding-Window Recomputation}: In streaming and rolling-window regimes, naive systems slice windows of length $W$ and recompute all features from scratch on every step, yielding an unfavorable $O(N \cdot W)$ total time complexity.
+    \item \textbf{Sliding-Window Recomputation}: In streaming and rolling-window regimes, naive systems slice windows of length $W$ and recompute all features from scratch on every step, yielding an unfavorable $O(TW)$ total time complexity for $T$ incoming samples.
 \end{enumerate}
 
 To address these limitations, this paper investigates the following central research question:
@@ -131,11 +131,11 @@ To address these limitations, this paper investigates the following central rese
 \textit{Can a batch-oriented systems architecture for classical time-series feature extraction reduce computational cost and memory overhead at scale while maintaining numerical correctness and practical downstream utility?}
 \end{quote}
 
-We emphasize that the primary contribution of \tsxtract{} lies in systems engineering, memory architecture, and batch execution strategy rather than the invention of new mathematical feature estimators. We present the design, algorithmic formulation, and empirical evaluation of \tsxtract{}, an open-source systems library with a high-performance Rust core exposed to Python via zero-copy PyO3 bindings. Specifically, this work makes the following contributions:
+We emphasize that the primary contribution of \tsxtract{} lies in systems engineering, memory architecture, and batch execution strategy rather than the invention of new mathematical feature estimators. We present the design, algorithmic formulation, and empirical evaluation of \tsxtract{}, an open-source systems library with a high-performance Rust core~\cite{matsakis2014rust} exposed to Python via zero-copy PyO3 bindings~\cite{pyo3_rust_python} for NumPy buffers~\cite{harris2020array}. Specifically, this work makes the following contributions:
 \begin{enumerate}
     \item \textbf{High-Throughput Batch Architecture}: A zero-copy buffer ingestion and GIL-detached parallel architecture that processes batches of time series concurrently across worker threads, achieving $>800,000$ series/sec on 16 worker threads.
     \item \textbf{Micro-Architectural Algorithmic Optimizations}: Practical implementations of $O(n)$ Quickselect for 10 quantile ranks, real-to-complex FFT, branchless permutation entropy tables, and five fused memory sweeps.
-    \item \textbf{Incremental Streaming Engine}: An online rolling-window state accumulator maintaining circular buffer moments and trend covariance, reducing sliding-window extraction complexity from $O(N \cdot W)$ to $O(N)$ for streaming telemetry.
+    \item \textbf{Incremental Streaming Engine}: An online rolling-window state accumulator maintaining circular buffer moments and trend covariance, reducing sliding-window extraction complexity from $O(TW)$ to $O(T)$ for $T$ streamed samples over window capacity $W$.
     \item \textbf{Empirical Evaluation and Correctness}: Comprehensive benchmarking against \tsfresh{}, \catchtwentytwo{}, and \tsfel{}, multi-stage architectural ablation experiments, and 98 automated tests validating numerical agreement with NumPy/SciPy within $10^{-9}$ relative tolerance.
 \end{enumerate}
 
@@ -170,7 +170,7 @@ Fulcher and Jones~\cite{fulcher2014highly} introduced highly comparative time-se
 Recognizing the computational expense of \hctsa{}, Lubba et al.~\cite{lubba2019catch22} developed \catchtwentytwo{}, distilling the 7,700 candidate features down to 22 canonical features through mutual-information clustering on the \ucrarchive{}~\cite{dau2019ucr}. \catchtwentytwo{} is implemented in pure C and provides bindings for Python, R, and Julia. However, its Python bindings operate on individual 1D arrays, necessitating a Python-level iteration loop over batches of time series. Barandas et al.~\cite{barandas2020tsfel} organized features across temporal, statistical, and spectral domains in \tsfel{} using Numba compilation, providing $\sim$390 features in total; when evaluated with all domains enabled at default settings, it computes 156 features. Like \catchtwentytwo{}, \tsfel{} lacks native multi-series parallel batch scheduling in its Python interface.
 
 \subsection{Positioning Tsxtract}
-\tsxtract{} is deliberately positioned to occupy a distinct systems niche: \textit{high-throughput batch and online extraction of a curated, low-redundancy feature bank over massive collections of time series}. It is not intended to replace \tsfresh{} for exploratory hypothesis screening, nor does it aim to provide multi-language bindings like \catchtwentytwo{}. Instead, it focuses on maximizing hardware utilization, memory locality, and throughput in high-volume Python data pipelines. We emphasize that the core contribution is systems architecture, memory safety, and thread parallelism rather than feature innovation.
+\tsxtract{} is deliberately positioned to occupy a distinct systems niche: \textit{high-throughput batch and online extraction of a curated feature bank with comparatively low pairwise linear correlation on the evaluated corpus over massive collections of time series}. It is not intended to replace \tsfresh{} for exploratory hypothesis screening, nor does it aim to provide multi-language bindings like \catchtwentytwo{}. Instead, it focuses on maximizing hardware utilization, memory locality, and throughput in high-volume Python data pipelines. We emphasize that the core contribution is systems architecture, memory safety, and thread parallelism rather than feature innovation.
 
 \section{System Architecture}
 \label{sec:architecture}
@@ -208,7 +208,7 @@ To prevent allocator contention in multi-threaded execution, \tsxtract{} elimina
     \item \texttt{ORDER\_BUF}: A thread-local \texttt{RefCell<Vec<f64>>} used to partition elements during order-statistic selection without allocating per series.
     \item \texttt{WORKSPACE}: Thread-local real-to-complex FFT scratch buffers and planners that cache execution plans per series length.
 \end{enumerate}
-Consequently, memory allocation scales as $O(p)$ with the number of worker threads $p$, rather than $O(N)$ with the batch size.
+Consequently, auxiliary intermediate scratchpad memory scales strictly as $O(p \cdot n)$ with the worker thread count $p$ and sequence length $n$ ($\approx 0.1$~MiB across 16 threads at $n=500$), while output memory scales as $O(N \cdot F)$ ($F=33$), and the input matrix $O(N \cdot n)$ remains unowned resident memory without duplication.
 
 \section{Feature Extraction Methodology}
 \label{sec:feature_set}
@@ -294,7 +294,7 @@ Normalized permutation entropy (order 3, delay 1)~\cite{bandt2002permutation} is
 Spectral features (dominant frequency, spectral centroid, spectral entropy) are computed using a real-to-complex Fast Fourier Transform (\texttt{realfft})~\cite{frigo2005design}. Because the input signal is purely real, the negative-frequency spectrum is redundant; \texttt{realfft} exploits Hermitian symmetry to compute an $n/2$ complex spectrum, delivering a measured 1.94$\times$ empirical speedup (3.14~$\mu$s $\to$ 1.62~$\mu$s) relative to general complex FFT algorithms.
 
 \subsection{Stateful Incremental Streaming Engine}
-For sliding-window telemetry applications, \tsxtract{} provides an online streaming engine (\texttt{StreamingExtractor} in \texttt{src/features/}\allowbreak\texttt{streaming.rs}) that maintains a circular ring buffer of capacity $W$. As new samples arrive via \texttt{push(val)}, running power sums, linear trend covariance, successive first differences, and zero crossings update incrementally in strictly $O(1)$ arithmetic time:
+For sliding-window telemetry applications, \tsxtract{} provides an online streaming engine (\texttt{StreamingExtractor} in \texttt{src/features/}\allowbreak\texttt{streaming.rs}) that maintains a circular ring buffer of capacity $W$. Generalizing classical single-pass online moment accumulators~\cite{welford1962note}, as new samples arrive via \texttt{push(val)}, running power sums, linear trend covariance, successive first differences, and zero crossings update incrementally in strictly $O(1)$ arithmetic time:
 \begin{equation}
 \label{eq:stream_power_sum}
 S_k \leftarrow S_k + x_{\text{new}}^k - x_{\text{old}}^k, \quad k \in \{1, 2, 3, 4\},
@@ -309,8 +309,8 @@ T \leftarrow T - (S_{1, \text{prev}} - x_{\text{old}}) + (W - 1) x_{\text{new}}.
 \end{equation}
 This recurrence establishes a two-tiered streaming contract:
 \begin{itemize}
-    \item \textbf{$O(1)$ Streamable Subset (15 features)}: Online statistical moments ($\mu, \sigma^2, \sigma, S, K$), energy, RMS, trend slope $\beta$, goodness of fit $r^2$, mean absolute change, and zero crossings are updated in strictly $O(1)$ time per sample without rescanning the window.
-    \item \textbf{Snapshot Evaluation (18 features)}: Non-linear order statistics (quantiles, median) and spectral properties require evaluating the $W$-element ring buffer in $O(W)$ and $O(W \log W)$ time upon explicit request (\texttt{compute\_features}), completely avoiding historical re-allocation.
+    \item \textbf{$O(1)$ Streamable Subset (11 features)}: Online statistical moments ($\mu, \sigma^2, \sigma, S, K$), absolute energy, RMS, linear trend slope $\beta$, trend goodness of fit $r^2$, mean absolute change, and zero crossings are updated in strictly $O(1)$ arithmetic time per incoming sample without rescanning the window.
+    \item \textbf{Snapshot Evaluation (22 features)}: Non-linear order statistics (quantiles, median, min, max), run strikes, and spectral transforms evaluate the $W$-element circular ring buffer in $O(W)$ and $O(W \log W)$ time upon explicit request (\texttt{compute\_features}), completely avoiding historical re-allocation.
 \end{itemize}
 
 \section{Computational Complexity}
@@ -349,12 +349,12 @@ Spectral & \texttt{dominant\_freq}, \texttt{centroid}, \texttt{entropy} & $O(n \
 }
 \end{table}
 
-The composite batch time complexity for processing $N$ independent series of length $n$ across $p$ processor cores is:
+The composite batch time complexity for processing $N$ independent series of length $n$ across $p$ processor worker threads is:
 \begin{equation}
 \label{eq:batch_complexity}
-T_{\text{batch}}(N, n, p) = O\left(\frac{N \cdot n \log n}{p}\right).
+T_{\text{batch}}(N, n, p) = O\left(\frac{N \cdot n + N \cdot n \log n}{p}\right) = O\left(\frac{N \cdot n \log n}{p}\right),
 \end{equation}
-The auxiliary memory footprint scales as $O(p \cdot n)$, bounded entirely by thread-local scratchpads.
+where the $N \cdot n$ component reflects the 30 linear-time time-domain features and the $N \cdot n \log n$ component reflects the three real-to-complex FFT spectral transforms. This bound holds asymptotically under balanced work distribution across worker threads ($N \gg p$), with scheduling overhead amortized. Auxiliary intermediate memory scales strictly as $O(p \cdot n)$, bounded entirely by thread-local scratchpads, while output memory scales as $O(N \cdot F)$ ($F=33$) and resident input memory occupies $O(N \cdot n)$.
 
 \section{Experimental Evaluation}
 \label{sec:experiments}
@@ -391,7 +391,14 @@ To evaluate real-world pipeline throughput, our benchmark harness (\texttt{bench
 }
 \end{table*}
 
-As detailed in Table~\ref{tab:benchmark_results}, \tsxtract{} processes the entire 1,000-series batch in a median time of \textbf{1.25~ms} (IQR: 0.26~ms), sustaining a throughput of \textbf{800,256 series/sec}. In contrast, \catchtwentytwo{} requires 1.02 seconds, \tsfel{} requires 7.15 seconds, and \tsfresh{} requires 17.68 seconds.
+As detailed in Table~\ref{tab:benchmark_results} and Figure~\ref{fig:throughput}, \tsxtract{} processes the entire 1,000-series batch in a median time of \textbf{1.25~ms} (IQR: 0.26~ms), sustaining a throughput of \textbf{800,256 series/sec}. In contrast, \catchtwentytwo{} requires 1.02 seconds, \tsfel{} requires 7.15 seconds, and \tsfresh{} requires 17.68 seconds.
+
+\begin{figure}[t]
+\centering
+\includefigsafe[width=0.88\linewidth]{throughput.png}{Batch Extraction Throughput across Frameworks}
+\caption{Batch Extraction Throughput across Frameworks ($N=1,000$ series $\times 500$ steps, log scale). Error bars denote IQR across 10 repeated benchmark iterations. Notice that \tsxtract{} sustains 800,256 series/sec, driven by zero-copy FFI and multi-threaded work-stealing parallelism.}
+\label{fig:throughput}
+\end{figure}
 
 \subsection{Deconstructing the Speedup: Matched-Feature Microbenchmark}
 A critical scientific question is: \textit{How much of this speedup stems from algorithmic optimization versus batch scheduling, FFI amortization, and multi-core parallelism?} Because toolkits compute distinct feature inventories of varying mathematical complexity, end-to-end runtimes alone cannot establish pure algorithmic superiority.
@@ -401,7 +408,7 @@ To address this, we developed a dedicated microbenchmark (\texttt{benches/bench\
 \begin{table*}[t]
 \centering
 \setlength{\tabcolsep}{4pt}
-\caption{Empirical Matched-Feature Microbenchmark Across Frameworks ($N=1000$ Series $\times$ 500 Steps, Reported as Median $\pm$ IQR in $\mu\text{s}$ per Series). Directly isolates execution times of semantically equivalent estimators on identical inputs.}
+\caption{Empirical Matched-Feature Microbenchmark Across Frameworks ($N=1000$ Series $\times$ 500 Steps, Reported as Median $\pm$ IQR in $\mu\text{s}$ per Series). Rows 1--6 report isolated microbenchmark timings of specific estimators on identical inputs. The composite row reports unified multi-threaded batch execution across all 33 features ($1.25 \pm 0.26~\mu$s/series matching Table~\ref{tab:benchmark_results}; in isolated single-thread micro-execution without inter-pass amortization, the accumulated kernel sum is $1.95 \pm 0.68~\mu$s/series).}
 \label{tab:matched_features}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lrrrr>{\raggedright\arraybackslash}p{4.2cm}@{}}
@@ -415,24 +422,20 @@ CID-CE (Complexity Distance) & \textbf{0.14 $\pm$ 0.03 $\mu$s} & [Not in set] & 
 Zero Crossings & \textbf{0.09 $\pm$ 0.02 $\mu$s} & [Not in set] & 3.73 $\pm$ 0.46 $\mu$s & 4.73 $\pm$ 0.55 $\mu$s & Fused level detection in Pass 4 \\
 Permutation Entropy ($d=3, \tau=1$) & \textbf{0.21 $\pm$ 0.05 $\mu$s} & [Not in set] & 278.57 $\pm$ 10.51 $\mu$s & [Not in set] & Branchless 3-bit table lookup \\
 \midrule
-\textbf{All 33 Features (Composite)} & \textbf{1.95 $\pm$ 0.68 $\mu$s} & \textbf{1,024.77 $\mu$s (22 feats)} & \textbf{17,683.31 $\mu$s (777 feats)} & \textbf{125.40 $\mu$s (10 feats)} & \textbf{5 fused sweeps + RealFFT + Rayon} \\
+\textbf{All 33 Features (Parallel Batch)} & \textbf{1.25 $\pm$ 0.26 $\mu$s} & \textbf{1,024.77 $\mu$s (22 feats)} & \textbf{17,683.31 $\mu$s (777 feats)} & \textbf{125.40 $\mu$s (10 feats)} & \textbf{5 fused sweeps + RealFFT + Rayon} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table*}
 
-The empirical measurements in Table~\ref{tab:matched_features} reveal that \tsxtract{}'s speedup is not monolithic, but decomposes multiplicatively across four distinct layers:
-\begin{equation}
-\label{eq:speedup_decomposition}
-S_{\text{total}} = S_{\text{algorithmic}} \times S_{\text{native\_loop}} \times S_{\text{FFI\_amortization}} \times S_{\text{parallelism}}.
-\end{equation}
+The empirical measurements in Table~\ref{tab:matched_features} reveal that \tsxtract{}'s speedup is not monolithic, but decomposes across four distinct layers:
 \begin{enumerate}
-    \item \textbf{Algorithmic Optimization ($S_{\text{algorithmic}} \approx 2\times$--$4\times$)}: Quickselect ($O(n)$) achieves a 2.1$\times$ to 59$\times$ reduction in quantile extraction latency relative to full-array sorting in NumPy ($35.18~\mu$s) and \tsfresh{} ($130.31~\mu$s). For permutation entropy, branchless bitwise mapping ($0.21~\mu$s) eliminates branching mispredictions, executing over $1,300\times$ faster than \tsfresh{}'s iterative branch-heavy implementation ($278.57~\mu$s).
+    \item \textbf{Algorithmic Optimization ($S_{\text{algorithmic}} \approx 2\times$--$4\times$)}: Quickselect ($O(n)$) achieves a 2.1$\times$ to 59$\times$ reduction in quantile extraction latency relative to full-array sorting in NumPy ($35.18~\mu$s) and \tsfresh{} ($130.31~\mu$s). For permutation entropy ($d=3, \tau=1$), \tsxtract{}'s branchless bitwise mapping ($0.21~\mu$s per series) eliminates branching mispredictions, executing over $1,300\times$ faster than \tsfresh{}'s reference implementation (\texttt{permutation\_entropy} in \texttt{tsfresh.feature\_extraction.feature\_calculators}, $278.57~\mu$s per series). Both implementations were evaluated on identical $n=500$ series with identical parameterization ($d=3, \tau=1$); \tsfresh{} constructs rolling window tuples in Python, hashes permutation sequences in an interpreted dictionary, and calculates Shannon entropy via NumPy, whereas \tsxtract{} maps consecutive 3-tuples into a 3-bit bitwise comparison LUT and accumulates directly into stack-resident registers without heap allocation.
     \item \textbf{Native Loop and Pass Fusion ($S_{\text{native\_loop}} \approx 4.1\times$)}: Condensing calculations into five fused sweeps minimizes cache thrashing, executing 4.1$\times$ faster than an equivalent single-threaded Python/NumPy loop over individual feature calls.
-    \item \textbf{FFI Marshalling Amortization ($S_{\text{FFI\_amortization}} \approx 14.8\times$)}: In \catchtwentytwo{}, executing 1,000 separate native calls inside a serial Python loop incurs $14.8\times$ higher dispatch and pointer marshalling overhead than \tsxtract{}'s single batch entry point.
-    \item \textbf{Work-Stealing Multi-Threading ($S_{\text{parallelism}} \approx 13.9\times$)}: Distributing series across 16 worker threads yields an empirical 13.92$\times$ parallel speedup (87.0\% efficiency).
+    \item \textbf{FFI Marshalling Amortization ($S_{\text{FFI\_amortization}} \approx 4.1\times$)}: In a controlled single-threaded experiment with identical Rust feature kernels, invoking a single-series native function 1,000 times inside a serial Python loop requires 11.27~ms, whereas a single batch FFI dispatch with a native serial C-loop requires 2.75~ms. This directly isolates an empirical $4.10\times$ FFI boundary and dispatch overhead penalty ($S_{\text{FFI\_amortization}} \approx 4.1\times$). In frameworks such as \texttt{pycatch22}, this repeated per-series Python-to-C wrapper invocation constitutes a major fraction of total runtime.
+    \item \textbf{Work-Stealing Multi-Threading ($S_{\text{parallelism}} \approx 13.9\times$)}: Distributing series across 16 worker threads yields an empirical 13.92$\times$ parallel speedup (87.0\% parallel efficiency on a 10-core/16-thread processor).
 \end{enumerate}
-Multiplying these factors yields $S_{\text{total}} \approx 4.1 \times 14.8 \times 13.9 \approx 840\times$, directly explaining the measured 820$\times$ speedup over \catchtwentytwo{}.
+Rather than assuming strict multiplicative independence among layers, this layered speedup decomposition provides an approximate model consistent with the observed 820$\times$ end-to-end acceleration over \catchtwentytwo{}. It demonstrates how micro-algorithmic efficiency ($2\times\text{--}4\times$), native compiled loop fusion ($4.1\times$), FFI call amortization ($4.1\times$), and thread-level parallelism ($13.9\times$) compound to deliver orders-of-magnitude systems-level gains.
 
 \begin{figure*}[t]
 \centering
@@ -454,7 +457,7 @@ Furthermore, evaluating single-series latency ($N = 1$) isolates the crossover p
 \subsection{Disambiguated Memory Footprint and Zero-Copy Benefits}
 To provide an accurate accounting of memory consumption and clearly distinguish pre-existing input buffers from dynamic heap allocations, Figure~\ref{fig:memory} explicitly separates three memory tiers:
 \begin{enumerate}
-    \item \textbf{Resident Input Buffer}: For a batch of $N = 100,000$ series of length $n = 500$, the input array occupies $100,000 \times 500 \times 8\text{ bytes} = 400.0\text{ MB}$ ($381.47\text{ MiB}$) of pre-existing memory. \tsxtract{} borrows an unowned pointer view via PyO3, incurring \textbf{0.0~MB of additional ingestion allocation}.
+    \item \textbf{Resident Input Buffer}: For a batch of $N = 100,000$ series of length $n = 500$, the input array occupies $100,000 \times 500 \times 8\text{ bytes} = 400.0\text{ MB}$ ($381.47\text{ MiB}$) of pre-existing memory. \tsxtract{} borrows an unowned pointer view via PyO3, performing no input-buffer copy during ingestion (\textbf{zero additional memory duplication}).
     \item \textbf{Allocated Output Matrix}: The extracted feature table occupies $100,000 \times 33 \times 8\text{ bytes} = 26.4\text{ MB}$ ($25.18\text{ MiB}$).
     \item \textbf{Intermediate Heap Allocations}: \tsxtract{} requires only $O(p \cdot n) \approx 0.1\text{ MiB}$ across all $p=16$ worker threads for thread-local scratchpads.
 \end{enumerate}
@@ -495,12 +498,12 @@ Within the native execution core, micro-architectural design choices yield subst
     \item \textbf{Quickselect vs Full Sort}: Quickselect targeting 10 quantile ranks reduced quantile extraction time from 4.82~$\mu$s to 2.29~$\mu$s (2.1$\times$ improvement) relative to full sorting.
     \item \textbf{RealFFT vs Complex FFT}: Exploiting Hermitian symmetry halved the transform length, reducing spectral stage latency from 3.14~$\mu$s to 1.62~$\mu$s (1.94$\times$ empirical speedup).
     \item \textbf{Branchless Permutation Entropy}: Eliminating branch mispredictions via static bitwise comparison lookup tables reduced permutation entropy latency from 2.11~$\mu$s to 0.67~$\mu$s per series.
-    \item \textbf{Memory Pass Fusion}: Condensing 33 feature passes into five fused contiguous sweeps reduced memory traversals by 6.6$\times$, significantly reducing memory bandwidth pressure.
+    \item \textbf{Memory Pass Fusion}: Condensing 33 feature passes into five fused contiguous sweeps reduced the number of major sequential feature-computation sweeps from 33 conceptual passes down to five fused memory traversals, maximizing cache line reuse while data elements reside in L1/L2 data cache.
 \end{itemize}
 
 \section{Downstream Machine Learning Utility}
 \label{sec:downstream_ml}
-To verify that \tsxtract{} retains high discriminative representation capacity on non-trivially separable tasks, we evaluated classification performance across four canonical time-series dynamic archetypes with per-series z-score standardization:
+To verify that \tsxtract{} retains high discriminative representation capacity on non-trivially separable tasks, we evaluated classification performance across four synthetic and canonical dynamic time-series classification tasks with per-series z-score standardization:
 \begin{enumerate}
     \item \textbf{Synthetic Control (6-class, $N=600$, $n=150$)}: White noise, cyclic, upward trend, downward trend, upward shift, downward shift with overlapping noise.
     \item \textbf{Simulated ECG (2-class, $N=500$, $n=150$)}: Normal sinus rhythm vs arrhythmic waveforms with physiological baseline wander.
@@ -513,7 +516,7 @@ Features were extracted using \tsxtract{} (33 features), \catchtwentytwo{} (22 f
 \begin{table*}[t]
 \centering
 \setlength{\tabcolsep}{5pt}
-\caption{Downstream Machine Learning Classification Results (5-Fold Stratified Cross-Validation). Notice that \tsxtract{} achieves superior classification accuracy across both linear and non-linear models while executing 300$\times$--600$\times$ faster than \catchtwentytwo{}.}
+\caption{Downstream Machine Learning Classification Results (5-Fold Stratified Cross-Validation). Notice that \tsxtract{} achieves strong classification performance across both linear and non-linear models while executing 252$\times$--631$\times$ faster than \catchtwentytwo{}.}
 \label{tab:downstream_results}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}llcccccc@{}}
@@ -540,13 +543,13 @@ Features were extracted using \tsxtract{} (33 features), \catchtwentytwo{} (22 f
 }
 \end{table*}
 
-As shown in Table~\ref{tab:downstream_results}, \tsxtract{} consistently matches or outperforms \catchtwentytwo{} while extracting features in under 0.65~ms across all datasets (300$\times$--600$\times$ faster than \catchtwentytwo{}'s 150--233~ms). Crucially, on tasks where simple moment statistics collapse (e.g., Ridge accuracy falling to 62.8\% on ECG and 65.2\% on Power Demand due to shape ambiguity), \tsxtract{}'s temporal and spectral features retain full discriminability (100.0\% accuracy).
+As shown in Table~\ref{tab:downstream_results}, \tsxtract{} consistently matches or outperforms \catchtwentytwo{} while extracting features in under 0.65~ms across all datasets (252$\times$--631$\times$ faster than \catchtwentytwo{}'s 151--232~ms). Crucially, on tasks where simple moment statistics collapse (e.g., Ridge accuracy falling to 62.8\% on ECG and 65.2\% on Power Demand due to shape ambiguity), \tsxtract{}'s temporal and spectral features retain full discriminability (100.0\% accuracy).
 
 \section{Information-Theoretic Redundancy Analysis}
 \label{sec:redundancy}
 To empirically assess the degree of collinearity within \tsxtract{}'s feature bank, we evaluated pairwise Pearson correlations across a diverse benchmark corpus of 2,000 synthetic time series spanning eight dynamic regimes (white noise, harmonic, random walk, AR(1), linear trend, regime shift, chaotic logistic maps, and sparse pulses).
 
-Across all 528 unique feature pairs, \textbf{83.3\%} exhibit low correlation ($|r| < 0.70$), 11.6\% exhibit moderate correlation ($0.70 \le |r| < 0.90$), and only 5.1\% exhibit high collinearity ($|r| \ge 0.90$). Principal Component Analysis (PCA) demonstrated that capturing 90\% of total variance requires 6 principal components (18.2\% of the feature bank). We note that while low pairwise correlation on this diverse dynamic corpus does not guarantee statistical orthogonality across arbitrary real-world distributions, it validates that \tsxtract{} avoids the excessive collinearity of over-parameterized libraries where as few as 4 components explain over 90\% of an entire 390-feature inventory~\cite{barandas2020tsfel}.
+Across all 528 unique feature pairs, \textbf{83.3\%} exhibit low pairwise linear correlation ($|r| < 0.70$), 11.6\% exhibit moderate correlation ($0.70 \le |r| < 0.90$), and only 5.1\% exhibit high collinearity ($|r| \ge 0.90$). Principal Component Analysis (PCA) demonstrated that capturing 90\% of total variance requires 6 principal components (18.2\% of the feature bank). Importantly, pairwise linear correlation does not rule out non-linear dependencies, nor does PCA variance retention directly dictate downstream classification utility; nonetheless, this empirical profile demonstrates that \tsxtract{} avoids the excessive collinearity of over-parameterized libraries where as few as 4 components explain over 90\% of an entire 390-feature inventory~\cite{barandas2020tsfel}.
 
 \section{Numerical Correctness and Test Suite}
 \label{sec:correctness}
@@ -580,20 +583,18 @@ To ensure complete reproducibility, all artifacts, scripts, and tests are releas
 \begin{center}
 \url{https://github.com/Aamod007/Tsxtract}
 \end{center}
-The benchmark suite can be reproduced via:
+Benchmarks execute with random seed 42, preceded by two untimed warmup iterations per framework to mitigate cache cold-start effects, reporting median $\pm$ IQR over $k=10$ measured runs ($k \ge 2$ for slow baselines). Experiments were executed on an Intel Core i7-13620H processor running Windows 11 Enterprise with OS high-performance power plan enabled and non-essential background processes terminated. The benchmark suite and paper figures can be reproduced via:
 \begin{lstlisting}[language=bash]
-git checkout 6df77e4
+git checkout 1e8b277
 pip install -e ".[bench]"
 python benches/bench_libraries.py --n-series 1000 --n-steps 500
-python benches/bench_matched_features.py --n-series 1000 --length 500
-python benches/bench_architectural_ablation.py
-python benches/bench_series_length.py
 python benches/bench_ucr_downstream.py
+python paper/generate_figures.py
 \end{lstlisting}
 
 \section{Conclusion}
 \label{sec:conclusion}
-This work examined whether a batch-oriented systems architecture for classical time-series feature extraction can overcome the scaling bottlenecks of existing Python frameworks. The results demonstrate that by combining zero-copy FFI buffer ingestion, GIL release, multi-threaded work-stealing parallelism across series, and cache-conscious fused memory passes, \tsxtract{} achieves an extraction throughput exceeding 800,000 series/sec across 16 worker threads on a 10-core CPU. Furthermore, the integration of an $O(1)$ streaming state engine enables real-time sliding-window processing for running moments and trend covariance. By demonstrating that high extraction throughput can be achieved alongside numerical correctness and high downstream predictive accuracy, \tsxtract{} provides a practical systems foundation for scalable time-series feature engineering.
+This work examined whether a batch-oriented systems architecture for classical time-series feature extraction can overcome the scaling bottlenecks of existing Python frameworks. The results demonstrate that by combining zero-copy FFI buffer ingestion, GIL release, multi-threaded work-stealing parallelism across series, and cache-conscious fused memory passes, \tsxtract{} achieves an extraction throughput exceeding 800,000 series/sec across 16 worker threads on a 10-core CPU. Furthermore, the integration of an $O(1)$ streaming state engine enables real-time sliding-window processing for running moments and trend covariance. By demonstrating that high extraction throughput can be achieved alongside numerical correctness and strong representation capacity on canonical benchmark tasks, \tsxtract{} provides a practical systems foundation for scalable time-series feature engineering.
 
 % Fully self-contained IEEE bibliography: guarantees 0 errors on Overleaf / TeX Live without needing external .bib files
 \begin{thebibliography}{15}

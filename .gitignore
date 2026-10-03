@@ -8,3 +8,7 @@ dist/
 *.pdb
 .hypothesis/
 site/
+node_modules/
+landing/dist/
+.gstack/
+
