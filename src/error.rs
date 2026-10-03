@@ -31,6 +31,10 @@ pub enum TsxError {
         cols: usize,
         len: usize,
     },
+    /// Feature name not recognized.
+    UnknownFeature { name: String },
+    /// Feature extraction profile not recognized.
+    UnknownProfile { profile: String },
 }
 
 impl fmt::Display for TsxError {
@@ -75,6 +79,12 @@ impl fmt::Display for TsxError {
                 f,
                 "internal error: cannot shape {len} values as ({rows}, {cols})"
             ),
+            TsxError::UnknownFeature { name } => {
+                write!(f, "unknown feature '{name}'; check tsxtractor.feature_names()")
+            }
+            TsxError::UnknownProfile { profile } => {
+                write!(f, "unknown profile '{profile}'; valid profiles: 'core33', 'minimal', 'extended', 'full'")
+            }
         }
     }
 }

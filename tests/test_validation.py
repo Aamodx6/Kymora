@@ -85,7 +85,7 @@ def test_non_contiguous_series_in_list_reports_index():
         pytest.param(np.arange(10.0), id="1d_array"),
         pytest.param(np.zeros((2, 3, 4)), id="3d_array"),
         pytest.param(np.arange(20).reshape(2, 10), id="int_dtype"),
-        pytest.param(np.zeros((2, 10), dtype=np.float32), id="float32_dtype"),
+        pytest.param(np.zeros((2, 10), dtype=np.complex128), id="complex128_dtype"),
         pytest.param([[1.0, 2.0, 3.0]], id="list_of_lists"),
         pytest.param("not an array", id="string"),
     ],

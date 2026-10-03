@@ -1,6 +1,6 @@
 [package]
 name = "tsxtractor"
-version = "0.3.2"
+version = "0.4.0"
 edition = "2021"
 
 [lib]
@@ -12,7 +12,10 @@ pyo3 = { version = "0.26", features = ["extension-module", "abi3-py310"] }
 numpy = "0.26"
 rayon = "1"
 realfft = "3.5.0"
+bitflags = "2"
 
 [profile.release]
-lto = true
+opt-level = 3
+lto = "fat"
 codegen-units = 1
+debug = "line-tables-only"

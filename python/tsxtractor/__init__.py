@@ -33,7 +33,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence
 
-from ._core import StreamingExtractor, extract_features, feature_names, sliding_features
+from ._core import (
+    StreamingExtractor,
+    describe_feature,
+    extract_features,
+    extract_features_ragged,
+    feature_names,
+    list_profiles,
+    sliding_features,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
@@ -41,10 +49,13 @@ if TYPE_CHECKING:  # pragma: no cover
 
 __all__ = [
     "extract_features",
+    "extract_features_ragged",
     "extract_features_df",
     "sliding_features",
     "StreamingExtractor",
     "feature_names",
+    "list_profiles",
+    "describe_feature",
     "__version__",
 ]
 
@@ -57,7 +68,7 @@ def _resolve_version() -> str:
             return version(dist_name)
         except PackageNotFoundError:
             continue
-    return "0.3.2"
+    return "0.4.0"
 
 
 #: Package version, read from the installed distribution metadata (which maturin
@@ -67,6 +78,10 @@ __version__: str = _resolve_version()
 
 def extract_features_df(
     X: "np.ndarray | Sequence[np.ndarray]",
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: "np.ndarray | None" = None,
 ) -> "pd.DataFrame":
     """Same as :func:`extract_features`, returned as a labeled DataFrame.
 
@@ -78,11 +93,15 @@ def extract_features_df(
         pip install "tsxtract-rs[pandas]"
 
     Args:
-        X: 2D float64 array of shape ``(n_series, length)``, or a sequence of 1D
-            float64 arrays for ragged series.
+        X: 2D float64/float32 array of shape ``(n_series, length)``, or a sequence of 1D
+            arrays for ragged series.
+        profile: Optional feature profile name ("minimal", "core33", "extended", "full").
+        features: Optional explicit sequence of feature names or aliases.
+        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        out: Optional pre-allocated C-contiguous float64 array.
 
     Returns:
-        A ``(n_series, 33)`` DataFrame of float64 features.
+        A ``(n_series, n_features)`` DataFrame of float64 features.
 
     Raises:
         ImportError: if pandas is not installed.
@@ -97,5 +116,5 @@ def extract_features_df(
             'install by default. Install it with: pip install "tsxtract-rs[pandas]"'
         ) from exc
 
-    values: Any = extract_features(X)
-    return pd.DataFrame(values, columns=feature_names())
+    values: Any = extract_features(X, profile=profile, features=features, n_jobs=n_jobs, out=out)
+    return pd.DataFrame(values, columns=feature_names(profile=profile, features=features))

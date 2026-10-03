@@ -12,7 +12,31 @@ feature is a **major** version change; appending a new feature at the end is a
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-08-31
+## [0.4.0] - 2026-10-04
+
+### Added
+- **Dynamic Feature Planning & Profiles:**
+  - `profile="minimal"` (10 core statistical features, avoiding sorting and FFT entirely: ~0.51 ms per 1k series, ~2,000,000 series/sec).
+  - `profile="core33"` (frozen authoritative v1.0 default: ~1.80 ms per 1k series, 555,000 series/sec).
+  - `profile="extended"` (143 features across distribution+, counts, crossings, nonlinear stats, PACF, linear trend, spectral agg, chunk ratios).
+  - `profile="full"` (543 features, including all 400 FFT coefficient parameters extracted directly from precomputed spectrum).
+  - `list_profiles()` and `describe_feature(name)` APIs with full alias resolution.
+- **Native Float32 Ingestion Path:**
+  - Zero-copy read view of 2D/1D `float32` arrays, accumulating with register precision in `float64`.
+- **In-Place Output Buffer (`out=`):**
+  - Zero-allocation extraction support across `extract_features`, `extract_features_ragged`, and `sliding_features`.
+- **CSR Ragged Series Extraction:**
+  - `extract_features_ragged(values, offsets)` for flat contiguous CSR representations with zero per-series Python overhead.
+- **Thread Pool Control (`n_jobs`):**
+  - Optional `n_jobs` parameter supporting fine-grained Rayon thread-pool scoping and preventing thread oversubscription.
+- **Real-Time Streaming O(1) Fast Tier:**
+  - `StreamingExtractor.compute(kind="fast")` computes 12 true online features (`mean`, `std`, `var`, `skewness`, `kurtosis`, `abs_energy`, `root_mean_square`, `mean_abs_change`, `mean_change`, `cid_ce`, `zero_crossings`, `trend_slope`) in sub-microsecond time with zero heap allocations, zero sorting, and zero FFT.
+  - Periodic accumulator re-anchoring every 4096 steps preventing IEEE 754 drift.
+  - Centered two-pass moment formulation immune to catastrophic cancellation even on $10^9 + \text{noise}$ series.
+  - `StreamingExtractor.fast_feature_names()` static API.
+- **Block-Parallel Sliding Windows:**
+  - Rayon block-parallelized `sliding_features` with per-worker reusable `Scratch` buffers.
+
 
 ### Changed
 

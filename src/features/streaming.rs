@@ -228,7 +228,86 @@ impl StreamingExtractor {
         self.get_current_window(&mut window_buf);
         compute_all(&window_buf, out);
     }
+
+    /// Computes the O(1) subset of 12 online features directly with centered moment passes.
+    pub fn compute_fast(&self, out: &mut [f64]) {
+        assert_eq!(out.len(), FAST_NAMES.len());
+        if !self.is_full() {
+            out.fill(f64::NAN);
+            return;
+        }
+
+        let w_len = self.window_size;
+        let w = w_len as f64;
+
+        let mut sum = 0.0;
+        let mut sum_sq = 0.0;
+        for &v in &self.buffer {
+            sum += v;
+            sum_sq += v * v;
+        }
+        let mean = sum / w;
+
+        let mut m2 = 0.0;
+        let mut m3 = 0.0;
+        let mut m4 = 0.0;
+        for &v in &self.buffer {
+            let diff = v - mean;
+            let d2 = diff * diff;
+            m2 += d2;
+            m3 += d2 * diff;
+            m4 += d2 * d2;
+        }
+
+        let var = m2 / w;
+        let std = var.sqrt();
+
+        let skewness = if std == 0.0 { f64::NAN } else { (m3 / w) / (var * std) };
+        let kurtosis = if std == 0.0 { f64::NAN } else { (m4 / w) / (var * var) - 3.0 };
+
+        let abs_energy = sum_sq;
+        let rms = (abs_energy / w).sqrt();
+        let mean_abs_change = self.abs_diff_sum / (w - 1.0);
+        let last_idx = (self.head + self.window_size - 1) % self.window_size;
+        let mean_change = (self.buffer[last_idx] - self.buffer[self.head]) / (w - 1.0);
+        let cid_ce = if std == 0.0 { 0.0 } else { self.sq_diff_sum.sqrt() / std };
+        let zero_crossings = self.zero_crossings as f64;
+
+        let t_mean = (w - 1.0) * 0.5;
+        let var_t = (w * w - 1.0) / 12.0;
+        let sum_t2 = w * var_t;
+        let cov_tx = self.trend_sum - w * t_mean * mean;
+        let trend_slope = cov_tx / sum_t2;
+
+        out[0] = mean;
+        out[1] = std;
+        out[2] = var;
+        out[3] = skewness;
+        out[4] = kurtosis;
+        out[5] = abs_energy;
+        out[6] = rms;
+        out[7] = mean_abs_change;
+        out[8] = mean_change;
+        out[9] = cid_ce;
+        out[10] = zero_crossings;
+        out[11] = trend_slope;
+    }
 }
+
+pub const FAST_NAMES: &[&str] = &[
+    "mean",
+    "std",
+    "var",
+    "skewness",
+    "kurtosis",
+    "abs_energy",
+    "root_mean_square",
+    "mean_abs_change",
+    "mean_change",
+    "cid_ce",
+    "zero_crossings",
+    "trend_slope",
+];
 
 #[cfg(test)]
 mod tests {

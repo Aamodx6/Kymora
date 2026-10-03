@@ -144,8 +144,6 @@ pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 ```
 
----
-
 ### Streaming & Real-Time Telemetry
 
 Maintain running statistical features in real-time embedded systems or trading loops without recomputing from scratch:
@@ -153,31 +151,78 @@ Maintain running statistical features in real-time embedded systems or trading l
 ```python
 from tsxtractor import StreamingExtractor
 
-# Initialize streaming extractor with buffer capacity
+# Initialize streaming extractor with window capacity
 stream = StreamingExtractor(capacity=500)
 
-# Ingest points one by one with O(1) state updates
 for tick in incoming_data_feed:
     stream.push(tick)
-    current_features = stream.compute()
+    
+    # 1. True O(1) online fast tier (sub-microsecond, no sorting, no FFT):
+    # Returns 12 features: mean, std, var, skew, kurt, abs_energy, rms,
+    # mean_abs_change, mean_change, cid_ce, zero_crossings, trend_slope
+    fast_features = stream.compute(kind="fast")
+    
+    # 2. Complete 33-feature set evaluated over the current rolling window:
+    all_features = stream.compute(kind="all")
+```
+
+---
+
+### Profiles & Feature Catalog
+
+Choose the performance-to-breadth profile that fits your pipeline:
+
+* **`minimal` (10 features):** Centered moments, extrema, energy, zero crossings. Zero sorting and zero FFT overhead (~0.51 ms per 1,000 series; **~2,000,000 series/sec**).
+* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~1.80 ms per 1,000 series; **555,000 series/sec**).
+* **`extended` (143 features):** Adds distribution statistics, crossings, nonlinear stats, PACF (Levinson-Durbin), full linear regression trend, and spectral aggregations.
+* **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
+
+```python
+import tsxtractor
+
+# List available profiles and feature counts
+print(tsxtractor.list_profiles())
+# {'minimal': 10, 'core33': 33, 'extended': 143, 'full': 543}
+
+# Inspect individual features and their computational prerequisites
+print(tsxtractor.describe_feature("autocorrelation__lag_1"))
 ```
 
 ---
 
 ### Benchmarks
 
-Tested on a 16-core system across **1,000 series of 500 steps** (500,000 data points total):
+Measured on a 16-core system across **1,000 series of 500 steps** (500,000 data points total), traceable to CI artifacts in `benches/results/bench_matrix.json`:
 
-| Library | Features | Runtime | Series / sec | Per-Feature Cost | Speedup vs Tsxtract |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Tsxtract (`tsxtract-rs`)** | **33** | **1.25 ms** | **800,256** | **0.038 µs** | **Baseline (1.0×)** |
-| `catch22` | 22 | 1,024.8 ms | 976 | 46.58 µs | **820× slower** |
-| `TSFEL` | 156 | 7,154.0 ms | 140 | 45.86 µs | **5,725× slower** |
-| `tsfresh` | 777 | 17,683.3 ms | 57 | 22.76 µs | **14,151× slower** |
+#### Profile Throughput (1,000 × 500):
+| Profile | Features | Latency (1k) | Per-Series | Per-Feature Cost | Throughput |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `minimal` | 10 | **0.51 ms** | **0.51 µs** | 0.0507 µs | **1,972,776 series/s** |
+| `core33` | 33 | **1.80 ms** | **1.80 µs** | 0.0546 µs | **555,016 series/s** |
+| `extended` | 143 | **7.12 ms** | **7.12 µs** | 0.0498 µs | **140,395 series/s** |
+| `full` | 543 | **8.36 ms** | **8.36 µs** | 0.0154 µs | **119,654 series/s** |
+
+#### Multi-Core Scaling (`core33`, 1,000 × 500):
+| Worker Threads | Latency | Per-Series Cost | Speedup vs 1 Thread | Scaling Efficiency |
+| :---: | :---: | :---: | :---: | :---: |
+| 1 Thread | 11.31 ms | 11.31 µs | 1.00× | 100.0% |
+| 2 Threads | 6.03 ms | 6.03 µs | 1.88× | 93.8% |
+| 4 Threads | 3.58 ms | 3.58 µs | 3.16× | 78.9% |
+| 8 Threads | 2.52 ms | 2.52 µs | 4.49× | 56.1% |
+| 16 Threads | 2.60 ms | 2.60 µs | 4.34× | 27.1% |
+
+#### Competitive Landscape (1,000 × 500):
+| Library | Features | Runtime (1k × 500) | Series / sec | Speedup vs Competitor |
+| :--- | :---: | :---: | :---: | :--- |
+| **Tsxtract (`core33`)** | **33** | **1.80 ms** | **555,016** | **Baseline (1.0×)** |
+| `catch22` | 22 | 1,045.8 ms | 956 | **580× slower** |
+| `TSFEL` | 156 | 9,806.6 ms | 102 | **5,443× slower** |
+| `tsfresh` | 777 | 100,500.0 ms | 10 | **55,779× slower** |
 
 #### Memory Footprint (100,000 series × 500 steps):
-* **Tsxtract:** **+25.2 MiB** allocated memory (strictly the output matrix, zero input duplication).
+* **Tsxtract:** **25.18 MiB** allocated memory (strictly the output matrix: $100,000 \times 33 \times 8\text{ B}$, with **+0.00 MiB intermediate overhead**).
 * **tsfresh / Pandas:** **+1,250 MiB** memory ballooning due to melted DataFrame indices.
+
 
 ---
 

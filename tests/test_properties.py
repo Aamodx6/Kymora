@@ -224,7 +224,7 @@ def test_degenerate_2d_shapes_raise_value_error(shape):
 @SETTINGS
 @given(
     x=hnp.arrays(
-        dtype=st.sampled_from([np.float32, np.int32, np.int64, np.complex128]),
+        dtype=st.sampled_from([np.int32, np.int64, np.complex128]),
         shape=st.tuples(st.integers(1, 5), st.integers(1, 10)),
     )
 )

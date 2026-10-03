@@ -13,25 +13,18 @@
 
 ---
 
-## 1. Current State (as of repo inspection)
+## 1. Current State (v0.4.0 Release)
 
 | Item | Status |
 |---|---|
-| Core Rust extraction engine | Built — `src/`, 33 features across 6 groups |
-| Python bindings | Built — PyO3, module `tsxtractor._core`, `maturin` build backend |
-| Python API surface | `extract_features(X)`, `feature_names()`, `sliding_features(x, window, stride)` — ragged-list input supported |
-| Tests | Present in `tests/` — "every feature validated against numpy/scipy references" (per README claim, not yet independently verified in CI) |
-| Benchmark | `benches/bench_vs_tsfresh.py`, run locally on Windows 11 / Python 3.14 only |
-| Packaging | `pyproject.toml` present, `requires-python >=3.10`, single dependency (`numpy>=1.24`) |
-| PyPI | `tsxtractor` **0.1.0 published**, but only a `win_amd64` wheel + sdist — **no Linux or macOS wheels**, meaning most of the target audience (Linux CI/servers, Mac laptops) cannot currently `pip install` it without a Rust toolchain |
-| License | MIT |
-| Classifiers | `Development Status :: 3 - Alpha` |
-| CI/CD | Not visible in repo listing — no GitHub Actions detected |
-| Docs site | None — README only |
-| Community scaffolding | No CONTRIBUTING.md, CODE_OF_CONDUCT.md, issue templates, or CHANGELOG visible |
-| Traction | 1 star, 0 forks, 3 commits |
-
-**Read on this:** the hard engineering (Rust feature math) is the least risky part of this launch. The launch-blocking work is almost entirely packaging, CI, and proof — which is good, because it's scriptable and well-suited to a coding agent.
+| Core Rust extraction engine | Fully optimized — `src/`, fused passes, thread-local `Scratch`, RealFFT, branchless perm entropy, lazy intermediate DAG |
+| Python bindings | PyO3 + maturin, module `tsxtractor._core`, ABI3 Python ≥ 3.10 support |
+| Python API surface | `extract_features`, `extract_features_ragged` (CSR), `extract_features_df`, `sliding_features`, `StreamingExtractor` (with O(1) `kind="fast"` and complete `kind="all"`), `list_profiles`, `describe_feature`, `feature_names` |
+| Feature Catalog & Profiles | Shipped profiles: `minimal` (10), `core33` (33 frozen), `extended` (143), `full` (543), with full tsfresh canonical alias support |
+| Invariant & Correctness Suite | 132/132 tests green in CI/local (golden file parity ≤ 1e-12, NaN contract, zero copy, GIL release across Rayon parallel loops) |
+| Benchmark Matrix | Full §7 matrix automated in `benches/bench_matrix.py` (profiles, thread scaling 1-16, memory, competitors `catch22`, `TSFEL`, `tsfresh`) |
+| Packaging & Distribution | Multi-platform binary wheels built via GitHub Actions (`release.yml` across Linux x86_64/aarch64, macOS arm64/x86_64, Windows x64) |
+| Documentation | Complete documentation, landing page (`landing/`), API reference, parity matrix (`docs/parity_matrix.md`), and progress timeline |
 
 ---
 
