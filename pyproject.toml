@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "tsxtract-rs"
-version = "0.3.1"
+version = "0.3.2"
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"
 license = "MIT"
@@ -32,10 +32,10 @@ bench = ["pandas>=1.5", "tsfresh>=0.20", "pycatch22>=0.4.5", "tsfel>=0.1.6"]
 docs = ["mkdocs>=1.6", "mkdocs-material>=9.5"]
 
 [project.urls]
-Homepage = "https://github.com/Aamod007/Tsxtract"
-Repository = "https://github.com/Aamod007/Tsxtract"
-Issues = "https://github.com/Aamod007/Tsxtract/issues"
-Changelog = "https://github.com/Aamod007/Tsxtract/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Aamodx6/Tsxtract"
+Repository = "https://github.com/Aamodx6/Tsxtract"
+Issues = "https://github.com/Aamodx6/Tsxtract/issues"
+Changelog = "https://github.com/Aamodx6/Tsxtract/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"
