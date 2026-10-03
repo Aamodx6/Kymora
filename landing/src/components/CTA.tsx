@@ -5,7 +5,7 @@ export const CTA: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract');
+      await navigator.clipboard.writeText('pip install tsxtract-rs');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -43,7 +43,7 @@ export const CTA: React.FC = () => {
             <div className="mx-auto mb-8 flex max-w-md items-center justify-between rounded-lg border border-borderLine bg-canvas px-4 py-3 font-mono text-sm text-ink shadow-inner">
               <div className="flex items-center gap-2">
                 <span className="text-muted select-none">$</span>
-                <span className="font-semibold">pip install tsxtract</span>
+                <span className="font-semibold">pip install tsxtract-rs</span>
               </div>
               <button
                 type="button"

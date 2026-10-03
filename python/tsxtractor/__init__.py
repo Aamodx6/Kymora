@@ -75,7 +75,7 @@ def extract_features_df(
 
     Requires pandas, which is an optional extra::
 
-        pip install "tsxtractor[pandas]"
+        pip install "tsxtract-rs[pandas]"
 
     Args:
         X: 2D float64 array of shape ``(n_series, length)``, or a sequence of 1D
@@ -93,8 +93,8 @@ def extract_features_df(
         import pandas as pd
     except ImportError as exc:  # pragma: no cover - depends on environment
         raise ImportError(
-            "extract_features_df requires pandas, which tsxtractor does not "
-            'install by default. Install it with: pip install "tsxtractor[pandas]"'
+            "extract_features_df requires pandas, which tsxtract-rs does not "
+            'install by default. Install it with: pip install "tsxtract-rs[pandas]"'
         ) from exc
 
     values: Any = extract_features(X)

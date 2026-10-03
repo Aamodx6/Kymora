@@ -35,12 +35,12 @@ By the end of this guide you will be able to:
 
 You need Tsxtract plus the optional data-science stack used below:
 
-- **Tsxtract 0.3.0:** `pip install "tsxtractor[pandas]"` for the core plus DataFrame support.
+- **Tsxtract 0.3.2:** `pip install "tsxtract-rs[pandas]"` for the core plus DataFrame support.
 - **scikit-learn:** `pip install scikit-learn` for the classifier demonstration.
 - **PyArrow (optional):** `pip install pyarrow` if you want the Parquet save path.
 
 ```bash
-pip install "tsxtractor[pandas]" scikit-learn pyarrow
+pip install "tsxtract-rs[pandas]" scikit-learn pyarrow
 ```
 
 ## Steps

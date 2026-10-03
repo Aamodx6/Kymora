@@ -8,7 +8,7 @@ buffers, releases the GIL, and parallelises across the *series* dimension with
 [rayon](https://github.com/rayon-rs/rayon).
 
 ```bash
-pip install tsxtractor
+pip install tsxtract-rs
 ```
 
 ```python

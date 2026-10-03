@@ -30,7 +30,7 @@ df = tsxtractor.extract_features_df(X)
 df.columns.tolist()[:3]     # ['mean', 'std', 'var']
 ```
 
-Requires pandas (`pip install "tsxtractor[pandas]"`); it is not a hard
+Requires pandas (`pip install "tsxtract-rs[pandas]"`); it is not a hard
 dependency of the library.
 
 ## Series of different lengths

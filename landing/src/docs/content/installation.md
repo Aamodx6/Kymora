@@ -116,16 +116,16 @@ cargo test --no-default-features
 Move to the latest published release with your usual manager:
 
 ```bash tab="pip"
-pip install --upgrade tsxtractor
+pip install --upgrade tsxtract-rs
 ```
 
 ```bash tab="uv"
-uv lock --upgrade-package tsxtractor
+uv lock --upgrade-package tsxtract-rs
 uv sync
 ```
 
 ```bash tab="conda"
-conda update -c conda-forge tsxtractor
+conda update -c conda-forge tsxtract-rs
 ```
 
 ## Uninstall
@@ -133,22 +133,22 @@ conda update -c conda-forge tsxtractor
 Remove the library cleanly when switching environments:
 
 ```bash tab="pip"
-pip uninstall -y tsxtractor
+pip uninstall -y tsxtract-rs
 ```
 
 ```bash tab="uv"
-uv remove tsxtractor
+uv remove tsxtract-rs
 ```
 
 ```bash tab="conda"
-conda remove tsxtractor
+conda remove tsxtract-rs
 ```
 
 ## Troubleshooting
 
 ### Wheel not found during install
 
-- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtractor`.
+- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract-rs`.
 - **Cause:** Python older than 3.10 or an unsupported architecture such as 32-bit x86.
 - **Resolution:** check `python --version`, then recreate the environment on Python 3.10+.
 
@@ -174,7 +174,7 @@ conda remove tsxtractor
 
 - **Symptom:** `ImportError: DLL load failed` on Windows or `undefined symbol` on Linux.
 - **Cause:** stale virtual environment paths or an outdated system C runtime.
-- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtractor` plus `numpy>=1.24`.
+- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract-rs` plus `numpy>=1.24`.
 
 ### Proxy and corporate firewall timeouts
 
@@ -183,11 +183,11 @@ conda remove tsxtractor
 - **Resolution:** pass your proxy and certificate bundle explicitly during install.
 
 ```bash
-pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtractor
+pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract-rs
 ```
 
 ```text
-Successfully installed tsxtractor-0.3.0
+Successfully installed tsxtract-rs-0.3.2
 ```
 
 ### Contiguous and dtype errors at call time

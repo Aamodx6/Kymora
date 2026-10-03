@@ -43,7 +43,7 @@ You need only the core package, plus a mental model of two terms:
 - **Rolling window:** a fixed-length slice that advances by `stride` samples across one long series.
 
 ```bash
-pip install tsxtractor
+pip install tsxtract-rs
 ```
 
 ## Steps

@@ -1,7 +1,7 @@
 # Install
 
 ```bash
-pip install tsxtractor
+pip install tsxtract-rs
 ```
 
 That is the whole story on Linux (x86_64, aarch64), macOS (Intel and Apple
@@ -21,7 +21,7 @@ The only required runtime dependency is numpy (>= 1.24).
 | `docs` | mkdocs, mkdocs-material | building this site |
 
 ```bash
-pip install "tsxtractor[pandas]"
+pip install "tsxtract-rs[pandas]"
 ```
 
 ## Building from source

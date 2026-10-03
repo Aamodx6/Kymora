@@ -40,7 +40,7 @@ You need NumPy plus scikit-learn for the ranking step, and one definition:
 - **Variance filter:** dropping columns whose values barely vary across rows, since constants cannot discriminate classes.
 
 ```bash
-pip install "tsxtractor[pandas]" scikit-learn
+pip install "tsxtract-rs[pandas]" scikit-learn
 ```
 
 ## Steps
