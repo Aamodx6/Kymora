@@ -20,9 +20,15 @@ def test_version_is_exposed_and_pep440_shaped():
 
 
 def test_version_matches_installed_distribution_metadata():
-    from importlib.metadata import version
+    from importlib.metadata import PackageNotFoundError, version
 
-    assert tsxtractor.__version__ == version("tsxtractor")
+    for dist_name in ("tsxtract-rs", "tsxtractor"):
+        try:
+            assert tsxtractor.__version__ == version(dist_name)
+            return
+        except PackageNotFoundError:
+            continue
+    raise AssertionError("No distribution metadata found for tsxtract-rs or tsxtractor")
 
 
 def test_public_api_surface_is_exactly_what_is_documented():
@@ -153,3 +159,12 @@ def test_pandas_is_not_imported_by_importing_tsxtractor():
     ]
     assert not module_level, module_level
     assert importlib.util.find_spec("tsxtractor._core") is not None
+
+
+def test_tsxtract_alias_matches_tsxtractor():
+    import tsxtract
+
+    assert tsxtract.__version__ == tsxtractor.__version__
+    assert tsxtract.extract_features is tsxtractor.extract_features
+    assert tsxtract.feature_names is tsxtractor.feature_names
+

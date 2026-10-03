@@ -40,4 +40,5 @@ Changelog = "https://github.com/Aamodx6/Tsxtract/blob/main/CHANGELOG.md"
 [tool.maturin]
 python-source = "python"
 module-name = "tsxtractor._core"
+python-packages = ["tsxtractor", "tsxtract"]
 features = ["pyo3/extension-module"]

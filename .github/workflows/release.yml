@@ -130,12 +130,14 @@ jobs:
         run: |
           cd "$(mktemp -d)"
           python -c "
-          import numpy as np, tsxtract
+          import numpy as np, tsxtractor, tsxtract
           X = np.random.default_rng(0).standard_normal((64, 128))
-          f = tsxtract.extract_features(X)
-          assert f.shape == (64, len(tsxtract.feature_names())), f.shape
+          f = tsxtractor.extract_features(X)
+          assert f.shape == (64, len(tsxtractor.feature_names())), f.shape
           assert np.isfinite(f).all()
-          print('ok', tsxtract.__version__, f.shape)
+          f_alias = tsxtract.extract_features(X)
+          assert (f == f_alias).all()
+          print('ok', tsxtractor.__version__, f.shape)
           "
 
   publish:
