@@ -9,11 +9,7 @@ pub const SERIAL_THRESHOLD: usize = 8;
 pub const MIN_ROWS_PER_TASK: usize = 16;
 
 /// Extract features into pre-allocated flat slice in row-major order (f64) using FeaturePlan.
-pub fn extract_plan_into_slice(
-    rows: &[&[f64]],
-    plan: &FeaturePlan,
-    out_slice: &mut [f64],
-) {
+pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &mut [f64]) {
     let n_rows = rows.len();
     if n_rows == 0 {
         return;
@@ -145,7 +141,6 @@ pub fn extract_windows_plan_into_slice(
             );
     }
 }
-
 
 /// Extract features from CSR ragged arrays (values: 1D, offsets: 1D int64).
 pub fn extract_ragged_csr(

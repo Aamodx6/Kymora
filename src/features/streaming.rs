@@ -262,15 +262,27 @@ impl StreamingExtractor {
         let var = m2 / w;
         let std = var.sqrt();
 
-        let skewness = if std == 0.0 { f64::NAN } else { (m3 / w) / (var * std) };
-        let kurtosis = if std == 0.0 { f64::NAN } else { (m4 / w) / (var * var) - 3.0 };
+        let skewness = if std == 0.0 {
+            f64::NAN
+        } else {
+            (m3 / w) / (var * std)
+        };
+        let kurtosis = if std == 0.0 {
+            f64::NAN
+        } else {
+            (m4 / w) / (var * var) - 3.0
+        };
 
         let abs_energy = sum_sq;
         let rms = (abs_energy / w).sqrt();
         let mean_abs_change = self.abs_diff_sum / (w - 1.0);
         let last_idx = (self.head + self.window_size - 1) % self.window_size;
         let mean_change = (self.buffer[last_idx] - self.buffer[self.head]) / (w - 1.0);
-        let cid_ce = if std == 0.0 { 0.0 } else { self.sq_diff_sum.sqrt() / std };
+        let cid_ce = if std == 0.0 {
+            0.0
+        } else {
+            self.sq_diff_sum.sqrt() / std
+        };
         let zero_crossings = self.zero_crossings as f64;
 
         let t_mean = (w - 1.0) * 0.5;

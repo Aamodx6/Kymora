@@ -95,7 +95,7 @@ impl FeatureDef {
             }
             FeatureCompute::Decile { idx } => inter.deciles[idx],
             FeatureCompute::Pacf { lag } => {
-                if lag >= 1 && lag <= 9 {
+                if (1..=9).contains(&lag) {
                     inter.pacf_9[lag - 1]
                 } else {
                     f64::NAN
@@ -577,7 +577,13 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         Needs::PASS1.union(Needs::PASS2),
         CostClass::A,
         EXT_ALL,
-        FeatureCompute::Fn(|_x, inter| if inter.p2.var > inter.p2.std { 1.0 } else { 0.0 }),
+        FeatureCompute::Fn(|_x, inter| {
+            if inter.p2.var > inter.p2.std {
+                1.0
+            } else {
+                0.0
+            }
+        }),
     );
     add_feat(
         &mut list,
@@ -603,7 +609,11 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         EXT_ALL,
         FeatureCompute::Fn(|x, inter| {
             let n = x.len();
-            if n == 0 { f64::NAN } else { inter.p1.first_max_idx as f64 / n as f64 }
+            if n == 0 {
+                f64::NAN
+            } else {
+                inter.p1.first_max_idx as f64 / n as f64
+            }
         }),
     );
     add_feat(
@@ -615,7 +625,11 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         EXT_ALL,
         FeatureCompute::Fn(|x, inter| {
             let n = x.len();
-            if n == 0 { f64::NAN } else { inter.p1.first_min_idx as f64 / n as f64 }
+            if n == 0 {
+                f64::NAN
+            } else {
+                inter.p1.first_min_idx as f64 / n as f64
+            }
         }),
     );
     add_feat(
@@ -627,7 +641,11 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         EXT_ALL,
         FeatureCompute::Fn(|x, inter| {
             let n = x.len();
-            if n == 0 { f64::NAN } else { inter.p1.last_max_idx as f64 / n as f64 }
+            if n == 0 {
+                f64::NAN
+            } else {
+                inter.p1.last_max_idx as f64 / n as f64
+            }
         }),
     );
     add_feat(
@@ -639,7 +657,11 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         EXT_ALL,
         FeatureCompute::Fn(|x, inter| {
             let n = x.len();
-            if n == 0 { f64::NAN } else { inter.p1.last_min_idx as f64 / n as f64 }
+            if n == 0 {
+                f64::NAN
+            } else {
+                inter.p1.last_min_idx as f64 / n as f64
+            }
         }),
     );
     add_feat(
@@ -662,24 +684,120 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
     );
 
     // C3 Nonlinear
-    add_feat(&mut list, "c3__lag_1", &["tsfresh__c3__lag_1"], Needs::C3, CostClass::A, EXT_ALL, FeatureCompute::C3 { lag: 1 });
-    add_feat(&mut list, "c3__lag_2", &["tsfresh__c3__lag_2"], Needs::C3, CostClass::A, EXT_ALL, FeatureCompute::C3 { lag: 2 });
-    add_feat(&mut list, "c3__lag_3", &["tsfresh__c3__lag_3"], Needs::C3, CostClass::A, EXT_ALL, FeatureCompute::C3 { lag: 3 });
+    add_feat(
+        &mut list,
+        "c3__lag_1",
+        &["tsfresh__c3__lag_1"],
+        Needs::C3,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::C3 { lag: 1 },
+    );
+    add_feat(
+        &mut list,
+        "c3__lag_2",
+        &["tsfresh__c3__lag_2"],
+        Needs::C3,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::C3 { lag: 2 },
+    );
+    add_feat(
+        &mut list,
+        "c3__lag_3",
+        &["tsfresh__c3__lag_3"],
+        Needs::C3,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::C3 { lag: 3 },
+    );
 
     // Time Reversal Asymmetry
-    add_feat(&mut list, "time_reversal_asymmetry_statistic__lag_1", &["tsfresh__time_reversal_asymmetry_statistic__lag_1"], Needs::NONLIN, CostClass::A, EXT_ALL, FeatureCompute::TimeRev { lag: 1 });
-    add_feat(&mut list, "time_reversal_asymmetry_statistic__lag_2", &["tsfresh__time_reversal_asymmetry_statistic__lag_2"], Needs::NONLIN, CostClass::A, EXT_ALL, FeatureCompute::TimeRev { lag: 2 });
-    add_feat(&mut list, "time_reversal_asymmetry_statistic__lag_3", &["tsfresh__time_reversal_asymmetry_statistic__lag_3"], Needs::NONLIN, CostClass::A, EXT_ALL, FeatureCompute::TimeRev { lag: 3 });
+    add_feat(
+        &mut list,
+        "time_reversal_asymmetry_statistic__lag_1",
+        &["tsfresh__time_reversal_asymmetry_statistic__lag_1"],
+        Needs::NONLIN,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::TimeRev { lag: 1 },
+    );
+    add_feat(
+        &mut list,
+        "time_reversal_asymmetry_statistic__lag_2",
+        &["tsfresh__time_reversal_asymmetry_statistic__lag_2"],
+        Needs::NONLIN,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::TimeRev { lag: 2 },
+    );
+    add_feat(
+        &mut list,
+        "time_reversal_asymmetry_statistic__lag_3",
+        &["tsfresh__time_reversal_asymmetry_statistic__lag_3"],
+        Needs::NONLIN,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::TimeRev { lag: 3 },
+    );
 
     // Crossings extra
-    add_feat(&mut list, "number_crossing_m__m_-1", &["tsfresh__number_crossing_m__m_-1"], Needs::CROSSINGS, CostClass::A, EXT_ALL, FeatureCompute::CrossingM { m: -1.0 });
-    add_feat(&mut list, "number_crossing_m__m_1", &["tsfresh__number_crossing_m__m_1"], Needs::CROSSINGS, CostClass::A, EXT_ALL, FeatureCompute::CrossingM { m: 1.0 });
+    add_feat(
+        &mut list,
+        "number_crossing_m__m_-1",
+        &["tsfresh__number_crossing_m__m_-1"],
+        Needs::CROSSINGS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::CrossingM { m: -1.0 },
+    );
+    add_feat(
+        &mut list,
+        "number_crossing_m__m_1",
+        &["tsfresh__number_crossing_m__m_1"],
+        Needs::CROSSINGS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::CrossingM { m: 1.0 },
+    );
 
     // Peaks extra
-    add_feat(&mut list, "number_peaks__n_1", &["tsfresh__number_peaks__n_1"], Needs::PEAKS, CostClass::A, EXT_ALL, FeatureCompute::Peaks { n: 1 });
-    add_feat(&mut list, "number_peaks__n_5", &["tsfresh__number_peaks__n_5"], Needs::PEAKS, CostClass::A, EXT_ALL, FeatureCompute::Peaks { n: 5 });
-    add_feat(&mut list, "number_peaks__n_10", &["tsfresh__number_peaks__n_10"], Needs::PEAKS, CostClass::A, EXT_ALL, FeatureCompute::Peaks { n: 10 });
-    add_feat(&mut list, "number_peaks__n_50", &["tsfresh__number_peaks__n_50"], Needs::PEAKS, CostClass::A, EXT_ALL, FeatureCompute::Peaks { n: 50 });
+    add_feat(
+        &mut list,
+        "number_peaks__n_1",
+        &["tsfresh__number_peaks__n_1"],
+        Needs::PEAKS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::Peaks { n: 1 },
+    );
+    add_feat(
+        &mut list,
+        "number_peaks__n_5",
+        &["tsfresh__number_peaks__n_5"],
+        Needs::PEAKS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::Peaks { n: 5 },
+    );
+    add_feat(
+        &mut list,
+        "number_peaks__n_10",
+        &["tsfresh__number_peaks__n_10"],
+        Needs::PEAKS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::Peaks { n: 10 },
+    );
+    add_feat(
+        &mut list,
+        "number_peaks__n_50",
+        &["tsfresh__number_peaks__n_50"],
+        Needs::PEAKS,
+        CostClass::A,
+        EXT_ALL,
+        FeatureCompute::Peaks { n: 50 },
+    );
 
     // Linear trend extra
     add_feat(
@@ -702,68 +820,224 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
     );
 
     // Autocorrelation extra lags
-    add_feat(&mut list, "autocorrelation__lag_0", &["tsfresh__autocorrelation__lag_0"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 0 });
-    add_feat(&mut list, "autocorrelation__lag_3", &["tsfresh__autocorrelation__lag_3"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 3 });
-    add_feat(&mut list, "autocorrelation__lag_4", &["tsfresh__autocorrelation__lag_4"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 4 });
-    add_feat(&mut list, "autocorrelation__lag_6", &["tsfresh__autocorrelation__lag_6"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 6 });
-    add_feat(&mut list, "autocorrelation__lag_7", &["tsfresh__autocorrelation__lag_7"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 7 });
-    add_feat(&mut list, "autocorrelation__lag_8", &["tsfresh__autocorrelation__lag_8"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 8 });
-    add_feat(&mut list, "autocorrelation__lag_9", &["tsfresh__autocorrelation__lag_9"], Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Acf10 { lag: 9 });
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_0",
+        &["tsfresh__autocorrelation__lag_0"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 0 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_3",
+        &["tsfresh__autocorrelation__lag_3"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 3 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_4",
+        &["tsfresh__autocorrelation__lag_4"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 4 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_6",
+        &["tsfresh__autocorrelation__lag_6"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 6 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_7",
+        &["tsfresh__autocorrelation__lag_7"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 7 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_8",
+        &["tsfresh__autocorrelation__lag_8"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 8 },
+    );
+    add_feat(
+        &mut list,
+        "autocorrelation__lag_9",
+        &["tsfresh__autocorrelation__lag_9"],
+        Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+        CostClass::D,
+        EXT_ALL,
+        FeatureCompute::Acf10 { lag: 9 },
+    );
 
     // PACF lags 1..9
     for lag in 1..=9 {
-        let name: &'static str = Box::leak(format!("partial_autocorrelation__lag_{lag}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__partial_autocorrelation__lag_{lag}").into_boxed_str());
+        let name: &'static str =
+            Box::leak(format!("partial_autocorrelation__lag_{lag}").into_boxed_str());
+        let tsfresh_alias: &'static str =
+            Box::leak(format!("tsfresh__partial_autocorrelation__lag_{lag}").into_boxed_str());
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::PASS1.union(Needs::PASS2).union(Needs::ACF), CostClass::D, EXT_ALL, FeatureCompute::Pacf { lag });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::PASS1.union(Needs::PASS2).union(Needs::ACF),
+            CostClass::D,
+            EXT_ALL,
+            FeatureCompute::Pacf { lag },
+        );
     }
 
     // FFT Aggregated
-    add_feat(&mut list, "fft_aggregated__aggtype_\"centroid\"", &["tsfresh__fft_aggregated__aggtype_\"centroid\""], Needs::PASS1.union(Needs::SPECTRUM), CostClass::C, EXT_ALL, FeatureCompute::Fn(|_x, inter| inter.fft_agg.centroid));
-    add_feat(&mut list, "fft_aggregated__aggtype_\"variance\"", &["tsfresh__fft_aggregated__aggtype_\"variance\""], Needs::PASS1.union(Needs::SPECTRUM), CostClass::C, EXT_ALL, FeatureCompute::Fn(|_x, inter| inter.fft_agg.variance));
-    add_feat(&mut list, "fft_aggregated__aggtype_\"skew\"", &["tsfresh__fft_aggregated__aggtype_\"skew\""], Needs::PASS1.union(Needs::SPECTRUM), CostClass::C, EXT_ALL, FeatureCompute::Fn(|_x, inter| inter.fft_agg.skew));
-    add_feat(&mut list, "fft_aggregated__aggtype_\"kurtosis\"", &["tsfresh__fft_aggregated__aggtype_\"kurtosis\""], Needs::PASS1.union(Needs::SPECTRUM), CostClass::C, EXT_ALL, FeatureCompute::Fn(|_x, inter| inter.fft_agg.kurtosis));
+    add_feat(
+        &mut list,
+        "fft_aggregated__aggtype_\"centroid\"",
+        &["tsfresh__fft_aggregated__aggtype_\"centroid\""],
+        Needs::PASS1.union(Needs::SPECTRUM),
+        CostClass::C,
+        EXT_ALL,
+        FeatureCompute::Fn(|_x, inter| inter.fft_agg.centroid),
+    );
+    add_feat(
+        &mut list,
+        "fft_aggregated__aggtype_\"variance\"",
+        &["tsfresh__fft_aggregated__aggtype_\"variance\""],
+        Needs::PASS1.union(Needs::SPECTRUM),
+        CostClass::C,
+        EXT_ALL,
+        FeatureCompute::Fn(|_x, inter| inter.fft_agg.variance),
+    );
+    add_feat(
+        &mut list,
+        "fft_aggregated__aggtype_\"skew\"",
+        &["tsfresh__fft_aggregated__aggtype_\"skew\""],
+        Needs::PASS1.union(Needs::SPECTRUM),
+        CostClass::C,
+        EXT_ALL,
+        FeatureCompute::Fn(|_x, inter| inter.fft_agg.skew),
+    );
+    add_feat(
+        &mut list,
+        "fft_aggregated__aggtype_\"kurtosis\"",
+        &["tsfresh__fft_aggregated__aggtype_\"kurtosis\""],
+        Needs::PASS1.union(Needs::SPECTRUM),
+        CostClass::C,
+        EXT_ALL,
+        FeatureCompute::Fn(|_x, inter| inter.fft_agg.kurtosis),
+    );
 
     // Deciles 0.2, 0.3, 0.4, 0.6, 0.7, 0.8
-    for &(idx, q_str) in &[(1, "0.2"), (2, "0.3"), (3, "0.4"), (5, "0.6"), (6, "0.7"), (7, "0.8")] {
+    for &(idx, q_str) in &[
+        (1, "0.2"),
+        (2, "0.3"),
+        (3, "0.4"),
+        (5, "0.6"),
+        (6, "0.7"),
+        (7, "0.8"),
+    ] {
         let name: &'static str = Box::leak(format!("quantile__q_{q_str}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__quantile__q_{q_str}").into_boxed_str());
+        let tsfresh_alias: &'static str =
+            Box::leak(format!("tsfresh__quantile__q_{q_str}").into_boxed_str());
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::SORTED, CostClass::B, EXT_ALL, FeatureCompute::Decile { idx });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::SORTED,
+            CostClass::B,
+            EXT_ALL,
+            FeatureCompute::Decile { idx },
+        );
     }
 
     // Ratio beyond r sigma
     for &r in &[0.5f64, 1.0, 1.5, 2.0, 2.5, 3.0] {
         let name: &'static str = Box::leak(format!("ratio_beyond_r_sigma__r_{r}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__ratio_beyond_r_sigma__r_{r}").into_boxed_str());
+        let tsfresh_alias: &'static str =
+            Box::leak(format!("tsfresh__ratio_beyond_r_sigma__r_{r}").into_boxed_str());
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::PASS1.union(Needs::PASS2).union(Needs::CENTERED), CostClass::A, EXT_ALL, FeatureCompute::RatioBeyondR { r });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::PASS1.union(Needs::PASS2).union(Needs::CENTERED),
+            CostClass::A,
+            EXT_ALL,
+            FeatureCompute::RatioBeyondR { r },
+        );
     }
 
     // Large standard deviation
     for r_step in 1..=19 {
         let r = (r_step as f64) * 0.05;
-        let name: &'static str = Box::leak(format!("large_standard_deviation__r_{r:.2}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__large_standard_deviation__r_{r:.2}").into_boxed_str());
+        let name: &'static str =
+            Box::leak(format!("large_standard_deviation__r_{r:.2}").into_boxed_str());
+        let tsfresh_alias: &'static str =
+            Box::leak(format!("tsfresh__large_standard_deviation__r_{r:.2}").into_boxed_str());
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::PASS1.union(Needs::PASS2), CostClass::A, EXT_ALL, FeatureCompute::LargeStd { r });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::PASS1.union(Needs::PASS2),
+            CostClass::A,
+            EXT_ALL,
+            FeatureCompute::LargeStd { r },
+        );
     }
 
     // Symmetry looking
     for r_step in 1..=20 {
         let r = (r_step as f64) * 0.05;
         let name: &'static str = Box::leak(format!("symmetry_looking__r_{r:.2}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__symmetry_looking__r_{r:.2}").into_boxed_str());
+        let tsfresh_alias: &'static str =
+            Box::leak(format!("tsfresh__symmetry_looking__r_{r:.2}").into_boxed_str());
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::PASS1.union(Needs::SORTED), CostClass::B, EXT_ALL, FeatureCompute::Symmetry { r });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::PASS1.union(Needs::SORTED),
+            CostClass::B,
+            EXT_ALL,
+            FeatureCompute::Symmetry { r },
+        );
     }
 
     // Energy ratio by chunks (10 segments)
     for seg in 0..10 {
-        let name: &'static str = Box::leak(format!("energy_ratio_by_chunks__num_segments_10__segment_focus_{seg}").into_boxed_str());
-        let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__energy_ratio_by_chunks__num_segments_10__segment_focus_{seg}").into_boxed_str());
+        let name: &'static str = Box::leak(
+            format!("energy_ratio_by_chunks__num_segments_10__segment_focus_{seg}")
+                .into_boxed_str(),
+        );
+        let tsfresh_alias: &'static str = Box::leak(
+            format!("tsfresh__energy_ratio_by_chunks__num_segments_10__segment_focus_{seg}")
+                .into_boxed_str(),
+        );
         let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
-        add_feat(&mut list, name, aliases, Needs::PASS1, CostClass::A, EXT_ALL, FeatureCompute::EnergyChunk { seg, num: 10 });
+        add_feat(
+            &mut list,
+            name,
+            aliases,
+            Needs::PASS1,
+            CostClass::A,
+            EXT_ALL,
+            FeatureCompute::EnergyChunk { seg, num: 10 },
+        );
     }
 
     // =========================================================================
@@ -771,9 +1045,15 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
     // =========================================================================
     for k in 0..100 {
         for &(attr_idx, attr_str) in &[(0, "real"), (1, "imag"), (2, "abs"), (3, "angle")] {
-            let name: &'static str = Box::leak(format!("fft_coefficient__coeff_{k}__attr_\"{attr_str}\"").into_boxed_str());
-            let tsfresh_alias: &'static str = Box::leak(format!("tsfresh__fft_coefficient__coeff_{k}__attr_\"{attr_str}\"").into_boxed_str());
-            let aliases: &'static [&'static str] = Box::leak(vec![tsfresh_alias].into_boxed_slice());
+            let name: &'static str = Box::leak(
+                format!("fft_coefficient__coeff_{k}__attr_\"{attr_str}\"").into_boxed_str(),
+            );
+            let tsfresh_alias: &'static str = Box::leak(
+                format!("tsfresh__fft_coefficient__coeff_{k}__attr_\"{attr_str}\"")
+                    .into_boxed_str(),
+            );
+            let aliases: &'static [&'static str] =
+                Box::leak(vec![tsfresh_alias].into_boxed_slice());
             add_feat(
                 &mut list,
                 name,

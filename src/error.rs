@@ -80,7 +80,10 @@ impl fmt::Display for TsxError {
                 "internal error: cannot shape {len} values as ({rows}, {cols})"
             ),
             TsxError::UnknownFeature { name } => {
-                write!(f, "unknown feature '{name}'; check tsxtractor.feature_names()")
+                write!(
+                    f,
+                    "unknown feature '{name}'; check tsxtractor.feature_names()"
+                )
             }
             TsxError::UnknownProfile { profile } => {
                 write!(f, "unknown profile '{profile}'; valid profiles: 'core33', 'minimal', 'extended', 'full'")

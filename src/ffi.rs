@@ -268,6 +268,7 @@ pub fn extract_features_ragged<'py>(
 /// sliding_features(x, window, stride=1, profile="core33", features=None, n_jobs=None, out=None) -> (n_windows, n_features) float64 array.
 #[pyfunction]
 #[pyo3(signature = (x, window, stride = 1, profile = None, features = None, n_jobs = None, out = None))]
+#[allow(clippy::too_many_arguments)]
 pub fn sliding_features<'py>(
     py: Python<'py>,
     x: PyReadonlyArray1<'py, f64>,
@@ -342,8 +343,9 @@ pub fn list_profiles() -> HashMap<&'static str, usize> {
 /// describe_feature(name) -> dict with description, cost, aliases, and needs.
 #[pyfunction]
 pub fn describe_feature(name: &str) -> PyResult<HashMap<&'static str, String>> {
-    let idx = registry::find_feature(name)
-        .ok_or_else(|| TsxError::UnknownFeature { name: name.to_string() })?;
+    let idx = registry::find_feature(name).ok_or_else(|| TsxError::UnknownFeature {
+        name: name.to_string(),
+    })?;
     let def = &registry::FEATURES[idx];
     let mut map = HashMap::new();
     map.insert("name", def.name.to_string());

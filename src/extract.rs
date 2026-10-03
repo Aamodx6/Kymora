@@ -12,6 +12,7 @@ use rayon::prelude::*;
 
 /// Number of output columns.
 #[inline]
+#[allow(dead_code)]
 pub fn n_features() -> usize {
     features::NAMES.len()
 }
@@ -36,6 +37,7 @@ pub fn validate_batch(rows: &[&[f64]]) -> Result<(), TsxError> {
 ///
 /// Callers must have validated with [`validate_batch`] first. The GIL is
 /// expected to be released by the caller around this call.
+#[allow(dead_code)]
 pub fn extract_rows(rows: &[&[f64]]) -> Vec<f64> {
     let nf = n_features();
     let mut out = vec![0.0f64; rows.len() * nf];
@@ -46,6 +48,7 @@ pub fn extract_rows(rows: &[&[f64]]) -> Vec<f64> {
 }
 
 /// Shape a flat feature buffer into `(nrows, n_features)` without panicking.
+#[allow(dead_code)]
 pub fn build_matrix(flat: Vec<f64>, nrows: usize) -> Result<Array2<f64>, TsxError> {
     let cols = n_features();
     let len = flat.len();
@@ -93,6 +96,7 @@ pub fn window_geometry(
 /// Feature matrix over rolling windows of one series.
 ///
 /// Windows are borrowed slices of the caller's buffer — no data is copied.
+#[allow(dead_code)]
 pub fn extract_windows(x: &[f64], window: usize, stride: usize) -> Vec<f64> {
     let rows: Vec<&[f64]> = x.windows(window).step_by(stride).collect();
     extract_rows(&rows)

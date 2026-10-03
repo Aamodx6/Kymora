@@ -528,11 +528,7 @@ pub fn successive_differences(x: &[f64], std: f64) -> (f64, f64, f64, f64) {
 
     let mean_abs_change = abs_change / (nf - 1.0);
     let mean_change = (x[n - 1] - x[0]) / (nf - 1.0);
-    let cid_ce = if std == 0.0 {
-        0.0
-    } else {
-        scaled_sq.sqrt()
-    };
+    let cid_ce = if std == 0.0 { 0.0 } else { scaled_sq.sqrt() };
 
     let mean_second_derivative = if n < 3 {
         f64::NAN
@@ -572,16 +568,15 @@ pub fn successive_differences_f32(x: &[f32], std: f64) -> (f64, f64, f64, f64) {
 
     let mean_abs_change = abs_change / (nf - 1.0);
     let mean_change = (x[n - 1] - x[0]) as f64 / (nf - 1.0);
-    let cid_ce = if std == 0.0 {
-        0.0
-    } else {
-        scaled_sq.sqrt()
-    };
+    let cid_ce = if std == 0.0 { 0.0 } else { scaled_sq.sqrt() };
 
     let mean_second_derivative = if n < 3 {
         f64::NAN
     } else {
-        let s: f64 = x.windows(3).map(|w| (w[2] - 2.0 * w[1] + w[0]) as f64).sum();
+        let s: f64 = x
+            .windows(3)
+            .map(|w| (w[2] - 2.0 * w[1] + w[0]) as f64)
+            .sum();
         s / (2.0 * (nf - 2.0))
     };
 
@@ -793,7 +788,12 @@ pub fn ratio_beyond_r_sigma(centered: &[f64], std: f64, r: f64) -> f64 {
 
 /// Energy ratio of chunk `chunk_idx` of `num_chunks`.
 #[inline]
-pub fn energy_ratio_chunk(x: &[f64], total_energy: f64, chunk_idx: usize, num_chunks: usize) -> f64 {
+pub fn energy_ratio_chunk(
+    x: &[f64],
+    total_energy: f64,
+    chunk_idx: usize,
+    num_chunks: usize,
+) -> f64 {
     let n = x.len();
     if total_energy == 0.0 || n == 0 || chunk_idx >= num_chunks || num_chunks == 0 {
         return f64::NAN;
@@ -803,7 +803,10 @@ pub fn energy_ratio_chunk(x: &[f64], total_energy: f64, chunk_idx: usize, num_ch
     let (start, end) = if chunk_idx < r {
         (chunk_idx * (q + 1), (chunk_idx + 1) * (q + 1))
     } else {
-        (r * (q + 1) + (chunk_idx - r) * q, r * (q + 1) + (chunk_idx - r + 1) * q)
+        (
+            r * (q + 1) + (chunk_idx - r) * q,
+            r * (q + 1) + (chunk_idx - r + 1) * q,
+        )
     };
     if start >= end || start >= n {
         return 0.0;
@@ -814,4 +817,3 @@ pub fn energy_ratio_chunk(x: &[f64], total_energy: f64, chunk_idx: usize, num_ch
     }
     seg_energy / total_energy
 }
-

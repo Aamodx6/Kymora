@@ -147,4 +147,3 @@ pub fn deciles_from_sorted(sorted: &[f64]) -> [f64; 9] {
 pub fn has_duplicate_sorted(sorted: &[f64]) -> bool {
     sorted.windows(2).any(|w| w[0] == w[1])
 }
-

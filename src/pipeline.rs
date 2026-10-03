@@ -18,7 +18,9 @@ pub fn run_plan(x: &[f64], plan: &FeaturePlan, scratch: &mut Scratch, out: &mut 
     }
 
     // Fast path: if plan is the default core33, use direct fused kernel pipeline
-    if plan.indices.len() == CORE33_COUNT && plan.indices.iter().enumerate().all(|(i, &idx)| i == idx) {
+    if plan.indices.len() == CORE33_COUNT
+        && plan.indices.iter().enumerate().all(|(i, &idx)| i == idx)
+    {
         run_core33(x, scratch, out);
         return;
     }

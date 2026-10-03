@@ -1,8 +1,17 @@
 import numpy as np
 import pytest
 from scipy import stats
-import statsmodels.tsa.stattools as stattools
-from tsfresh.feature_extraction import feature_calculators as tsf_calc
+
+try:
+    import statsmodels.tsa.stattools as stattools
+except ImportError:
+    stattools = None
+
+try:
+    from tsfresh.feature_extraction import feature_calculators as tsf_calc
+except ImportError:
+    tsf_calc = None
+
 import tsxtractor
 
 
@@ -24,6 +33,8 @@ def test_phase4_profile_shapes():
 
 
 def test_reference_parity_c3_and_time_reversal():
+    if tsf_calc is None:
+        pytest.skip("tsfresh not installed")
     rng = np.random.default_rng(123)
     x = rng.standard_normal(100)
     X = x.reshape(1, -1)
@@ -42,6 +53,8 @@ def test_reference_parity_c3_and_time_reversal():
 
 
 def test_reference_parity_crossings_and_peaks():
+    if tsf_calc is None:
+        pytest.skip("tsfresh not installed")
     rng = np.random.default_rng(456)
     x = rng.standard_normal(120)
     X = x.reshape(1, -1)
@@ -60,6 +73,8 @@ def test_reference_parity_crossings_and_peaks():
 
 
 def test_reference_parity_autocorrelation_and_pacf():
+    if tsf_calc is None or stattools is None:
+        pytest.skip("tsfresh and/or statsmodels not installed")
     rng = np.random.default_rng(789)
     x = rng.standard_normal(100)
     X = x.reshape(1, -1)
@@ -114,18 +129,19 @@ def test_reference_parity_fft_coefficients_and_aggregated():
         np.testing.assert_allclose(our_vals[3], np.angle(rfft_x[k], deg=True), rtol=1e-12, atol=1e-12)
 
     # FFT Aggregated
-    agg_names = [
-        'fft_aggregated__aggtype_"centroid"',
-        'fft_aggregated__aggtype_"variance"',
-        'fft_aggregated__aggtype_"skew"',
-        'fft_aggregated__aggtype_"kurtosis"',
-    ]
-    our_agg = tsxtractor.extract_features(X, features=agg_names)[0]
-    tsf_agg = dict(tsf_calc.fft_aggregated(x, [{"aggtype": a} for a in ["centroid", "variance", "skew", "kurtosis"]]))
-    np.testing.assert_allclose(our_agg[0], tsf_agg['aggtype_"centroid"'], rtol=1e-10, atol=1e-10)
-    np.testing.assert_allclose(our_agg[1], tsf_agg['aggtype_"variance"'], rtol=1e-10, atol=1e-10)
-    np.testing.assert_allclose(our_agg[2], tsf_agg['aggtype_"skew"'], rtol=1e-10, atol=1e-10)
-    np.testing.assert_allclose(our_agg[3], tsf_agg['aggtype_"kurtosis"'], rtol=1e-10, atol=1e-10)
+    if tsf_calc is not None:
+        agg_names = [
+            'fft_aggregated__aggtype_"centroid"',
+            'fft_aggregated__aggtype_"variance"',
+            'fft_aggregated__aggtype_"skew"',
+            'fft_aggregated__aggtype_"kurtosis"',
+        ]
+        our_agg = tsxtractor.extract_features(X, features=agg_names)[0]
+        tsf_agg = dict(tsf_calc.fft_aggregated(x, [{"aggtype": a} for a in ["centroid", "variance", "skew", "kurtosis"]]))
+        np.testing.assert_allclose(our_agg[0], tsf_agg['aggtype_"centroid"'], rtol=1e-10, atol=1e-10)
+        np.testing.assert_allclose(our_agg[1], tsf_agg['aggtype_"variance"'], rtol=1e-10, atol=1e-10)
+        np.testing.assert_allclose(our_agg[2], tsf_agg['aggtype_"skew"'], rtol=1e-10, atol=1e-10)
+        np.testing.assert_allclose(our_agg[3], tsf_agg['aggtype_"kurtosis"'], rtol=1e-10, atol=1e-10)
 
 
 def test_reference_parity_distribution_and_change_stats():

@@ -132,13 +132,9 @@ impl<'a> Intermediates<'a> {
         }
 
         // Pass 2 Fused + Centered buffer
-        let p2 = if needs.intersects(
-            Needs::CENTERED
-                | Needs::PASS2
-                | Needs::ACF
-                | Needs::TREND
-                | Needs::PEAKS,
-        ) {
+        let p2 = if needs
+            .intersects(Needs::CENTERED | Needs::PASS2 | Needs::ACF | Needs::TREND | Needs::PEAKS)
+        {
             kernels::reduce::pass2_fused(x, p1.mean, p1.constant, &mut scratch.centered)
         } else {
             kernels::reduce::FusedPass2Result {
@@ -176,7 +172,12 @@ impl<'a> Intermediates<'a> {
         let (diffs, cid_ce_raw, abs_sum_changes) = if needs.contains(Needs::DIFFS) {
             let d = kernels::reduce::diffs_full(x, p2.std);
             (
-                (d.mean_abs_change, d.mean_change, d.cid_ce_norm, d.mean_second_derivative),
+                (
+                    d.mean_abs_change,
+                    d.mean_change,
+                    d.cid_ce_norm,
+                    d.mean_second_derivative,
+                ),
                 d.cid_ce_raw,
                 d.abs_sum_changes,
             )
@@ -301,4 +302,3 @@ impl<'a> Intermediates<'a> {
         }
     }
 }
-

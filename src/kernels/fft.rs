@@ -22,7 +22,9 @@ pub fn spectral_features(x: &[f64], constant: bool, scratch: &mut Scratch) -> (f
     scratch.fft_out.resize(complex_len, Complex::new(0.0, 0.0));
 
     if scratch.fft_scratch.len() < scratch_len {
-        scratch.fft_scratch.resize(scratch_len, Complex::new(0.0, 0.0));
+        scratch
+            .fft_scratch
+            .resize(scratch_len, Complex::new(0.0, 0.0));
     }
 
     if fft
@@ -103,7 +105,9 @@ pub fn spectral_features_f32(x: &[f32], constant: bool, scratch: &mut Scratch) -
     scratch.fft_out.resize(complex_len, Complex::new(0.0, 0.0));
 
     if scratch.fft_scratch.len() < scratch_len {
-        scratch.fft_scratch.resize(scratch_len, Complex::new(0.0, 0.0));
+        scratch
+            .fft_scratch
+            .resize(scratch_len, Complex::new(0.0, 0.0));
     }
 
     if fft
@@ -228,7 +232,8 @@ pub fn fft_aggregated(fft_out: &[Complex<f64>]) -> FftAggregatedResult {
     let var_pow_1_5 = variance.powf(1.5);
     let var_pow_2 = variance * variance;
     let skew = (m3 - 3.0 * centroid * variance - centroid.powi(3)) / var_pow_1_5;
-    let kurtosis = (m4 - 4.0 * centroid * m3 + 6.0 * m2 * centroid * centroid - 3.0 * centroid) / var_pow_2;
+    let kurtosis =
+        (m4 - 4.0 * centroid * m3 + 6.0 * m2 * centroid * centroid - 3.0 * centroid) / var_pow_2;
 
     FftAggregatedResult {
         centroid,
@@ -253,4 +258,3 @@ pub fn fft_coeff(fft_out: &[Complex<f64>], k: usize, attr: usize) -> f64 {
         _ => f64::NAN,
     }
 }
-
