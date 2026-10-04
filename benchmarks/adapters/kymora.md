@@ -1,7 +1,7 @@
-# Tsxtract Adapter Tuning Notes
+# Kymora Adapter Tuning Notes
 
 ## Library Overview
-- **Name:** Tsxtract (`tsxtract._core`)
+- **Name:** Kymora (`kymora._core`)
 - **Version:** 0.5.0
 - **Implementation:** Rust native extension with PyO3 bindings and Rayon/SpinPool execution.
 

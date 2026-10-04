@@ -32,7 +32,7 @@ import numpy as np
 # exactly one definition of ground truth in the repo.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tests"))
 
-import tsxtract  # noqa: E402
+import kymora  # noqa: E402
 from test_features import SERIES, reference  # noqa: E402
 
 ATOL = 1e-10
@@ -41,7 +41,7 @@ RTOL = 1e-9
 
 def collect() -> dict[str, dict[str, object]]:
     """Per-feature max error and NaN-mismatch tally across every sample series."""
-    names = tsxtract.feature_names()
+    names = kymora.feature_names()
     stats: dict[str, dict[str, object]] = {
         name: {
             "max_abs_err": 0.0,
@@ -54,7 +54,7 @@ def collect() -> dict[str, dict[str, object]]:
     }
 
     for label, x in SERIES.items():
-        got = dict(zip(names, tsxtract.extract_features([np.asarray(x, np.float64)])[0]))
+        got = dict(zip(names, kymora.extract_features([np.asarray(x, np.float64)])[0]))
         want = reference(x, level=got["mean"])
         for name in names:
             g, w = float(got[name]), float(want[name])
@@ -101,7 +101,7 @@ def render(stats: dict[str, dict[str, object]]) -> tuple[str, bool]:
     lines = [
         "# Reference-validation report",
         "",
-        f"tsxtract {tsxtract.__version__} on {platform.platform()}, "
+        f"kymora {kymora.__version__} on {platform.platform()}, "
         f"Python {platform.python_version()}, numpy {np.__version__}.",
         "",
         f"Each of the {len(stats)} features is compared against a numpy/scipy "

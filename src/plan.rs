@@ -2,7 +2,7 @@
 
 //! Feature plan resolution and needs bitmask computation with multi-view invariance pruning.
 
-use crate::error::TsxError;
+use crate::error::KymoraError;
 use crate::features::views;
 use crate::intermediates::Needs;
 use crate::registry::{self, ProfileMask, FEATURES};
@@ -28,7 +28,7 @@ impl FeaturePlan {
     pub fn build<S: AsRef<str>>(
         profile: Option<&str>,
         features: Option<&[S]>,
-    ) -> Result<Self, TsxError> {
+    ) -> Result<Self, KymoraError> {
         Self::build_with_views(profile, features, None::<&[&str]>)
     }
 
@@ -37,7 +37,7 @@ impl FeaturePlan {
         profile: Option<&str>,
         features: Option<&[S]>,
         views: Option<&[V]>,
-    ) -> Result<Self, TsxError> {
+    ) -> Result<Self, KymoraError> {
         let mut base_indices = Vec::new();
         let mut base_needs = Needs::empty();
 
@@ -49,7 +49,7 @@ impl FeaturePlan {
                     base_indices.push(idx);
                     base_needs |= def.needs;
                 } else {
-                    return Err(TsxError::UnknownFeature {
+                    return Err(KymoraError::UnknownFeature {
                         name: s.to_string(),
                     });
                 }
@@ -90,7 +90,7 @@ impl FeaturePlan {
                     }
                 }
                 _ => {
-                    return Err(TsxError::UnknownProfile {
+                    return Err(KymoraError::UnknownProfile {
                         profile: prof.to_string(),
                     });
                 }
@@ -102,7 +102,7 @@ impl FeaturePlan {
             for v in v_list {
                 let s = v.as_ref();
                 if !views::SUPPORTED_VIEWS.contains(&s) {
-                    return Err(TsxError::UnknownProfile {
+                    return Err(KymoraError::UnknownProfile {
                         profile: format!("unsupported view '{s}'"),
                     });
                 }

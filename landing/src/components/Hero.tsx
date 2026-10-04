@@ -106,7 +106,7 @@ export const Hero: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract-rs');
+      await navigator.clipboard.writeText('pip install kymora');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -310,7 +310,7 @@ export const Hero: React.FC = () => {
               <strong className="font-bold text-[#000000]">
                 The time-series extractor that shows its work.
               </strong>{' '}
-              Tsxtract maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 3.18 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
+              Kymora maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 3.18 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}
@@ -322,7 +322,7 @@ export const Hero: React.FC = () => {
                 aria-label="Copy pip install command"
               >
                 <span className="text-neutral-400 select-none">$</span>
-                <span>pip install tsxtract-rs</span>
+                <span>pip install kymora</span>
                 {copied ? (
                   <span className="text-emerald-400 font-sans font-medium text-[11px] ml-1">Copied!</span>
                 ) : (
@@ -334,7 +334,7 @@ export const Hero: React.FC = () => {
               </button>
 
               <a
-                href="https://github.com/Aamodx6/Tsxtract"
+                href="https://github.com/Aamodx6/Kymora"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-[36px] items-center justify-center gap-2 rounded-md border border-[#D8D9D2] bg-white px-3.5 text-xs font-semibold text-black shadow-btn transition hover:border-black"
@@ -408,7 +408,7 @@ export const Hero: React.FC = () => {
               <figure
                 ref={chartRef}
                 className="lgad-app"
-                aria-label="Tsxtract Engine analyzing 100k series"
+                aria-label="Kymora Engine analyzing 100k series"
               >
                 {/* Window Top Bar */}
                 <div className="lgad-top">
@@ -423,7 +423,7 @@ export const Hero: React.FC = () => {
                         <rect x="0" y="18" width="21" height="3" />
                       </g>
                     </svg>
-                    <span>Tsxtract Engine</span>
+                    <span>Kymora Engine</span>
                     <svg className="lgad-chev" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <path d="M3 4.5 6 7.5 9 4.5" />
                     </svg>
@@ -478,7 +478,7 @@ export const Hero: React.FC = () => {
                       <span>Extracted features across categories, this run vs. baseline</span>
                       <span className="lgad-legend">
                         <i className="lgad-sw" style={{ background: '#000000' }} />
-                        <span className="text-black font-medium">Tsxtract (Rust)</span>
+                        <span className="text-black font-medium">Kymora (Rust)</span>
                         <i className="lgad-sw" style={{ background: '#E2E3DC' }} />
                         <span>Python baseline</span>
                       </span>
@@ -564,9 +564,9 @@ export const Hero: React.FC = () => {
                     <div className="mt-3 rounded-md border border-[#E2E3DC] bg-[#F2F3EF] p-3 font-mono text-[11.5px] text-black animate-in fade-in">
                       <pre>
                         <code>
-                          <span className="py-kw">import</span> tsxtract <span className="py-kw">as</span> tsx{'\n'}
+                          <span className="py-kw">import</span> kymora <span className="py-kw">as</span> km{'\n'}
                           <span className="py-com"># Zero-copy view into 100k series buffers</span>{'\n'}
-                          features = tsx.extract_features({'\n'}
+                          features = km.extract_features({'\n'}
                           {'    '}buffer, features=[<span className="py-str">"sample_entropy"</span>, <span className="py-str">"hurst"</span>, <span className="py-str">"fft_energy"</span>],{'\n'}
                           {'    '}n_jobs=-<span className="py-num">1</span>{'\n'}
                           )

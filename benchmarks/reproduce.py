@@ -1,4 +1,4 @@
-"""Master reproduction runner for Tsxtract benchmarks."""
+"""Master reproduction runner for Kymora benchmarks."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from benchmarks.smoke import run_smoke
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Reproduce Tsxtract benchmarks.")
+    parser = argparse.ArgumentParser(description="Reproduce Kymora benchmarks.")
     parser.add_argument("command", nargs="?", default="smoke", choices=["smoke", "agreement", "all", "report"])
     parser.add_argument("--suite", default="all", help="Target suite name")
     args = parser.parse_args()

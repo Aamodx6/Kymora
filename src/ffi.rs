@@ -3,7 +3,7 @@
 //! Responsibilities, in order:
 //!   1. obtain zero-copy read views of the caller's numpy buffers,
 //!   2. validate structure (shapes, lengths, window geometry) *before* any
-//!      compute starts, mapping failures to `TsxError` -> `ValueError`,
+//!      compute starts, mapping failures to `KymoraError` -> `ValueError`,
 //!   3. release the GIL and run the pure-Rust extraction,
 //!   4. shape or write directly into in-place numpy buffers.
 //!
@@ -17,7 +17,7 @@ use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use std::collections::HashMap;
 
-use crate::error::TsxError;
+use crate::error::KymoraError;
 use crate::extract;
 use crate::features;
 use crate::pipeline;
@@ -67,18 +67,18 @@ fn get_out_array<'py>(
 // `mut_from_ref` is the point of this helper (numpy hands out `&mut` from a
 // shared `Bound`); soundness rests on the contract above, not on the borrow.
 #[allow(clippy::mut_from_ref)]
-fn out_slice_mut<'a>(arr: &'a Bound<'_, PyArray2<f64>>) -> Result<&'a mut [f64], TsxError> {
+fn out_slice_mut<'a>(arr: &'a Bound<'_, PyArray2<f64>>) -> Result<&'a mut [f64], KymoraError> {
     // SAFETY: upheld per the contract above.
-    unsafe { arr.as_slice_mut() }.map_err(|_| TsxError::NotContiguous { index: None })
+    unsafe { arr.as_slice_mut() }.map_err(|_| KymoraError::NotContiguous { index: None })
 }
 
 /// f32-output variant of [`out_slice_mut`]; same contract.
 #[inline]
 // See `out_slice_mut` for why `mut_from_ref` is allowed here.
 #[allow(clippy::mut_from_ref)]
-fn out_slice_mut_f32<'a>(arr: &'a Bound<'_, PyArray2<f32>>) -> Result<&'a mut [f32], TsxError> {
+fn out_slice_mut_f32<'a>(arr: &'a Bound<'_, PyArray2<f32>>) -> Result<&'a mut [f32], KymoraError> {
     // SAFETY: upheld per the contract above.
-    unsafe { arr.as_slice_mut() }.map_err(|_| TsxError::NotContiguous { index: None })
+    unsafe { arr.as_slice_mut() }.map_err(|_| KymoraError::NotContiguous { index: None })
 }
 
 fn run_in_pool<F, R>(n_jobs: Option<usize>, f: F) -> R
@@ -126,14 +126,14 @@ pub fn extract_features<'py>(
         let nrows = view.nrows();
         let ncols = view.ncols();
         if nrows == 0 {
-            return Err(TsxError::EmptyInput.into());
+            return Err(KymoraError::EmptyInput.into());
         }
         if ncols == 0 {
-            return Err(TsxError::ZeroLengthColumns.into());
+            return Err(KymoraError::ZeroLengthColumns.into());
         }
         let slice = view
             .as_slice()
-            .ok_or(TsxError::NotContiguous { index: None })?;
+            .ok_or(KymoraError::NotContiguous { index: None })?;
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
@@ -168,14 +168,14 @@ pub fn extract_features<'py>(
         let nrows = view.nrows();
         let ncols = view.ncols();
         if nrows == 0 {
-            return Err(TsxError::EmptyInput.into());
+            return Err(KymoraError::EmptyInput.into());
         }
         if ncols == 0 {
-            return Err(TsxError::ZeroLengthColumns.into());
+            return Err(KymoraError::ZeroLengthColumns.into());
         }
         let slice = view
             .as_slice()
-            .ok_or(TsxError::NotContiguous { index: None })?;
+            .ok_or(KymoraError::NotContiguous { index: None })?;
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
@@ -211,9 +211,9 @@ pub fn extract_features<'py>(
             .enumerate()
             .map(|(index, a)| {
                 a.as_slice()
-                    .map_err(|_| TsxError::NotContiguous { index: Some(index) })
+                    .map_err(|_| KymoraError::NotContiguous { index: Some(index) })
             })
-            .collect::<Result<_, TsxError>>()?;
+            .collect::<Result<_, KymoraError>>()?;
         extract::validate_batch(&slices)?;
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
@@ -229,15 +229,15 @@ pub fn extract_features<'py>(
     // 4. List of 1D float32 arrays
     if let Ok(list) = x.extract::<Vec<PyReadonlyArray1<f32>>>() {
         if list.is_empty() {
-            return Err(TsxError::EmptyInput.into());
+            return Err(KymoraError::EmptyInput.into());
         }
         let mut slices = Vec::with_capacity(list.len());
         for (index, a) in list.iter().enumerate() {
             let s = a
                 .as_slice()
-                .map_err(|_| TsxError::NotContiguous { index: Some(index) })?;
+                .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?;
             if s.is_empty() {
-                return Err(TsxError::EmptySeries { index }.into());
+                return Err(KymoraError::EmptySeries { index }.into());
             }
             slices.push(s);
         }
@@ -409,12 +409,12 @@ pub fn extract_features_mc<'py>(
     let length = shape[2];
 
     if n_samples == 0 || n_channels == 0 || length == 0 {
-        return Err(TsxError::EmptyInput.into());
+        return Err(KymoraError::EmptyInput.into());
     }
 
     let slice = arr
         .as_slice()
-        .map_err(|_| TsxError::NotContiguous { index: None })?;
+        .map_err(|_| KymoraError::NotContiguous { index: None })?;
 
     let pair_count = if cross && n_channels >= 2 {
         let mut count = 0usize;
@@ -535,9 +535,9 @@ pub fn extract_features_ragged<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let offsets_slice = offsets
         .as_slice()
-        .map_err(|_| TsxError::NotContiguous { index: None })?;
+        .map_err(|_| KymoraError::NotContiguous { index: None })?;
     if offsets_slice.len() < 2 {
-        return Err(TsxError::EmptyInput.into());
+        return Err(KymoraError::EmptyInput.into());
     }
     let nrows = offsets_slice.len() - 1;
 
@@ -548,7 +548,7 @@ pub fn extract_features_ragged<'py>(
     if let Ok(v64) = values.extract::<PyReadonlyArray1<f64>>() {
         let v_slice = v64
             .as_slice()
-            .map_err(|_| TsxError::NotContiguous { index: None })?;
+            .map_err(|_| KymoraError::NotContiguous { index: None })?;
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
@@ -562,7 +562,7 @@ pub fn extract_features_ragged<'py>(
     if let Ok(v32) = values.extract::<PyReadonlyArray1<f32>>() {
         let v_slice = v32
             .as_slice()
-            .map_err(|_| TsxError::NotContiguous { index: None })?;
+            .map_err(|_| KymoraError::NotContiguous { index: None })?;
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
@@ -594,7 +594,7 @@ pub fn sliding_features<'py>(
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let slice = x
         .as_slice()
-        .map_err(|_| TsxError::NotContiguous { index: None })?;
+        .map_err(|_| KymoraError::NotContiguous { index: None })?;
     let (window, stride, n_windows) = extract::window_geometry(slice.len(), window, stride)?;
 
     let feat_refs = features.as_deref();
@@ -653,7 +653,7 @@ pub fn list_profiles() -> HashMap<&'static str, usize> {
 /// describe_feature(name) -> dict with description, cost, aliases, and needs.
 #[pyfunction]
 pub fn describe_feature(name: &str) -> PyResult<HashMap<&'static str, String>> {
-    let idx = registry::find_feature(name).ok_or_else(|| TsxError::UnknownFeature {
+    let idx = registry::find_feature(name).ok_or_else(|| KymoraError::UnknownFeature {
         name: name.to_string(),
     })?;
     let def = &registry::FEATURES[idx];
@@ -785,7 +785,7 @@ impl PyMultiStreamExtractor {
     pub fn push_many(&mut self, values: PyReadonlyArray1<f64>) -> PyResult<bool> {
         let slice = values
             .as_slice()
-            .map_err(|_| TsxError::NotContiguous { index: None })?;
+            .map_err(|_| KymoraError::NotContiguous { index: None })?;
         if slice.len() != self.inner.n_streams() {
             return Err(pyo3::exceptions::PyValueError::new_err(format!(
                 "expected {} values, got {}",

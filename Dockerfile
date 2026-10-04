@@ -1,4 +1,4 @@
-# Dockerfile for Tsxtract Linux Competitor Benchmark Environment
+# Dockerfile for Kymora Linux Competitor Benchmark Environment
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,7 +28,7 @@ WORKDIR /workspace
 
 COPY . /workspace
 
-# Build Tsxtract in release mode
+# Build Kymora in release mode
 RUN maturin develop --release || pip install -e .
 
 CMD ["bash", "reproduce.sh"]

@@ -1,4 +1,4 @@
-"""JSONL schema definition and validation for Tsxtract benchmarks."""
+"""JSONL schema definition and validation for Kymora benchmarks."""
 
 from __future__ import annotations
 

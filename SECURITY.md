@@ -3,7 +3,7 @@
 ## Supported Versions
 
 Security fixes are applied to the latest release on PyPI
-([`tsxtract-rs`](https://pypi.org/project/tsxtract-rs/)). Older releases are
+([`kymora`](https://pypi.org/project/kymora/)). Older releases are
 not backported; upgrading is the recommended mitigation.
 
 | Version | Supported |
@@ -16,7 +16,7 @@ not backported; upgrading is the recommended mitigation.
 Please do **not** open a public issue for security reports.
 
 Use GitHub's private reporting for this repository:
-https://github.com/Aamodx6/Tsxtract/security/advisories/new
+https://github.com/Aamodx6/Kymora/security/advisories/new
 
 Include, when possible:
 

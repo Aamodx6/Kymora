@@ -12,7 +12,7 @@ rounds (`B_040_R1/R2`, `B_PRE_R1c/R2`, `B_HEAD_R1/R2`; probe sets PA2/PB),
 one machine (i7-13620H laptop, 10 cores / 16 threads, Windows 11,
 Performance plan, AC online, Python 3.14.6, NumPy 2.5.2). Code states:
 pre-refactor tag `4c268ca`, HEAD `9c1b3dd` (step-2) → `88298f5`/`de1982f`
-(code-identical for numerics), PyPI `tsxtract-rs` 0.3.2 / 0.4.0 in
+(code-identical for numerics), PyPI `kymora` 0.3.2 / 0.4.0 in
 isolated venvs. Suite: `benchmarks/suites/reproduce_readme.py` @ HEAD
 for all rounds, 1,000 series × 500 steps, f64 C-contiguous gaussian,
 16 threads, seed 42. Every run records `n_features` (observed: 33 / 22

@@ -1,11 +1,11 @@
 import numpy as np
 import pytest
 import time
-import tsxtract
+import kymora
 
 
 def test_list_profiles():
-    profiles = tsxtract.list_profiles()
+    profiles = kymora.list_profiles()
     assert isinstance(profiles, dict)
     assert "minimal" in profiles
     assert "core33" in profiles
@@ -17,36 +17,36 @@ def test_list_profiles():
 
 
 def test_describe_feature():
-    desc_mean = tsxtract.describe_feature("mean")
+    desc_mean = kymora.describe_feature("mean")
     assert isinstance(desc_mean, dict)
     assert desc_mean["name"] == "mean"
     assert "PASS1" in desc_mean["needs"]
 
     # Test alias resolution
-    desc_alias = tsxtract.describe_feature("standard_deviation")
+    desc_alias = kymora.describe_feature("standard_deviation")
     assert desc_alias["name"] == "std"
 
     with pytest.raises(ValueError, match="unknown feature"):
-        tsxtract.describe_feature("non_existent_feature_123")
+        kymora.describe_feature("non_existent_feature_123")
 
 
 def test_feature_names_profiles():
-    all_33 = tsxtract.feature_names()
+    all_33 = kymora.feature_names()
     assert len(all_33) == 33
 
-    core_names = tsxtract.feature_names(profile="core33")
+    core_names = kymora.feature_names(profile="core33")
     assert core_names == all_33
 
-    min_names = tsxtract.feature_names(profile="minimal")
+    min_names = kymora.feature_names(profile="minimal")
     assert len(min_names) < 33
     for name in min_names:
         assert name in all_33
 
-    custom_names = tsxtract.feature_names(features=["mean", "variance", "std", "maximum"])
+    custom_names = kymora.feature_names(features=["mean", "variance", "std", "maximum"])
     assert custom_names == ["mean", "var", "std", "max"]
 
     # Alias in feature_names returns canonical name
-    custom_alias = tsxtract.feature_names(features=["standard_deviation", "mean"])
+    custom_alias = kymora.feature_names(features=["standard_deviation", "mean"])
     assert custom_alias == ["std", "mean"]
 
 
@@ -55,29 +55,29 @@ def test_extract_features_profiles():
     X = rng.standard_normal((50, 100))
 
     # Default vs core33
-    out_default = tsxtract.extract_features(X)
-    out_core = tsxtract.extract_features(X, profile="core33")
+    out_default = kymora.extract_features(X)
+    out_core = kymora.extract_features(X, profile="core33")
     np.testing.assert_array_equal(out_default, out_core)
 
     # Minimal profile
-    min_names = tsxtract.feature_names(profile="minimal")
-    out_min = tsxtract.extract_features(X, profile="minimal")
+    min_names = kymora.feature_names(profile="minimal")
+    out_min = kymora.extract_features(X, profile="minimal")
     assert out_min.shape == (50, len(min_names))
 
     # Verify minimal columns match core33 corresponding columns
     for col_idx, name in enumerate(min_names):
-        core_idx = tsxtract.feature_names().index(name)
+        core_idx = kymora.feature_names().index(name)
         np.testing.assert_allclose(out_min[:, col_idx], out_default[:, core_idx], rtol=1e-12, atol=1e-12)
 
 
 def test_extract_features_custom_selection():
     rng = np.random.default_rng(123)
     X = rng.standard_normal((40, 200))
-    full = tsxtract.extract_features(X)
-    names = tsxtract.feature_names()
+    full = kymora.extract_features(X)
+    names = kymora.feature_names()
 
     requested = ["skewness", "mean", "kurtosis", "autocorr_lag_1", "abs_energy"]
-    out_custom = tsxtract.extract_features(X, features=requested)
+    out_custom = kymora.extract_features(X, features=requested)
     assert out_custom.shape == (40, len(requested))
 
     for col_idx, name in enumerate(requested):
@@ -88,10 +88,10 @@ def test_extract_features_custom_selection():
 def test_extract_features_invalid_profile_or_features():
     X = np.ones((5, 10))
     with pytest.raises(ValueError, match="unknown profile"):
-        tsxtract.extract_features(X, profile="quantum_ultra")
+        kymora.extract_features(X, profile="quantum_ultra")
 
     with pytest.raises(ValueError, match="unknown feature"):
-        tsxtract.extract_features(X, features=["mean", "bad_feature"])
+        kymora.extract_features(X, features=["mean", "bad_feature"])
 
 
 def test_ragged_and_sliding_profiles():
@@ -100,17 +100,17 @@ def test_ragged_and_sliding_profiles():
     v = rng.standard_normal(300)
     offsets = np.array([0, 100, 300], dtype=np.int64)
 
-    min_ragged = tsxtract.extract_features_ragged(v, offsets, profile="minimal")
-    assert min_ragged.shape == (2, len(tsxtract.feature_names(profile="minimal")))
+    min_ragged = kymora.extract_features_ragged(v, offsets, profile="minimal")
+    assert min_ragged.shape == (2, len(kymora.feature_names(profile="minimal")))
 
-    custom_ragged = tsxtract.extract_features_ragged(v, offsets, features=["mean", "std"])
+    custom_ragged = kymora.extract_features_ragged(v, offsets, features=["mean", "std"])
     assert custom_ragged.shape == (2, 2)
 
     # Sliding
     x = rng.standard_normal(150)
-    min_sliding = tsxtract.sliding_features(x, window=50, stride=10, profile="minimal")
+    min_sliding = kymora.sliding_features(x, window=50, stride=10, profile="minimal")
     n_windows = (150 - 50) // 10 + 1
-    assert min_sliding.shape == (n_windows, len(tsxtract.feature_names(profile="minimal")))
+    assert min_sliding.shape == (n_windows, len(kymora.feature_names(profile="minimal")))
 
 
 def test_extract_features_df_profiles():
@@ -118,11 +118,11 @@ def test_extract_features_df_profiles():
     rng = np.random.default_rng(777)
     X = rng.standard_normal((10, 50))
 
-    df_min = tsxtract.extract_features_df(X, profile="minimal")
-    assert list(df_min.columns) == tsxtract.feature_names(profile="minimal")
+    df_min = kymora.extract_features_df(X, profile="minimal")
+    assert list(df_min.columns) == kymora.feature_names(profile="minimal")
     assert len(df_min) == 10
 
-    df_custom = tsxtract.extract_features_df(X, features=["median", "mean"])
+    df_custom = kymora.extract_features_df(X, features=["median", "mean"])
     assert list(df_custom.columns) == ["median", "mean"]
     assert len(df_custom) == 10
 
@@ -133,8 +133,8 @@ def test_minimal_profile_is_faster_than_core33():
     X = rng.standard_normal((500, 1000))
 
     # Warmup
-    tsxtract.extract_features(X[:50], profile="minimal")
-    tsxtract.extract_features(X[:50], profile="core33")
+    kymora.extract_features(X[:50], profile="minimal")
+    kymora.extract_features(X[:50], profile="core33")
 
     # Best-of-N each: machine noise only ever ADDS time (loaded CI runners
     # inverted this assertion with single samples), so the minimum is the
@@ -143,7 +143,7 @@ def test_minimal_profile_is_faster_than_core33():
         best = float("inf")
         for _ in range(n):
             t0 = time.perf_counter()
-            tsxtract.extract_features(X, profile=profile)
+            kymora.extract_features(X, profile=profile)
             best = min(best, time.perf_counter() - t0)
         return best
 

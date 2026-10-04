@@ -6,13 +6,13 @@ One row in, one feature row out. The Rust engine executes without GIL contention
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 
 rng = np.random.default_rng(0)
 X = rng.standard_normal((10_000, 500))  # 10,000 series, 500 samples each
 
-feats = tsxtract.extract_features(X)          # (10_000, 33) float64
-names = tsxtract.feature_names()              # canonical column names
+feats = kymora.extract_features(X)          # (10_000, 33) float64
+names = kymora.feature_names()              # canonical column names
 ```
 
 Input arrays must be **float64 and C-contiguous**. A wrong dtype or non-contiguous layout will raise `TypeError` or `ValueError` rather than silently copying.
@@ -25,11 +25,11 @@ Generate multi-domain feature representations across differences, detrending, an
 
 ```python
 # Compute features across original series, first differences, and z-normalization
-feats_views = tsxtract.extract_features(
+feats_views = kymora.extract_features(
     X,
     views=["raw", "diff", "znorm"]
 )
-view_names = tsxtract.feature_names(views=["raw", "diff", "znorm"])
+view_names = kymora.feature_names(views=["raw", "diff", "znorm"])
 print(f"Extracted {len(view_names)} features across 3 views.")
 ```
 
@@ -46,7 +46,7 @@ Extract features and cross-channel interaction dynamics from 3D arrays:
 X_mc = rng.standard_normal((100, 4, 1000))
 
 # Extract per-channel features and cross-channel dynamics
-df_mc = tsxtract.extract_features_mc_df(X_mc, cross=True)
+df_mc = kymora.extract_features_mc_df(X_mc, cross=True)
 print(df_mc.shape)  # 100 rows x combined channel features
 ```
 
@@ -61,7 +61,7 @@ n_streams = 1000
 window_size = 200
 
 # Fleet extractor maintains contiguous circular buffers for all streams
-extractor = tsxtract.MultiStreamExtractor(n_streams, window_size)
+extractor = kymora.MultiStreamExtractor(n_streams, window_size)
 
 # Ingest new readings from IoT fleet or market feed
 new_tick = rng.standard_normal(n_streams)
@@ -84,7 +84,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 
 # Seamless scikit-learn transformer
 pipe = Pipeline([
-    ("select", tsxtract.TsxSelector(task="classification", fdr=0.05)),
+    ("select", kymora.KymoraSelector(task="classification", fdr=0.05)),
     ("clf", HistGradientBoostingClassifier())
 ])
 
@@ -101,11 +101,11 @@ Benchmark your local architecture to configure the optimal execution backend:
 
 ```python
 # Microbenchmarks execution variants and caches the best configuration
-profile = tsxtract.tune(shapes=[(1000, 500)], budget_s=5.0)
+profile = kymora.tune(shapes=[(1000, 500)], budget_s=5.0)
 print(f"Optimal pool: {profile['best_config']['pool']}")
 ```
 
 !!! note "Pool selection is provisional"
-    `tune()` records a `spin`/`rayon` recommendation, but the `TSXTRACT_POOL`
+    `tune()` records a `spin`/`rayon` recommendation, but the `KYMORA_POOL`
     switch is not wired up yet (see [Threading & Runtime Controls](api.md#threading-runtime-controls)) —
     scheduling is Rayon either way today.

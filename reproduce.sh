@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Tsxtract Benchmark Suite Reproduction Script
+# Kymora Benchmark Suite Reproduction Script
 set -euo pipefail
 
 echo "=========================================="
-echo " Tsxtract Benchmark Reproduction Pipeline "
+echo " Kymora Benchmark Reproduction Pipeline "
 echo "=========================================="
 
 PYTHON="${PYTHON:-python}"

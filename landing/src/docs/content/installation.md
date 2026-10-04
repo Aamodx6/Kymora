@@ -1,18 +1,18 @@
 ---
 title: "Installation"
-description: "Install Tsxtract wheels, build from source, verify the install, and fix platform issues."
+description: "Install Kymora wheels, build from source, verify the install, and fix platform issues."
 order: 2
 section: "Start here"
 ---
 
-Install Tsxtract from PyPI as precompiled wheels with no Rust toolchain required, then verify the native extension loads. Standard use needs only Python 3.10+ and NumPy on a 64-bit OS.
+Install Kymora from PyPI as precompiled wheels with no Rust toolchain required, then verify the native extension loads. Standard use needs only Python 3.10+ and NumPy on a 64-bit OS.
 
 ```bash tab="pip"
-pip install tsxtract-rs
+pip install kymora
 ```
 
 ```bash tab="uv"
-uv add tsxtract-rs
+uv add kymora
 ```
 
 > [!NOTE]
@@ -37,21 +37,21 @@ uv add tsxtract-rs
 The core install stays NumPy-only, so install extras only for the workflow you need:
 
 ```bash tab="pip"
-pip install "tsxtract-rs[pandas]"
-pip install "tsxtract-rs[test]"
-pip install "tsxtract-rs[bench]"
+pip install "kymora[pandas]"
+pip install "kymora[test]"
+pip install "kymora[bench]"
 ```
 
 ```bash tab="uv"
-uv add "tsxtract-rs[pandas]"
-uv add "tsxtract-rs[test]"
+uv add "kymora[pandas]"
+uv add "kymora[test]"
 ```
 
 Available extras and their contents:
 
-- **Pandas support:** `"tsxtract-rs[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
-- **Test suite:** `"tsxtract-rs[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
-- **Benchmarks:** `"tsxtract-rs[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
+- **Pandas support:** `"kymora[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
+- **Test suite:** `"kymora[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
+- **Benchmarks:** `"kymora[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
 - **Docs tooling:** the `docs` extra pulls `mkdocs` and `mkdocs-material` for local docs builds.
 
 ## Verify installation
@@ -60,17 +60,17 @@ Run this snippet to confirm the version, the 33-feature registry, and a real ext
 
 ```python
 import numpy as np
-import tsxtract
-print("tsxtract version:", tsxtract.__version__)
-print("Total registered features:", len(tsxtract.feature_names()))
+import kymora
+print("kymora version:", kymora.__version__)
+print("Total registered features:", len(kymora.feature_names()))
 sample = np.linspace(0.0, 10.0, 100, dtype=np.float64).reshape(1, -1)
-result = tsxtract.extract_features(sample)
+result = kymora.extract_features(sample)
 print("Test feature vector shape:", result.shape)
 print("Computed mean value:", result[0, 0])
 ```
 
 ```text
-tsxtract version: 0.6.0
+kymora version: 0.6.0
 Total registered features: 33
 Test feature vector shape: (1, 33)
 Computed mean value: 5.0
@@ -89,8 +89,8 @@ Build from source when developing features, targeting an architecture without pr
 ### Compile steps
 
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract.git
-cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora.git
+cd Kymora
 python -m venv .venv
 source .venv/bin/activate
 pip install maturin
@@ -108,11 +108,11 @@ cargo test --no-default-features
 Move to the latest published release with your usual manager:
 
 ```bash tab="pip"
-pip install --upgrade tsxtract-rs
+pip install --upgrade kymora
 ```
 
 ```bash tab="uv"
-uv lock --upgrade-package tsxtract-rs
+uv lock --upgrade-package kymora
 uv sync
 ```
 
@@ -121,18 +121,18 @@ uv sync
 Remove the library cleanly when switching environments:
 
 ```bash tab="pip"
-pip uninstall -y tsxtract-rs
+pip uninstall -y kymora
 ```
 
 ```bash tab="uv"
-uv remove tsxtract-rs
+uv remove kymora
 ```
 
 ## Troubleshooting
 
 ### Wheel not found during install
 
-- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract-rs`.
+- **Symptom:** `ERROR: Could not find a version that satisfies the requirement kymora`.
 - **Cause:** Python older than 3.10 or an unsupported architecture such as 32-bit x86.
 - **Resolution:** check `python --version`, then recreate the environment on Python 3.10+.
 
@@ -158,7 +158,7 @@ uv remove tsxtract-rs
 
 - **Symptom:** `ImportError: DLL load failed` on Windows or `undefined symbol` on Linux.
 - **Cause:** stale virtual environment paths or an outdated system C runtime.
-- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract-rs` plus `numpy>=1.24`.
+- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `kymora` plus `numpy>=1.24`.
 
 ### Proxy and corporate firewall timeouts
 
@@ -167,11 +167,11 @@ uv remove tsxtract-rs
 - **Resolution:** pass your proxy and certificate bundle explicitly during install.
 
 ```bash
-pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract-rs
+pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt kymora
 ```
 
 ```text
-Successfully installed tsxtract-rs-0.6.0
+Successfully installed kymora-0.6.0
 ```
 
 ### Contiguous and dtype errors at call time

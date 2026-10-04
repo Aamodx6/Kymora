@@ -1,19 +1,19 @@
 ---
 title: "Core Concepts"
-description: "Foundational architecture, memory model, data types, and deterministic execution guarantees in Tsxtract."
+description: "Foundational architecture, memory model, data types, and deterministic execution guarantees in Kymora."
 order: 4
 section: "Concepts"
 ---
 
-This page explains the mental model behind Tsxtract: what counts as a series, which array layouts the Rust core accepts, how missing and infinite values behave, and what guarantees cover output order, determinism, and thread-safety.
+This page explains the mental model behind Kymora: what counts as a series, which array layouts the Rust core accepts, how missing and infinite values behave, and what guarantees cover output order, determinism, and thread-safety.
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 X = np.ascontiguousarray(np.arange(12.0).reshape(3, 4))
-feats = tsxtract.extract_features(X)
+feats = kymora.extract_features(X)
 print(feats.shape)
-print(tsxtract.feature_names()[:3])
+print(kymora.feature_names()[:3])
 print(feats[:, 0])
 ```
 
@@ -27,7 +27,7 @@ print(feats[:, 0])
 
 A time series is one ordered sequence of measurements, such as a single sensor channel sampled over time. A feature is one scalar summarizing that sequence, such as its mean or its autocorrelation at lag 1.
 
-Tsxtract maps every input series to exactly 33 float64 features, so a batch of `n` series always yields an `(n, 33)` matrix. The mapping is pure: it depends only on the values in that one series, never on its neighbors, its position in the batch, or any hidden state.
+Kymora maps every input series to exactly 33 float64 features, so a batch of `n` series always yields an `(n, 33)` matrix. The mapping is pure: it depends only on the values in that one series, never on its neighbors, its position in the batch, or any hidden state.
 
 ## Input shapes and dtypes
 
@@ -71,13 +71,13 @@ Dtype and layout rules are strict because the core borrows buffers without copyi
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 x = np.arange(8.0)
 try:
-    tsxtract.extract_features(x)
+    kymora.extract_features(x)
 except TypeError as exc:
     print("TypeError:", str(exc)[:60])
-print(tsxtract.extract_features(x.reshape(1, -1)).shape)
+print(kymora.extract_features(x.reshape(1, -1)).shape)
 ```
 
 ```text
@@ -87,14 +87,14 @@ TypeError: extract_features expects a 2D float64 array of shape (n_se
 
 ## Ragged sequences
 
-A ragged batch is a list of 1D arrays with different lengths, used when recordings have unequal durations. Padding with zeros would corrupt variance, quantiles, and autocorrelations, so Tsxtract handles the true lengths directly.
+A ragged batch is a list of 1D arrays with different lengths, used when recordings have unequal durations. Padding with zeros would corrupt variance, quantiles, and autocorrelations, so Kymora handles the true lengths directly.
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 rng = np.random.default_rng(3)
 ragged = [np.ascontiguousarray(rng.standard_normal(n)) for n in (60, 200, 120)]
-out = tsxtract.extract_features(ragged)
+out = kymora.extract_features(ragged)
 print(out.shape)
 ```
 
@@ -130,11 +130,11 @@ flowchart TD
 
 ```python
 import numpy as np
-import tsxtract
-names = tsxtract.feature_names()
-poisoned = tsxtract.extract_features([np.array([1.0, 2.0, np.nan, 4.0])])[0]
+import kymora
+names = kymora.feature_names()
+poisoned = kymora.extract_features([np.array([1.0, 2.0, np.nan, 4.0])])[0]
 print("NaN row is all NaN:", bool(np.isnan(poisoned).all()))
-const = tsxtract.extract_features([np.full(10, 3.7)])[0]
+const = kymora.extract_features([np.full(10, 3.7)])[0]
 d = dict(zip(names, const))
 print("Constant mean/std:", d["mean"], d["std"])
 print("Constant skew/autocorr_1:", d["skewness"], d["autocorr_lag_1"])

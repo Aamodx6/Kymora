@@ -1,20 +1,20 @@
 ---
 title: "API Reference"
-description: "Comprehensive public API reference for tsxtract functions, classes, type stubs, and constants."
+description: "Comprehensive public API reference for kymora functions, classes, type stubs, and constants."
 order: 10
 section: "Reference"
 ---
 
-The public surface covers batch, streaming, multichannel, and supervised feature extraction. Stubs live in `python/tsxtract/_core.pyi` with a `py.typed` marker for IDEs and type checkers.
+The public surface covers batch, streaming, multichannel, and supervised feature extraction. Stubs live in `python/kymora/_core.pyi` with a `py.typed` marker for IDEs and type checkers.
 
 ```python
-import tsxtract
-print(sorted(tsxtract.__all__))
-print(tsxtract.__version__)
+import kymora
+print(sorted(kymora.__all__))
+print(kymora.__version__)
 ```
 
 ```text
-['MultiStreamExtractor', 'StreamingExtractor', 'TsxSelector', '__version__', 'describe_feature', 'extract_features', 'extract_features_df', 'extract_features_mc', 'extract_features_mc_df', 'extract_features_ragged', 'feature_names', 'feature_names_mc', 'list_profiles', 'select_features', 'sliding_features', 'tune']
+['MultiStreamExtractor', 'StreamingExtractor', 'KymoraSelector', '__version__', 'describe_feature', 'extract_features', 'extract_features_df', 'extract_features_mc', 'extract_features_mc_df', 'extract_features_ragged', 'feature_names', 'feature_names_mc', 'list_profiles', 'select_features', 'sliding_features', 'tune']
 0.6.0
 ```
 
@@ -159,14 +159,14 @@ def select_features(
 
 ---
 
-### `TsxSelector`
+### `KymoraSelector`
 
 Scikit-learn compatible transformer implementing FDR-controlled feature selection.
 
 ```python
-class TsxSelector:
+class KymoraSelector:
     def __init__(self, task: str = "auto", fdr: float = 0.05, max_corr: float = 0.90) -> None: ...
-    def fit(self, X: Any, y: Sequence[Any] | np.ndarray) -> TsxSelector: ...
+    def fit(self, X: Any, y: Sequence[Any] | np.ndarray) -> KymoraSelector: ...
     def transform(self, X: Any) -> Any: ...
     def fit_transform(self, X: Any, y: Sequence[Any] | np.ndarray) -> Any: ...
     def get_support(self, indices: bool = False) -> np.ndarray: ...
@@ -224,7 +224,7 @@ class MultiStreamExtractor:
 
 ### `tune`
 
-Microbenchmarks execution variants on this hardware and caches optimal execution parameters to `wisdom.json` (Windows: `%LOCALAPPDATA%\tsxtract\`; POSIX: `~/.cache/tsxtract/`). Set `TSXTRACT_WISDOM=off` to skip the cache.
+Microbenchmarks execution variants on this hardware and caches optimal execution parameters to `wisdom.json` (Windows: `%LOCALAPPDATA%\kymora\`; POSIX: `~/.cache/kymora/`). Set `KYMORA_WISDOM=off` to skip the cache.
 
 ```python
 def tune(

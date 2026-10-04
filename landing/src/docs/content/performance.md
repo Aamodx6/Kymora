@@ -1,17 +1,17 @@
 ---
 title: "Performance & Architecture"
-description: "Zero-copy memory pipelines, Rayon parallelism, loop fusion, and algorithmic complexity in Tsxtract."
+description: "Zero-copy memory pipelines, Rayon parallelism, loop fusion, and algorithmic complexity in Kymora."
 order: 5
 section: "Concepts"
 ---
 
-Tsxtract is fast for two separable reasons: it parallelizes across series with the GIL released, and it computes a deliberately cheap feature set with fused memory traversals. This page traces the data flow, names each optimization, and shows the benchmark and architecture diagrams.
+Kymora is fast for two separable reasons: it parallelizes across series with the GIL released, and it computes a deliberately cheap feature set with fused memory traversals. This page traces the data flow, names each optimization, and shows the benchmark and architecture diagrams.
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 X = np.ascontiguousarray(np.random.default_rng(11).standard_normal((1000, 500)))
-feats = tsxtract.extract_features(X)
+feats = kymora.extract_features(X)
 print(feats.shape, feats.dtype)
 ```
 
@@ -26,13 +26,13 @@ print(feats.shape, feats.dtype)
 
 The core system is structured across a thin Python binding layer and a compiled native Rust computational core:
 
-![System Architecture: Zero-copy NumPy ingestion, Rayon work-stealing, and 5-pass fused feature extraction kernels](/figures/architecture.png "Figure 1: Tsxtract Native Computational Architecture and PyO3 Zero-Copy Ingestion")
+![System Architecture: Zero-copy NumPy ingestion, Rayon work-stealing, and 5-pass fused feature extraction kernels](/figures/architecture.png "Figure 1: Kymora Native Computational Architecture and PyO3 Zero-Copy Ingestion")
 
 ```mermaid
 flowchart TD
     subgraph PY["Python User Space"]
         INPUT["NumPy 2D Array X\n(N × n, C-contiguous float64)"]
-        CALL["tsxtract.extract_features(X)"]
+        CALL["kymora.extract_features(X)"]
         OUTPUT["Output Matrix Y\n(N × 33, float64)"]
     end
 
@@ -82,7 +82,7 @@ Features that share a scan share it deliberately, so related metrics accumulate 
 
 ## Memory model
 
-Tsxtract borrows memory from the host process without defensive copies:
+Kymora borrows memory from the host process without defensive copies:
 
 ![Memory Allocation Profile during Feature Extraction](/figures/memory.png "Figure 2: Memory Footprint during Batch Feature Extraction. Zero-copy pointer borrow ensures the input buffer incurs +0.0 MB memory overhead, with only 25.2 MiB allocated for 100,000 series.")
 
@@ -115,8 +115,8 @@ Parallelism splits across the series dimension only, never across features withi
 ![Batch Scaling across Series Count and Series Length Crossover](/figures/scaling.png "Figure 4: (a) Batch Scaling across series count N (10 to 100,000 series); (b) Length scaling n and crossover comparison with NumPy.")
 
 As shown in the scaling profiles:
-- **Batch Scaling (a):** Across batch sizes from 10 to 100,000 series, Tsxtract maintains orders of magnitude lower execution times than loop-based libraries.
-- **Length Scaling (b):** For single short series, pure NumPy has lower invocation latency. However, as series length $n$ grows past 1,000 steps or when batch size $N \ge 100$, Tsxtract's fused passes and parallel execution decisively outperform manual pipelines.
+- **Batch Scaling (a):** Across batch sizes from 10 to 100,000 series, Kymora maintains orders of magnitude lower execution times than loop-based libraries.
+- **Length Scaling (b):** For single short series, pure NumPy has lower invocation latency. However, as series length $n$ grows past 1,000 steps or when batch size $N \ge 100$, Kymora's fused passes and parallel execution decisively outperform manual pipelines.
 
 ## Complexity per feature group
 
@@ -133,7 +133,7 @@ Every feature is `O(n)` or `O(n log n)` by construction, with `n` as series leng
 
 ## Benchmark comparison
 
-![Batch Throughput Benchmark: Tsxtract vs catch22, TSFEL, tsfresh](/figures/throughput.png "Figure 5: Batch Throughput Benchmark (1,000 series × 500 steps, 16 threads, log-scale). Tsxtract delivers 314,450 series/sec median (exploratory laptop run), outperforming catch22 by 262x and tsfresh by 6,570x raw time.")
+![Batch Throughput Benchmark: Kymora vs catch22, TSFEL, tsfresh](/figures/throughput.png "Figure 5: Batch Throughput Benchmark (1,000 series × 500 steps, 16 threads, log-scale). Kymora delivers 314,450 series/sec median (exploratory laptop run), outperforming catch22 by 262x and tsfresh by 6,570x raw time.")
 
 `benchmarks/bench_libraries.py` measures end-to-end wall-clock batch throughput, deliberately including each library's required input reshaping (`tsfresh` needs a long DataFrame; `catch22` and `TSFEL` need per-series loops):
 
@@ -145,9 +145,9 @@ python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500 --json benchm
 Published benchmark results (exploratory — i7-13620H laptop, 10 cores /
 16 threads; artifact: `benchmarks/results/F1_REPORT.md`):
 
-| Library | Feature count | Total time | Series/s | Speedup vs Tsxtract |
+| Library | Feature count | Total time | Series/s | Speedup vs Kymora |
 | :--- | ---: | ---: | ---: | :--- |
-| **Tsxtract** | 33 | **3.18 ms** | **314,450** | **Baseline (1.0x)** |
+| **Kymora** | 33 | **3.18 ms** | **314,450** | **Baseline (1.0x)** |
 | `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | ~262x slower |
 | `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | ~799x slower |
 | `tsfresh` (EfficientFC) | 777 | 20,891.2 ms | 48 | ~6,570x slower |

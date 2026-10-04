@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
                 <span className="h-[2px] w-3 bg-ink" />
               </div>
               <span className="font-sans text-lg font-bold tracking-tight text-ink">
-                tsxtract
+                kymora
               </span>
             </div>
             <p className="max-w-sm text-body leading-relaxed">
@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
               Engineered for data science teams and real-time inference pipelines.
             </p>
             <div className="pt-1 font-mono text-[11px] text-muted">
-              Repository: <a href="https://github.com/Aamodx6/Tsxtract" className="text-ink hover:underline">github.com/Aamodx6/Tsxtract</a>
+              Repository: <a href="https://github.com/Aamodx6/Kymora" className="text-ink hover:underline">github.com/Aamodx6/Kymora</a>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamodx6/Tsxtract#features"
+                  href="https://github.com/Aamodx6/Kymora#features"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -98,7 +98,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="https://github.com/Aamodx6/Tsxtract"
+                  href="https://github.com/Aamodx6/Kymora"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -108,7 +108,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamodx6/Tsxtract/issues"
+                  href="https://github.com/Aamodx6/Kymora/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -118,7 +118,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://pypi.org/project/tsxtract-rs"
+                  href="https://pypi.org/project/kymora"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -128,7 +128,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE"
+                  href="https://github.com/Aamodx6/Kymora/blob/main/LICENSE"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -145,14 +145,14 @@ export const Footer: React.FC = () => {
           <div>
             <span>Licensed under </span>
             <a
-              href="https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE"
+              href="https://github.com/Aamodx6/Kymora/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="text-ink hover:underline"
             >
               MIT
             </a>
-            <span>. Copyright &copy; {new Date().getFullYear()} Tsxtract contributors.</span>
+            <span>. Copyright &copy; {new Date().getFullYear()} Kymora contributors.</span>
           </div>
 
           <div className="flex items-center gap-4">

@@ -23,7 +23,7 @@ class Adapter(BaseAdapter):
     name = "tsfresh"
     version = _VERSION
 
-    # The 13 tsfresh features whose definitions agree with tsxtract core33
+    # The 13 tsfresh features whose definitions agree with kymora core33
     # (frozen in benchmarks/agreement/feature_map.json, Phase B1). Used for the
     # matched-feature view (arch.md §11.6): time ONLY the agreed definitions.
     MATCHED_FC_PARAMS = {

@@ -1,1 +1,1 @@
-"""Tsxtract benchmark suite package."""
+"""Kymora benchmark suite package."""

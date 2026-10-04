@@ -1,4 +1,4 @@
-"""Fast supervised feature selection (select_features) and scikit-learn transformer (TsxSelector).
+"""Fast supervised feature selection (select_features) and scikit-learn transformer (KymoraSelector).
 
 Implements ANOVA F and Mann-Whitney U test relevance for classification,
 Pearson and Spearman correlation relevance for regression,
@@ -247,7 +247,7 @@ def select_features(
     return selected_indices, report
 
 
-class TsxSelector:
+class KymoraSelector:
     """Scikit-learn compatible transformer for fast supervised time-series feature selection."""
 
     def __init__(
@@ -262,7 +262,7 @@ class TsxSelector:
         self.selected_indices_: list[int] | None = None
         self.report_: Any = None
 
-    def fit(self, X: Any, y: Sequence[Any] | np.ndarray) -> "TsxSelector":
+    def fit(self, X: Any, y: Sequence[Any] | np.ndarray) -> "KymoraSelector":
         indices, report = select_features(
             X, y, task=self.task, fdr=self.fdr, max_corr=self.max_corr
         )
@@ -272,7 +272,7 @@ class TsxSelector:
 
     def transform(self, X: Any) -> Any:
         if self.selected_indices_ is None:
-            raise ValueError("TsxSelector instance is not fitted yet.")
+            raise ValueError("KymoraSelector instance is not fitted yet.")
         if hasattr(X, "iloc"):
             return X.iloc[:, self.selected_indices_]
         return np.asarray(X)[:, self.selected_indices_]
@@ -282,7 +282,7 @@ class TsxSelector:
 
     def get_support(self, indices: bool = False) -> np.ndarray:
         if self.selected_indices_ is None:
-            raise ValueError("TsxSelector instance is not fitted yet.")
+            raise ValueError("KymoraSelector instance is not fitted yet.")
         if indices:
             return np.array(self.selected_indices_)
         if hasattr(self.report_, "__len__"):
@@ -292,3 +292,8 @@ class TsxSelector:
         mask = np.zeros(n, dtype=bool)
         mask[self.selected_indices_] = True
         return mask
+
+
+#: Deprecated alias for :class:`KymoraSelector` (pre-rename name).
+#: Removal no earlier than version 0.8.0.
+TsxSelector = KymoraSelector

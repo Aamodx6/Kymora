@@ -1,6 +1,6 @@
 """Comprehensive benchmark matrix: profiles, competitors, thread scaling, and memory.
 
-Measures all dimensions specified in arch_max.md §7:
+Measures all dimensions specified in arch.md §11:
 1. Profiles: minimal, core33, extended, full
 2. Thread scaling: 1, 2, 4, 8, all (with speedup & scaling efficiency)
 3. Memory: tracemalloc peak RSS delta for 100k x 500
@@ -20,7 +20,7 @@ import tracemalloc
 from typing import Any, Callable
 
 import numpy as np
-import tsxtract
+import kymora
 
 
 def timed_median_iqr(fn: Callable[[], Any], min_runs: int = 3, max_runs: int = 10, min_total: float = 0.5) -> dict[str, float]:
@@ -64,7 +64,7 @@ def run_benchmark_matrix(n_series: int = 1000, n_steps: int = 500, seed: int = 4
             "cpu_count": cpu_count,
             "n_series": n_series,
             "n_steps": n_steps,
-            "tsxtractor_version": tsxtract.__version__,
+            "tsxtractor_version": kymora.__version__,
         },
         "profiles": {},
         "thread_scaling": {},
@@ -73,11 +73,11 @@ def run_benchmark_matrix(n_series: int = 1000, n_steps: int = 500, seed: int = 4
     }
 
     # 1. Profiles Benchmark (1000 x 500)
-    print("--- 1. Testing Tsxtract Profiles ---", flush=True)
+    print("--- 1. Testing Kymora Profiles ---", flush=True)
     profiles = ["minimal", "core33", "extended", "full"]
     for prof in profiles:
-        names = tsxtract.feature_names(profile=prof)
-        stats = timed_median_iqr(lambda: tsxtract.extract_features(X, profile=prof))
+        names = kymora.feature_names(profile=prof)
+        stats = timed_median_iqr(lambda: kymora.extract_features(X, profile=prof))
         med = stats["median_s"]
         per_series_us = (med / n_series) * 1e6
         per_feature_us = (med / (n_series * len(names))) * 1e6
@@ -102,7 +102,7 @@ def run_benchmark_matrix(n_series: int = 1000, n_steps: int = 500, seed: int = 4
 
     t1_time = None
     for t in threads_to_test:
-        stats = timed_median_iqr(lambda: tsxtract.extract_features(X, n_jobs=t))
+        stats = timed_median_iqr(lambda: kymora.extract_features(X, n_jobs=t))
         med = stats["median_s"]
         if t == 1:
             t1_time = med
@@ -129,7 +129,7 @@ def run_benchmark_matrix(n_series: int = 1000, n_steps: int = 500, seed: int = 4
 
     tracemalloc.start()
     t0 = time.perf_counter()
-    out = tsxtract.extract_features(X_large)
+    out = kymora.extract_features(X_large)
     elapsed = time.perf_counter() - t0
     current_b, peak_b = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -240,11 +240,11 @@ def run_benchmark_matrix(n_series: int = 1000, n_steps: int = 500, seed: int = 4
 def render_markdown_report(rep: dict[str, Any]) -> str:
     meta = rep["meta"]
     lines = [
-        "# Tsxtract Comprehensive Benchmark Matrix",
+        "# Kymora Comprehensive Benchmark Matrix",
         "",
         f"- **Environment**: {meta['platform']}, Python {meta['python']}, {meta['cpu_count']} CPU cores",
         f"- **Standard Batch Shape**: {meta['n_series']} series × {meta['n_steps']} points",
-        f"- **Tsxtract Version**: {meta['tsxtractor_version']}",
+        f"- **Kymora Version**: {meta['tsxtractor_version']}",
         "",
         "## 1. Profile Throughput (1,000 × 500)",
         "",
@@ -281,7 +281,7 @@ def render_markdown_report(rep: dict[str, Any]) -> str:
         "",
         "| Engine | Features | Runtime (1k × 500) | Per-Series Cost | Speedup vs Competitor |",
         "|:---|:---:|:---:|:---:|:---:|",
-        f"| **Tsxtract (`core33`)** | **33** | **{rep['profiles']['core33']['median_ms']:.2f} ms** | **{rep['profiles']['core33']['per_series_us']:.2f} µs** | **Baseline (1.0×)** |",
+        f"| **Kymora (`core33`)** | **33** | **{rep['profiles']['core33']['median_ms']:.2f} ms** | **{rep['profiles']['core33']['per_series_us']:.2f} µs** | **Baseline (1.0×)** |",
     ]
     for comp, d in rep["competitors"].items():
         lines.append(

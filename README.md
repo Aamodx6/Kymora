@@ -1,22 +1,22 @@
-# Tsxtract
+# Kymora
 ### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
 
-[![PyPI - Version](https://img.shields.io/pypi/v/tsxtract-rs.svg?color=blue)](https://pypi.org/project/tsxtract-rs/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tsxtract-rs.svg)](https://pypi.org/project/tsxtract-rs/)
+[![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kymora.svg)](https://pypi.org/project/kymora/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml)
+[![CI](https://github.com/Aamodx6/Kymora/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/ci.yml)
 
 > **Batch time-series feature extraction: 33 features at 3.18 ms median per 1,000 series x 500 steps, with zero defensive memory copies.**
 
-**Tsxtract** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
+**Kymora** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
-[PyPI](https://pypi.org/project/tsxtract-rs/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
+[PyPI](https://pypi.org/project/kymora/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
 
 ---
 
-### Why Tsxtract?
+### Why Kymora?
 
-Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Tsxtract eliminates that trade-off.
+Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Kymora eliminates that trade-off.
 
 * **Throughput (measured):** Best run **436,719 series/second** (median 314,450) on an i7-13620H laptop, 10 cores / 16 threads — about **262×** `catch22` and **6,570×** `tsfresh` raw time on the same machine (per-feature: 393× and 279× — see Benchmarks and `CLAIMS.md`).
 * **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No data duplication, no DataFrame melting, and zero intermediate memory ballooning.
@@ -31,7 +31,7 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 * **Zero-Copy Hybrid Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native-Rust multi-core loops without copying a single byte.
 * **Batch-First Parallelism:** Processes $N$ series in parallel across hardware threads instead of running serial Python loops.
 * **Dual API Support:** Extract raw 2D NumPy matrices for maximum speed, or labeled Pandas/Polars DataFrames for immediate exploratory analysis.
-* **Scikit-Learn Compatible:** Drop `TsxtractTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
+* **Scikit-Learn Compatible:** Drop `KymoraTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
 * **Realfft & Histogram Quantiles:** Preallocated per-worker FFT scratch and histogram multi-select quantiles ensure predictable sub-millisecond execution.
 * **Streaming & Sliding Windows:** Extract rolling features over continuous data streams without reallocating buffers.
 
@@ -40,22 +40,23 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 ### Installation
 
 #### Prebuilt Wheels (Recommended)
-Precompiled binary wheels are available on [PyPI (tsxtract-rs)](https://pypi.org/project/tsxtract-rs/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
+Precompiled binary wheels are available on [PyPI (kymora)](https://pypi.org/project/kymora/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
 
 ```bash
-pip install tsxtract-rs
+pip install kymora
 ```
 
 > **Name collision warning:** the bare PyPI name `tsxtract` belongs to an
-> unrelated JAX-based project. Do not install `tsxtract` and `tsxtract-rs`
-> in the same environment — both provide a top-level `tsxtract` import and
-> they will shadow each other. This package is always installed as
-> `pip install tsxtract-rs` and imported as `import tsxtract`.
+> unrelated JAX-based project. Do not install `tsxtract` and `kymora`
+> in the same environment — both provide a top-level `tsxtract` import
+> (ours only as a deprecated shim) and they will shadow each other.
+> This package is always installed as `pip install kymora` and
+> imported as `import kymora`.
 
 #### From Source (Development)
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract.git
-cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora.git
+cd Kymora
 pip install maturin
 maturin develop --release
 ```
@@ -69,23 +70,23 @@ Extract 33 features from 100,000 series in under a second:
 
 ```python
 import numpy as np
-import tsxtract as tsx
+import kymora as km
 
 # 1,000 series of 500 time-steps (float64)
 X = np.random.randn(1000, 500)
 
 # Extract 33 features (zero-copy, multi-threaded)
-features = tsx.extract_features(X)
+features = km.extract_features(X)
 
 print("Output shape:", features.shape)      # (1000, 33)
-print("Feature names:", tsx.feature_names()[:5])
+print("Feature names:", km.feature_names()[:5])
 # ['mean', 'std', 'var', 'min', 'max', ...]
 ```
 
 #### 2. Labeled Pandas DataFrame
 ```python
 # Returns a labeled pandas DataFrame with clean column headers
-df = tsx.extract_features_df(X)
+df = km.extract_features_df(X)
 print(df.head())
 ```
 
@@ -96,7 +97,7 @@ arr1 = np.random.randn(300)
 arr2 = np.random.randn(500)
 arr3 = np.random.randn(120)
 
-features = tsx.extract_features([arr1, arr2, arr3])
+features = km.extract_features([arr1, arr2, arr3])
 print(features.shape)  # (3, 33)
 ```
 
@@ -104,7 +105,7 @@ print(features.shape)  # (3, 33)
 ```python
 # Extract rolling window features from a 1D continuous sensor stream
 signal = np.random.randn(100_000)
-windowed_features = tsx.sliding_features(signal, window=256, stride=64)
+windowed_features = km.sliding_features(signal, window=256, stride=64)
 ```
 
 ---
@@ -115,23 +116,23 @@ Integrate directly into standard classification, regression, or clustering pipel
 
 ```python
 import numpy as np
-import tsxtract as tsx
+import kymora as km
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
-class TsxtractTransformer(BaseEstimator, TransformerMixin):
-    """Extract 33 Tsxtract features per input row (one series per row)."""
+class KymoraTransformer(BaseEstimator, TransformerMixin):
+    """Extract 33 Kymora features per input row (one series per row)."""
     def fit(self, X, y=None):
         return self
     def transform(self, X):
         X_contig = np.ascontiguousarray(X, dtype=np.float64)
-        return tsx.extract_features(X_contig)
+        return km.extract_features(X_contig)
 
 # Assemble end-to-end reproducible pipeline
 pipeline = Pipeline([
-    ("features", TsxtractTransformer()),
+    ("features", KymoraTransformer()),
     ("scaler", StandardScaler()),
     ("classifier", RandomForestClassifier(n_estimators=100))
 ])
@@ -146,7 +147,7 @@ y_pred = pipeline.predict(X_test)
 Maintain running statistical features in real-time embedded systems or trading loops without recomputing from scratch:
 
 ```python
-from tsxtract import StreamingExtractor
+from kymora import StreamingExtractor
 
 # Initialize streaming extractor with window capacity
 stream = StreamingExtractor(capacity=500)
@@ -175,14 +176,14 @@ Choose the performance-to-breadth profile that fits your pipeline:
 * **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
 
 ```python
-import tsxtract
+import kymora
 
 # List available profiles and feature counts
-print(tsxtract.list_profiles())
+print(kymora.list_profiles())
 # {'minimal': 10, 'core33': 33, 'extended': 143, 'full': 543}
 
 # Inspect individual features and their computational prerequisites
-print(tsxtract.describe_feature("autocorrelation__lag_1"))
+print(kymora.describe_feature("autocorrelation__lag_1"))
 ```
 
 ---
@@ -213,15 +214,15 @@ Re-measured 2026-10-04 across **1,000 series of 500 steps** (500,000 data points
 #### Competitive Landscape (1,000 × 500):
 | Library | Features | Runtime (1k × 500) | Series / sec | Speedup (raw time) | Per-feature | Speedup (per-feature) |
 | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **Tsxtract (`core33`)** | **33** | **3.18 ms** | **314,450** | **Baseline (1.0×)** | **0.0964 µs** | **Baseline (1.0×)** |
+| **Kymora (`core33`)** | **33** | **3.18 ms** | **314,450** | **Baseline (1.0×)** | **0.0964 µs** | **Baseline (1.0×)** |
 | `catch22` | 22 | 833.1 ms | 1,200 | **262× slower** | 37.87 µs | **393×** |
 | `TSFEL` | 156 | 2,541.6 ms | 393 | **799× slower** | 16.29 µs | **169×** |
 | `tsfresh` | 777 | 20,891.2 ms | 48 | **6,570× slower** | 26.89 µs | **279×** |
 
-Pooled medians: tsxtract over 4 HEAD rounds (n=400 runs), competitors over 10 rounds (n=53/83/64); 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is".
+Pooled medians: kymora over 4 HEAD rounds (n=400 runs), competitors over 10 rounds (n=53/83/64); 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is".
 
 #### Memory Footprint (100,000 series × 500 steps) †:
-* **Tsxtract:** **25.18 MiB** allocated memory (strictly the output matrix: $100,000 \times 33 \times 8\text{ B}$, with **+0.00 MiB intermediate overhead**).
+* **Kymora:** **25.18 MiB** allocated memory (strictly the output matrix: $100,000 \times 33 \times 8\text{ B}$, with **+0.00 MiB intermediate overhead**).
 * **tsfresh / Pandas:** **+1,250 MiB** memory ballooning due to melted DataFrame indices.
 
 
@@ -229,7 +230,7 @@ Pooled medians: tsxtract over 4 HEAD rounds (n=400 runs), competitors over 10 ro
 
 ### The 33 Curated Features
 
-Tsxtract deliberately computes 33 high-signal, non-redundant features spanning all temporal domains:
+Kymora deliberately computes 33 high-signal, non-redundant features spanning all temporal domains:
 * **Distribution Moments:** Mean, Standard Deviation, Variance, Skewness, Kurtosis.
 * **Extrema & Spans:** Min, Max, Peak-to-Peak Range, Quantiles (q05, q25, median, q75, q95), Interquartile Range (IQR).
 * **Dynamics & Crossing:** Zero Crossing Rate, Mean Crossing Rate, Root Mean Square (RMS), Crest Factor, Median Absolute Deviation (MAD).
@@ -243,12 +244,12 @@ Tsxtract deliberately computes 33 high-signal, non-redundant features spanning a
 ### Contributing
 
 Contributions, bug reports, and PRs are welcome!
-Please check [`CONTRIBUTING.md`](https://github.com/Aamodx6/Tsxtract/blob/main/CONTRIBUTING.md) for details on setting up the local Rust/Python development environment and running the benchmark suites.
+Please check [`CONTRIBUTING.md`](https://github.com/Aamodx6/Kymora/blob/main/CONTRIBUTING.md) for details on setting up the local Rust/Python development environment and running the benchmark suites.
 
 ---
 
 ### License
 
-Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE) for details.
+Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamodx6/Kymora/blob/main/LICENSE) for details.
 
 *Built with Rust and Python by [Aamod](https://github.com/Aamod007).*

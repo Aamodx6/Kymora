@@ -17,7 +17,7 @@ artifacts.
 ## Setup (exact commands)
 
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract.git && cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora.git && cd Kymora
 git checkout <main-tip-at-run-time>   # record the SHA in the report
 python3.12 -m venv .venv && . .venv/bin/activate
 python -m pip install --upgrade pip maturin
@@ -31,7 +31,7 @@ for v in v032 v040 vPRE vHEAD; do python3.12 -m venv --system-site-packages "/tm
 /tmp/venvs/v032/bin/python -m pip install --no-deps tsxtract-rs==0.3.2
 /tmp/venvs/v040/bin/python -m pip install --no-deps tsxtract-rs==0.4.0
 /tmp/venvs/vPRE/bin/python -m pip install --no-deps <pre-refactor-wheel>  # build via: git worktree + maturin build --release
-/tmp/venvs/vHEAD/bin/python -m pip install --no-deps <head-wheel>        # target/wheels/tsxtract_rs-*.whl
+/tmp/venvs/vHEAD/bin/python -m pip install --no-deps <head-wheel>        # target/wheels/kymora-*.whl
 ```
 
 Notes: 0.3.2 ships no manylinux wheel → its sdist builds against the
@@ -70,7 +70,7 @@ run_readme_reproduce(results_dir=Path('benchmarks/results/L16_<VER>_R<n>'))"
 | Step | Laptop-measured basis | Linux est. |
 |---|---|---|
 | Setup (clone, toolchain, venvs, 2 local wheel builds, installs, pytest) | ~15 min on laptop | ~15 min |
-| 4× F1 suite rounds (tsxtract 100 runs + catch22 + tsfel + tsfresh) | ~3 min/round | ~12 min |
+| 4× F1 suite rounds (kymora 100 runs + catch22 + tsfel + tsfresh) | ~3 min/round | ~12 min |
 | 6× bisect suite rounds | ~3 min/round | ~18 min |
 | Probes (100 timed runs each, ~10 total incl. control sets) | ~40 s each | ~7 min |
 | Scaling threads=1 cell + analysis + report | — | ~10 min |

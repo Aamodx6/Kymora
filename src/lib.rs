@@ -1,4 +1,4 @@
-//! tsxtract Rust core — PyO3 module registration only. No numeric logic here.
+//! kymora Rust core — PyO3 module registration only. No numeric logic here.
 
 mod error;
 pub mod exec;

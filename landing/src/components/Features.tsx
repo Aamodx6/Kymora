@@ -27,7 +27,7 @@ export const Features: React.FC = () => {
       tag: 'Series-dimension scaling',
       description:
         'The GIL is released immediately upon entering Rust. Extraction parallelises across the series dimension using Rayon, scaling linearly with available CPU cores.',
-      codeSnippet: '# GIL released, 16 cores fully saturated\nX = np.random.randn(100_000, 500)\nfeats = tsxtract.extract_features(X)',
+      codeSnippet: '# GIL released, 16 cores fully saturated\nX = np.random.randn(100_000, 500)\nfeats = kymora.extract_features(X)',
       badge: 'GIL-free Rayon scaling',
     },
     {
@@ -45,7 +45,7 @@ export const Features: React.FC = () => {
       tag: 'DataFrame interop',
       description:
         'Return results directly as typed Polars or Pandas DataFrames with human-readable column headers via extract_features_df(X). Keeps index and metadata intact.',
-      codeSnippet: 'df = tsxtract.extract_features_df(X)\nprint(df.columns)  # [mean, std, autokurt, ...]',
+      codeSnippet: 'df = kymora.extract_features_df(X)\nprint(df.columns)  # [mean, std, autokurt, ...]',
       badge: 'Zero serialization overhead',
     },
     {
@@ -54,7 +54,7 @@ export const Features: React.FC = () => {
       tag: 'PyO3 memory buffers',
       description:
         'Binds directly to contiguous C-order float64 numpy arrays without copying memory into Rust. Input validation enforces contiguous layouts at zero runtime penalty.',
-      codeSnippet: '# Direct memory pointer borrowed by Rust\nassert X.flags["C_CONTIGUOUS"]\nfeats = tsxtract.extract_features(X)',
+      codeSnippet: '# Direct memory pointer borrowed by Rust\nassert X.flags["C_CONTIGUOUS"]\nfeats = kymora.extract_features(X)',
       badge: '0 intermediate copies',
     },
     {

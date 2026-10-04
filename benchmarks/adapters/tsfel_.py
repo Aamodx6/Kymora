@@ -20,7 +20,7 @@ class Adapter(BaseAdapter):
     name = "tsfel"
     version = _VERSION
 
-    # The 13 TSFEL feature functions whose definitions agree with tsxtract
+    # The 13 TSFEL feature functions whose definitions agree with kymora
     # core33 (frozen in benchmarks/agreement/feature_map.json, Phase B1).
     MATCHED_TSFEL_NAMES = [
         "Mean", "Standard deviation", "Variance", "Min", "Max", "Median",

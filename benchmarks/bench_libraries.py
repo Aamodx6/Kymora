@@ -1,9 +1,9 @@
-"""Batch-throughput benchmark: tsxtract vs tsfresh vs catch22 vs TSFEL.
+"""Batch-throughput benchmark: kymora vs tsfresh vs catch22 vs TSFEL.
 
 What this measures: wall-clock time to turn a batch of `n_series` equal-length
 series into one feature row per series, which is the shape of work a feature
 pipeline actually does. It is deliberately *not* a per-feature microbenchmark --
-catch22 and TSFEL are competitive there, and the tsxtract claim is throughput
+catch22 and TSFEL are competitive there, and the kymora claim is throughput
 across a whole batch (rayon parallelises over the series dimension).
 
 Every library gets the same input matrix and is timed end to end, including the
@@ -102,13 +102,13 @@ def timed(
     return out, median, iqr, mean, std, minimum, maximum, runs, times
 
 
-def bench_tsxtractor(X: np.ndarray) -> Result:
-    import tsxtract
+def bench_kymora(X: np.ndarray) -> Result:
+    import kymora
 
-    tsxtract.extract_features(X[: min(64, len(X))])  # warm the thread pool
-    feats, med, iqr, mean, std, mn, mx, runs, times = timed(lambda: tsxtract.extract_features(X))
+    kymora.extract_features(X[: min(64, len(X))])  # warm the thread pool
+    feats, med, iqr, mean, std, mn, mx, runs, times = timed(lambda: kymora.extract_features(X))
     return Result(
-        library=f"tsxtract {tsxtract.__version__}",
+        library=f"kymora {kymora.__version__}",
         n_features=int(feats.shape[1]),  # type: ignore[union-attr]
         seconds=med,
         iqr_seconds=iqr,
@@ -225,7 +225,7 @@ def bench_tsfel(X: np.ndarray) -> Result:
 
 def render_markdown(report: Report) -> str:
     ran = [r for r in report.results if r.seconds is not None]
-    baseline = next((r for r in ran if r.library.startswith("tsxtract")), None)
+    baseline = next((r for r in ran if r.library.startswith("kymora")), None)
 
     lines = [
         "# Batch-throughput benchmark",
@@ -235,7 +235,7 @@ def render_markdown(report: Report) -> str:
         "",
         "Time is reported as Median ± IQR across repeated runs, including input reshaping.",
         "",
-        "| library | features | median time | IQR | mean time | series/s | ms/feature | vs tsxtract |",
+        "| library | features | median time | IQR | mean time | series/s | ms/feature | vs kymora |",
         "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in report.results:
@@ -266,7 +266,7 @@ def render_markdown(report: Report) -> str:
         "",
         "Read this honestly: these libraries compute different numbers of "
         "features, so total time is not a like-for-like comparison. The "
-        "tsxtract advantage is parallelising across series in native code; on "
+        "kymora advantage is parallelising across series in native code; on "
         "a single short series it will not look meaningfully faster than "
         "catch22.",
         "",
@@ -285,7 +285,7 @@ def main() -> int:
     ap.add_argument(
         "--only",
         nargs="*",
-        choices=["tsxtract", "tsfresh", "catch22", "tsfel"],
+        choices=["kymora", "tsfresh", "catch22", "tsfel"],
         default=None,
         help="run a subset (default: all available)",
     )
@@ -295,7 +295,7 @@ def main() -> int:
     X = np.ascontiguousarray(rng.standard_normal((args.n_series, args.n_steps)))
 
     benchmarks = {
-        "tsxtract": bench_tsxtractor,
+        "kymora": bench_kymora,
         "catch22": bench_catch22,
         "tsfel": bench_tsfel,
         "tsfresh": bench_tsfresh,

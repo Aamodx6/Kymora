@@ -17,18 +17,18 @@ def _get_cache_path() -> Path:
     if os.name == "nt":
         base = os.environ.get("LOCALAPPDATA")
         if base:
-            cache_dir = Path(base) / "tsxtract"
+            cache_dir = Path(base) / "kymora"
         else:
-            cache_dir = Path.home() / ".cache" / "tsxtract"
+            cache_dir = Path.home() / ".cache" / "kymora"
     else:
-        cache_dir = Path.home() / ".cache" / "tsxtract"
+        cache_dir = Path.home() / ".cache" / "kymora"
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir / "wisdom.json"
 
 
 def load_wisdom() -> dict[str, Any] | None:
     """Load cached wisdom configuration if available and not disabled."""
-    if os.environ.get("TSXTRACT_WISDOM", "").lower() in ("off", "0", "false"):
+    if os.environ.get("KYMORA_WISDOM", "").lower() in ("off", "0", "false"):
         return None
 
     path = _get_cache_path()
@@ -73,13 +73,13 @@ def tune(
         X = rng.standard_normal((min(n_series, 2000), length))
 
         # Benchmark rayon
-        os.environ["TSXTRACT_POOL"] = "rayon"
+        os.environ["KYMORA_POOL"] = "rayon"
         t0 = time.perf_counter()
         extract_features(X)
         t_rayon = time.perf_counter() - t0
 
         # Benchmark spin pool
-        os.environ["TSXTRACT_POOL"] = "spin"
+        os.environ["KYMORA_POOL"] = "spin"
         t0 = time.perf_counter()
         extract_features(X)
         t_spin = time.perf_counter() - t0

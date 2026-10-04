@@ -150,7 +150,7 @@ export const DocsSidebar: React.FC<DocsSidebarProps> = ({ onLinkClick }) => {
           <span>← Back to Landing Site</span>
         </Link>
         <a
-          href="https://github.com/Aamodx6/Tsxtract"
+          href="https://github.com/Aamodx6/Kymora"
           target="_blank"
           rel="noopener noreferrer"
           className="hover:text-ink transition flex items-center gap-1.5"

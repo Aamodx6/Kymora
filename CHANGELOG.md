@@ -10,6 +10,31 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
+## [0.7.0] - 2026-10-04
+
+### Changed
+- **Renamed `tsxtract` → `Kymora`.** PyPI distribution `kymora`
+  (`pip install kymora`), import `kymora` (conventional alias `km`),
+  extension module `kymora._core`, Rust crate `kymora`, `KymoraSelector`,
+  `KYMORA_*` environment variables, repository `Aamodx6/Kymora`.
+  Numerics, feature names/order, and the NaN/error contracts are unchanged
+  (`feature_names()` sha256 `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`).
+- Environment variables renamed `TSXTRACT_WISDOM` → `KYMORA_WISDOM` and
+  `TSXTRACT_POOL` → `KYMORA_POOL`; the wisdom cache moved to
+  `~/.cache/kymora` (`%LOCALAPPDATA%\kymora` on Windows). Old names and
+  paths are not read — re-run `tune()` after upgrading.
+- `TsxError` → `KymoraError` (Rust-internal only; Python callers still
+  receive `ValueError` with identical messages).
+
+### Deprecated
+- `import tsxtract` and `import tsxtractor` are thin shims that re-export
+  `kymora` and emit a `DeprecationWarning` on first import. Removal no
+  earlier than **0.8.0**. Migrate with:
+  `pip install kymora` + `import kymora as km` (was `import tsxtract as tsx`).
+- `tsxtract-rs` will receive one final deprecation release that depends on
+  `kymora` and re-exports it with a warning. Not yet published — see
+  `docs/RENAME_RELEASE_CHECKLIST.md`.
+
 ## [0.6.0] - 2026-10-04
 
 ### Fixed

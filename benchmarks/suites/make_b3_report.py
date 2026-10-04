@@ -15,7 +15,7 @@ from pathlib import Path
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 REPORT_DIR = Path(__file__).resolve().parent.parent / "results"
-TSXTRACT_LIB = "tsxtract"
+KYMORA_LIB = "kymora"
 
 
 def load_jsonl(filename: str) -> list[dict]:
@@ -92,12 +92,12 @@ def env_header_lines(env: dict | None, commit: str) -> list[str]:
 
 
 def compute_win_loss(rows: list[dict]) -> dict:
-    """Pair tsxtract vs every other lib per (shape, dist); count wins/losses/thin wins."""
+    """Pair kymora vs every other lib per (shape, dist); count wins/losses/thin wins."""
     ok = [r for r in rows if r.get("status") == "ok"]
     by = {(r["lib"], r["n_series"], r["length"], r["dist"]): r for r in ok}
     shapes = sorted(set((r["n_series"], r["length"]) for r in ok))
     dists = sorted(set(r["dist"] for r in ok))
-    other_libs = sorted(set(r["lib"] for r in ok) - {TSXTRACT_LIB})
+    other_libs = sorted(set(r["lib"] for r in ok) - {KYMORA_LIB})
 
     summary: dict[str, dict] = {}
     for ol in other_libs:
@@ -106,7 +106,7 @@ def compute_win_loss(rows: list[dict]) -> dict:
         loss_shapes: dict[tuple[int, int], int] = {}
         for n, l in shapes:
             for d in dists:
-                t = by.get((TSXTRACT_LIB, n, l, d))
+                t = by.get((KYMORA_LIB, n, l, d))
                 o = by.get((ol, n, l, d))
                 if not t or not o:
                     continue
@@ -222,11 +222,11 @@ def generate_report():
         # Win/loss summary (Rule 2: report losses, not just wins)
         summary = compute_win_loss(throughput)
         if summary:
-            lines.append("### 1.3 Win/loss summary (Tsxtract vs competitor, median, all 5 dists)")
+            lines.append("### 1.3 Win/loss summary (Kymora vs competitor, median, all 5 dists)")
             lines.append("")
             lines.append(
-                "| Library | Tsxtract wins | Tsxtract losses | Thin wins (<2×) | "
-                "Ratio range (competitor/tsx) | Median ratio |"
+                "| Library | Kymora wins | Kymora losses | Thin wins (<2×) | "
+                "Ratio range (competitor/km) | Median ratio |"
             )
             lines.append("|---|---|---|---|---|---|")
             for ol, s in summary.items():
@@ -241,7 +241,7 @@ def generate_report():
                         f"{n}×{l} ({c}/5)" for (n, l), c in sorted(s["loss_shapes"].items())
                     )
                     lines.append(
-                        f"- **Tsxtract loses to `{ol}`** at: {shape_str} — see LOSS_LEDGER L1."
+                        f"- **Kymora loses to `{ol}`** at: {shape_str} — see LOSS_LEDGER L1."
                     )
             lines.append("")
 
@@ -313,7 +313,7 @@ def generate_report():
                 )
             lines.append("")
             lines.append(
-                "> ⚠️ At len=10 Tsxtract wins p50 (345.8 µs vs 1317.6 µs) but loses the tail "
+                "> ⚠️ At len=10 Kymora wins p50 (345.8 µs vs 1317.6 µs) but loses the tail "
                 "(p99 15,375.8 µs vs 3,220.5 µs; max 29.1 ms) — thread-pool/FFI wake jitter on "
                 "the very first touches of a tiny input. See LOSS_LEDGER L2/L7."
             )
@@ -321,19 +321,21 @@ def generate_report():
 
         crossover_data = [r for r in latency if r.get("case") == "crossover"]
         if crossover_data:
-            lines.append("### 3.2 Crossover analysis (Tsxtract vs NumPy @ 1 series, 1 thread)")
+            lines.append("### 3.2 Crossover analysis (Kymora vs NumPy @ 1 series, 1 thread)")
             lines.append("")
-            lines.append("| Length | Tsxtract (µs) | NumPy (µs) | Winner | Ratio |")
+            lines.append("| Length | Kymora (µs) | NumPy (µs) | Winner | Ratio |")
             lines.append("|---|---|---|---|---|")
             for r in sorted(crossover_data, key=lambda x: x["length"]):
+                # Pre-rename rows use `tsx_p50_us`; post-rename rows use `km_p50_us`.
+                km_p50 = r.get("km_p50_us", r.get("tsx_p50_us"))
                 lines.append(
-                    f"| {r['length']:,} | {r['tsx_p50_us']:.1f} | {r['numpy_p50_us']:.1f} | "
+                    f"| {r['length']:,} | {km_p50:.1f} | {r['numpy_p50_us']:.1f} | "
                     f"{r['winner']} | {r.get('ratio', 0):.2f}× |"
                 )
             lines.append("")
             lines.append(
-                "**No crossover vs NumPy:** Tsxtract wins at every measured length "
-                "(7.1×–10.7×). The numba baseline does cross Tsxtract — see §1.3 and LOSS_LEDGER L1."
+                "**No crossover vs NumPy:** Kymora wins at every measured length "
+                "(7.1×–10.7×). The numba baseline does cross Kymora — see §1.3 and LOSS_LEDGER L1."
             )
             lines.append("")
 

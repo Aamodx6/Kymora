@@ -9,10 +9,10 @@ Turn raw sequences into a `(n_series, 33)` feature matrix, label it with stable 
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 rng = np.random.default_rng(0)
 X = rng.standard_normal((100, 200))
-features = tsxtract.extract_features(X)
+features = kymora.extract_features(X)
 print("Output matrix dimensions:", features.shape)
 ```
 
@@ -33,14 +33,14 @@ By the end of this guide you will be able to:
 
 ## Prerequisites
 
-You need Tsxtract plus the optional data-science stack used below:
+You need Kymora plus the optional data-science stack used below:
 
-- **Tsxtract:** `pip install "tsxtract-rs[pandas]"` for the core plus DataFrame support.
+- **Kymora:** `pip install "kymora[pandas]"` for the core plus DataFrame support.
 - **scikit-learn:** `pip install scikit-learn` for the classifier demonstration.
 - **PyArrow (optional):** `pip install pyarrow` if you want the Parquet save path.
 
 ```bash
-pip install "tsxtract-rs[pandas]" scikit-learn pyarrow
+pip install "kymora[pandas]" scikit-learn pyarrow
 ```
 
 ## Steps
@@ -75,8 +75,8 @@ Memory is C-contiguous: True
 Call `extract_features()` on the matrix. The call borrows the buffer zero-copy, releases the GIL, and spreads series across Rayon worker threads.
 
 ```python
-import tsxtract
-features = tsxtract.extract_features(X)
+import kymora
+features = kymora.extract_features(X)
 print("Features array shape:", features.shape)
 print("Features data type:", features.dtype)
 ```
@@ -91,7 +91,7 @@ Features data type: float64
 Use `extract_features_df()` when downstream work lives in pandas. Columns follow `feature_names()` order with a plain `RangeIndex`.
 
 ```python
-df_features = tsxtract.extract_features_df(X)
+df_features = kymora.extract_features_df(X)
 print("DataFrame columns:", list(df_features.columns[:6]))
 print(df_features[["mean", "std", "trend_slope", "trend_r2"]].head(3).to_string())
 ```
@@ -109,7 +109,7 @@ DataFrame columns: ['mean', 'std', 'var', 'min', 'max', 'median']
 Column order is a stability guarantee within a major version, so always resolve indices through `feature_names()` instead of hardcoding positions.
 
 ```python
-names = tsxtract.feature_names()
+names = kymora.feature_names()
 for idx, name in enumerate(names[:8]):
     print(f"Column {idx:2d} -> {name}")
 ```
@@ -135,7 +135,7 @@ ragged_batch = [
     np.ascontiguousarray(rng.standard_normal(450), dtype=np.float64),
     np.ascontiguousarray(rng.standard_normal(280), dtype=np.float64),
 ]
-ragged_features = tsxtract.extract_features(ragged_batch)
+ragged_features = kymora.extract_features(ragged_batch)
 print("Extracted matrix shape from ragged input:", ragged_features.shape)
 ```
 
@@ -197,7 +197,7 @@ This script combines synthesis, extraction, ragged handling, model training, and
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-import tsxtract
+import kymora
 rng = np.random.default_rng(123)
 n_samples = 400
 length = 250
@@ -206,16 +206,16 @@ signals_0 = np.sin(time) + rng.normal(0, 0.2, (n_samples // 2, length))
 signals_1 = np.cumsum(rng.normal(0, 0.1, (n_samples // 2, length)), axis=1)
 X = np.ascontiguousarray(np.vstack([signals_0, signals_1]), dtype=np.float64)
 y = np.array([0] * (n_samples // 2) + [1] * (n_samples // 2))
-df = tsxtract.extract_features_df(X)
+df = kymora.extract_features_df(X)
 print("Extracted DataFrame shape:", df.shape)
 ragged_sample = [np.ascontiguousarray(X[0, :100]), np.ascontiguousarray(X[1, :200]), np.ascontiguousarray(X[2, :250])]
-print("Ragged features shape:", tsxtract.extract_features(ragged_sample).shape)
+print("Ragged features shape:", kymora.extract_features(ragged_sample).shape)
 X_train, X_test, y_train, y_test = train_test_split(df.values, y, test_size=0.25, random_state=42)
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 print(f"Test accuracy: {model.score(X_test, y_test):.3f}")
 top = np.argsort(model.feature_importances_)[::-1][:3]
-print("Top 3 features:", [tsxtract.feature_names()[i] for i in top])
+print("Top 3 features:", [kymora.feature_names()[i] for i in top])
 ```
 
 ```text

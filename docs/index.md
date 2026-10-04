@@ -1,21 +1,21 @@
-# tsxtract
+# kymora
 
 High-performance time-series feature extraction for Python, powered by a native Rust engine.
 
 Extract curated statistical, temporal, spectral, multichannel, and multi-view features across large batches of time series. The Rust core operates directly on zero-copy NumPy buffers, releases the GIL, and parallelizes across series with Rayon; per-series work runs through fused single-traversal passes over lazily computed shared intermediates.
 
 ```bash
-pip install tsxtract-rs
+pip install kymora
 ```
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 
 # Batch extraction over 100,000 series
 X = np.random.randn(100_000, 500)
-feats = tsxtract.extract_features(X)       # (100_000, 33) float64
-df = tsxtract.extract_features_df(X)       # pandas DataFrame with labeled columns
+feats = kymora.extract_features(X)       # (100_000, 33) float64
+df = kymora.extract_features_df(X)       # pandas DataFrame with labeled columns
 ```
 
 ---
@@ -28,7 +28,7 @@ df = tsxtract.extract_features_df(X)       # pandas DataFrame with labeled colum
 - **Multi-View Transform Engine**: Multiply feature coverage across 8 mathematical domain views (`raw`, `diff`, `diff2`, `detrend`, `znorm`, `abs`, `logret`, `rank`) with automatic invariance pruning.
 - **Multichannel & Cross-Channel Dynamics**: Full support for 3D time-series batches `(samples, channels, length)`, evaluating per-channel baselines and pairwise cross-correlation / covariance interactions.
 - **Fleet Real-Time Streaming**: `MultiStreamExtractor` monitors thousands of live time-series streams simultaneously with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$, and a fast 12-feature tier avoids sorting and FFT.
-- **Supervised Feature Selection**: `select_features` and `TsxSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
+- **Supervised Feature Selection**: `select_features` and `KymoraSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
 
 ---
 

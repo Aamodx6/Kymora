@@ -25,7 +25,7 @@ class Adapter(BaseAdapter):
         raise NotImplementedError(
             "This adapter represents the unrelated PyPI package 'tsxtract' (JAX-based). "
             "It is maintained solely to document the name collision and ensure users "
-            "import 'tsxtract' (our high-performance Rust core) rather than the JAX package."
+            "import 'kymora' (our high-performance Rust core) rather than the JAX package."
         )
 
     def tune_info(self) -> dict[str, Any]:
@@ -33,5 +33,5 @@ class Adapter(BaseAdapter):
             "name": self.name,
             "version": self.version,
             "nature": "Name collision documentation on PyPI",
-            "recommended_resolution": "Install our package via `pip install tsxtract-rs` and use `import tsxtract`",
+            "recommended_resolution": "Install our package via `pip install kymora` and use `import kymora`",
         }

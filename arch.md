@@ -1,4 +1,4 @@
-# Tsxtract — Architecture (single source of truth)
+# Kymora — Architecture (single source of truth)
 
 **Supersedes:** the previous `arch.md` (v1.0 hardening), `arch_max.md`, `arch_zenith.md`. Delete those after the migration checklist in Appendix C passes.
 **Audience:** maintainers and Claude Code. **Style:** normative ("MUST/SHOULD"), phase-gated, evidence-driven.
@@ -26,7 +26,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 
 **Non-goals (v1.x):** custom user-defined features in Python on the hot path; GPU in the core wheel; DataFrame melting/grouping semantics; forecasting; online learning.
 
-**When NOT to use Tsxtract (publish this):**
+**When NOT to use Kymora (publish this):**
 - Tiny calls (a handful of series): fixed per-call overhead (~70 µs observed in B0 smoke, to be decomposed — §13) dominates; numba/numpy can win.
 - Need for features outside the shipped profiles or custom Python features.
 - Single very short series where Python overhead is the whole cost.
@@ -54,9 +54,9 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | ID | Finding | Evidence | Action |
 |---|---|---|---|
 | F1 | **Throughput claims disagreed:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cited ~1.80 ms / 555k series/s for `core33` | README vs release notes | ✅ RESOLVED 2026-10-04: interleaved `suites/reproduce_readme.py` (+0.3.2/0.4.0 bisect) shows BOTH old figures irreproducible on this machine at every version — README+`CLAIMS.md` rewritten from artifact (3.18 ms med / 314,450 s/s; raw 262×/799×/6,570×, per-feature 393×/169×/279×). Artifact: `benchmarks/results/F1_REPORT.md` |
-| F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (tsxtract) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
+| F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (kymora) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
 | F3 | Feature-name lists differ between README and old `arch.md` | audit | `feature_names()` is truth; list mismatches in `docs/arch_audit.md` |
-| F4 | Naming: PyPI `tsxtract-rs`, imports `tsxtract` + `tsxtract`; unrelated JAX PyPI project `tsxtract` exists; two GitHub accounts/repos | repos, PyPI | Decision D3 |
+| F4 | Naming: PyPI `kymora`, import `kymora`, crate `kymora`; unrelated JAX PyPI project `tsxtract` keeps the bare name (deprecated `tsxtract`/`tsxtractor` shims warn); two GitHub accounts/repos | repos, PyPI | Decision D3 (decided 2026-10-04: rename to Kymora, 0.7.0) |
 | F5 | Hardware wording: i7-13620H = 10 cores (6P+4E) / 16 threads, not "16 cores" | env.json | Reword all claims (§14) |
 | F6 | Streaming claim "O(1)" does not hold for quantile/spectral/entropy features | code | O(1) vs O(n) tiers documented (§8) |
 | F7 | Landing site is a client-rendered SPA (empty HTML to crawlers), default Vercel domain | fetch | Prerender, OG tags, domain (§14.4) |
@@ -71,7 +71,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 |---|---|---|
 | I1 | `profile="core33"` is the default. Names/order from `feature_names()` are **frozen for 1.x**; new features are append-only | `tests/golden/core33_names.json` + golden output file |
 | I2 | **NaN model:** a series containing NaN → all-NaN row. An undefined single feature → that feature NaN. ±inf handling is fixed and tested. Never panic | `tests/test_nan_contract.py`, property tests |
-| I3 | **Error model:** structural problems raise — zero series, zero-length series, window/stride < 1, window > length → `ValueError`; wrong dtype/shape → `TypeError`. One `TsxError → PyErr` conversion point | tests + hypothesis |
+| I3 | **Error model:** structural problems raise — zero series, zero-length series, window/stride < 1, window > length → `ValueError`; wrong dtype/shape → `TypeError`. One `KymoraError → PyErr` conversion point | tests + hypothesis |
 | I4 | **No panic crosses FFI.** `panic = "unwind"` (never abort) + `catch_unwind` backstop | fuzz, property tests |
 | I5 | **GIL released** for the whole parallel region; inputs converted to plain slices before release | test: 2 Python threads scale ≈2× |
 | I6 | Input is **borrowed, never defensively copied** (contiguous f64/f32). Output float64 unless `out_dtype` given | allocation-counting test |
@@ -86,7 +86,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 |---|---|---|
 | D1 | `feature_names()` from the built library is the single source of truth for feature names; README/docs generated from it | ✅ |
 | D2 | **Non-contiguous input:** default `contiguous="error"` (preserves documented `ValueError`); `contiguous="copy"` opt-in performs one explicit copy with a one-time warning stating the cost. Never copy silently | ✅ |
-| D3 | **Canonical import/package name.** Recommendation: PyPI `tsxtract-rs` (or rename), import `tsxtract` only; keep `tsxtract` alias as deprecated shim that warns, because an unrelated PyPI `tsxtract` (JAX) exists and can collide | ❓ owner decision |
+| D3 | **Canonical import/package name (decided 2026-10-04).** PyPI `kymora`, import `kymora` only, crate `kymora`; `tsxtract` + `tsxtractor` remain as deprecated warning shims (removal >= 0.8.0) because an unrelated PyPI `tsxtract` (JAX) exists and can collide — never `pip install tsxtract` | ✅ |
 | D4 | `compute()` of `StreamingExtractor` is **not** O(1) for all features; API exposes `compute(kind="fast"\|"all")` | ✅ |
 | D5 | Exact (unpadded) FFT is default; padded `fft_mode="fast"` is opt-in and documented non-identical | ✅ |
 | D6 | `precision="f32"` is opt-in; default stays f64 | ✅ |
@@ -99,11 +99,11 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 
 ```mermaid
 flowchart TB
-    subgraph PY["Python — python/tsxtract/"]
+    subgraph PY["Python — python/kymora/"]
         API["extract_features · extract_features_ragged · extract_features_df\nsliding_features · StreamingExtractor · feature_names · list_profiles · describe_feature\nselect_features (planned) · extract_features_mc (planned)"]
     end
     subgraph FFI["src/ffi.rs"]
-        VAL["validate (shape, dtype, contiguity, window) → TsxError"]
+        VAL["validate (shape, dtype, contiguity, window) → KymoraError"]
         PLAN["FeaturePlan::build(profile|names|views) → bitmask + required Intermediates"]
     end
     subgraph EXEC["src/exec.rs"]
@@ -126,7 +126,7 @@ src/
   (quarantined to experiment/spin-pool + experiment/soa-4x — see docs/ROADMAP.md; revival gated on Z6/Z2)
   kernels/   mod.rs reduce.rs sort.rs fft.rs perm.rs        # designated home for unsafe/SIMD (currently unsafe-free)
   features/  mod.rs stats.rs temporal.rs spectral.rs entropy.rs views.rs streaming.rs multistream.rs
-python/tsxtract/  __init__.py  _core.pyi  py.typed  (+ ../tsxtractor/ deprecated shim, removal >= 0.7.0)
+python/kymora/  __init__.py  _core.pyi  py.typed  (+ ../tsxtract/ + ../tsxtractor/ deprecated shims, removal >= 0.8.0)
 benchmarks/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md
 Makefile  Dockerfile  reproduce.sh  (repo root: benchmark + build entry points)
 tests/     golden/ reference/ property/ fixtures/
@@ -245,7 +245,7 @@ pub static FEATURES: &[FeatureDef] = &[ /* append-only; core33 occupies 0..33 in
 
 - **Views × features (Z11):** `views=("raw","diff","diff2","detrend","znorm","abs","logret","rank")`; columns `view__feature`; **invariance pruning** in the planner (e.g., autocorrelation is shift+scale invariant → skip `znorm`); each pruned combo has a redundancy test; `views=("raw",)` ≡ current output. `max_columns` guard.
 - **Multichannel (Z12):** `(n, C, L)` input; per-channel features + cross-channel (correlation/covariance-spectrum summaries, best-lag cross-correlation via cached spectra, coherence bands); `max_pairs` guard (all pairs only when C ≤ 8).
-- **Select (Z13):** `select_features(F, y, task="auto", fdr=0.05, max_corr=0.9)` — ANOVA F / rank tests / Pearson-Spearman / MI estimate, Benjamini–Yekutieli FDR, correlation-cluster redundancy pruning; Rust, parallel across features; sklearn-compatible `TsxSelector`.
+- **Select (Z13):** `select_features(F, y, task="auto", fdr=0.05, max_corr=0.9)` — ANOVA F / rank tests / Pearson-Spearman / MI estimate, Benjamini–Yekutieli FDR, correlation-cluster redundancy pruning; Rust, parallel across features; sklearn-compatible `KymoraSelector`.
 - **Large catalog (Z15):** hctsa-scale catalogs are low value; prefer views + selection over raw count.
 
 ---
@@ -253,16 +253,16 @@ pub static FEATURES: &[FeatureDef] = &[ /* append-only; core33 occupies 0..33 in
 ## 7. Python API (stable + additive)
 
 ```python
-tsx.extract_features(X, *, profile="core33", features=None, views=("raw",), n_jobs=None,
+km.extract_features(X, *, profile="core33", features=None, views=("raw",), n_jobs=None,
                      out=None, precision="f64", fft_mode="exact", contiguous="error")
-tsx.extract_features_ragged(values, offsets, *, profile=..., features=..., n_jobs=None)
-tsx.extract_features_df(X, **same)            # labeled columns == feature_names(...)
-tsx.feature_names(profile="core33", features=None, views=("raw",))
-tsx.list_profiles() -> dict[str, int];  tsx.describe_feature(name) -> dict   # cost class, needs, definition, aliases
-tsx.sliding_features(x, window, stride, *, profile=..., features=..., n_jobs=None)
-tsx.StreamingExtractor(capacity, *, features=None).push(v); .compute(kind="fast"|"all")
-tsx.tune(shapes=..., budget_s=20)             # wisdom (Z9)
-tsx.select_features(F, y, ...); tsx.extract_features_mc(X, ..., cross=True)   # planned
+km.extract_features_ragged(values, offsets, *, profile=..., features=..., n_jobs=None)
+km.extract_features_df(X, **same)            # labeled columns == feature_names(...)
+km.feature_names(profile="core33", features=None, views=("raw",))
+km.list_profiles() -> dict[str, int];  km.describe_feature(name) -> dict   # cost class, needs, definition, aliases
+km.sliding_features(x, window, stride, *, profile=..., features=..., n_jobs=None)
+km.StreamingExtractor(capacity, *, features=None).push(v); .compute(kind="fast"|"all")
+km.tune(shapes=..., budget_s=20)             # wisdom (Z9)
+km.select_features(F, y, ...); km.extract_features_mc(X, ..., cross=True)   # planned
 ```
 `features` accepts canonical names or aliases; unknown name → `ValueError` with close matches. Ship `_core.pyi` + `py.typed`. v1 calls remain valid unchanged.
 
@@ -286,11 +286,11 @@ SORT/FFT dominate `core33`, so incremental moments alone barely move `core33`; t
 ## 9. Performance Model & Ceilings
 
 ### 9.1 Reference baseline (measured 2026-10-04, F1 artifact; exploratory laptop numbers)
-1,000 series × 500, 16 threads on i7-13620H laptop (10 cores/16 threads), Windows 11, Performance plan, AC online. Pooled medians (tsxtract n=400 runs over 4 HEAD rounds; competitors n=53/83/64 over 10 rounds), 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`.
+1,000 series × 500, 16 threads on i7-13620H laptop (10 cores/16 threads), Windows 11, Performance plan, AC online. Pooled medians (kymora n=400 runs over 4 HEAD rounds; competitors n=53/83/64 over 10 rounds), 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`.
 
 | Library | Features | Runtime | µs / series-feature | Raw ratio | **Per-feature ratio** |
 |---|---|---|---|---|---|
-| Tsxtract core33 | 33 | 3.18 ms | 0.0964 | — | — |
+| Kymora core33 | 33 | 3.18 ms | 0.0964 | — | — |
 | catch22 | 22 | 833.1 ms | 37.87 | 262× | 393× |
 | TSFEL | 156 | 2,541.6 ms | 16.29 | 799× | 169× |
 | tsfresh | 777 | 20,891.2 ms | 26.89 | 6,570× | 279× |
@@ -325,17 +325,17 @@ Stop a stage when within **1.3×** of its reference bound (FFTW/pyFFTW for FFT, 
 | ID | Item | Gate (from re-baseline) | Priority |
 |---|---|---|---|
 | Z1 | Histogram multi-select (§5.2) | quantile stage >25% of per-series time | 1 |
-| Z6 | Persistent spin-then-park pool: atomic epoch + dynamic chunk counter (chunk 32–64 series, cache-line-aligned output boundaries), spin ~20–50 µs then park; rayon fallback `TSXTRACT_POOL=rayon`; panics → `TsxError` | η < 0.85 at (1k×500) or rayon wake/steal dominates flamegraph | 1 |
+| Z6 | Persistent spin-then-park pool: atomic epoch + dynamic chunk counter (chunk 32–64 series, cache-line-aligned output boundaries), spin ~20–50 µs then park; rayon fallback `KYMORA_POOL=rayon`; panics → `KymoraError` | η < 0.85 at (1k×500) or rayon wake/steal dominates flamegraph | 1 |
 | Z7 | First-touch uninit output; 64-B aligned scratch | always (cheap) | 2 |
 | Z8 | Software prefetch of next series; one DRAM touch/series | LLC-miss rate high at 100k×500 | 2 |
-| Z9 | **Wisdom auto-tuner** `tsx.tune()` → `~/.cache/tsxtract/wisdom.json` keyed by CPU model+flags+version; tunes select/sort strategy & `B`, chunk size, serial threshold, pool type, threads, AVX2/AVX-512, FFT mode; static CI-generated defaults; `TSXTRACT_WISDOM=off` | results vary >10% across machines | 2 |
+| Z9 | **Wisdom auto-tuner** `km.tune()` → `~/.cache/kymora/wisdom.json` keyed by CPU model+flags+version; tunes select/sort strategy & `B`, chunk size, serial threshold, pool type, threads, AVX2/AVX-512, FFT mode; static CI-generated defaults; `KYMORA_WISDOM=off` | results vary >10% across machines | 2 |
 | Z10 | Length-bucketed ragged scheduling (sort indices by length, one plan per bucket, scatter back) | ragged workloads slow | 2 |
 | Z4 | `precision="f32"` fast mode (f64 accumulation for sensitive reductions) | opt-in; always allowed | 2 |
 | Z2 | Lane-batched SoA mode: `L` series/vector in time-major layout (`L·n·8 B ≤ ~16 KB`), equal-length batches only | fused+ACF+perm >30% after Z1/Z3 | 3 |
 | Z3 | FFT specialization (§5.3) | FFT >35% after Z1 | 3 |
 | Z5 | Hand-fused `core33_fused` from registry via `build.rs` | last; ≥3% gain | 3 |
 | Z11–Z14 | Views, multichannel, select_features, MultiStream (§6.1, §8) | product positioning | 1 (value, not speed) |
-| Z-GPU | Separate `tsxtract-gpu` via DLPack (data already on GPU) | demonstrated demand | skip |
+| Z-GPU | Separate `kymora-gpu` via DLPack (data already on GPU) | demonstrated demand | skip |
 
 Decision table (fill at re-baseline): SORT >25% → Z1 · η<0.85 → Z6 · FFT >35% after Z1 → Z3 prototype · fused+ACF+perm >30% → Z2 · variance across machines >10% → Z9 early · all gates false → skip to output features.
 
@@ -395,10 +395,10 @@ Reference tests per feature (numpy/scipy/tsfresh/TSFEL/catch22) → kernel parit
 Moments/ACF/quantiles vs numpy: rel ≤1e-12 (f64), ≤1e-5 (f32 input) · spectral/entropy vs scipy/numpy: rel ≤1e-9 · SIMD vs scalar: rel ≤1e-12 (`abs ≤ atol + rtol·|ref|`) · cancellation test `1e9 + N(0,1)` variance within 1e-6 relative of exact.
 
 ### 12.3 Agreement classes
-EXACT ≤1e-9 · CLOSE ≤1e-5 · DIFFERENT-DEFINITION (documented in `feature_map.json` notes) · WRONG (investigate; decide with numpy/scipy + published definition; if Tsxtract is wrong, fix with a regression test).
+EXACT ≤1e-9 · CLOSE ≤1e-5 · DIFFERENT-DEFINITION (documented in `feature_map.json` notes) · WRONG (investigate; decide with numpy/scipy + published definition; if Kymora is wrong, fix with a regression test).
 
 ### 12.4 Robustness matrix (every library × every case)
-Cases: length 0–5; constant; all-zero; single NaN (first/middle/last); 1% NaN; 100% NaN; +inf/−inf/mixed; denormals; 1e300 (overflow in Σx²); 1e-300; `1e9` offset; huge dynamic range; duplicate-heavy; very long (1e7); very wide (1M×10); 1 series; 0 series; wrong dtype (object/str/complex/bool); 3-D input; `n_jobs ≤ 0`; unknown feature names; window > length; stride 0; huge window; negative strides; array mutated concurrently. Status per cell: OK-correct / OK-NaN-by-contract / **silent-wrong** (finite but disagrees with reference) / exception (type+message) / crash (segfault/hang/abort) / timeout. **Tsxtract must have zero crash/hang/silent-wrong.**
+Cases: length 0–5; constant; all-zero; single NaN (first/middle/last); 1% NaN; 100% NaN; +inf/−inf/mixed; denormals; 1e300 (overflow in Σx²); 1e-300; `1e9` offset; huge dynamic range; duplicate-heavy; very long (1e7); very wide (1M×10); 1 series; 0 series; wrong dtype (object/str/complex/bool); 3-D input; `n_jobs ≤ 0`; unknown feature names; window > length; stride 0; huge window; negative strides; array mutated concurrently. Status per cell: OK-correct / OK-NaN-by-contract / **silent-wrong** (finite but disagrees with reference) / exception (type+message) / crash (segfault/hang/abort) / timeout. **Kymora must have zero crash/hang/silent-wrong.**
 
 ### 12.5 Concurrency & process safety
 Fork after rayon init can deadlock → detect and document; `os.register_at_fork` handling or lazy pool re-init in the child; test fork/spawn/forkserver, joblib/loky, Dask. Free-threaded Python builds: track as a supported-or-not matrix entry.
@@ -431,7 +431,7 @@ Every README/landing/PyPI/release-note claim → `CLAIMS.md` row: claim → arti
 core33 26.4 MB · extended (~150) ~120 MB · full (777) ~622 MB · views×features (~1,200 cols) ~960 MB. Provide `out_dtype="float32"` and the chunked API for large profiles.
 
 ### 14.4 Website requirements (landing/)
-Prerender/SSG (no empty-HTML SPA); OG/Twitter tags + 1200×630 image, favicon, canonical, sitemap, robots, `SoftwareApplication` JSON-LD; real domain; benchmark centerpiece (log-scale chart with raw / per-feature / matched toggles, hardware caption, reproduce command, artifact link); full feature table (grouped, formulas, NaN behavior); "When not to use Tsxtract"; data fed from `benchmarks/report/results.json` only; one docs source of truth (MkDocs *or* site, not both); Lighthouse ≥95, `prefers-reduced-motion` honored, 375 px mobile, WCAG AA contrast. **Anti-slop rules:** no gradient text/glow blobs/glass cards/pill badges/fake terminal chrome/icon-card grids/invented testimonials; hero = real code + real output + number with its conditions; one accent color, one display font + one mono; cover-the-logo test.
+Prerender/SSG (no empty-HTML SPA); OG/Twitter tags + 1200×630 image, favicon, canonical, sitemap, robots, `SoftwareApplication` JSON-LD; real domain; benchmark centerpiece (log-scale chart with raw / per-feature / matched toggles, hardware caption, reproduce command, artifact link); full feature table (grouped, formulas, NaN behavior); "When not to use Kymora"; data fed from `benchmarks/report/results.json` only; one docs source of truth (MkDocs *or* site, not both); Lighthouse ≥95, `prefers-reduced-motion` honored, 375 px mobile, WCAG AA contrast. **Anti-slop rules:** no gradient text/glow blobs/glass cards/pill badges/fake terminal chrome/icon-card grids/invented testimonials; hero = real code + real output + number with its conditions; one accent color, one display font + one mono; cover-the-logo test.
 
 ---
 
@@ -460,7 +460,7 @@ Z0 re-baseline (stage table, η, IPC, LLC-miss) → Z1 select → Z2 runtime (Z6
 | B1 | Correctness & agreement; determinism; matched sets frozen | no WRONG open; `feature_map.json` frozen | ⬜ |
 | B2 | Datasets (generators deterministic; real data hashed) | manifest complete | ⬜ (code exists) |
 | B3 | Throughput, scaling, latency, memory, startup, sliding, streaming, concurrency, portability | every case has a result or explicit error row | ⬜ |
-| B4 | Robustness/edge cases + fuzz ≥30 min | `robustness_matrix.md`; zero Tsxtract crash/hang/silent-wrong | ⬜ |
+| B4 | Robustness/edge cases + fuzz ≥30 min | `robustness_matrix.md`; zero Kymora crash/hang/silent-wrong | ⬜ |
 | B5 | Downstream quality | `downstream_report.md` with significance tests | ⬜ |
 | B6 | Analysis → Loss Ledger (owner confirms ranking) | ledger ranked and committed | ⬜ |
 | B7 | Improvement loop (§13) | all ≥medium items closed or justified; no regression >3% unlogged | ⬜ |
@@ -521,7 +521,7 @@ done, then run B1. Stop at each gate and report: what was done, artifact paths, 
 ```
 
 ## Appendix B — Glossary
-**Matched features:** features whose definitions agree with a competitor's (per `feature_map.json`). **η:** parallel efficiency. **Select vs Sorted:** exact order statistics via histogram selection vs full sorted copy. **Wisdom:** cached per-machine tuning results. **View:** derived series (diff, detrend, …) on which features are computed. **Loss Ledger:** ranked list of every case where Tsxtract loses, errs, or is fragile.
+**Matched features:** features whose definitions agree with a competitor's (per `feature_map.json`). **η:** parallel efficiency. **Select vs Sorted:** exact order statistics via histogram selection vs full sorted copy. **Wisdom:** cached per-machine tuning results. **View:** derived series (diff, detrend, …) on which features are computed. **Loss Ledger:** ranked list of every case where Kymora loses, errs, or is fragile.
 
 ## Appendix C — Consolidation / migration checklist (run once)
 1. Diff the **old** `arch.md` against this file; any requirement that exists only in the old file (error-model wording, NaN edge cases, versioning rules, CI details) must be copied into §3 before deleting it.

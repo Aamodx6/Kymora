@@ -4,14 +4,14 @@ Per the owner's gate-audit instruction, for the 17 numba_baseline_fast losses:
 
   1. Table every losing (shape, dist) with ratio and bootstrap 95% CI
      (re-measured via the subprocess runner so runs[] are stored).
-  2. Per-stage timing for Tsxtract vs numba at the losing shapes:
+  2. Per-stage timing for Kymora vs numba at the losing shapes:
      fused passes, quantiles, FFT(+spectral), ACF, permutation entropy,
-     call overhead. Tsxtract stages are measured *differentially* via the
+     call overhead. Kymora stages are measured *differentially* via the
      `features=` subset API (intermediates are shared, so stage times are
      estimates; the residual is reported). Numba stages mirror the exact
      kernels in benchmarks/adapters/numba_baseline.py.
   3. Verify numba computes the same 33 features on the losing shapes
-     (per-feature agreement vs tsxtract, mapped against the frozen matched
+     (per-feature agreement vs kymora, mapped against the frozen matched
      set in feature_map.json), verify a real O(N log N) FFT (A1), and record
      which fastmath variant ran (+ a fastmath=False timing bound).
   4. Classify each loss: call-overhead / algorithmic / layout / threading /
@@ -363,17 +363,17 @@ def build_numba_stages():
 # ---------------------------------------------------------------------------
 
 def main() -> int:
-    import tsxtractor as tsx
+    import tsxtractor as km
 
     import gc  # noqa: F401
 
     print("=" * 100)
-    print("  L1 ROOT-CAUSE EVIDENCE PASS (numba_baseline_fast vs tsxtract)")
+    print("  L1 ROOT-CAUSE EVIDENCE PASS (numba_baseline_fast vs kymora)")
     print("=" * 100)
 
     # ── 0. Load throughput rows and find the losing pairs ──────────────────
     rows = [json.loads(l) for l in THROUGHPUT_JSONL.read_text(encoding="utf-8").splitlines() if l.strip()]
-    base = [r for r in rows if r.get("lib") in ("tsxtract", "numba_baseline_fast") and r.get("status") == "ok"]
+    base = [r for r in rows if r.get("lib") in ("kymora", "numba_baseline_fast") and r.get("status") == "ok"]
 
     def key(r: dict) -> tuple:
         return (r["n_series"], r["length"], r["dist"])
@@ -384,12 +384,12 @@ def main() -> int:
 
     losses = []
     for k, libs in sorted(by_key.items()):
-        if "tsxtract" in libs and "numba_baseline_fast" in libs:
-            t = libs["tsxtract"]["stats"]["median_ms"]
+        if "kymora" in libs and "numba_baseline_fast" in libs:
+            t = libs["kymora"]["stats"]["median_ms"]
             nb = libs["numba_baseline_fast"]["stats"]["median_ms"]
             if nb < t:
                 losses.append({"n_series": k[0], "length": k[1], "dist": k[2],
-                               "tsx_median_ms": t, "numba_median_ms": nb,
+                               "km_median_ms": t, "numba_median_ms": nb,
                                "ratio": t / nb})
     print(f"\n0. Found {len(losses)} losing (shape, dist) pairs in throughput.jsonl")
 
@@ -400,7 +400,7 @@ def main() -> int:
         n, length, dist = L["n_series"], L["length"], L["dist"]
         case_id = f"l1_{n}x{length}_{dist}"
         recs = {}
-        for adapter, fs, kw in (("tsxtract", "core33", {}), ("numba_baseline", "fast", {"fastmath": True})):
+        for adapter, fs, kw in (("kymora", "core33", {}), ("numba_baseline", "fast", {"fastmath": True})):
             rec = run_benchmark_subprocess(
                 adapter=adapter, suite="l1_root_cause", case_id=case_id,
                 feature_set=fs, n_series=n, length=length, dist=dist,
@@ -408,22 +408,22 @@ def main() -> int:
                 env_ref="env.json", rerun_on_high_cv=False, **kw,
             )
             recs[adapter] = rec
-        r_tsx, r_nb = recs["tsxtract"], recs["numba_baseline"]
-        t_tsx = (r_tsx.stats.get("median") or math.nan) * 1e3
+        r_km, r_nb = recs["kymora"], recs["numba_baseline"]
+        t_km = (r_km.stats.get("median") or math.nan) * 1e3
         t_nb = (r_nb.stats.get("median") or math.nan) * 1e3
-        ratio = t_tsx / t_nb if t_nb else math.nan
-        ci_lo, ci_hi = bootstrap_ratio_ci(r_tsx.runs, r_nb.runs)
+        ratio = t_km / t_nb if t_nb else math.nan
+        ci_lo, ci_hi = bootstrap_ratio_ci(r_km.runs, r_nb.runs)
         row = {
             "n_series": n, "length": length, "dist": dist,
-            "tsx_median_ms": t_tsx, "numba_median_ms": t_nb,
+            "km_median_ms": t_km, "numba_median_ms": t_nb,
             "ratio": ratio, "ratio_ci95": [ci_lo, ci_hi],
-            "tsx_runs": len(r_tsx.runs), "numba_runs": len(r_nb.runs),
+            "km_runs": len(r_km.runs), "numba_runs": len(r_nb.runs),
             "numba_fastmath_variant": r_nb.extra.get("fastmath_variant"),
             "original_ratio": L["ratio"],
         }
         loss_table.append(row)
         print(f"   [{i+1:2d}/{len(losses)}] {n:>6d}x{length:<6d} {dist:<13s} "
-              f"tsx={t_tsx:8.3f} ms  numba={t_nb:8.3f} ms  ratio={ratio:6.2f}x "
+              f"km={t_km:8.3f} ms  numba={t_nb:8.3f} ms  ratio={ratio:6.2f}x "
               f"CI[{ci_lo:.2f}, {ci_hi:.2f}]")
 
     # ── 2. Per-stage differential timing at the 4 losing shapes ───────────
@@ -431,7 +431,7 @@ def main() -> int:
     stages = build_numba_stages()
     losing_shapes = sorted({(L["n_series"], L["length"]) for L in losses})
 
-    tsx_subset_names = {
+    km_subset_names = {
         "pass1": ["mean"],
         "quantiles": ["median", "quantile_10", "quantile_25", "quantile_75", "quantile_90"],
         "fft_spectral": ["dominant_frequency", "spectral_centroid", "spectral_entropy"],
@@ -445,20 +445,20 @@ def main() -> int:
         for threads in (16, 1):
             entry: dict[str, Any] = {"n_series": n, "length": length, "threads": threads}
 
-            # Tsxtract: full core33 + feature subsets (differential)
-            t_core = _time_call(tsx.extract_features, X, profile="core33", n_jobs=threads)["median_ms"]
-            entry["tsx_core33_ms"] = t_core
+            # Kymora: full core33 + feature subsets (differential)
+            t_core = _time_call(km.extract_features, X, profile="core33", n_jobs=threads)["median_ms"]
+            entry["km_core33_ms"] = t_core
             sub = {}
-            for stage, feats in tsx_subset_names.items():
-                sub[stage] = _time_call(tsx.extract_features, X, features=feats, n_jobs=threads)["median_ms"]
+            for stage, feats in km_subset_names.items():
+                sub[stage] = _time_call(km.extract_features, X, features=feats, n_jobs=threads)["median_ms"]
             t_pass1 = sub["pass1"]
-            entry["tsx_pass1_ms"] = t_pass1
+            entry["km_pass1_ms"] = t_pass1
             for stage in ("quantiles", "fft_spectral", "acf", "perm"):
-                entry[f"tsx_{stage}_ms"] = max(0.0, sub[stage] - t_pass1)
-            entry["tsx_misc_ms"] = max(0.0, t_core - (t_pass1 + sum(entry[f"tsx_{s}_ms"] for s in ("quantiles", "fft_spectral", "acf", "perm"))))
+                entry[f"km_{stage}_ms"] = max(0.0, sub[stage] - t_pass1)
+            entry["km_misc_ms"] = max(0.0, t_core - (t_pass1 + sum(entry[f"km_{s}_ms"] for s in ("quantiles", "fft_spectral", "acf", "perm"))))
             # call-overhead floor: minimal call on the tiniest input
             X_tiny = generate_series("gaussian", 1, 10, seed=42)
-            entry["tsx_call_floor_ms"] = _time_call(tsx.extract_features, X_tiny, features=["mean"], n_jobs=threads)["median_ms"]
+            entry["km_call_floor_ms"] = _time_call(km.extract_features, X_tiny, features=["mean"], n_jobs=threads)["median_ms"]
 
             # Numba: full row + stages (first series, then averaged over batch)
             n_series_i, n_steps = X.shape
@@ -518,12 +518,12 @@ def main() -> int:
             }
             entry["numba_stages_sum_ms"] = max(0.0, t_p1 + t_p2 + t_q + t_sk + t_fft + t_acf + t_perm + t_misc)
             stage_table.append(entry)
-            print(f"   {n:>6d}x{length:<6d} T{threads:<2d} tsx={t_core:8.3f} ms "
-                  f"(floor {entry['tsx_call_floor_ms']:6.3f})  numba={entry['numba_full_ms']:8.3f} ms "
+            print(f"   {n:>6d}x{length:<6d} T{threads:<2d} km={t_core:8.3f} ms "
+                  f"(floor {entry['km_call_floor_ms']:6.3f})  numba={entry['numba_full_ms']:8.3f} ms "
                   f"(stages sum {entry['numba_stages_sum_ms']:8.3f})")
 
-    # ── 3. Agreement: numba strict vs tsxtract on the losing shapes ───────
-    print("\n3. Numba (fastmath=False) vs tsxtract agreement on losing shapes...")
+    # ── 3. Agreement: numba strict vs kymora on the losing shapes ───────
+    print("\n3. Numba (fastmath=False) vs kymora agreement on losing shapes...")
     from benchmarks.adapters.numba_baseline import Adapter as NumbaAdapter
     nb_adapter = NumbaAdapter()
     matched_set = set(json.load(open(Path(__file__).parents[1] / "agreement" / "feature_map.json"))["matched_feature_sets"]["numba_baseline"])
@@ -531,7 +531,7 @@ def main() -> int:
     for n, length in losing_shapes:
         for dist in ("gaussian", "random_walk", "ar1", "heavy_tailed", "sinusoid"):
             X = generate_series(dist, n, length, seed=42)
-            a = tsx.extract_features(X, profile="core33")
+            a = km.extract_features(X, profile="core33")
             b = nb_adapter.extract(X, feature_set="strict")
             per_feature = {}
             n_exact = n_close = n_diff = 0
@@ -605,10 +605,10 @@ def main() -> int:
         st1 = next((e for e in stage_table if e["n_series"] == n and e["length"] == length and e["threads"] == 1), None)
         if not st:
             continue
-        tsx_total = st["tsx_core33_ms"]
-        gap = row["numba_median_ms"] and (tsx_total - row["numba_median_ms"])
-        floor_share = st["tsx_call_floor_ms"] / tsx_total if tsx_total else 0
-        thread_delta = (st["tsx_core33_ms"] - st1["tsx_core33_ms"]) / st1["tsx_core33_ms"] if st1 and st1["tsx_core33_ms"] else 0
+        km_total = st["km_core33_ms"]
+        gap = row["numba_median_ms"] and (km_total - row["numba_median_ms"])
+        floor_share = st["km_call_floor_ms"] / km_total if km_total else 0
+        thread_delta = (st["km_core33_ms"] - st1["km_core33_ms"]) / st1["km_core33_ms"] if st1 and st1["km_core33_ms"] else 0
         # unfair-baseline: mismatched-feature work inside numba (skew_kurt + acf-def-diff)
         nst = st["numba_stages_ms"]
         mismatched_work = nst["skew_kurt"] + nst["acf"] * 0.5  # acf def differs, not absent; conservative half
@@ -620,8 +620,8 @@ def main() -> int:
             labels.append("threading")
         if mismatched_share_of_gap >= 0.20:
             labels.append("unfair-baseline")
-        # algorithmic: tsx quantile stage vs numba full-sort quantile stage
-        if st["tsx_quantiles_ms"] > st["numba_stages_ms"]["quantiles"] * 1.5:
+        # algorithmic: km quantile stage vs numba full-sort quantile stage
+        if st["km_quantiles_ms"] > st["numba_stages_ms"]["quantiles"] * 1.5:
             labels.append("algorithmic(quantile-stage)")
         if not labels:
             labels.append("call-overhead")  # residual: fixed FFI/plan/dispatch cost
@@ -631,7 +631,7 @@ def main() -> int:
                                 "thread_delta_16v1": thread_delta,
                                 "mismatched_share_of_gap": mismatched_share_of_gap})
         print(f"   {n:>6d}x{length:<6d} {dist:<13s} -> {'+'.join(labels)}  "
-              f"(floor {100*floor_share:.0f}% of tsx, threadΔ {100*thread_delta:+.0f}%, mismatched {100*mismatched_share_of_gap:.0f}% of gap)")
+              f"(floor {100*floor_share:.0f}% of km, threadΔ {100*thread_delta:+.0f}%, mismatched {100*mismatched_share_of_gap:.0f}% of gap)")
 
     # ── 7. Write artifacts ────────────────────────────────────────────────
     evidence = {
@@ -643,8 +643,8 @@ def main() -> int:
         "fastmath_bound": fastmath_bound,
         "classifications": classifications,
         "notes": [
-            "Tsxtract stage times are differential estimates via features= subsets "
-            "(shared intermediates; residual reported as tsx_misc_ms).",
+            "Kymora stage times are differential estimates via features= subsets "
+            "(shared intermediates; residual reported as km_misc_ms).",
             "Numba stage kernels mirror benchmarks/adapters/numba_baseline.py exactly; "
             "stages are timed as batch loops in Python (loop overhead measured via "
             "empty kernel and subtracted).",

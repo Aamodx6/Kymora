@@ -4,7 +4,7 @@ Runs the exact benchmark configuration reported in README.md:
 - 1,000 series × 500 points
 - 16 worker threads
 - Competitors pinned to README configurations:
-  * tsxtract: core33 (33 features)
+  * kymora: core33 (33 features)
   * catch22: default (22 features)
   * tsfel: get_features_by_domain() (156 features)
   * tsfresh: EfficientFCParameters (777 features)
@@ -31,8 +31,8 @@ from benchmarks.harness.runner import append_record, run_benchmark_subprocess
 from benchmarks.harness.schema import BenchmarkRecord
 
 README_TARGETS = {
-    "tsxtract": {
-        "adapter": "tsxtract",
+    "kymora": {
+        "adapter": "kymora",
         "feature_set": "core33",
         "expected_features": 33,
         "readme_ms": 1.80,
@@ -86,7 +86,7 @@ def run_readme_reproduce(results_dir: Path | None = None, skip_slow: bool = Fals
 
     freq_before = measure_cpu_freq()
     print(f"\n================================================================================")
-    print(f"  Tsxtract README Reproduction Benchmark Suite (1,000 × 500, 16 Threads)")
+    print(f"  Kymora README Reproduction Benchmark Suite (1,000 × 500, 16 Threads)")
     print(f"  CPU Frequency: {freq_before.get('current_mhz')} MHz")
     print(f"================================================================================\n")
 

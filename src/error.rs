@@ -2,7 +2,7 @@
 
 //! Structural error type for the FFI boundary.
 //!
-//! Scope discipline: `TsxError` describes *structural* problems with a call —
+//! Scope discipline: `KymoraError` describes *structural* problems with a call —
 //! shapes, lengths, window geometry, memory layout. It never describes the
 //! *values* in a series. NaN in the input is a legitimate value with a
 //! documented propagation contract (see `features::compute_all`), not an error,
@@ -13,7 +13,7 @@ use pyo3::PyErr;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum TsxError {
+pub enum KymoraError {
     /// No series at all: empty list, or a 2D array with zero rows.
     EmptyInput,
     /// A series with zero elements. `index` is its position in the batch.
@@ -39,66 +39,63 @@ pub enum TsxError {
     UnknownProfile { profile: String },
 }
 
-impl fmt::Display for TsxError {
+impl fmt::Display for KymoraError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TsxError::EmptyInput => write!(
+            KymoraError::EmptyInput => write!(
                 f,
                 "input contains no series; expected at least one series of length >= 1"
             ),
-            TsxError::EmptySeries { index } => write!(
+            KymoraError::EmptySeries { index } => write!(
                 f,
                 "series at index {index} has length 0; zero-length series are not \
                  supported (features are undefined, so this is an error rather than \
                  a NaN row)"
             ),
-            TsxError::ZeroLengthColumns => write!(
+            KymoraError::ZeroLengthColumns => write!(
                 f,
                 "input array has 0 columns; every series would be zero-length"
             ),
-            TsxError::NotContiguous { index } => match index {
+            KymoraError::NotContiguous { index } => match index {
                 Some(i) => write!(
                     f,
                     "series at index {i} is not contiguous; pass \
-                     np.ascontiguousarray(x) (tsxtract reads numpy buffers \
+                     np.ascontiguousarray(x) (kymora reads numpy buffers \
                      without copying, so a strided view cannot be used)"
                 ),
                 None => write!(
                     f,
                     "input array is not C-contiguous; pass \
-                     np.ascontiguousarray(X) (tsxtract reads numpy buffers \
+                     np.ascontiguousarray(X) (kymora reads numpy buffers \
                      without copying, so a strided view cannot be used)"
                 ),
             },
-            TsxError::NonPositiveWindowParam { name, value } => {
+            KymoraError::NonPositiveWindowParam { name, value } => {
                 write!(f, "{name} must be >= 1, got {value}")
             }
-            TsxError::WindowTooLarge { window, len } => write!(
+            KymoraError::WindowTooLarge { window, len } => write!(
                 f,
                 "window ({window}) is larger than the series length ({len})"
             ),
-            TsxError::OutputShape { rows, cols, len } => write!(
+            KymoraError::OutputShape { rows, cols, len } => write!(
                 f,
                 "internal error: cannot shape {len} values as ({rows}, {cols})"
             ),
-            TsxError::UnknownFeature { name } => {
-                write!(
-                    f,
-                    "unknown feature '{name}'; check tsxtract.feature_names()"
-                )
+            KymoraError::UnknownFeature { name } => {
+                write!(f, "unknown feature '{name}'; check kymora.feature_names()")
             }
-            TsxError::UnknownProfile { profile } => {
+            KymoraError::UnknownProfile { profile } => {
                 write!(f, "unknown profile '{profile}'; valid profiles: 'core33', 'minimal', 'extended', 'full'")
             }
         }
     }
 }
 
-impl std::error::Error for TsxError {}
+impl std::error::Error for KymoraError {}
 
 /// Single conversion point: every structural error becomes a Python `ValueError`.
-impl From<TsxError> for PyErr {
-    fn from(e: TsxError) -> PyErr {
+impl From<KymoraError> for PyErr {
+    fn from(e: KymoraError) -> PyErr {
         PyValueError::new_err(e.to_string())
     }
 }

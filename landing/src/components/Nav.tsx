@@ -7,7 +7,7 @@ export const Nav: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract-rs');
+      await navigator.clipboard.writeText('pip install kymora');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -23,7 +23,7 @@ export const Nav: React.FC = () => {
           <a
             href="#"
             className="group flex items-center gap-2.5 text-ink transition-opacity hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-            aria-label="tsxtract home"
+            aria-label="kymora home"
           >
             {/* Minimal geometric mark matching reference aesthetic */}
             <div className="flex h-5 w-5 flex-col justify-between py-0.5" aria-hidden="true">
@@ -33,7 +33,7 @@ export const Nav: React.FC = () => {
               <span className="h-[2px] w-3 bg-ink transition-transform group-hover:scale-x-110" />
             </div>
             <span className="font-sans text-xl font-bold tracking-tight text-ink">
-              tsxtract
+              kymora
             </span>
           </a>
         </div>
@@ -65,7 +65,7 @@ export const Nav: React.FC = () => {
             Docs
           </Link>
           <a
-            href="https://github.com/Aamodx6/Tsxtract"
+            href="https://github.com/Aamodx6/Kymora"
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
@@ -83,7 +83,7 @@ export const Nav: React.FC = () => {
             aria-label="Copy install command"
           >
             <span className="text-muted select-none">$</span>
-            <span className="font-semibold">pip install tsxtract-rs</span>
+            <span className="font-semibold">pip install kymora</span>
             <span className="ml-1 text-muted group-hover:text-ink" aria-hidden="true">
               {copied ? (
                 <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -104,7 +104,7 @@ export const Nav: React.FC = () => {
           </button>
 
           <a
-            href="https://github.com/Aamodx6/Tsxtract"
+            href="https://github.com/Aamodx6/Kymora"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:inline-flex h-9 items-center justify-center rounded-md bg-ink px-3.5 text-[13.5px] font-semibold text-white shadow-btn transition hover:bg-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
@@ -164,7 +164,7 @@ export const Nav: React.FC = () => {
               Documentation
             </Link>
             <a
-              href="https://github.com/Aamodx6/Tsxtract"
+              href="https://github.com/Aamodx6/Kymora"
               target="_blank"
               rel="noopener noreferrer"
               className="py-1 hover:text-ink"

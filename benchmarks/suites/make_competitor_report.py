@@ -29,15 +29,15 @@ SHAPES = [(1, 100), (1, 10_000), (10, 500), (100, 100), (100, 500), (100, 5_000)
 
 # display order + label
 VARIANT_LABELS = {
-    "tsxtract": "Tsxtract core33",
+    "kymora": "Kymora core33",
     "catch22": "catch22 (22)",
     "tsfel": "TSFEL (156, README cfg)",
     "tsfel_matched": "TSFEL matched (13)",
-    "tsxtract_matched_tsfel": "Tsxtract matched-tsfel (13)",
+    "tsxtract_matched_tsfel": "Kymora matched-tsfel (13)",
     "tsfresh_e2e": "tsfresh (777, e2e)",
     "tsfresh_extract_only": "tsfresh (777, extract-only)",
     "tsfresh_matched": "tsfresh matched (13)",
-    "tsxtract_matched_tsfresh": "Tsxtract matched-tsfresh (13)",
+    "tsxtract_matched_tsfresh": "Kymora matched-tsfresh (13)",
     "antropy": "antropy (8)",
     "tsflex": "tsflex (7 stats)",
     "sktime_catch22": "sktime Catch22 (22)",
@@ -59,9 +59,9 @@ def load_rows() -> dict[tuple, dict]:
             lib = r.get("lib")
             fset = r.get("feature_set", "default")
             v = r.get("extra", {}).get("variant")
-            if lib == "tsxtract" and fset == "core33":
-                variant = "tsxtract"
-            elif lib == "tsxtract":
+            if lib == "kymora" and fset == "core33":
+                variant = "kymora"
+            elif lib == "kymora":
                 variant = f"tsxtract_{fset}"
             elif lib == "numba_baseline":
                 variant = "numba_baseline_fast"
@@ -135,7 +135,7 @@ def main() -> int:
     lines.append("**Protocol:** fresh subprocess per case, warmup, GC disabled; per-case wall-clock timeout recorded as an explicit `timeout` row; tsfresh/sktime slow families use min_runs=1 (single full run dominates); see `benchmarks/suites/throughput_competitors.py`.\n")
 
     dists = ["gaussian", "random_walk", "ar1", "heavy_tailed", "sinusoid"]
-    variants = ["tsxtract", "catch22", "tsfel", "tsfresh_e2e", "tsfresh_extract_only",
+    variants = ["kymora", "catch22", "tsfel", "tsfresh_e2e", "tsfresh_extract_only",
                 "antropy", "tsflex", "sktime_catch22"]
 
     # ── View 1+2 table per shape (gaussian + all dists aggregated min) ─────
@@ -147,9 +147,9 @@ def main() -> int:
         def get(variant: str, dist: str) -> dict | None:
             return rows.get((variant, n, length, dist))
 
-        tsx_row = get("tsxtract", "gaussian")
-        tsx_med = med_ms(tsx_row)
-        tsx_nf = n_features(tsx_row) or 33
+        km_row = get("kymora", "gaussian")
+        km_med = med_ms(km_row)
+        km_nf = n_features(km_row) or 33
 
         for variant in variants:
             agg_med = [med_ms(get(variant, d)) for d in dists]
@@ -163,8 +163,8 @@ def main() -> int:
             med = min(agg_med_ok)  # best dist (documented)
             nf = n_features(get(variant, "gaussian")) or 0
             us_sf = med * 1000 / max(1, n * nf) if med == med else math.nan
-            raw_ratio = med / tsx_med if med == med and tsx_med == tsx_med else math.nan
-            if variant == "tsxtract":
+            raw_ratio = med / km_med if med == med and km_med == km_med else math.nan
+            if variant == "kymora":
                 raw_ratio = 1.0
 
             matched_col = "—"
@@ -230,10 +230,10 @@ def main() -> int:
 - **catch22**: pycatch22 serial per-series loop; `multiprocessing.Pool(16)` variant is what runs at threads=16 (adapter default fast config).
 - **TSFEL**: `get_features_by_domain()` (README 156-feature config), joblib `Parallel(n_jobs=16)`.
 - **tsfresh**: `EfficientFCParameters` (README 777-feature config), `n_jobs=16`. End-to-end includes long-format DataFrame construction; extract-only builds the DataFrame outside the timed region (`variant=extract_only`).
-- **Matched-feature runs**: only the 13 definition-agreed features per competitor (frozen in `benchmarks/agreement/feature_map.json`); Tsxtract matched runs use the same 13 via the `features=` subset API.
+- **Matched-feature runs**: only the 13 definition-agreed features per competitor (frozen in `benchmarks/agreement/feature_map.json`); Kymora matched runs use the same 13 via the `features=` subset API.
 - **antropy / tsflex / sktime**: included where installed; matched set vs core33 is empty (B1), so matched view is N/A.
-- Per-case subprocess import overhead (numba/pandas/tsfresh) is *included* in competitor wall times — a conservative choice against Tsxtract.
-- Dist aggregation in the per-shape tables reports the **best** dist median per library (worst-case vs Tsxtract); per-dist detail tables above give all five.
+- Per-case subprocess import overhead (numba/pandas/tsfresh) is *included* in competitor wall times — a conservative choice against Kymora.
+- Dist aggregation in the per-shape tables reports the **best** dist median per library (worst-case vs Kymora); per-dist detail tables above give all five.
 """)
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {OUT_MD} ({len(lines)} lines)")

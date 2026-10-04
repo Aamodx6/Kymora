@@ -1,4 +1,4 @@
-"""Type stubs for the compiled ``tsxtract._core`` extension module."""
+"""Type stubs for the compiled ``kymora._core`` extension module."""
 
 from typing import Sequence
 

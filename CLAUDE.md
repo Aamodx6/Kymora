@@ -6,14 +6,14 @@ contributor rules are in `CONTRIBUTING.md`.
 
 ## Dev loop (critical)
 
-pytest imports the **installed** package (site-packages), not `python/tsxtract/`
+pytest imports the **installed** package (site-packages), not `python/kymora/`
 from the working tree. After any change to Python or Rust source:
 
 ```bash
 maturin develop --release        # inside an active venv (maturin requires one)
 # or, without a venv:
 python -m maturin build --release
-pip install --force-reinstall --no-deps target/wheels/tsxtract_rs-*.whl
+pip install --force-reinstall --no-deps target/wheels/kymora-*.whl
 ```
 
 Bare `maturin build` is a debug build (~10× slower) — always `--release` for
@@ -28,7 +28,7 @@ cargo fmt --all -- --check
 cargo clippy --no-default-features --all-targets -- -D warnings
 python tools/validation_report.py          # feature-drift check
 python -m mkdocs build --strict
-python -m mypy python/tsxtract
+python -m mypy python/kymora
 ```
 
 Feature-order invariant: `feature_names()` must keep sha256
@@ -41,12 +41,14 @@ Feature-order invariant: `feature_names()` must keep sha256
   pass-through. No new computation in `python/`.
 - **No panic crosses the FFI boundary**: no `unwrap`/`expect`/panicking index
   on user-reachable paths in `src/ffi.rs`.
-- **Structural errors vs NaN values stay separate**: `TsxError` never describes
+- **Structural errors vs NaN values stay separate**: `KymoraError` never describes
   values; NaN has its own documented propagation contract (`docs/nan-policy.md`).
-- Naming (D-series, `docs/refactor/naming.md`): import `tsxtract`, PyPI dist
-  `tsxtract-rs` (bare `tsxtract` on PyPI is an unrelated project — never
-  `pip install tsxtract`), crate `tsxtract`, `python/tsxtractor/` is a
-  deprecated shim.
+- Naming (D-series, `docs/refactor/naming.md`, `docs/naming/NAME_CHECK.md`):
+  import `kymora`, PyPI dist `kymora` (bare `tsxtract` on PyPI is an
+  unrelated JAX project — never `pip install tsxtract`), crate `kymora`,
+  `KymoraSelector` (with deprecated alias `TsxSelector`),
+  `python/tsxtract/` + `python/tsxtractor/` are deprecated shims
+  (removal >= 0.8.0).
 - Never edit `benchmarks/results/` artifacts in place; never `git add -A`
   (bench run outputs must stay untracked).
 
@@ -54,8 +56,8 @@ Feature-order invariant: `feature_names()` must keep sha256
 
 - `src/` Rust core; unsafe only in `ffi.rs` (helpers + SAFETY contract) and
   `kernels/` by convention (`#![deny(unsafe_code)]` elsewhere).
-- `python/tsxtract/` real package (`__init__.py`, `select.py`, `tune.py`,
-  `_core.pyi`); `python/tsxtractor/` shim.
+- `python/kymora/` real package (`__init__.py`, `select.py`, `tune.py`,
+  `_core.pyi`); `python/tsxtract/` + `python/tsxtractor/` shims.
 - `tests/` goldens in `tests/golden/` — never regenerate to "fix" a failure
   without understanding the drift first.
 - `docs/` mkdocs site (deployed by `.github/workflows/docs.yml`);

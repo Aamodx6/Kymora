@@ -27,7 +27,7 @@ import numpy as np
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from benchmarks.adapters.tsxtract import Adapter as TsxtractAdapter
+from benchmarks.adapters.kymora import Adapter as KymoraAdapter
 from benchmarks.adapters.numpy_baseline import Adapter as NumpyAdapter
 from benchmarks.adapters.numba_baseline import Adapter as NumbaAdapter
 from benchmarks.datasets.generators import generate_series, ALL_DISTRIBUTIONS
@@ -195,15 +195,15 @@ def run_throughput_suite(
 
     # ── 1. Initialize adapters ──
     print("1. Initializing adapters...")
-    tsx = TsxtractAdapter()
+    km = KymoraAdapter()
     np_baseline = NumpyAdapter()
     nb_baseline = NumbaAdapter()
-    print(f"   Tsxtract: {tsx.version}")
+    print(f"   Kymora: {km.version}")
     print(f"   NumPy baseline: {np_baseline.version}")
     print(f"   Numba baseline: {nb_baseline.version}")
 
     adapters = {
-        "tsxtract": (tsx, "core33", {}),
+        "kymora": (km, "core33", {}),
         "numpy_baseline": (np_baseline, "default", {}),
         "numba_baseline_fast": (nb_baseline, "fast", {"fastmath": True}),
     }
@@ -356,18 +356,18 @@ def run_throughput_suite(
 
     # ── 6. Ratio table ──
     print("\n" + "-" * 80)
-    print("  Speedup ratios vs Tsxtract @ 1000×500 gaussian (median)")
+    print("  Speedup ratios vs Kymora @ 1000×500 gaussian (median)")
     print("-" * 80)
 
-    tsx_1k = [
+    km_1k = [
         r for r in all_results
-        if r["lib"] == "tsxtract" and r["n_series"] == 1000 and r["length"] == 500
+        if r["lib"] == "kymora" and r["n_series"] == 1000 and r["length"] == 500
         and r["status"] == "ok" and r["dist"] == "gaussian"
     ]
-    if tsx_1k:
-        tsx_median = tsx_1k[0]["stats"]["median_ms"]
+    if km_1k:
+        km_median = km_1k[0]["stats"]["median_ms"]
         for lib in lib_names:
-            if lib == "tsxtract":
+            if lib == "kymora":
                 continue
             matching = [
                 r for r in all_results
@@ -376,10 +376,10 @@ def run_throughput_suite(
             ]
             if matching:
                 lib_median = matching[0]["stats"]["median_ms"]
-                raw_ratio = lib_median / tsx_median if tsx_median > 0 else float("inf")
+                raw_ratio = lib_median / km_median if km_median > 0 else float("inf")
                 n_feat_lib = matching[0].get("n_features", 33)
-                n_feat_tsx = tsx_1k[0].get("n_features", 33)
-                pf_ratio = (lib_median / n_feat_lib) / (tsx_median / n_feat_tsx) if n_feat_tsx > 0 and n_feat_lib > 0 else float("nan")
+                n_feat_km = km_1k[0].get("n_features", 33)
+                pf_ratio = (lib_median / n_feat_lib) / (km_median / n_feat_km) if n_feat_km > 0 and n_feat_lib > 0 else float("nan")
                 print(f"  {lib:25s}  raw={raw_ratio:>8.1f}×  per-feat={pf_ratio:>8.1f}×")
 
     print("\n" + "=" * 80)

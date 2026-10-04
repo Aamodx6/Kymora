@@ -46,9 +46,9 @@ immediately rather than after burning a thread pool:
 | Wrong dtype (not float64) or wrong shape | `TypeError` |
 
 ```python
->>> tsxtract.extract_features(np.zeros((0, 10)))
+>>> kymora.extract_features(np.zeros((0, 10)))
 ValueError: input contains no series; expected at least one series of length >= 1
->>> tsxtract.sliding_features(np.zeros(10), window=20)
+>>> kymora.sliding_features(np.zeros(10), window=20)
 ValueError: window (20) is larger than the series length (10)
 ```
 

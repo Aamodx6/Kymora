@@ -1,7 +1,7 @@
 # Roadmap — quarantined experiments
 
 Two uncalled Zenith-session prototypes were removed from `main`
-(`refactor/tsxtract`) and preserved on experiment branches. They are **not
+(`refactor/kymora`) and preserved on experiment branches. They are **not
 deleted**; they are **not wired**. Revival is gated on measurement per
 `arch.md` — "decide, then build".
 
@@ -25,14 +25,15 @@ Still-true post-1.0 ideas from the v1.0 PRD (§15), not otherwise tracked:
 ## experiment/spin-pool — persistent spin-then-park pool (NEEDS-OWNER #7)
 
 - Contents: `src/pool.rs` (222 lines) as of `f7282a0`; was declared as
-  `pub mod pool` in `src/lib.rs` with **zero callers**. `TSXTRACT_POOL`
+   `pub mod pool` in `src/lib.rs` with **zero callers**. `TSXTRACT_POOL`
+  (pre-rename name; now `KYMORA_POOL`)
   is read by nothing; `tune.py`'s pool dimension benchmarks variants of
   a backend that does not exist (recorded as provisional in
   `docs/api.md`).
 - Revival gate — **arch.md Z6** (§10): re-baseline shows parallel
   efficiency η < 0.85 at (1k×500), **or** rayon wake/steal dominates the
-  flamegraph. On revival, Z6 also requires: `TSXTRACT_POOL=rayon`
-  fallback, panics converted to `TsxError`, loom/stress tests + env
+   flamegraph. On revival, Z6 also requires: `KYMORA_POOL=rayon`
+  fallback, panics converted to `KymoraError`, loom/stress tests + env
   switch (arch.md §12 pool row), and the §9.4 stop rule (stop after two
   consecutive attempts each gaining <3% end-to-end).
 - Revive with: `git checkout experiment/spin-pool -- src/pool.rs`, then

@@ -68,7 +68,7 @@ const DocsLayoutInner: React.FC<DocsLayoutInnerProps> = ({ children, headings })
               to="/"
               className="flex items-center gap-2 font-sans font-bold text-lg tracking-tight text-ink hover:opacity-85 transition"
             >
-              <span>tsxtract</span>
+              <span>kymora</span>
               <span className="text-xs font-mono font-normal text-muted">/ docs</span>
             </Link>
           </div>
@@ -105,7 +105,7 @@ const DocsLayoutInner: React.FC<DocsLayoutInnerProps> = ({ children, headings })
             </button>
 
             <a
-              href="https://github.com/Aamodx6/Tsxtract"
+              href="https://github.com/Aamodx6/Kymora"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-md border border-borderLine bg-card px-2.5 text-xs font-medium text-ink hover:border-ink transition"

@@ -46,7 +46,7 @@ STREAM_COMPUTE_EVERY = 64   # compute cadence in the simulation
 def _record(case_id: str, status: str, runs: list[float], msg: str | None,
             extra: dict[str, Any]) -> BenchmarkRecord:
     rec = BenchmarkRecord(
-        suite="streaming", case_id=case_id, lib="tsxtract", feature_set="core33",
+        suite="streaming", case_id=case_id, lib="kymora", feature_set="core33",
         n_series=extra.get("capacity", 1), length=extra.get("capacity", 1),
         dtype="float64", layout="C", threads=1, dist="gaussian",
         runs=runs, stats=compute_stats(runs), peak_rss_mb=float(extra.get("rss_delta_mb", 0.0)),
@@ -66,10 +66,10 @@ def _append(rec: BenchmarkRecord) -> None:
 
 def _gate(ex, s: np.ndarray, cap: int) -> tuple[bool, float, str | None]:
     """Verify streaming compute == batch extract on the same buffer."""
-    import tsxtract
+    import kymora
     x = s[None, :]
     all_out = ex.compute(kind="all")
-    ref = tsxtract.extract_features(x, profile="core33")[0]
+    ref = kymora.extract_features(x, profile="core33")[0]
     if all_out.shape != ref.shape:
         return False, float("inf"), f"shape mismatch {all_out.shape} vs {ref.shape}"
     denom = np.maximum(np.abs(ref), 1e-12)
@@ -79,7 +79,7 @@ def _gate(ex, s: np.ndarray, cap: int) -> tuple[bool, float, str | None]:
 
     fast_names = list(type(ex).fast_feature_names())
     fast_out = ex.compute(kind="fast")
-    ref_fast = tsxtract.extract_features(x, features=fast_names)[0]
+    ref_fast = kymora.extract_features(x, features=fast_names)[0]
     if fast_out.shape != ref_fast.shape:
         return False, float("inf"), f"fast shape mismatch {fast_out.shape} vs {ref_fast.shape}"
     denom_f = np.maximum(np.abs(ref_fast), 1e-12)
@@ -90,7 +90,7 @@ def _gate(ex, s: np.ndarray, cap: int) -> tuple[bool, float, str | None]:
 
 
 def run_capacity(cap: int, threads: int) -> None:
-    import tsxtract
+    import kymora
     import psutil
 
     case_prefix = f"stream_cap{cap}"
@@ -101,7 +101,7 @@ def run_capacity(cap: int, threads: int) -> None:
     s = np.ascontiguousarray(rng.standard_normal(cap), dtype=np.float64)
 
     def fresh():
-        ex = tsxtract.StreamingExtractor(cap)
+        ex = kymora.StreamingExtractor(cap)
         for v in s:
             ex.push(float(v))
         return ex
@@ -169,12 +169,12 @@ def run_capacity(cap: int, threads: int) -> None:
     ex = fresh()
     x = s[None, :]
     for _ in range(5):
-        tsxtract.extract_features(x, profile="core33", n_jobs=threads)
+        kymora.extract_features(x, profile="core33", n_jobs=threads)
     gc.disable()
     times = []
     for _ in range(max(10, NAIVE_RUNS if cap <= 4096 else 30)):
         t0 = time.perf_counter()
-        tsxtract.extract_features(x, profile="core33", n_jobs=threads)
+        kymora.extract_features(x, profile="core33", n_jobs=threads)
         times.append(time.perf_counter() - t0)
     gc.enable()
     st = compute_stats(times)
@@ -209,13 +209,13 @@ def run_capacity(cap: int, threads: int) -> None:
 
 def run_end_to_end() -> None:
     """Push STREAM_LENGTH values with periodic compute vs naive full recompute."""
-    import tsxtract
+    import kymora
 
     cap = 256
     rng = np.random.default_rng(42)
     data = rng.standard_normal(STREAM_LENGTH)
 
-    ex = tsxtract.StreamingExtractor(cap)
+    ex = kymora.StreamingExtractor(cap)
     # fill
     for v in data[:cap]:
         ex.push(float(v))
@@ -237,7 +237,7 @@ def run_end_to_end() -> None:
     for i in range(cap, STREAM_LENGTH):
         window.pop(0); window.append(data[i])
         if i % STREAM_COMPUTE_EVERY == 0:
-            tsxtract.extract_features(np.asarray(window)[None, :], profile="core33", n_jobs=1)
+            kymora.extract_features(np.asarray(window)[None, :], profile="core33", n_jobs=1)
             n_computes += 1
     naive_s = time.perf_counter() - t0
     gc.enable()

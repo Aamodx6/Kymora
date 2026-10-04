@@ -1,4 +1,4 @@
-"""Statistical utilities for the Tsxtract benchmark harness.
+"""Statistical utilities for the Kymora benchmark harness.
 
 Provides pyperf-style metrics:
 - min, median, IQR (q75 - q25), mean, std, p95, CV

@@ -1,4 +1,4 @@
-# Contributing to tsxtract
+# Contributing to kymora
 
 Thanks for looking. This project has a deliberately small surface, so the most
 useful contributions are usually correctness work, docs, and platform support
@@ -10,8 +10,8 @@ before opening a PR that adds one.
 You need a [Rust toolchain](https://rustup.rs/) and Python 3.10+.
 
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract
-cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora
+cd Kymora
 python -m venv .venv
 . .venv/bin/activate          # .venv\Scripts\activate on Windows
 pip install maturin
@@ -68,14 +68,14 @@ commits unless a phase record explicitly says otherwise.
 Three constraints keep the correctness story tractable. A PR that breaks one will
 be asked to change approach, not just to fix a test.
 
-1. **No numeric logic in Python.** `python/tsxtract/__init__.py` is a
+1. **No numeric logic in Python.** `python/kymora/__init__.py` is a
    pass-through with docstrings. All math lives in `src/features/`, so there is
    exactly one implementation to validate.
 2. **No panic may cross the FFI boundary.** No `unwrap`, `expect`, or panicking
    index on a user-reachable path in `src/ffi.rs` or `src/extract.rs`. Fallible
-   steps return `Result<_, TsxError>`; `src/error.rs` is the single conversion
+   steps return `Result<_, KymoraError>`; `src/error.rs` is the single conversion
    point to `PyErr`.
-3. **Structural errors and NaN values stay separate.** `TsxError` describes
+3. **Structural errors and NaN values stay separate.** `KymoraError` describes
    shapes, lengths, and layout — never the values in a series. NaN is a value
    with a documented propagation contract. Do not let those code paths merge.
 
@@ -137,7 +137,7 @@ Everyone participating agrees to follow the
 
 ## Reporting bugs
 
-Include your OS, Python version, `tsxtract.__version__`, and a runnable
+Include your OS, Python version, `kymora.__version__`, and a runnable
 snippet. For a wrong-value report, include what you expected and how you
 computed it (a numpy/scipy expression is ideal) — that turns the report straight
 into a test case.

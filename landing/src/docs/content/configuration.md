@@ -1,16 +1,16 @@
 ---
 title: "Configuration & Environment Variables"
-description: "Runtime controls, thread tuning, environment variables, and compilation flags for Tsxtract."
+description: "Runtime controls, thread tuning, environment variables, and compilation flags for Kymora."
 order: 12
 section: "Reference"
 ---
 
-Tsxtract has no configuration file. Per-call behavior is fully described by arguments, plus two `TSXTRACT_*` environment variables consumed by the wisdom tuner (`python/tsxtract/tune.py`; the Rust core itself reads no environment). The tunable surface is therefore small — call arguments at run time and build flags at compile time.
+Kymora has no configuration file. Per-call behavior is fully described by arguments, plus two `KYMORA_*` environment variables consumed by the wisdom tuner (`python/kymora/tune.py`; the Rust core itself reads no environment). The tunable surface is therefore small — call arguments at run time and build flags at compile time.
 
 ```python
-import tsxtract
-print(tsxtract.__version__)
-print(len(tsxtract.feature_names()))
+import kymora
+print(kymora.__version__)
+print(len(kymora.feature_names()))
 ```
 
 ```text
@@ -43,12 +43,12 @@ There is deliberately nothing else: no feature toggles and no plugin registry. T
 
 | Name | Default | Effect | Example |
 | :--- | :--- | :--- | :--- |
-| `TSXTRACT_WISDOM` | unset (enabled) | `off`/`0`/`false` disables loading the cached `tune()` wisdom file | `TSXTRACT_WISDOM=off python job.py` |
-| `TSXTRACT_POOL` | unset (Rayon) | Recorded by `tune()` when comparing pool variants | Set by `tune()` during benchmarking |
+| `KYMORA_WISDOM` | unset (enabled) | `off`/`0`/`false` disables loading the cached `tune()` wisdom file | `KYMORA_WISDOM=off python job.py` |
+| `KYMORA_POOL` | unset (Rayon) | Recorded by `tune()` when comparing pool variants | Set by `tune()` during benchmarking |
 | `RAYON_NUM_THREADS` | Core count | Caps Rayon worker threads process-wide (standard Rayon mechanism) | `RAYON_NUM_THREADS=4 python job.py` |
 
 > [!NOTE]
-> `TSXTRACT_WISDOM` selects the cache file by machine signature (`platform.machine`-`platform.processor`) and ignores mismatched hosts. The cached `pool` recommendation is currently advisory: the alternative spin backend lives in `experiment/spin-pool`, so main runs the Rayon pool. `RAYON_NUM_THREADS` is honored by Rayon's default global pool, but no thread-count test exists in this repo — treat pinned-thread benchmarks as unverified until a test covers them.
+> `KYMORA_WISDOM` selects the cache file by machine signature (`platform.machine`-`platform.processor`) and ignores mismatched hosts. The cached `pool` recommendation is currently advisory: the alternative spin backend lives in `experiment/spin-pool`, so main runs the Rayon pool. `RAYON_NUM_THREADS` is honored by Rayon's default global pool, but no thread-count test exists in this repo — treat pinned-thread benchmarks as unverified until a test covers them.
 
 ## Build flags
 
@@ -80,7 +80,7 @@ Version floors from `pyproject.toml` that constrain environments:
 | :--- | :--- | :--- | :--- |
 | `requires-python` | `>=3.10` | Older interpreters cannot install the package | `python --version` |
 | `numpy` | `>=1.24` | Minimum array runtime | `pip install "numpy>=1.24"` |
-| `pandas` (extra) | `>=1.5` | Needed only for `extract_features_df()` | `pip install "tsxtract-rs[pandas]"` |
+| `pandas` (extra) | `>=1.5` | Needed only for `extract_features_df()` | `pip install "kymora[pandas]"` |
 | `maturin` (build) | `>=1.14,<2.0` | Build backend for source builds | `pip install "maturin>=1.14,<2.0"` |
 
 ## See also

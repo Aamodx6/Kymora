@@ -1,7 +1,7 @@
 # Contributing
 
 The full guide lives in
-[CONTRIBUTING.md](https://github.com/Aamodx6/Tsxtract/blob/main/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/Aamodx6/Kymora/blob/main/CONTRIBUTING.md)
 in the repository. This page is the short version.
 
 ## Setup
@@ -9,8 +9,8 @@ in the repository. This page is the short version.
 You need a [Rust toolchain](https://rustup.rs/) and Python 3.10+.
 
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract
-cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora
+cd Kymora
 python -m venv .venv
 . .venv/bin/activate          # .venv\Scripts\activate on Windows
 pip install maturin
@@ -39,12 +39,12 @@ flag.
 
 ## Architecture rules
 
-1. **No numeric logic in Python.** `python/tsxtract/__init__.py` is a
+1. **No numeric logic in Python.** `python/kymora/__init__.py` is a
    pass-through with docstrings; all math lives in `src/features/`.
 2. **No panic may cross the FFI boundary.** Fallible steps return
-   `Result<_, TsxError>`; `src/error.rs` is the single conversion point to
+   `Result<_, KymoraError>`; `src/error.rs` is the single conversion point to
    `PyErr`.
-3. **Structural errors and NaN values stay separate.** `TsxError` describes
+3. **Structural errors and NaN values stay separate.** `KymoraError` describes
    shapes and layout, never values — see the [NaN policy](nan-policy.md).
 
 ## Adding a feature

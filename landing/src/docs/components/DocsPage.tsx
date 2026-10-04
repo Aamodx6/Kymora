@@ -44,16 +44,16 @@ export const DocsPage: React.FC = () => {
   // SEO: Update page title and meta description
   useEffect(() => {
     if (doc) {
-      document.title = `${doc.title} · Tsxtract Documentation`;
+      document.title = `${doc.title} · Kymora Documentation`;
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute(
           'content',
-          doc.description || `${doc.title} - Tsxtract time-series feature extraction documentation.`
+          doc.description || `${doc.title} - Kymora time-series feature extraction documentation.`
         );
       }
     } else {
-      document.title = 'Page Not Found · Tsxtract Documentation';
+      document.title = 'Page Not Found · Kymora Documentation';
     }
   }, [doc]);
 

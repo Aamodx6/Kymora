@@ -1,11 +1,24 @@
 ---
 title: "Changelog"
-description: "Release history and version progression for Tsxtract following the Keep a Changelog standard."
+description: "Release history and version progression for Kymora following the Keep a Changelog standard."
 order: 15
 section: "Help"
 ---
 
 Releases follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Project-specific rule: `feature_names()` order and length are public API — reordering, renaming, or removing a feature is major, while appending at the end is minor.
+
+## 0.7.0 — 2026-10-04
+
+Rename release: `tsxtract` is now **Kymora**. No numerics changed — feature values, names, order, and the NaN/error contracts are identical to 0.6.0.
+
+### Changed
+
+- PyPI distribution is `kymora` (`pip install kymora`); import is `kymora` (`import kymora as km`); extension module `kymora._core`; sklearn selector `KymoraSelector`; env vars `KYMORA_WISDOM` / `KYMORA_POOL` (old names no longer read — re-run `tune()`).
+- `TsxError` became `KymoraError` inside the Rust core; Python callers still get `ValueError` with identical messages.
+
+### Deprecated
+
+- `import tsxtract` and `import tsxtractor` are thin shims that re-export `kymora` with a `DeprecationWarning`. Removal no earlier than 0.8.0.
 
 ## 0.6.0 — 2026-10-04
 
@@ -44,7 +57,7 @@ Zenith Architecture release delivering vectorized compute enhancements, persiste
   - Pairwise cross-correlation peak, lag offset, cross-covariance, Pearson coefficient, plus global spectral coherence and eigenvalue spread.
 - **Fleet Real-Time Streaming (`MultiStreamExtractor`):**
   - Streaming extractor managing thousands of concurrent time-series signals with sub-microsecond $O(1)$ state updates.
-- **Supervised Feature Selection (`select_features`, `TsxSelector`):**
+- **Supervised Feature Selection (`select_features`, `KymoraSelector`):**
   - ANOVA F and correlation relevance statistics, Benjamini-Hochberg FDR control, and correlation-threshold redundancy clustering.
   - Scikit-learn transformer integration for machine learning pipelines.
 - **Wisdom Auto-Tuner (`tune`):**

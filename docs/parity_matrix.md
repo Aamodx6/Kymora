@@ -2,7 +2,7 @@
 
 This document maps every feature from the tsfresh 777 EfficientFCParameters set to its status in 	sxtractor.
 
-| Feature Family | Total Count | Tsxtract Status | Profile / Cost Class | Notes |
+| Feature Family | Total Count | Kymora Status | Profile / Cost Class | Notes |
 |---|---|---|---|---|
 | fft_coefficient | 400 | **Implemented** | full (Cost C) | k=0..99 real, imag, abs, angle directly from FFT buffer |
 | cwt_coefficients | 60 | **Gated Heavy** | full (Cost E - opt-in) | O(N^2) or continuous wavelets; gated behind include_heavy |
@@ -80,7 +80,7 @@ This document maps every feature from the tsfresh 777 EfficientFCParameters set 
 
 ## Complete 777 Feature Manifest
 
-| # | tsfresh Name | Canonical tsxtract Name | Profile | Cost Class |
+| # | tsfresh Name | Canonical kymora Name | Profile | Cost Class |
 |---|---|---|---|---|
 | 1 | variance_larger_than_standard_deviation | variance_larger_than_standard_deviation | full | A/B/C/D |
 | 2 | has_duplicate_max | has_duplicate_max | full | A/B/C/D |

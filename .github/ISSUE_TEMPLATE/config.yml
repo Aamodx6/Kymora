@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 links:
   - name: Security report (private)
-    url: https://github.com/Aamodx6/Tsxtract/security/advisories/new
+    url: https://github.com/Aamodx6/Kymora/security/advisories/new
     about: Vulnerability reports — never file these as public issues
   - name: Documentation
-    url: https://aamodx6.github.io/Tsxtract/
+    url: https://aamodx6.github.io/Kymora/
     about: Install, quickstart, API reference

@@ -24,7 +24,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from benchmarks.adapters.tsxtract import Adapter as TsxtractAdapter
+from benchmarks.adapters.kymora import Adapter as KymoraAdapter
 from benchmarks.adapters.numpy_baseline import Adapter as NumpyAdapter
 from benchmarks.datasets.generators import generate_series
 
@@ -72,9 +72,9 @@ def run_latency_suite():
     print("  Phase B3: Latency Benchmark Suite")
     print("=" * 80)
 
-    tsx = TsxtractAdapter()
+    km = KymoraAdapter()
     np_baseline = NumpyAdapter()
-    print(f"\n   Tsxtract: {tsx.version}")
+    print(f"\n   Kymora: {km.version}")
     print(f"   NumPy baseline: {np_baseline.version}")
 
     results = []
@@ -89,7 +89,7 @@ def run_latency_suite():
     for length in lengths:
         X = generate_series("gaussian", 1, length, seed=42)
 
-        for lib_name, adapter, fs in [("tsxtract", tsx, "core33"), ("numpy", np_baseline, "default")]:
+        for lib_name, adapter, fs in [("kymora", km, "core33"), ("numpy", np_baseline, "default")]:
             stats = time_latency(adapter, X, threads=1, feature_set=fs, n_runs=200)
             print(f"   {length:>8d}  {lib_name:>15s}  {stats['p50_us']:>10.1f}  {stats['p95_us']:>10.1f}  {stats['p99_us']:>10.1f}  {stats['max_us']:>10.1f}")
 
@@ -106,12 +106,12 @@ def run_latency_suite():
 
     for n, l in overhead_configs:
         X = generate_series("gaussian", n, l, seed=42)
-        stats = time_latency(tsx, X, threads=1, n_runs=500)
+        stats = time_latency(km, X, threads=1, n_runs=500)
         print(f"   {n}×{l:>5d}: p50={stats['p50_us']:>8.1f}µs  p95={stats['p95_us']:>8.1f}µs  min={stats['min_us']:>8.1f}µs")
 
         results.append({
             "suite": "latency", "case": "overhead_decomposition",
-            "lib": "tsxtract", "n_series": n, "length": l,
+            "lib": "kymora", "n_series": n, "length": l,
             "threads": 1, "stats": stats,
             "timestamp": datetime.now().isoformat(),
         })
@@ -121,48 +121,48 @@ def run_latency_suite():
     X_warm = generate_series("gaussian", 100, 500, seed=42)
 
     # Warm: after warmup
-    warm_stats = time_latency(tsx, X_warm, threads=1, n_runs=100)
+    warm_stats = time_latency(km, X_warm, threads=1, n_runs=100)
     print(f"   Warm (100×500): p50={warm_stats['p50_us']:>10.1f}µs  p95={warm_stats['p95_us']:>10.1f}µs")
 
     results.append({
         "suite": "latency", "case": "cold_vs_warm",
-        "lib": "tsxtract", "variant": "warm",
+        "lib": "kymora", "variant": "warm",
         "n_series": 100, "length": 500, "threads": 1,
         "stats": warm_stats,
         "timestamp": datetime.now().isoformat(),
     })
 
     # ── 4. Crossover analysis: where NumPy wins ──
-    print("\n4. Crossover analysis (Tsxtract vs NumPy @ 1 thread, 1 series):")
+    print("\n4. Crossover analysis (Kymora vs NumPy @ 1 thread, 1 series):")
     print(f"   {'Length':>8s}  {'Tsx(µs)':>10s}  {'NumPy(µs)':>10s}  {'Winner':>8s}  {'Ratio':>8s}")
     print(f"   {'-'*50}")
 
     crossover_found = None
     for length in [10, 25, 50, 100, 200, 500, 1000, 5000]:
         X = generate_series("gaussian", 1, length, seed=42)
-        tsx_stats = time_latency(tsx, X, threads=1, n_runs=200)
+        km_stats = time_latency(km, X, threads=1, n_runs=200)
         np_stats = time_latency(np_baseline, X, threads=1, feature_set="default", n_runs=200)
 
-        tsx_us = tsx_stats["p50_us"]
+        km_us = km_stats["p50_us"]
         np_us = np_stats["p50_us"]
-        winner = "tsx" if tsx_us < np_us else "numpy"
-        ratio = np_us / tsx_us if tsx_us > 0 else 0
+        winner = "km" if km_us < np_us else "numpy"
+        ratio = np_us / km_us if km_us > 0 else 0
 
-        print(f"   {length:>8d}  {tsx_us:>10.1f}  {np_us:>10.1f}  {winner:>8s}  {ratio:>7.2f}×")
+        print(f"   {length:>8d}  {km_us:>10.1f}  {np_us:>10.1f}  {winner:>8s}  {ratio:>7.2f}×")
 
-        if winner == "tsx" and crossover_found is None:
+        if winner == "km" and crossover_found is None:
             crossover_found = length
 
         results.append({
             "suite": "latency", "case": "crossover",
             "n_series": 1, "length": length, "threads": 1,
-            "tsx_p50_us": tsx_us, "numpy_p50_us": np_us,
+            "km_p50_us": km_us, "numpy_p50_us": np_us,
             "winner": winner, "ratio": ratio,
             "timestamp": datetime.now().isoformat(),
         })
 
     if crossover_found:
-        print(f"\n   Crossover point: Tsxtract wins from length ≥ {crossover_found}")
+        print(f"\n   Crossover point: Kymora wins from length ≥ {crossover_found}")
     else:
         print("\n   NumPy wins at all tested single-series lengths")
 

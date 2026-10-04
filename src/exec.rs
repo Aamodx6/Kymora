@@ -110,9 +110,9 @@ pub fn extract_ragged_csr_plan(
     offsets: &[i64],
     plan: &FeaturePlan,
     out_slice: &mut [f64],
-) -> Result<(), crate::error::TsxError> {
+) -> Result<(), crate::error::KymoraError> {
     if offsets.len() < 2 {
-        return Err(crate::error::TsxError::EmptyInput);
+        return Err(crate::error::KymoraError::EmptyInput);
     }
     let n_series = offsets.len() - 1;
 
@@ -121,12 +121,12 @@ pub fn extract_ragged_csr_plan(
         let start = offsets[i];
         let end = offsets[i + 1];
         if start < 0 || end < start || (end as usize) > values.len() {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
+            return Err(crate::error::KymoraError::EmptySeries { index: i });
         }
         let start_u = start as usize;
         let end_u = end as usize;
         if start_u == end_u {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
+            return Err(crate::error::KymoraError::EmptySeries { index: i });
         }
         rows.push(&values[start_u..end_u]);
     }
@@ -141,9 +141,9 @@ pub fn extract_ragged_csr_f32(
     offsets: &[i64],
     out_slice: &mut [f64],
     n_cols: usize,
-) -> Result<(), crate::error::TsxError> {
+) -> Result<(), crate::error::KymoraError> {
     if offsets.len() < 2 {
-        return Err(crate::error::TsxError::EmptyInput);
+        return Err(crate::error::KymoraError::EmptyInput);
     }
     let n_series = offsets.len() - 1;
 
@@ -152,12 +152,12 @@ pub fn extract_ragged_csr_f32(
         let start = offsets[i];
         let end = offsets[i + 1];
         if start < 0 || end < start || (end as usize) > values.len() {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
+            return Err(crate::error::KymoraError::EmptySeries { index: i });
         }
         let start_u = start as usize;
         let end_u = end as usize;
         if start_u == end_u {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
+            return Err(crate::error::KymoraError::EmptySeries { index: i });
         }
         rows.push(&values[start_u..end_u]);
     }

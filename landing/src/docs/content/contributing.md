@@ -1,6 +1,6 @@
 ---
 title: "Contributing Guide"
-description: "Development environment setup, code guidelines, testing procedures, and tutorials for contributing to Tsxtract."
+description: "Development environment setup, code guidelines, testing procedures, and tutorials for contributing to Kymora."
 order: 14
 section: "Help"
 ---
@@ -8,8 +8,8 @@ section: "Help"
 Contributions with the highest leverage are correctness work, documentation, and platform support — the `core33` set is frozen on purpose (new features are append-only). This guide covers environment setup, repo layout, checks, the add-a-feature walkthrough, and pull-request expectations.
 
 ```bash
-git clone https://github.com/Aamodx6/Tsxtract.git
-cd Tsxtract
+git clone https://github.com/Aamodx6/Kymora.git
+cd Kymora
 python -m venv .venv
 source .venv/bin/activate
 pip install maturin
@@ -23,19 +23,19 @@ You need a stable Rust toolchain (from [rustup.rs](https://rustup.rs/)) and Pyth
 
 - **Release builds only:** debug builds run roughly an order of magnitude slower and invalidate every timing observation.
 - **Virtualenv for CI parity:** `maturin develop` requires an active virtualenv; bare interpreters fail the same way CI once did.
-- **Verify the setup:** `python -c "import tsxtract; print(tsxtract.__version__)"` should print the built version.
+- **Verify the setup:** `python -c "import kymora; print(kymora.__version__)"` should print the built version.
 
 ## Repository layout
 
 ```text
-Tsxtract/
+Kymora/
   src/lib.rs            # PyO3 module registration only, no math
   src/ffi.rs            # Boundary wrappers: views, validation, GIL release
-  src/error.rs          # TsxError enum, single conversion to PyErr
+  src/error.rs          # KymoraError enum, single conversion to PyErr
   src/extract.rs        # Dispatch, batch validation, Rayon fan-out
   src/features/mod.rs   # NAMES registry + compute_all (single source of truth)
   src/features/         # stats, temporal, spectral, entropy, streaming
-  python/tsxtract/    # __init__.py, _core.pyi stubs, py.typed marker
+  python/kymora/    # __init__.py, _core.pyi stubs, py.typed marker
   tests/                # reference, property, NaN, validation, streaming suites
   benchmarks/              # bench_libraries, ablation, UCR downstream + results/
   tools/              # validation_report, feature_redundancy_analysis
@@ -46,8 +46,8 @@ Tsxtract/
 Three architecture rules constrain every change, and PRs breaking one are asked to change approach:
 
 - **No numeric logic in Python:** `__init__.py` is a documented pass-through; all math lives in `src/features/`.
-- **No panic crosses the FFI boundary:** no `unwrap`, `expect`, or panicking index on user-reachable paths; fallible steps return `Result<_, TsxError>`.
-- **Structure and NaN stay separate:** `TsxError` covers shapes, lengths, and layout only; NaN is a value with its own propagation contract.
+- **No panic crosses the FFI boundary:** no `unwrap`, `expect`, or panicking index on user-reachable paths; fallible steps return `Result<_, KymoraError>`.
+- **Structure and NaN stay separate:** `KymoraError` covers shapes, lengths, and layout only; NaN is a value with its own propagation contract.
 
 ## Running tests and checks
 
@@ -89,7 +89,7 @@ Version impact follows the policy table: appending at the end is a minor bump, w
 - **Regression test:** new behavior needs a test that fails without the change.
 - **Version impact:** note the bump implied by the versioning table.
 - **Style match:** `cargo fmt` clean, Clippy silent, and comments explaining reasoning rather than restating code.
-- **Bug reports:** include OS, Python version, `tsxtract.__version__`, a runnable snippet, and the expected NumPy/SciPy expression for wrong values.
+- **Bug reports:** include OS, Python version, `kymora.__version__`, a runnable snippet, and the expected NumPy/SciPy expression for wrong values.
 
 > [!NOTE]
 > Commit messages in this repo follow the `area(scope): summary` convention (for example `release(0.6.0): ...`), and participation follows `CODE_OF_CONDUCT.md` at the repo root.

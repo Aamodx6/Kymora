@@ -1,4 +1,4 @@
-"""Adapter for Tsxtract (Rust core)."""
+"""Adapter for Kymora (Rust core)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from benchmarks.adapters.base import BaseAdapter
 
 
 class Adapter(BaseAdapter):
-    name = "tsxtract"
+    name = "kymora"
 
     # Frozen matched sets from benchmarks/agreement/feature_map.json (Phase B1).
     # feature_set="matched_<competitor>" extracts ONLY the features whose
@@ -31,17 +31,22 @@ class Adapter(BaseAdapter):
 
     def __init__(self) -> None:
         try:
-            import tsxtract
-            self.lib = tsxtract
-            self.version = getattr(tsxtract, "__version__", "0.5.0")
+            import kymora
+            self.lib = kymora
+            self.version = getattr(kymora, "__version__", "0.7.0")
         except ImportError:
             try:
-                import tsxtractor
-                self.lib = tsxtractor
-                self.version = getattr(tsxtractor, "__version__", "0.5.0")
+                import tsxtract
+                self.lib = tsxtract
+                self.version = getattr(tsxtract, "__version__", "0.7.0")
             except ImportError:
-                self.lib = None
-                self.version = "not_installed"
+                try:
+                    import tsxtractor
+                    self.lib = tsxtractor
+                    self.version = getattr(tsxtractor, "__version__", "0.7.0")
+                except ImportError:
+                    self.lib = None
+                    self.version = "not_installed"
 
     def feature_names(self, feature_set: str = "default") -> list[str]:
         if self.lib is None:
@@ -62,7 +67,7 @@ class Adapter(BaseAdapter):
         **kwargs: Any,
     ) -> np.ndarray:
         if self.lib is None:
-            raise RuntimeError("tsxtract / tsxtractor is not installed.")
+            raise RuntimeError("kymora / tsxtract / tsxtractor is not installed.")
 
         prof = "core33" if feature_set in ("default", "core33") else feature_set
         precision = kwargs.get("precision", "f64")

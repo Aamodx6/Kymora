@@ -87,7 +87,7 @@ Computed from the real FFT with sample spacing 1. Frequencies reside in `(0, 0.5
 
 ## Multi-View Transform Engine
 
-Rather than hand-crafting transformations, `tsxtract` provides a multi-view extraction pipeline across 8 mathematical domain representations:
+Rather than hand-crafting transformations, `kymora` provides a multi-view extraction pipeline across 8 mathematical domain representations:
 
 - `raw`: Original time-series observations.
 - `diff`: First differences: $\Delta x_t = x_t - x_{t-1}$.
@@ -102,7 +102,7 @@ Rather than hand-crafting transformations, `tsxtract` provides a multi-view extr
 
 Computing every feature across every view leads to degenerate or redundant calculations (e.g., the mean of a z-normalized series is identically 0, and the standard deviation is identically 1).
 
-`tsxtract` tracks transformation invariances per feature:
+`kymora` tracks transformation invariances per feature:
 - `Invariances::SHIFT`: Features invariant under translation $x \to x + c$ (e.g., `std`, `var`, `mean_abs_change`).
 - `Invariances::SCALE`: Features invariant under scaling $x \to c \cdot x$ (e.g., `zero_crossings`, `autocorr`).
 - `Invariances::MONOTONE`: Features invariant under monotonic rank transforms (e.g., `permutation_entropy`).

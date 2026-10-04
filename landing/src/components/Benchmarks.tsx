@@ -43,7 +43,7 @@ export const Benchmarks: React.FC = () => {
           </h2>
           <p className="mt-4 font-sans text-base sm:text-lg text-body leading-relaxed">
             Standard Python time-series packages compute features using sequential loops or Python-level
-            multiprocessing. Tsxtract uses Rust zero-copy buffers and multi-threaded Rayon work-stealing.
+            multiprocessing. Kymora uses Rust zero-copy buffers and multi-threaded Rayon work-stealing.
           </p>
         </div>
 
@@ -121,10 +121,10 @@ export const Benchmarks: React.FC = () => {
               let percent = 0;
               if (metric === 'throughput') {
                 // Logarithmic-scaled bar for wide dynamic range
-                percent = item.isTsxtract ? 100 : Math.max(2, Math.round(Math.log10(item.seriesPerSec + 1) / Math.log10(maxThroughput + 1) * 90));
+                percent = item.isKymora ? 100 : Math.max(2, Math.round(Math.log10(item.seriesPerSec + 1) / Math.log10(maxThroughput + 1) * 90));
               } else {
                 const ratio = item.totalTimeMs / maxLatency;
-                percent = item.isTsxtract ? 2 : Math.max(3, Math.round(ratio * 100));
+                percent = item.isKymora ? 2 : Math.max(3, Math.round(ratio * 100));
               }
 
               const isSelected = selectedItem.id === item.id;
@@ -147,7 +147,7 @@ export const Benchmarks: React.FC = () => {
                       <span className="font-mono text-[11px] text-muted rounded bg-canvas px-1.5 py-0.5">
                         {item.language}
                       </span>
-                      {item.isTsxtract && (
+                      {item.isKymora && (
                         <span className="rounded bg-highlight px-2 py-0.5 font-mono text-[10px] font-bold text-ink">
                           BASELINE
                         </span>
@@ -158,18 +158,18 @@ export const Benchmarks: React.FC = () => {
                       {metric === 'throughput' ? (
                         <>
                           <span>{item.seriesPerSec.toLocaleString()} series/s</span>
-                          {!item.isTsxtract && (
+                          {!item.isKymora && (
                             <span className="text-muted font-normal text-[11px]">
-                              ({item.multiplierVsTsxtract}x slower)
+                              ({item.multiplierVsKymora}x slower)
                             </span>
                           )}
                         </>
                       ) : (
                         <>
                           <span>{item.totalTimeMs.toLocaleString()} ms</span>
-                          {!item.isTsxtract && (
+                          {!item.isKymora && (
                             <span className="text-muted font-normal text-[11px]">
-                              ({item.multiplierVsTsxtract}x slower)
+                              ({item.multiplierVsKymora}x slower)
                             </span>
                           )}
                         </>
@@ -181,14 +181,14 @@ export const Benchmarks: React.FC = () => {
                   <div className="relative h-6 w-full rounded bg-borderDim/50 overflow-hidden">
                     <div
                       className={`h-full rounded transition-all duration-700 ease-out flex items-center px-2.5 ${
-                        item.isTsxtract
+                        item.isKymora
                           ? 'bg-ink text-white font-mono text-[10px] font-semibold'
                           : 'bg-muted/30 text-ink font-mono text-[10px]'
                       }`}
                       style={{ width: `${percent}%` }}
                     >
-                      {item.isTsxtract && (
-                        <span className="truncate">Tsxtract (314k series/s, exploratory)</span>
+                      {item.isKymora && (
+                        <span className="truncate">Kymora (314k series/s, exploratory)</span>
                       )}
                     </div>
                   </div>

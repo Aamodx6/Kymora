@@ -1,7 +1,7 @@
 """Phase B1: Correctness & Feature Agreement Suite (Full).
 
 Evaluates:
-1. Agreement between Tsxtract core33 (33 features) and:
+1. Agreement between Kymora core33 (33 features) and:
    - numpy_baseline (pure NumPy/SciPy reference math)
    - numba_baseline (fastmath=False strict IEEE 754)
    - tsfresh (mapped features)
@@ -48,7 +48,7 @@ import numpy as np
 
 from benchmarks.adapters.numba_baseline import Adapter as NumbaAdapter
 from benchmarks.adapters.numpy_baseline import CORE33_NAMES, Adapter as NumpyAdapter
-from benchmarks.adapters.tsxtract import Adapter as TsxtractAdapter
+from benchmarks.adapters.kymora import Adapter as KymoraAdapter
 from benchmarks.datasets.generators import generate_series
 
 
@@ -103,16 +103,16 @@ def classify_error(abs_err: float, rel_err: float, diff_def: bool = False) -> st
 #  2. Determinism checks (arch.md §I7)
 # ────────────────────────────────────────────────────────────
 
-def check_determinism(tsx: TsxtractAdapter, X: np.ndarray) -> dict[str, Any]:
+def check_determinism(km: KymoraAdapter, X: np.ndarray) -> dict[str, Any]:
     """Verify bitwise determinism across thread counts and repeated runs."""
-    out_1t_a = tsx.extract(X, threads=1)
-    out_1t_b = tsx.extract(X, threads=1)
-    out_2t = tsx.extract(X, threads=2)
-    out_4t = tsx.extract(X, threads=4)
+    out_1t_a = km.extract(X, threads=1)
+    out_1t_b = km.extract(X, threads=1)
+    out_2t = km.extract(X, threads=2)
+    out_4t = km.extract(X, threads=4)
 
     # Try 16 threads if possible
     try:
-        out_16t = tsx.extract(X, threads=16)
+        out_16t = km.extract(X, threads=16)
     except Exception:
         out_16t = out_4t  # fallback
 
@@ -258,23 +258,23 @@ def try_load_competitor(name: str, X_subset: np.ndarray) -> dict | None:
 # ────────────────────────────────────────────────────────────
 
 def evaluate_feature_agreement(
-    tsx_feats: np.ndarray,
+    km_feats: np.ndarray,
     np_feats: np.ndarray,
     nb_feats: np.ndarray,
     dist_name: str,
     features_spec: dict,
     competitors: dict[str, dict],
-    tsx_full: np.ndarray | None = None,
+    km_full: np.ndarray | None = None,
 ) -> list[dict]:
     """Evaluate per-feature agreement for a single distribution."""
     records = []
     for idx, fname in enumerate(CORE33_NAMES):
-        tsx_col = tsx_feats[:, idx]
+        km_col = km_feats[:, idx]
         np_col = np_feats[:, idx]
         nb_col = nb_feats[:, idx]
 
-        abs_np, rel_np = compute_rel_abs_error(tsx_col, np_col)
-        abs_nb, rel_nb = compute_rel_abs_error(tsx_col, nb_col)
+        abs_np, rel_np = compute_rel_abs_error(km_col, np_col)
+        abs_nb, rel_nb = compute_rel_abs_error(km_col, nb_col)
 
         is_diff_def = fname in KNOWN_DIFF_DEF
         status_np = classify_error(abs_np, rel_np, diff_def=is_diff_def)
@@ -299,7 +299,7 @@ def evaluate_feature_agreement(
 
         # Check competitor agreement
         feat_meta = features_spec.get(fname, {})
-        n_tsx = tsx_feats.shape[0]
+        n_km = km_feats.shape[0]
 
         for comp_name, comp_info in competitors.items():
             mapped_key = feat_meta.get(comp_name)
@@ -320,11 +320,11 @@ def evaluate_feature_agreement(
                 continue
 
             cidx = matches[0]
-            sub_len = min(comp_feats.shape[0], n_tsx)
+            sub_len = min(comp_feats.shape[0], n_km)
             comp_vals = comp_feats[:sub_len, cidx]
 
-            # Use tsx_full if available for correct alignment, else tsx_feats
-            ref = tsx_full[:sub_len, idx] if tsx_full is not None else tsx_feats[:sub_len, idx]
+            # Use km_full if available for correct alignment, else km_feats
+            ref = km_full[:sub_len, idx] if km_full is not None else km_feats[:sub_len, idx]
             c_abs, c_rel = compute_rel_abs_error(ref, comp_vals)
             c_status = classify_error(c_abs, c_rel, diff_def=True)
             rec["competitors"][comp_name] = {
@@ -468,7 +468,7 @@ def generate_agreement_markdown(
     """Generate comprehensive AGREEMENT_REPORT.md."""
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     md = [
-        "# Tsxtract Feature Agreement & Correctness Report (Phase B1)",
+        "# Kymora Feature Agreement & Correctness Report (Phase B1)",
         "",
         f"**Generated:** {ts}  ",
         f"**Distributions tested:** {n_distributions} (synthetic + UCR real)  ",
@@ -644,7 +644,7 @@ def generate_agreement_markdown(
 
 def run_agreement_suite() -> None:
     print("\n" + "=" * 80)
-    print("  Phase B1: Tsxtract Correctness & Feature Agreement Suite (Full)")
+    print("  Phase B1: Kymora Correctness & Feature Agreement Suite (Full)")
     print("=" * 80 + "\n")
 
     map_path = REPO_ROOT / "benchmarks" / "agreement" / "feature_map.json"
@@ -671,10 +671,10 @@ def run_agreement_suite() -> None:
 
     # ── 3. Initialize adapters ──
     print("\n3. Initializing adapters...")
-    tsx_adapter = TsxtractAdapter()
+    km_adapter = KymoraAdapter()
     numpy_adapter = NumpyAdapter()
     numba_adapter = NumbaAdapter()
-    print(f"   Tsxtract version: {tsx_adapter.version}")
+    print(f"   Kymora version: {km_adapter.version}")
 
     # ── 4. Load competitors (on gaussian subset) ──
     print("\n4. Loading competitor adapters...")
@@ -689,20 +689,20 @@ def run_agreement_suite() -> None:
         else:
             print(f"   ⬜ {comp_name}: not available")
 
-    # Extract tsx features on the SAME subset for fair cross-library comparison
-    tsx_competitor_ref = tsx_adapter.extract(competitor_subset, feature_set="core33", threads=1)
+    # Extract km features on the SAME subset for fair cross-library comparison
+    km_competitor_ref = km_adapter.extract(competitor_subset, feature_set="core33", threads=1)
 
     # ── 5. Determinism check ──
     print("\n5. Running multi-core determinism check...")
     det_X = generate_series("gaussian", 64, 500, seed=99)
-    det_results = check_determinism(tsx_adapter, det_X)
+    det_results = check_determinism(km_adapter, det_X)
     print(f"   Repeat runs bitwise: {det_results['repeat_runs_bitwise_equal']}")
     print(f"   1T vs 2T bitwise:    {det_results['1T_vs_2T_bitwise_equal']} (diff: {det_results['max_abs_diff_2t']:.2e})")
     print(f"   1T vs 4T bitwise:    {det_results['1T_vs_4T_bitwise_equal']} (diff: {det_results['max_abs_diff_4t']:.2e})")
     print(f"   1T vs 16T bitwise:   {det_results['1T_vs_16T_bitwise_equal']} (diff: {det_results['max_abs_diff_16t']:.2e})")
     print(f"   Deterministic: {'✅ PASS' if det_results['is_deterministic'] else '❌ FAIL'}")
 
-    # ── 6. Per-distribution agreement evaluation (tsx vs numpy/numba baselines) ──
+    # ── 6. Per-distribution agreement evaluation (km vs numpy/numba baselines) ──
     print(f"\n6. Evaluating agreement across {n_total_dists} distributions...")
     all_records: list[dict] = []
     wrong_findings: list[dict] = []
@@ -711,17 +711,17 @@ def run_agreement_suite() -> None:
         print(f"   [{i:2d}/{n_total_dists}] {dist_name:<25} ({X.shape[0]:4d} × {X.shape[1]:4d})...", end=" ", flush=True)
 
         # Extract with all three core adapters
-        tsx_feats = tsx_adapter.extract(X, feature_set="core33", threads=1)
+        km_feats = km_adapter.extract(X, feature_set="core33", threads=1)
         np_feats = numpy_adapter.extract(X, feature_set="default", threads=1)
         try:
             nb_feats = numba_adapter.extract(X, feature_set="strict", threads=1, fastmath=False)
         except Exception as nb_err:
             print(f"⚠️ numba failed ({type(nb_err).__name__}: {nb_err}), using NaN... ", end="")
-            nb_feats = np.full_like(tsx_feats, np.nan)
+            nb_feats = np.full_like(km_feats, np.nan)
 
         # Evaluate (NO competitors here — they only have gaussian data)
         records = evaluate_feature_agreement(
-            tsx_feats, np_feats, nb_feats, dist_name, features_spec, {}, tsx_feats
+            km_feats, np_feats, nb_feats, dist_name, features_spec, {}, km_feats
         )
 
         n_exact = sum(1 for r in records if r["numpy_ref"]["status"] == "EXACT")
@@ -745,11 +745,11 @@ def run_agreement_suite() -> None:
     try:
         nb_comp_feats = numba_adapter.extract(competitor_subset, feature_set="strict", threads=1, fastmath=False)
     except Exception:
-        nb_comp_feats = np.full_like(tsx_competitor_ref, np.nan)
+        nb_comp_feats = np.full_like(km_competitor_ref, np.nan)
 
     competitor_records = evaluate_feature_agreement(
-        tsx_competitor_ref, np_comp_feats, nb_comp_feats,
-        "gaussian_competitor_subset", features_spec, competitors, tsx_competitor_ref
+        km_competitor_ref, np_comp_feats, nb_comp_feats,
+        "gaussian_competitor_subset", features_spec, competitors, km_competitor_ref
     )
     # Merge competitor results into the gaussian distribution records
     all_records.extend(competitor_records)

@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `tsxtract` v0.6.0.
+Complete Python API specification for `kymora` v0.6.0.
 
 ```python
-import tsxtract
+import kymora
 
-tsxtract.__version__  # "0.6.0"
+kymora.__version__  # "0.6.0"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.
@@ -44,15 +44,15 @@ A 2D `float64` array of shape `(n_series, n_features)`.
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 
 X = np.random.default_rng(0).standard_normal((1000, 500))
 
 # Default Core33 batch extraction
-feats = tsxtract.extract_features(X)
+feats = kymora.extract_features(X)
 
 # Multi-view extraction across raw, differences, and z-normalization
-feats_views = tsxtract.extract_features(X, views=["raw", "diff", "znorm"])
+feats_views = kymora.extract_features(X, views=["raw", "diff", "znorm"])
 ```
 
 ---
@@ -72,7 +72,7 @@ extract_features_df(
 
 Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
 
-Requires `pandas` (`pip install "tsxtract-rs[pandas]"`).
+Requires `pandas` (`pip install "kymora[pandas]"`).
 
 ---
 
@@ -231,12 +231,12 @@ Select significant, non-redundant time-series features using hypothesis testing,
 
 ---
 
-### TsxSelector
+### KymoraSelector
 
 ```python
-class TsxSelector:
+class KymoraSelector:
     def __init__(self, task: str = "auto", fdr: float = 0.05, max_corr: float = 0.90) -> None: ...
-    def fit(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> TsxSelector: ...
+    def fit(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> KymoraSelector: ...
     def transform(self, X: np.ndarray | pd.DataFrame) -> np.ndarray | pd.DataFrame: ...
     def fit_transform(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> np.ndarray | pd.DataFrame: ...
     def get_support(self, indices: bool = False) -> np.ndarray: ...
@@ -317,7 +317,7 @@ Microbenchmarks execution variants on current hardware and caches optimal execut
 ## Threading & Runtime Controls
 
 - Scheduling is Rayon today: `n_jobs` builds a dedicated pool for the call, otherwise the global pool is used (honors `RAYON_NUM_THREADS=N`).
-- `TSXTRACT_POOL` (`spin`/`rayon`) is currently **read by nothing** — the
+- `KYMORA_POOL` (`spin`/`rayon`) is currently **read by nothing** — the
   persistent spin-pool prototype was removed from main to
   `experiment/spin-pool` (see `docs/ROADMAP.md`; revival is gated on
   arch.md Z6). Treat any `tune()` pool recommendation as provisional until

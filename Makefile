@@ -1,11 +1,11 @@
-# Makefile for Tsxtract benchmark suite
+# Makefile for Kymora benchmark suite
 
 PYTHON ?= python
 
 .PHONY: help setup-venvs bench-smoke bench-agreement bench-all report clean
 
 help:
-	@echo "Tsxtract Benchmark Suite Commands:"
+	@echo "Kymora Benchmark Suite Commands:"
 	@echo "  make bench-smoke     Run Phase B0 smoke test on all adapters"
 	@echo "  make setup-venvs     Create all isolated competitor virtual environments"
 	@echo "  make bench-agreement Run Phase B1 feature agreement & parity matrix"

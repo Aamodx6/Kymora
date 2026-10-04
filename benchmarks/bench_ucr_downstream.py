@@ -1,6 +1,6 @@
 """Downstream Machine Learning Benchmark: Time-Series Classification Utility.
 
-Evaluates the downstream classification utility of features extracted by Tsxtract
+Evaluates the downstream classification utility of features extracted by Kymora
 versus pycatch22 and standard baseline representations on canonical time-series
 benchmark archetypes with realistic, non-trivial difficulty:
   1. Synthetic Control (6-class dynamic patterns with noise overlap)
@@ -30,7 +30,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import StratifiedKFold
 
-import tsxtract
+import kymora
 
 
 @dataclass
@@ -162,8 +162,8 @@ def generate_power_demand(n_samples: int = 400, length: int = 150) -> Tuple[np.n
 # Feature Extraction Functions
 # ---------------------------------------------------------------------
 
-def extract_tsxtractor(X: np.ndarray) -> np.ndarray:
-    return tsxtract.extract_features(X)
+def extract_kymora(X: np.ndarray) -> np.ndarray:
+    return kymora.extract_features(X)
 
 
 def extract_catch22(X: np.ndarray) -> np.ndarray | None:
@@ -240,7 +240,7 @@ def run_all_downstream(output_md: str | None = None) -> List[BenchmarkResult]:
     }
 
     extractors = {
-        "Tsxtract (33 feats)": extract_tsxtractor,
+        "Kymora (33 feats)": extract_kymora,
         "Naive Stats (5 feats)": extract_naive_stats,
     }
     if extract_catch22(np.zeros((2, 10))) is not None:

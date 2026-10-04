@@ -21,7 +21,7 @@ import re
 import sys
 import urllib.request
 
-UA = {"User-Agent": "tsxtract-rename-check/1.0 (contact: repo owner)"}
+UA = {"User-Agent": "kymora-rename-check/1.0 (contact: repo owner)"}
 TIMEOUT = 15
 
 

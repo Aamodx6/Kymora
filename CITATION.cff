@@ -1,16 +1,16 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
-title: "Tsxtract: High-Throughput Batch and Streaming Time-Series Feature Extraction with a Native Rust Computational Core"
+title: "Kymora: High-Throughput Batch and Streaming Time-Series Feature Extraction with a Native Rust Computational Core"
 authors:
   - family-names: Kumar
     given-names: Aamod
     affiliation: "Independent Researcher, Uttar Pradesh, India"
-version: 0.6.0
+version: 0.7.0
 date-released: 2026-10-04
 license: MIT
-repository-code: "https://github.com/Aamodx6/Tsxtract"
-url: "https://pypi.org/project/tsxtract-rs/"
+repository-code: "https://github.com/Aamodx6/Kymora"
+url: "https://pypi.org/project/kymora/"
 keywords:
   - time-series
   - feature-extraction
@@ -18,7 +18,7 @@ keywords:
   - pyo3
   - numpy
 abstract: >-
-  Tsxtract is a batch-oriented Python time-series feature extraction library
+  Kymora is a batch-oriented Python time-series feature extraction library
   with a Rust core: zero-copy NumPy buffer ingestion, GIL release across the
   parallel region, Rayon work-stealing across the series dimension, and a
   curated 33-feature low-redundancy catalog computed through fused

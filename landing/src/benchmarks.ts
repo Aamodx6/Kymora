@@ -1,5 +1,5 @@
 /**
- * Benchmark Datasets for Tsxtract Landing Page
+ * Benchmark Datasets for Kymora Landing Page
  *
  * Measured 2026-10-04 (EXPLORATORY single-machine numbers — see CLAIMS.md).
  * Artifact: benchmarks/results/F1_REPORT.md (10 interleaved rounds).
@@ -18,8 +18,8 @@ export interface BenchmarkItem {
   totalTimeMs: number; // in milliseconds
   seriesPerSec: number;
   msPerFeature: number;
-  multiplierVsTsxtract: number; // e.g. 1 for baseline, 262 for 262x slower
-  isTsxtract: boolean;
+  multiplierVsKymora: number; // e.g. 1 for baseline, 262 for 262x slower
+  isKymora: boolean;
   notes: string;
 }
 
@@ -44,16 +44,16 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
 /* Measured 2026-10-04, pooled medians; artifact benchmarks/results/F1_REPORT.md */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
-    id: "tsxtract",
-    name: "Tsxtract",
+    id: "kymora",
+    name: "Kymora",
     version: "0.5.0",
     language: "Rust + PyO3",
     featuresCount: 33,
     totalTimeMs: 3.18,
     seriesPerSec: 314450,
     msPerFeature: 0.0964,
-    multiplierVsTsxtract: 1.0,
-    isTsxtract: true,
+    multiplierVsKymora: 1.0,
+    isKymora: true,
     notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
   },
   {
@@ -65,8 +65,8 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 833.1,
     seriesPerSec: 1200,
     msPerFeature: 37.87,
-    multiplierVsTsxtract: 262.0,
-    isTsxtract: false,
+    multiplierVsKymora: 262.0,
+    isKymora: false,
     notes: "Per-series Python iteration loop overhead",
   },
   {
@@ -78,8 +78,8 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 2541.6,
     seriesPerSec: 393,
     msPerFeature: 16.29,
-    multiplierVsTsxtract: 799.2,
-    isTsxtract: false,
+    multiplierVsKymora: 799.2,
+    isKymora: false,
     notes: "Sequential python feature routines with heavy array copies",
   },
   {
@@ -91,8 +91,8 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 20891.2,
     seriesPerSec: 48,
     msPerFeature: 26.89,
-    multiplierVsTsxtract: 6570.0,
-    isTsxtract: false,
+    multiplierVsKymora: 6570.0,
+    isKymora: false,
     notes: "Requires long DataFrame melt; IPC and pickle serialization cost",
   },
 ];

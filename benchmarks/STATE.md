@@ -1,5 +1,12 @@
 # Benchmarking and Performance State (`benchmarks/STATE.md`)
 
+> Rename note (0.7.0, 2026-10-04): the library was renamed `tsxtract` →
+> `Kymora` (dist `kymora`, import `kymora`). Rows, adapter notes, and
+> report text below that say `tsxtract` describe pre-rename runs — that is
+> recorded data, not a bug. New runs record the library id `kymora`
+> (`benchmarks/adapters/kymora.py`); the crossover reader in
+> `make_b3_report.py` accepts both `tsx_p50_us` and `km_p50_us`.
+
 **Role:** Benchmarking and performance-engineering lead for Tsxtract (Rust core, Python API).  
 **Goal:** Build a rigorous, reproducible benchmark suite against every relevant competitor across all realistic circumstances and edge cases, find every place Tsxtract loses, is wrong, or is fragile, FIX those, and re-measure. Every number published must come from a committed artifact.
 
@@ -9,9 +16,9 @@
 - [x] **Rule 1 — Correctness before speed:** Never time a feature until outputs are verified equal (within tolerance) to a reference, or the definition mismatch is documented.
 - [x] **Rule 2 — No cherry-picking:** Report every case, including losses. No number without its conditions (hardware, threads, shape, dtype, versions, commit).
 - [x] **Rule 3 — Equal competitor tuning:** Competitors get equal tuning effort and their recommended fast configuration. Document tuning in `benchmarks/adapters/<lib>.md`.
-- [x] **Rule 4 — Preserve semantics & contracts:** Do not change feature semantics or the `core33` contract. Parity tests must stay green (`arch_max.md` §8.2).
+- [x] **Rule 4 — Preserve semantics & contracts:** Do not change feature semantics or the `core33` contract. Parity tests must stay green (`arch.md` §12).
 - [x] **Rule 5 — Traceable fixes:** Every fix: separate commit, references a Loss-Ledger ID, adds a regression benchmark + test, and records before/after in `benchmarks/results/PERF_CHANGELOG.md`.
-- [x] **Rule 6 — Stop rule:** Honor `arch_zenith.md` §1.3: stop optimizing a stage within 1.3x of its reference bound or after two <3% attempts.
+- [x] **Rule 6 — Stop rule:** Honor `arch.md` §9.4: stop optimizing a stage within 1.3x of its reference bound or after two <3% attempts.
 
 ---
 
@@ -78,7 +85,7 @@
 - [ ] Suite concurrency (Python threads GIL release check, joblib, multiprocessing fork/spawn, Dask, reload)
 - [ ] Suite portability (f64, f32, int16, int32, uint8, F-order, strided, memmap, pandas, polars, ragged, out= buffer copy analysis)
 - [ ] **GATE:** All suites produce valid results or explicit error rows; STATE.md updated.
-- *Status:* **IN PROGRESS** — throughput/scaling/latency **COMPLETE** (report: `benchmarks/results/B3_REPORT.md`, findings in `benchmarks/LOSS_LEDGER.md` L1/L3/L7); **step 2 competitor matrix COMPLETE** (see below); memory, startup, sliding, streaming, concurrency, portability pending
+- *Status:* **IN PROGRESS** — throughput/scaling/latency **COMPLETE** (report: `benchmarks/results/B3_REPORT.md`, findings in `benchmarks/results/LOSS_LEDGER.md` L1/L3/L7); **step 2 competitor matrix COMPLETE** (see below); memory, startup, sliding, streaming, concurrency, portability pending
 
 ### Phase B4: Robustness / Edge Cases
 - [ ] Comprehensive edge cases (len 0..5, constant, all-zero, NaN patterns, infs, denormals, huge/tiny scale, bad dtypes, 3D, non-contiguous strides, concurrency)

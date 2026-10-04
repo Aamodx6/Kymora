@@ -8,7 +8,7 @@ direct per-window recomputation on sampled rows BEFORE timing; a failed
 gate is recorded as an explicit `mismatch` row and never timed.
 
 Modes (n_features differ — recorded per row, §11.8):
-  - tsxtract   sliding_features core33 (33 features)
+  - kymora   sliding_features core33 (33 features)
   - swv        np.lib.stride_tricks.sliding_window_view + numpy baseline (33)
   - pandas     .rolling(w).agg mean/std/var/min/max ddof=0 (5)
   - tsflex     tsflex FeatureCollection windows/strides (5, alphabetical cols)
@@ -40,7 +40,7 @@ OUT_JSONL = RESULTS_DIR / "sliding.jsonl"
 N_POINTS = 10_000
 WINDOWS = [64, 256, 1024]
 STRIDES = [1, 8, 64, "window"]  # "window" == stride == window (non-overlapping)
-MODES = ["tsxtract", "swv", "pandas", "tsflex"]
+MODES = ["kymora", "swv", "pandas", "tsflex"]
 
 SAMPLED_ROWS = 6  # correctness gate samples per case
 
@@ -81,14 +81,14 @@ def main():
 
     out = {"status": "ok"}
     try:
-        if mode == "tsxtract":
-            import tsxtract
-            n_feat = len(tsxtract.feature_names(profile="core33"))
+        if mode == "kymora":
+            import kymora
+            n_feat = len(kymora.feature_names(profile="core33"))
             def compute():
-                return tsxtract.sliding_features(s, w, st, profile="core33", n_jobs=threads)
+                return kymora.sliding_features(s, w, st, profile="core33", n_jobs=threads)
             def ref_row(i):
                 a = starts()[i]
-                return tsxtract.extract_features(s[a:a+w][None, :], profile="core33")[0]
+                return kymora.extract_features(s[a:a+w][None, :], profile="core33")[0]
         elif mode == "swv":
             sys.path.insert(0, cfg["repo_root"])
             mod = importlib.import_module("benchmarks.adapters.numpy_baseline")
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 def run_case(mode: str, window: int, stride: int, threads: int) -> BenchmarkRecord:
     stride_label = "window" if stride == window else str(stride)
     case_id = f"slide_{mode}_w{window}_s{stride_label}"
-    py = _python_for("tsflex" if mode == "tsflex" else "tsxtract")
+    py = _python_for("tsflex" if mode == "tsflex" else "kymora")
     repo_root = Path(__file__).resolve().parents[2]
 
     tmo = 300.0 if (mode in ("swv", "tsflex") and window >= 256 and stride == 1) else 180.0

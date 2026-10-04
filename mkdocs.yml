@@ -1,8 +1,8 @@
-site_name: tsxtract
+site_name: kymora
 site_description: Batch time-series feature extraction for Python, with a Rust core.
-site_url: https://aamodx6.github.io/Tsxtract/
-repo_url: https://github.com/Aamodx6/Tsxtract
-repo_name: Aamodx6/Tsxtract
+site_url: https://aamodx6.github.io/Kymora/
+repo_url: https://github.com/Aamodx6/Kymora
+repo_name: Aamodx6/Kymora
 edit_uri: edit/main/docs/
 
 theme:
@@ -46,6 +46,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Aamodx6/Tsxtract
+      link: https://github.com/Aamodx6/Kymora
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/tsxtract-rs/
+      link: https://pypi.org/project/kymora/

@@ -1,4 +1,25 @@
-# Migrating from tsfresh
+# Migrating
+
+## Migrating from tsxtract (pre-0.7.0 names)
+
+0.7.0 renamed the project to Kymora. Numerics, feature names/order, and the
+NaN/error contracts are unchanged — only names moved:
+
+| Before (≤ 0.6.0) | After (≥ 0.7.0) |
+|---|---|
+| `pip install tsxtract-rs` | `pip install kymora` |
+| `import tsxtract as tsx` | `import kymora as km` |
+| `tsxtract._core` | `kymora._core` |
+| `TsxSelector` | `KymoraSelector` (`TsxSelector` still works as an alias) |
+| `TSXTRACT_WISDOM` / `TSXTRACT_POOL` | `KYMORA_WISDOM` / `KYMORA_POOL` |
+| `~/.cache/tsxtract/wisdom.json` | `~/.cache/kymora/wisdom.json` (re-run `tune()`) |
+
+`import tsxtract` and `import tsxtractor` keep working but emit a
+`DeprecationWarning`; they are removed no earlier than 0.8.0. Old benchmark
+rows and reports still carry the `tsxtract` library id — that is data, not
+a bug; new runs record `kymora`.
+
+## Migrating from tsfresh
 
 ## The shape of the change
 
@@ -16,10 +37,10 @@ features = extract_features(
     default_fc_parameters=EfficientFCParameters(),
 )
 
-# tsxtract
-import tsxtract
+# kymora
+import kymora
 X = values.reshape(n_series, n_steps)          # already sorted per series
-features = tsxtract.extract_features_df(X)   # DataFrame, 33 columns
+features = kymora.extract_features_df(X)   # DataFrame, 33 columns
 ```
 
 If your data is already long-format and you want to keep it that way:
@@ -27,7 +48,7 @@ If your data is already long-format and you want to keep it that way:
 ```python
 groups = long_df.sort_values("time").groupby("id")["value"]
 series = [g.to_numpy(dtype="float64") for _, g in groups]
-features = tsxtract.extract_features_df(series)   # ragged input is fine
+features = kymora.extract_features_df(series)   # ragged input is fine
 features.index = list(groups.groups)               # keep the original ids
 ```
 
@@ -38,7 +59,7 @@ because the input is an array whose order is already meaningful.
 
 Many features have a direct `tsfresh` counterpart under a different name:
 
-| tsxtract | tsfresh |
+| kymora | tsfresh |
 |---|---|
 | `mean`, `std`, `var`, `median`, `min`, `max` | `mean`, `standard_deviation`, `variance`, `median`, `minimum`, `maximum` |
 | `quantile_10` ... `quantile_90` | `quantile__q_0.1` ... `quantile__q_0.9` |
@@ -78,7 +99,7 @@ depends on those, `tsfresh` is the right tool and this library is not.
 
 ## Behaviour differences worth knowing
 
-| | tsfresh | tsxtract |
+| | tsfresh | kymora |
 |---|---|---|
 | NaN in a series | varies per feature; some impute, some return NaN | every feature for that series is NaN, always |
 | Empty series | dropped or NaN-filled | `ValueError` |

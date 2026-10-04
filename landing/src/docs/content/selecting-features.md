@@ -1,30 +1,30 @@
 ---
 title: "Selecting Feature Subsets"
-description: "Techniques for pruning redundant metrics, filtering by variance, and selecting domain-specific feature groups with TsxSelector."
+description: "Techniques for pruning redundant metrics, filtering by variance, and selecting domain-specific feature groups with KymoraSelector."
 order: 9
 section: "Guides"
 ---
 
-Feature selection reduces model complexity, prevents overfitting, and speeds up inference. `tsxtract` provides both high-level automated supervised selection (`select_features`, `TsxSelector`) and manual domain-guided filtering.
+Feature selection reduces model complexity, prevents overfitting, and speeds up inference. `kymora` provides both high-level automated supervised selection (`select_features`, `KymoraSelector`) and manual domain-guided filtering.
 
 ```python
 import numpy as np
-import tsxtract
+import kymora
 
 rng = np.random.default_rng(42)
 X = rng.standard_normal((100, 500))
 y = rng.integers(0, 2, size=100)
 
-F = tsxtract.extract_features(X)
+F = kymora.extract_features(X)
 
 # Fast automated feature selection with FDR control
-selected_idx, report = tsxtract.select_features(F, y, task="classification", fdr=0.05)
+selected_idx, report = kymora.select_features(F, y, task="classification", fdr=0.05)
 print(f"Selected {len(selected_idx)} non-redundant features.")
 ```
 
-## Native Supervised Selection (`TsxSelector`)
+## Native Supervised Selection (`KymoraSelector`)
 
-`tsxtract.TsxSelector` is a scikit-learn compatible transformer that:
+`kymora.KymoraSelector` is a scikit-learn compatible transformer that:
 1. Computes univariate relevance statistics (ANOVA F-statistic for classification, Pearson correlation for regression).
 2. Controls the False Discovery Rate (FDR) using the Benjamini-Hochberg procedure at a configurable threshold $\alpha$ (default `0.05`).
 3. Clusters surviving features by pairwise correlation and prunes collinear duplicates (`max_corr=0.90`).
@@ -34,7 +34,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 pipeline = Pipeline([
-    ("selector", tsxtract.TsxSelector(task="classification", fdr=0.05)),
+    ("selector", kymora.KymoraSelector(task="classification", fdr=0.05)),
     ("classifier", HistGradientBoostingClassifier())
 ])
 
@@ -49,7 +49,7 @@ predictions = pipeline.predict(F)
 Group features by physical properties and resolve indices dynamically:
 
 ```python
-names = tsxtract.feature_names()
+names = kymora.feature_names()
 
 groups = {
     "level": ["mean", "median", "min", "max"],
@@ -90,6 +90,6 @@ print("Top 5 features:", top_5_features)
 
 ## Best Practices
 
-- **Avoid Leakage:** Always fit `TsxSelector` on training folds only. Fitting on the entire dataset leaks label distributions.
-- **Index Safety:** Never hardcode integer indices. Use `names.index(col_name)` or `TsxSelector.get_support()`.
+- **Avoid Leakage:** Always fit `KymoraSelector` on training folds only. Fitting on the entire dataset leaks label distributions.
+- **Index Safety:** Never hardcode integer indices. Use `names.index(col_name)` or `KymoraSelector.get_support()`.
 - **Interpretability:** Use the detailed tabular report returned by `select_features` to inspect p-values and cluster exemplars.

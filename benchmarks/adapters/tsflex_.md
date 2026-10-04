@@ -8,4 +8,4 @@
 ## Fast Configuration & Tuning
 - **Input Format:** Requires timestamp-indexed pandas `Series` or `DataFrame`.
 - **Parallelism:** Supports multi-core calculation via `n_jobs=threads`.
-- **Windowing:** Used in Suite Sliding to compare Tsxtract's native zero-copy windowed execution vs tsflex windowing.
+- **Windowing:** Used in Suite Sliding to compare Kymora's native zero-copy windowed execution vs tsflex windowing.

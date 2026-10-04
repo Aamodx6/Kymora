@@ -34,14 +34,14 @@ OUT_JSONL = RESULTS_DIR / "memory.jsonl"
 
 # (case_label, adapter, feature_set, n_series, length, min_steady_runs, tracemalloc, timeout_s)
 CASES: list[tuple[str, str, str, int, int, int, bool, float]] = [
-    # Tsxtract profiles — incl. the §14.3 memory-budget verification at 100k×500
-    ("tsxtract_core33",   "tsxtract", "core33",   1_000, 500, 5, True, 120.0),
-    ("tsxtract_core33",   "tsxtract", "core33",  10_000, 500, 5, True, 120.0),
-    ("tsxtract_core33",   "tsxtract", "core33", 100_000, 500, 3, True, 300.0),
-    ("tsxtract_extended", "tsxtract", "extended", 10_000, 500, 3, True, 180.0),
-    ("tsxtract_extended", "tsxtract", "extended", 100_000, 500, 2, False, 300.0),
-    ("tsxtract_full",     "tsxtract", "full",      1_000, 500, 3, True, 180.0),
-    ("tsxtract_full",     "tsxtract", "full",     10_000, 500, 2, False, 300.0),
+    # Kymora profiles — incl. the §14.3 memory-budget verification at 100k×500
+    ("tsxtract_core33",   "kymora", "core33",   1_000, 500, 5, True, 120.0),
+    ("tsxtract_core33",   "kymora", "core33",  10_000, 500, 5, True, 120.0),
+    ("tsxtract_core33",   "kymora", "core33", 100_000, 500, 3, True, 300.0),
+    ("tsxtract_extended", "kymora", "extended", 10_000, 500, 3, True, 180.0),
+    ("tsxtract_extended", "kymora", "extended", 100_000, 500, 2, False, 300.0),
+    ("tsxtract_full",     "kymora", "full",      1_000, 500, 3, True, 180.0),
+    ("tsxtract_full",     "kymora", "full",     10_000, 500, 2, False, 300.0),
     # Baselines
     ("numpy_baseline",    "numpy_baseline", "default", 1_000, 500, 3, True, 120.0),
     ("numpy_baseline",    "numpy_baseline", "default", 10_000, 500, 2, False, 180.0),

@@ -59,5 +59,5 @@ plus docs/landing hosting, not on a standalone domain.
 
 **Phase 1 GATE: PASS** — owner confirmed the final name: **Kymora**.
 Everything below uses `<newname> = kymora` (import/distinct forms:
-`Kymora` display, `KYMORA` env prefix, `kymora-rs` PyPI dist,
+`Kymora` display, `KYMORA` env prefix, `kymora` PyPI dist,
 `kymora` crate, `pykymora` reserved, `kymora-py` reserved).

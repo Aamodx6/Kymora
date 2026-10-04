@@ -65,7 +65,7 @@ export const HowItWorks: React.FC = () => {
                 </h3>
               </div>
               <p className="font-sans text-[13.5px] text-[#50524B] leading-[1.45]">
-                Point Tsxtract at NumPy buffers, Polars Series, or Arrow memory with zero-copy views. No serialization or IPC overhead.
+                Point Kymora at NumPy buffers, Polars Series, or Arrow memory with zero-copy views. No serialization or IPC overhead.
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export const HowItWorks: React.FC = () => {
             <div className="rounded-xl border border-[#D8D9D2] bg-white p-4 h-[168px] flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
               <div className="font-mono text-[11px] leading-[1.65] text-[#000000] overflow-hidden">
                 <div className="truncate">
-                  <span className="text-[#C93B2B] font-medium">features</span> = tsx.<span className="text-[#1A56DB] font-medium">extract_features</span>(
+                  <span className="text-[#C93B2B] font-medium">features</span> = km.<span className="text-[#1A56DB] font-medium">extract_features</span>(
                 </div>
                 <div className="truncate pl-3">
                   buffer, features=[<span className="text-[#1E7E34]">'hurst'</span>, <span className="text-[#1E7E34]">'sample_entropy'</span>],

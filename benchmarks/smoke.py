@@ -18,7 +18,7 @@ from benchmarks.harness.runner import append_record, run_benchmark_subprocess
 from benchmarks.harness.schema import validate_record
 
 ADAPTERS = [
-    ("tsxtract", "core33"),
+    ("kymora", "core33"),
     ("numpy_baseline", "default"),
     ("numba_baseline", "default"),
     ("catch22_", "default"),

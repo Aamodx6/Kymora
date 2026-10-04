@@ -5,7 +5,7 @@ export const CTA: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract-rs');
+      await navigator.clipboard.writeText('pip install kymora');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -35,7 +35,7 @@ export const CTA: React.FC = () => {
 
             {/* Description */}
             <p className="font-sans text-base sm:text-lg text-body mb-8 leading-relaxed">
-              Tsxtract is free, open source, and available immediately via PyPI for Linux,
+              Kymora is free, open source, and available immediately via PyPI for Linux,
               macOS, and Windows. No compiler or toolchain needed.
             </p>
 
@@ -43,7 +43,7 @@ export const CTA: React.FC = () => {
             <div className="mx-auto mb-8 flex max-w-md items-center justify-between rounded-lg border border-borderLine bg-canvas px-4 py-3 font-mono text-sm text-ink shadow-inner">
               <div className="flex items-center gap-2">
                 <span className="text-muted select-none">$</span>
-                <span className="font-semibold">pip install tsxtract-rs</span>
+                <span className="font-semibold">pip install kymora</span>
               </div>
               <button
                 type="button"
@@ -68,7 +68,7 @@ export const CTA: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4">
               <a
-                href="https://github.com/Aamodx6/Tsxtract"
+                href="https://github.com/Aamodx6/Kymora"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-ink px-6 text-sm font-semibold text-white shadow-btn transition hover:bg-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
@@ -83,7 +83,7 @@ export const CTA: React.FC = () => {
               </a>
 
               <a
-                href="https://github.com/Aamodx6/Tsxtract#readme"
+                href="https://github.com/Aamodx6/Kymora#readme"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-borderLine bg-card px-6 text-sm font-semibold text-ink shadow-btn transition hover:border-ink hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"

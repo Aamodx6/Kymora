@@ -3,7 +3,7 @@ requires = ["maturin>=1.14,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "tsxtract-rs"
+name = "kymora"
 # Version is single-sourced from Cargo.toml; maturin injects the crate
 # version into the wheel metadata at build time. Do not add `version` here.
 dynamic = ["version"]
@@ -34,13 +34,13 @@ bench = ["pandas>=1.5", "tsfresh>=0.20", "pycatch22>=0.4.5", "tsfel>=0.1.6"]
 docs = ["mkdocs>=1.6", "mkdocs-material>=9.5"]
 
 [project.urls]
-Homepage = "https://github.com/Aamodx6/Tsxtract"
-Repository = "https://github.com/Aamodx6/Tsxtract"
-Issues = "https://github.com/Aamodx6/Tsxtract/issues"
-Changelog = "https://github.com/Aamodx6/Tsxtract/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Aamodx6/Kymora"
+Repository = "https://github.com/Aamodx6/Kymora"
+Issues = "https://github.com/Aamodx6/Kymora/issues"
+Changelog = "https://github.com/Aamodx6/Kymora/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"
-module-name = "tsxtract._core"
-python-packages = ["tsxtract", "tsxtractor"]
+module-name = "kymora._core"
+python-packages = ["kymora", "tsxtract", "tsxtractor"]
 features = ["pyo3/extension-module"]

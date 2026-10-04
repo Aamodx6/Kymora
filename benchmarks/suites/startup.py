@@ -36,10 +36,11 @@ OUT_JSONL = RESULTS_DIR / "startup.jsonl"
 
 # (label, adapter, import_module, timeout_s, size_targets...)
 # first-call is measured via the adapter on a tiny input (1x64).
-# size_targets default to import_module; tsxtract is a thin wrapper over the
-# native `tsxtractor` module, so both dirs count toward installed size.
+# size_targets default to import_module; kymora is the real package (with the
+# native `_core` extension) plus the thin `tsxtract` / `tsxtractor` shims,
+# so all three dirs count toward installed size.
 CASES: list[tuple] = [
-    ("tsxtract",       "tsxtract",       "tsxtract", 60.0,  ("tsxtract", "tsxtractor")),
+    ("kymora",       "kymora",       "kymora", 60.0,  ("kymora", "tsxtract", "tsxtractor")),
     ("numpy_baseline", "numpy_baseline", "numpy",    60.0,  ("numpy",)),
     ("numba_baseline", "numba_baseline", "numba",    180.0, ("numba",)),
     ("tsfresh",        "tsfresh_",       "tsfresh",  180.0, ("tsfresh",)),

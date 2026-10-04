@@ -1,6 +1,6 @@
 [package]
-name = "tsxtract"
-version = "0.6.0"
+name = "kymora"
+version = "0.7.0"
 edition = "2021"
 
 [lib]

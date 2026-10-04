@@ -7,7 +7,7 @@ Measures parallel scaling efficiency across:
 
 Per arch.md §11.5 (scaling suite):
 - Amdahl fit and parallel efficiency η = T1/(N·T_N)
-- Crossover analysis (where Tsxtract beats/loses to competitors)
+- Crossover analysis (where Kymora beats/loses to competitors)
 - Reports efficiency vs both logical and physical cores
 """
 
@@ -25,7 +25,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from benchmarks.adapters.tsxtract import Adapter as TsxtractAdapter
+from benchmarks.adapters.kymora import Adapter as KymoraAdapter
 from benchmarks.datasets.generators import generate_series
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
@@ -82,8 +82,8 @@ def run_scaling_suite():
     print("  Phase B3: Scaling Benchmark Suite")
     print("=" * 80)
 
-    tsx = TsxtractAdapter()
-    print(f"\n   Tsxtract: {tsx.version}")
+    km = KymoraAdapter()
+    print(f"\n   Kymora: {km.version}")
 
     max_threads = os.cpu_count() or 4
     results = []
@@ -98,7 +98,7 @@ def run_scaling_suite():
     print(f"   {'-'*60}")
 
     for t in thread_counts:
-        stats = time_it(tsx, X_thread, threads=t)
+        stats = time_it(km, X_thread, threads=t)
         if t == 1:
             t1_median = stats["median_ms"]
         speedup = t1_median / stats["median_ms"] if t1_median and stats["median_ms"] > 0 else 0
@@ -123,7 +123,7 @@ def run_scaling_suite():
 
     for n_ser in series_counts:
         X_ser = generate_series("gaussian", n_ser, 500, seed=42)
-        stats = time_it(tsx, X_ser, threads=max_threads)
+        stats = time_it(km, X_ser, threads=max_threads)
         us_per_series = stats["median_ms"] * 1000 / n_ser if n_ser > 0 else 0
         us_per_sf = us_per_series / 33.0
 
@@ -147,7 +147,7 @@ def run_scaling_suite():
 
     for length in lengths:
         X_len = generate_series("gaussian", 1000, length, seed=42)
-        stats = time_it(tsx, X_len, threads=max_threads)
+        stats = time_it(km, X_len, threads=max_threads)
         us_per_series = stats["median_ms"] * 1000 / 1000
         us_per_sf = us_per_series / 33.0
 

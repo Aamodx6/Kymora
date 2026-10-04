@@ -2,12 +2,12 @@
 
 import numpy as np
 import pytest
-import tsxtract
+import kymora
 
 
 def test_streaming_extractor_basic():
     w = 16
-    extractor = tsxtract.StreamingExtractor(w)
+    extractor = kymora.StreamingExtractor(w)
     assert extractor.window_size == w
     assert not extractor.is_full
 
@@ -26,10 +26,10 @@ def test_streaming_extractor_basic():
 
     # Compare with sliding_features on the same window
     window_slice = x[-w:]
-    batch_feat = tsxtract.extract_features(window_slice.reshape(1, -1))[0]
+    batch_feat = kymora.extract_features(window_slice.reshape(1, -1))[0]
     stream_feat = extractor.compute_features()
 
-    for k, name in enumerate(tsxtract.feature_names()):
+    for k, name in enumerate(kymora.feature_names()):
         if np.isnan(batch_feat[k]):
             assert np.isnan(stream_feat[k]), f"Feature {name} should be NaN"
         else:
@@ -43,7 +43,7 @@ def test_streaming_extractor_basic():
 
 
 def test_streaming_extractor_reset():
-    extractor = tsxtract.StreamingExtractor(5)
+    extractor = kymora.StreamingExtractor(5)
     for i in range(5):
         extractor.push(float(i))
     assert extractor.is_full
@@ -55,4 +55,4 @@ def test_streaming_extractor_reset():
 
 def test_streaming_extractor_invalid():
     with pytest.raises(ValueError):
-        tsxtract.StreamingExtractor(1)
+        kymora.StreamingExtractor(1)

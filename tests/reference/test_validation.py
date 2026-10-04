@@ -10,7 +10,7 @@ values inside a series.
 import numpy as np
 import pytest
 
-import tsxtract
+import kymora
 
 N_FEATURES = 33
 
@@ -27,7 +27,7 @@ N_FEATURES = 33
 )
 def test_empty_input_raises_value_error(X):
     with pytest.raises(ValueError, match="no series"):
-        tsxtract.extract_features(X)
+        kymora.extract_features(X)
 
 
 # --- zero-length series: structural error, NOT a NaN row ---------------------
@@ -35,23 +35,23 @@ def test_empty_input_raises_value_error(X):
 
 def test_zero_length_series_in_list_raises():
     with pytest.raises(ValueError, match="length 0"):
-        tsxtract.extract_features([np.array([], dtype=np.float64)])
+        kymora.extract_features([np.array([], dtype=np.float64)])
 
 
 def test_zero_length_series_reports_its_index():
     batch = [np.arange(5.0), np.arange(3.0), np.array([], dtype=np.float64)]
     with pytest.raises(ValueError, match="index 2"):
-        tsxtract.extract_features(batch)
+        kymora.extract_features(batch)
 
 
 def test_zero_column_2d_raises():
     with pytest.raises(ValueError, match="0 columns"):
-        tsxtract.extract_features(np.zeros((3, 0)))
+        kymora.extract_features(np.zeros((3, 0)))
 
 
 def test_single_element_series_is_valid_not_an_error():
     """Length 1 is legal; only length 0 is structurally invalid."""
-    out = tsxtract.extract_features([np.array([5.0])])
+    out = kymora.extract_features([np.array([5.0])])
     assert out.shape == (1, N_FEATURES)
 
 
@@ -61,19 +61,19 @@ def test_single_element_series_is_valid_not_an_error():
 def test_non_contiguous_2d_rejected_with_actionable_message():
     X = np.zeros((10, 10))[:, ::2]
     with pytest.raises(ValueError, match="ascontiguousarray"):
-        tsxtract.extract_features(X)
+        kymora.extract_features(X)
 
 
 def test_ascontiguousarray_is_the_documented_fix():
     X = np.arange(100.0).reshape(10, 10)[:, ::2]
-    out = tsxtract.extract_features(np.ascontiguousarray(X))
+    out = kymora.extract_features(np.ascontiguousarray(X))
     assert out.shape == (10, N_FEATURES)
 
 
 def test_non_contiguous_series_in_list_reports_index():
     batch = [np.arange(10.0), np.arange(20.0)[::2]]
     with pytest.raises(ValueError, match="index 1"):
-        tsxtract.extract_features(batch)
+        kymora.extract_features(batch)
 
 
 # --- dtype and shape: TypeError, kept distinct from structural ValueError -----
@@ -92,12 +92,12 @@ def test_non_contiguous_series_in_list_reports_index():
 )
 def test_wrong_dtype_or_shape_raises_type_error(X):
     with pytest.raises(TypeError):
-        tsxtract.extract_features(X)
+        kymora.extract_features(X)
 
 
 def test_dtype_error_names_the_fix():
     with pytest.raises(TypeError, match="astype"):
-        tsxtract.extract_features(np.arange(20).reshape(2, 10))
+        kymora.extract_features(np.arange(20).reshape(2, 10))
 
 
 # --- sliding_features window/stride geometry ---------------------------------
@@ -118,17 +118,17 @@ def test_dtype_error_names_the_fix():
 def test_sliding_features_invalid_geometry_raises_value_error(window, stride):
     x = np.arange(50.0)
     with pytest.raises(ValueError):
-        tsxtract.sliding_features(x, window=window, stride=stride)
+        kymora.sliding_features(x, window=window, stride=stride)
 
 
 def test_sliding_features_on_empty_series_raises():
     with pytest.raises(ValueError):
-        tsxtract.sliding_features(np.array([], dtype=np.float64), window=1)
+        kymora.sliding_features(np.array([], dtype=np.float64), window=1)
 
 
 def test_sliding_features_non_integer_window_raises_type_error():
     with pytest.raises(TypeError):
-        tsxtract.sliding_features(np.arange(50.0), window=2.5)
+        kymora.sliding_features(np.arange(50.0), window=2.5)
 
 
 @pytest.mark.parametrize(
@@ -144,13 +144,13 @@ def test_sliding_features_non_integer_window_raises_type_error():
 )
 def test_sliding_features_row_count(length, window, stride, expected):
     x = np.arange(float(length))
-    out = tsxtract.sliding_features(x, window=window, stride=stride)
+    out = kymora.sliding_features(x, window=window, stride=stride)
     assert out.shape == (expected, N_FEATURES)
 
 
 def test_sliding_features_non_contiguous_rejected():
     with pytest.raises(ValueError, match="contiguous"):
-        tsxtract.sliding_features(np.arange(100.0)[::2], window=10)
+        kymora.sliding_features(np.arange(100.0)[::2], window=10)
 
 
 # --- the panic that used to cross the boundary -------------------------------
@@ -171,4 +171,4 @@ def test_no_panic_exception_type_is_ever_raised():
     ]
     for X in bad_inputs:
         with pytest.raises((ValueError, TypeError)):
-            tsxtract.extract_features(X)
+            kymora.extract_features(X)

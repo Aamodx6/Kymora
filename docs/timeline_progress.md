@@ -1,4 +1,4 @@
-# Tsxtract Max-Throughput Architecture — Testing & Progress Timeline
+# Kymora Max-Throughput Architecture — Testing & Progress Timeline
 
 This document tracks the execution, brutal testing, benchmark results, and phase progression of the `arch_max.md` implementation.
 
@@ -25,7 +25,7 @@ This document tracks the execution, brutal testing, benchmark results, and phase
 ### Phase 0: Audit & Baseline (Complete)
 - **Files Audited:**
   - `src/lib.rs`, `src/ffi.rs`, `src/extract.rs`, `src/features/`
-  - `python/tsxtract/__init__.py`, `python/tsxtract/_core.pyi`
+  - `python/kymora/__init__.py`, `python/kymora/_core.pyi`
   - `Cargo.toml`, `pyproject.toml`, `benchmarks/`
 - **Reconciliation:**
   - Confirmed `src/features/mod.rs` as the single source of truth for the 33 frozen features.
@@ -90,7 +90,7 @@ This document tracks the execution, brutal testing, benchmark results, and phase
 ### Phase 5: Sliding & Streaming Fast Paths (Complete)
 - **Streaming O(1) Fast Tier:**
   - Implemented `FAST_NAMES` (12 true online features) in `src/features/streaming.rs`: `mean`, `std`, `var`, `skewness`, `kurtosis`, `abs_energy`, `root_mean_square`, `mean_abs_change`, `mean_change`, `cid_ce`, `zero_crossings`, `trend_slope`.
-  - Added `compute(kind="fast"|"all")` and `fast_feature_names()` to `PyStreamingExtractor` in `src/ffi.rs` and `python/tsxtract/_core.pyi`.
+  - Added `compute(kind="fast"|"all")` and `fast_feature_names()` to `PyStreamingExtractor` in `src/ffi.rs` and `python/kymora/_core.pyi`.
   - Push remains pure O(1) with running circular buffer, difference accumulators, and periodic anchor recomputation every 4096 steps.
   - `compute_fast` executes centered two-pass moment formulation over the active rolling window buffer in L1 cache, eliminating catastrophic cancellation while avoiding sorting and FFT.
 - **Block-Parallel Sliding Windows:**
@@ -111,7 +111,7 @@ This document tracks the execution, brutal testing, benchmark results, and phase
 - **Thread Pool Control (`n_jobs`):**
   - Added `n_jobs` parameter to `extract_features`, `extract_features_ragged`, `sliding_features`, and `extract_features_df`.
 - **Documentation & Release:**
-  - Bumped version to `0.4.0` in `Cargo.toml`, `pyproject.toml`, and `python/tsxtract/__init__.py`.
+  - Bumped version to `0.4.0` in `Cargo.toml`, `pyproject.toml`, and `python/kymora/__init__.py`.
   - Updated `README.md` with honest streaming tier definitions, new profile catalog, and traceable benchmark tables.
   - Updated `CHANGELOG.md` with comprehensive `0.4.0` release notes.
   - Updated `PRD.md` with current feature capabilities.

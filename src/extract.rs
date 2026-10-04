@@ -7,19 +7,19 @@
 //! and never inspects series *values* — value semantics (NaN propagation) live
 //! entirely in `features::compute_all`.
 
-use crate::error::TsxError;
+use crate::error::KymoraError;
 
 /// Structural validation of a batch of series views.
 ///
 /// Checks lengths only — no data is read, so this adds no copy and no pass over
 /// the series contents.
-pub fn validate_batch(rows: &[&[f64]]) -> Result<(), TsxError> {
+pub fn validate_batch(rows: &[&[f64]]) -> Result<(), KymoraError> {
     if rows.is_empty() {
-        return Err(TsxError::EmptyInput);
+        return Err(KymoraError::EmptyInput);
     }
     for (index, row) in rows.iter().enumerate() {
         if row.is_empty() {
-            return Err(TsxError::EmptySeries { index });
+            return Err(KymoraError::EmptySeries { index });
         }
     }
     Ok(())
@@ -34,15 +34,15 @@ pub fn window_geometry(
     len: usize,
     window: i64,
     stride: i64,
-) -> Result<(usize, usize, usize), TsxError> {
+) -> Result<(usize, usize, usize), KymoraError> {
     if window < 1 {
-        return Err(TsxError::NonPositiveWindowParam {
+        return Err(KymoraError::NonPositiveWindowParam {
             name: "window",
             value: window,
         });
     }
     if stride < 1 {
-        return Err(TsxError::NonPositiveWindowParam {
+        return Err(KymoraError::NonPositiveWindowParam {
             name: "stride",
             value: stride,
         });
@@ -50,10 +50,10 @@ pub fn window_geometry(
     let window = window as usize;
     let stride = stride as usize;
     if len == 0 {
-        return Err(TsxError::EmptySeries { index: 0 });
+        return Err(KymoraError::EmptySeries { index: 0 });
     }
     if window > len {
-        return Err(TsxError::WindowTooLarge { window, len });
+        return Err(KymoraError::WindowTooLarge { window, len });
     }
     let n_windows = (len - window) / stride + 1;
     Ok((window, stride, n_windows))
@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn empty_batch_is_an_error() {
-        assert_eq!(validate_batch(&[]), Err(TsxError::EmptyInput));
+        assert_eq!(validate_batch(&[]), Err(KymoraError::EmptyInput));
     }
 
     #[test]
@@ -74,7 +74,7 @@ mod tests {
         let rows: Vec<&[f64]> = vec![&a[..], &[]];
         assert_eq!(
             validate_batch(&rows),
-            Err(TsxError::EmptySeries { index: 1 })
+            Err(KymoraError::EmptySeries { index: 1 })
         );
     }
 

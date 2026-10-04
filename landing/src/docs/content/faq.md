@@ -1,6 +1,6 @@
 ---
 title: "FAQ & Troubleshooting"
-description: "Frequently asked questions, common error diagnostics, and practical solutions for Tsxtract."
+description: "Frequently asked questions, common error diagnostics, and practical solutions for Kymora."
 order: 13
 section: "Help"
 ---
@@ -9,8 +9,8 @@ Short answers to the questions that recur in issues and integrations. Each answe
 
 ```python
 import numpy as np
-import tsxtract
-print(tsxtract.__version__, len(tsxtract.feature_names()))
+import kymora
+print(kymora.__version__, len(kymora.feature_names()))
 ```
 
 ```text
@@ -26,7 +26,7 @@ print(tsxtract.__version__, len(tsxtract.feature_names()))
 
 ```python
 X = np.ascontiguousarray(np.arange(20.0).reshape(2, 10).astype(np.int64).astype(np.float64))
-print(tsxtract.extract_features(X).shape)
+print(kymora.extract_features(X).shape)
 ```
 
 ```text
@@ -50,7 +50,7 @@ print(tsxtract.extract_features(X).shape)
 
 ### Why does an empty series raise instead of returning NaNs?
 
-- **Cause:** zero-length input is a structural error (`TsxError::EmptySeries`), not a value condition, and the error names the offending batch index.
+- **Cause:** zero-length input is a structural error (`KymoraError::EmptySeries`), not a value condition, and the error names the offending batch index.
 - **Fix:** filter zero-length recordings before the call; length 1 remains legal.
 
 ### What window and stride values are legal for `sliding_features()`?
@@ -70,15 +70,15 @@ print(tsxtract.extract_features(X).shape)
 - **Answer:** no plugin hook exists; the registry in `src/features/mod.rs` is intentionally closed.
 - **Path:** open a New feature proposal issue first per `CONTRIBUTING.md`; unagreed PRs may close on scope regardless of quality.
 
-### Does Tsxtract run on GPUs or in R/Julia/MATLAB?
+### Does Kymora run on GPUs or in R/Julia/MATLAB?
 
 - **Answer:** neither. The engine is CPU-only via Rayon, and bindings are Python-only.
 - **Alternative:** `catch22` publishes multi-language bindings, and `arch.md` records GPU work as explicitly out of scope.
 
-### How do I use Tsxtract with Polars?
+### How do I use Kymora with Polars?
 
-- **Answer:** through an explicit NumPy bridge — Tsxtract ships no Polars-native function.
-- **Pattern:** select value columns, convert with `.to_numpy()`, extract, and wrap back with `pl.DataFrame(feats, schema=tsxtract.feature_names())`.
+- **Answer:** through an explicit NumPy bridge — Kymora ships no Polars-native function.
+- **Pattern:** select value columns, convert with `.to_numpy()`, extract, and wrap back with `pl.DataFrame(feats, schema=kymora.feature_names())`.
 
 ### Is `StreamingExtractor` output identical to batch output?
 
@@ -99,7 +99,7 @@ print(tsxtract.extract_features(X).shape)
 
 ### Where do I report a wrong value?
 
-- **Requirement:** include OS, Python version, `tsxtract.__version__`, a runnable snippet, and the expected value with its NumPy/SciPy expression.
+- **Requirement:** include OS, Python version, `kymora.__version__`, a runnable snippet, and the expected value with its NumPy/SciPy expression.
 - **Reason:** that expression converts directly into a reference test, which is the fastest path to a fix.
 
 ## See also

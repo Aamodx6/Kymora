@@ -102,7 +102,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-latest, python: "3.10", artifact: wheels-linux-x86_64}
           - {os: ubuntu-latest, python: "3.13", artifact: wheels-linux-x86_64}
           - {os: macos-latest, python: "3.13", artifact: wheels-macos-aarch64}
           - {os: windows-latest, python: "3.13", artifact: wheels-windows-x64}
@@ -120,27 +119,28 @@ jobs:
       - name: Install from wheel
         shell: bash
         run: |
-          # Dependencies come from PyPI; tsxtract-rs itself must come from the
+          # Dependencies come from PyPI; kymora itself must come from the
           # freshly built wheel, so install it with --no-index --no-deps.
           python -m pip install --upgrade pip
           python -m pip install "numpy>=1.24"
-          python -m pip install --no-index --no-deps --find-links dist tsxtract-rs
+          python -m pip install --no-index --no-deps --find-links dist kymora
       - name: Import and extract outside the source tree
         shell: bash
         run: |
           cd "$(mktemp -d)"
           python -c "
-          import numpy as np, tsxtract
+          import numpy as np, kymora
           X = np.random.default_rng(0).standard_normal((64, 128))
-          f = tsxtract.extract_features(X)
-          assert f.shape == (64, len(tsxtract.feature_names())), f.shape
+          f = kymora.extract_features(X)
+          assert f.shape == (64, len(kymora.feature_names())), f.shape
           assert np.isfinite(f).all()
           import warnings
           with warnings.catch_warnings():
               warnings.simplefilter('ignore', DeprecationWarning)
-              import tsxtractor
-          assert tsxtractor.extract_features is tsxtract.extract_features
-          print('ok', tsxtract.__version__, f.shape)
+              import tsxtract, tsxtractor
+          assert tsxtract.extract_features is kymora.extract_features
+          assert tsxtractor.extract_features is kymora.extract_features
+          print('ok', kymora.__version__, f.shape)
           "
 
   publish:
