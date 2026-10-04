@@ -208,9 +208,8 @@ if _HAS_NUMBA:
                 else:
                     out[idx] = sorted_x[low]
 
-            # Pass 2: centered moments (m3, m4), mean crossings, strikes, peaks
-            m3 = 0.0
-            m4 = 0.0
+            # Pass 2: mean crossings, strikes, peaks
+            # (skewness/kurtosis computed via z-scores below to avoid underflow)
             m_cross = 0
             cur_above = 0
             max_above = 0
@@ -218,11 +217,6 @@ if _HAS_NUMBA:
             max_below = 0
 
             for i in range(n):
-                d = x[i] - mean
-                d2 = d * d
-                m3 += d2 * d
-                m4 += d2 * d2
-
                 if x[i] > mean:
                     cur_above += 1
                     if cur_above > max_above:
@@ -242,8 +236,18 @@ if _HAS_NUMBA:
                         m_cross += 1
 
             if std > 0.0:
-                out[10] = (m3 / n) / (std**3)
-                out[11] = (m4 / n) / (std**4) - 3.0
+                # Use z-scores to avoid std^3/std^4 underflow for tiny-scale data.
+                # std^3 underflows to 0.0 for std < ~7e-109, causing ZeroDivisionError.
+                inv_std = 1.0 / std
+                z3_sum = 0.0
+                z4_sum = 0.0
+                for i in range(n):
+                    z = (x[i] - mean) * inv_std
+                    z2 = z * z
+                    z3_sum += z2 * z
+                    z4_sum += z2 * z2
+                out[10] = z3_sum / n          # skewness
+                out[11] = z4_sum / n - 3.0    # excess kurtosis
             else:
                 out[10] = np.nan
                 out[11] = np.nan
@@ -354,7 +358,7 @@ if _HAS_NUMBA:
                         max_p = p
                         max_idx = k
 
-                if tot_p > 0.0:
+                if tot_p > 0.0 and mx > mn:
                     out[30] = max_idx / n
                     out[31] = centroid_num / tot_p
                     if nbins == 1:
