@@ -56,7 +56,12 @@ arch.md is the architecture source of truth.
       benchmark commands documented (D14: raw commands canonical, wrappers
       kept for arch/Dockerfile refs). All YAML parse; full gates green.
       See `docs/refactor/phase7_VERIFICATION.md`.
-- [ ] Phase 8: final verification & report
+- [x] Phase 8: final verification & report (2026-10-04). All 11 gates
+      green on the final tree (cargo 16/16, clippy/fmt/doc clean, pytest
+      138 under `-W error`, hash MATCH, validation within tolerance,
+      mkdocs strict, mypy clean, landing builds, residual scan clean,
+      phase records complete). 17 commits from `pre-refactor`. Not
+      pushed — owner's call. See `docs/refactor/phase8_VERIFICATION.md`.
 
 ## Decisions
 
