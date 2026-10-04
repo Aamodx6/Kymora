@@ -1,0 +1,337 @@
+{
+  "source_of_truth": "tsxtractor.feature_names()",
+  "version": "0.5.0",
+  "count": 33,
+  "features": {
+    "mean": {
+      "index": 0,
+      "domain": "moments",
+      "numpy_reference": "np.mean(x)",
+      "tsfresh": "mean",
+      "tsfel": "Mean",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "First sample moment (arithmetic mean)."
+    },
+    "std": {
+      "index": 1,
+      "domain": "moments",
+      "numpy_reference": "np.std(x, ddof=0)",
+      "tsfresh": "standard_deviation",
+      "tsfel": "Standard deviation",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Sample standard deviation with ddof=0 (population standard deviation)."
+    },
+    "var": {
+      "index": 2,
+      "domain": "moments",
+      "numpy_reference": "np.var(x, ddof=0)",
+      "tsfresh": "variance",
+      "tsfel": "Variance",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Sample variance with ddof=0."
+    },
+    "min": {
+      "index": 3,
+      "domain": "moments",
+      "numpy_reference": "np.min(x)",
+      "tsfresh": "minimum",
+      "tsfel": "Min",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Minimum value in series."
+    },
+    "max": {
+      "index": 4,
+      "domain": "moments",
+      "numpy_reference": "np.max(x)",
+      "tsfresh": "maximum",
+      "tsfel": "Max",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Maximum value in series."
+    },
+    "median": {
+      "index": 5,
+      "domain": "quantiles",
+      "numpy_reference": "np.median(x)",
+      "tsfresh": "median",
+      "tsfel": "Median",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "50th percentile (linear interpolation or mid-value)."
+    },
+    "quantile_10": {
+      "index": 6,
+      "domain": "quantiles",
+      "numpy_reference": "np.percentile(x, 10)",
+      "tsfresh": "quantile__q_0.1",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "10th percentile using method='linear'."
+    },
+    "quantile_25": {
+      "index": 7,
+      "domain": "quantiles",
+      "numpy_reference": "np.percentile(x, 25)",
+      "tsfresh": "quantile__q_0.25",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "25th percentile (first quartile)."
+    },
+    "quantile_75": {
+      "index": 8,
+      "domain": "quantiles",
+      "numpy_reference": "np.percentile(x, 75)",
+      "tsfresh": "quantile__q_0.75",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "75th percentile (third quartile)."
+    },
+    "quantile_90": {
+      "index": 9,
+      "domain": "quantiles",
+      "numpy_reference": "np.percentile(x, 90)",
+      "tsfresh": "quantile__q_0.9",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "90th percentile."
+    },
+    "skewness": {
+      "index": 10,
+      "domain": "moments",
+      "numpy_reference": "scipy.stats.skew(x, bias=True)",
+      "tsfresh": "skewness",
+      "tsfel": "Skewness",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Third standardized moment (Fisher-Pearson coefficient of skewness, biased)."
+    },
+    "kurtosis": {
+      "index": 11,
+      "domain": "moments",
+      "numpy_reference": "scipy.stats.kurtosis(x, fisher=True, bias=True)",
+      "tsfresh": "kurtosis",
+      "tsfel": "Kurtosis",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Excess kurtosis (fourth standardized moment minus 3, Fisher definition)."
+    },
+    "abs_energy": {
+      "index": 12,
+      "domain": "moments",
+      "numpy_reference": "np.sum(x**2)",
+      "tsfresh": "abs_energy",
+      "tsfel": "Absolute energy",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Sum of squared values."
+    },
+    "root_mean_square": {
+      "index": 13,
+      "domain": "moments",
+      "numpy_reference": "np.sqrt(np.mean(x**2))",
+      "tsfresh": "root_mean_square",
+      "tsfel": "Root mean square",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Quadratic mean / RMS."
+    },
+    "mean_abs_change": {
+      "index": 14,
+      "domain": "change",
+      "numpy_reference": "np.mean(np.abs(np.diff(x)))",
+      "tsfresh": "mean_abs_change",
+      "tsfel": "Mean absolute diff",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Mean of absolute first differences |x[t] - x[t-1]|."
+    },
+    "mean_change": {
+      "index": 15,
+      "domain": "change",
+      "numpy_reference": "np.mean(np.diff(x))",
+      "tsfresh": "mean_change",
+      "tsfel": "Mean diff",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Mean of consecutive differences (x[N-1] - x[0]) / (N-1)."
+    },
+    "cid_ce": {
+      "index": 16,
+      "domain": "change",
+      "numpy_reference": "np.sqrt(np.sum(np.diff(x)**2))",
+      "tsfresh": "cid_ce__normalize_False",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Complexity estimate: L2 norm of first differences (unnormalized)."
+    },
+    "mean_second_derivative_central": {
+      "index": 17,
+      "domain": "change",
+      "numpy_reference": "np.mean((x[2:] - 2*x[1:-1] + x[:-2]) / 2.0)",
+      "tsfresh": "mean_second_derivative_central",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Mean of central second differences."
+    },
+    "zero_crossings": {
+      "index": 18,
+      "domain": "counts",
+      "numpy_reference": "np.sum(np.diff(x > 0).astype(bool))",
+      "tsfresh": null,
+      "tsfel": "Zero crossing rate",
+      "catch22": null,
+      "antropy": "num_zerocross",
+      "definition_notes": "Number of zero crossings."
+    },
+    "mean_crossings": {
+      "index": 19,
+      "domain": "counts",
+      "numpy_reference": "np.sum(np.diff(x > np.mean(x)).astype(bool))",
+      "tsfresh": null,
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Number of crossings of the sample mean."
+    },
+    "number_of_peaks": {
+      "index": 20,
+      "domain": "counts",
+      "numpy_reference": "scipy.signal.find_peaks(x)[0].size",
+      "tsfresh": "number_peaks__n_1",
+      "tsfel": "Peak to peak distance",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Count of simple local maxima: x[i-1] < x[i] and x[i] > x[i+1]."
+    },
+    "longest_strike_above_mean": {
+      "index": 21,
+      "domain": "counts",
+      "numpy_reference": "max_streak(x > np.mean(x))",
+      "tsfresh": "longest_strike_above_mean",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Longest consecutive sequence of values greater than mean(x)."
+    },
+    "longest_strike_below_mean": {
+      "index": 22,
+      "domain": "counts",
+      "numpy_reference": "max_streak(x < np.mean(x))",
+      "tsfresh": "longest_strike_below_mean",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Longest consecutive sequence of values strictly below mean(x)."
+    },
+    "autocorr_lag_1": {
+      "index": 23,
+      "domain": "correlation",
+      "numpy_reference": "np.corrcoef(x[:-1], x[1:])[0,1]",
+      "tsfresh": "autocorrelation__lag_1",
+      "tsfel": "Autocorrelation",
+      "catch22": "CO_Embed2_Dist_tau_d_expfit_meandiff",
+      "antropy": null,
+      "definition_notes": "Pearson autocorrelation at lag 1."
+    },
+    "autocorr_lag_2": {
+      "index": 24,
+      "domain": "correlation",
+      "numpy_reference": "np.corrcoef(x[:-2], x[2:])[0,1]",
+      "tsfresh": "autocorrelation__lag_2",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Pearson autocorrelation at lag 2."
+    },
+    "autocorr_lag_5": {
+      "index": 25,
+      "domain": "correlation",
+      "numpy_reference": "np.corrcoef(x[:-5], x[5:])[0,1]",
+      "tsfresh": "autocorrelation__lag_5",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Pearson autocorrelation at lag 5."
+    },
+    "autocorr_lag_10": {
+      "index": 26,
+      "domain": "correlation",
+      "numpy_reference": "np.corrcoef(x[:-10], x[10:])[0,1]",
+      "tsfresh": "autocorrelation__lag_10",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Pearson autocorrelation at lag 10."
+    },
+    "trend_slope": {
+      "index": 27,
+      "domain": "correlation",
+      "numpy_reference": "scipy.stats.linregress(range(N), x).slope",
+      "tsfresh": "linear_trend__attr_slope",
+      "tsfel": "Linear trend",
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Slope parameter of linear regression y = a*t + b with t in [0, N-1]."
+    },
+    "trend_r2": {
+      "index": 28,
+      "domain": "correlation",
+      "numpy_reference": "scipy.stats.linregress(range(N), x).rvalue**2",
+      "tsfresh": "linear_trend__attr_rvalue",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": null,
+      "definition_notes": "Coefficient of determination R^2 of linear regression against index."
+    },
+    "permutation_entropy": {
+      "index": 29,
+      "domain": "entropy",
+      "numpy_reference": "antropy.perm_entropy(x, order=3, delay=1, normalize=True)",
+      "tsfresh": "permutation_entropy__dimension_3__tau_1",
+      "tsfel": null,
+      "catch22": null,
+      "antropy": "perm_entropy",
+      "definition_notes": "Normalized permutation entropy for order=3, delay=1."
+    },
+    "dominant_frequency": {
+      "index": 30,
+      "domain": "spectral",
+      "numpy_reference": "np.argmax(np.abs(np.fft.rfft(x))[1:]) + 1",
+      "tsfresh": null,
+      "tsfel": "Max power spectrum",
+      "catch22": "SP_Summaries_welch_rect_centroid",
+      "antropy": null,
+      "definition_notes": "Index / frequency bin of maximum power in FFT magnitude spectrum (excluding DC)."
+    },
+    "spectral_centroid": {
+      "index": 31,
+      "domain": "spectral",
+      "numpy_reference": "np.sum(freqs * mag) / np.sum(mag)",
+      "tsfresh": null,
+      "tsfel": "Spectral centroid",
+      "catch22": "SP_Summaries_welch_rect_centroid",
+      "antropy": "spectral_centroid",
+      "definition_notes": "Center of mass of the power spectrum."
+    },
+    "spectral_entropy": {
+      "index": 32,
+      "domain": "spectral",
+      "numpy_reference": "antropy.spectral_entropy(x, sf=1.0, method='fft', normalize=True)",
+      "tsfresh": null,
+      "tsfel": "Spectral entropy",
+      "catch22": null,
+      "antropy": "spectral_entropy",
+      "definition_notes": "Normalized Shannon entropy of the power spectral density."
+    }
+  }
+}

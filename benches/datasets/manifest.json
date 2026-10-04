@@ -1,0 +1,134 @@
+{
+  "datasets": [
+    {
+      "name": "GunPoint",
+      "type": "univariate_classification",
+      "length": 150,
+      "n_classes": 2,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Kinematic / Motion"
+    },
+    {
+      "name": "ItalyPowerDemand",
+      "type": "univariate_classification",
+      "length": 24,
+      "n_classes": 2,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Energy / Telemetry"
+    },
+    {
+      "name": "Coffee",
+      "type": "univariate_classification",
+      "length": 286,
+      "n_classes": 2,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Spectroscopy"
+    },
+    {
+      "name": "Beef",
+      "type": "univariate_classification",
+      "length": 470,
+      "n_classes": 5,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Spectroscopy"
+    },
+    {
+      "name": "ECG200",
+      "type": "univariate_classification",
+      "length": 96,
+      "n_classes": 2,
+      "license": "PhysioNet / UCR Archive",
+      "domain": "Physiological ECG"
+    },
+    {
+      "name": "Wafer",
+      "type": "univariate_classification",
+      "length": 152,
+      "n_classes": 2,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Semiconductor sensor"
+    },
+    {
+      "name": "FordA",
+      "type": "univariate_classification",
+      "length": 500,
+      "n_classes": 2,
+      "license": "IEEE World Congress / UCR",
+      "domain": "Automotive / Acoustic"
+    },
+    {
+      "name": "ElectricDevices",
+      "type": "univariate_classification",
+      "length": 96,
+      "n_classes": 7,
+      "license": "Public Domain / UCR Archive",
+      "domain": "Energy telemetry"
+    },
+    {
+      "name": "StarLightCurves",
+      "type": "univariate_classification",
+      "length": 1024,
+      "n_classes": 3,
+      "license": "Astronomy Archive / UCR",
+      "domain": "Astronomical light curves"
+    },
+    {
+      "name": "TwoLeadECG",
+      "type": "univariate_classification",
+      "length": 82,
+      "n_classes": 2,
+      "license": "PhysioNet / UCR Archive",
+      "domain": "Physiological ECG"
+    },
+    {
+      "name": "Trace",
+      "type": "univariate_classification",
+      "length": 275,
+      "n_classes": 4,
+      "license": "Nuclear / UCR Archive",
+      "domain": "Transient instrumentation"
+    },
+    {
+      "name": "SyntheticControl",
+      "type": "univariate_classification",
+      "length": 60,
+      "n_classes": 6,
+      "license": "Alcock & Manolopoulos / UCI",
+      "domain": "Control charts"
+    },
+    {
+      "name": "CBF",
+      "type": "univariate_classification",
+      "length": 128,
+      "n_classes": 3,
+      "license": "Cylinder-Bell-Funnel benchmark",
+      "domain": "Synthetic patterns"
+    },
+    {
+      "name": "M4_Daily_Sample",
+      "type": "regression_forecasting",
+      "length": 200,
+      "n_series": 50,
+      "license": "M4 Competition (Open)",
+      "domain": "Economic / Business"
+    },
+    {
+      "name": "M4_Hourly_Sample",
+      "type": "regression_forecasting",
+      "length": 100,
+      "n_series": 50,
+      "license": "M4 Competition (Open)",
+      "domain": "Utility / Hourly load"
+    }
+  ],
+  "synthetic_benchmark_shapes": [
+    [1, 10], [1, 100], [1, 100000], [1, 1000000],
+    [10, 500], [100, 100], [100, 500],
+    [1000, 100], [1000, 500], [1000, 5000],
+    [10000, 500], [100000, 500], [100000, 100],
+    [1000000, 100], [100, 50000]
+  ],
+  "odd_lengths": [
+    7, 31, 499, 500, 503, 997, 1000, 1024, 2047, 4093, 100003, 65536
+  ]
+}
