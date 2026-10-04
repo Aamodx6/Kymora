@@ -89,6 +89,17 @@ arch.md is the architecture source of truth.
   (Windows-safe); `Makefile` and `reproduce.sh` remain optional wrappers
   (referenced by arch.md gates and Dockerfile CMD), not deleted.
 
+## Follow-up — post-Phase-8 steps (owner-directed, in order, gate each)
+
+- [ ] Step 1: quarantine #7/#8 → `experiment/spin-pool` + `experiment/soa-4x`
+      + `docs/ROADMAP.md` (revival gates Z6/Z2)
+- [ ] Step 2: F1 interleaved benchmark pre-refactor vs HEAD; update
+      README/CLAIMS.md only from that artifact
+- [ ] Step 3: verify-results checks (golden diff empty, hash, API dump
+      diff, clean-venv wheel install + verbatim quickstart)
+- [ ] Step 4: draft PR text; NO push until canonical remote confirmed
+- [ ] Step 5: CI failure fixes, one root cause per commit (blocked on push)
+
 ## NEEDS-OWNER
 
 1. Confirm canonical repo (`Aamodx6/Tsxtract`) and fate of anything under
@@ -104,12 +115,16 @@ arch.md is the architecture source of truth.
    keep (do NOT delete on usage heuristic).
 6. ~~`mkdocs.yml: site_url` still `aamod007.github.io`~~ — resolved Phase 5
    (`aamodx6.github.io`, per D0).
-7. `pool.rs` / `TSXTRACT_POOL`: Rust ignores the env var; docs now say so
-   (`api.md`, `quickstart.md`), but `tune.py` still records spin-vs-rayon
-   recommendations — wire the backend (behavior change), delete `pool.rs`,
-   or keep as documented prototype?
-8. `soa_4x` kernels + `run_core33_f32_out32`: uncalled Zenith-session
-   experiments — keep or delete?
+7. ~~`pool.rs` / `TSXTRACT_POOL`~~ — resolved: `src/pool.rs` moved to
+   `experiment/spin-pool`, deleted from main (0 callers); revival gated on
+   arch.md Z6, recorded in `docs/ROADMAP.md`. `tune.py` pool dimension
+   stays void until then.
+8. ~~`soa_4x` kernels + `run_core33_f32_out32`~~ — resolved: soa_4x
+   quartet (`reduce.rs:821-1153`) + `run_core33_f32_out32`
+   (`pipeline.rs:252-260`) moved to `experiment/soa-4x`, deleted from
+   main (0 callers, 0 parity tests, no ≥10% benchmark — exception clause
+   failed on evidence); revival gated on arch.md Z2 + ≥10% end-to-end,
+   recorded in `docs/ROADMAP.md`.
 
 ## Stash register
 

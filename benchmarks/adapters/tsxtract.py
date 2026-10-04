@@ -96,7 +96,7 @@ class Adapter(BaseAdapter):
             "name": self.name,
             "version": self.version,
             "runtime": "Rust",
-            "parallelism": "Rayon / Persistent SpinPool",
+            "parallelism": "Rayon",
             "zero_copy": True,
             "allocations": "Single output matrix",
         }

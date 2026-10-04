@@ -9,7 +9,6 @@ pub mod intermediates;
 pub mod kernels;
 pub mod pipeline;
 pub mod plan;
-pub mod pool;
 pub mod registry;
 pub mod scratch;
 

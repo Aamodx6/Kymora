@@ -122,7 +122,8 @@ flowchart TB
 ```
 src/
   lib.rs ffi.rs error.rs extract.rs plan.rs exec.rs pipeline.rs scratch.rs intermediates.rs registry.rs
-  pool.rs    (unwired Z6 prototype, no callers — wire-or-delete pending owner decision)
+  pool.rs + soa_4x quartet + run_core33_f32_out32 removed from main
+  (quarantined to experiment/spin-pool + experiment/soa-4x — see docs/ROADMAP.md; revival gated on Z6/Z2)
   kernels/   mod.rs reduce.rs sort.rs fft.rs perm.rs        # designated home for unsafe/SIMD (currently unsafe-free)
   features/  mod.rs stats.rs temporal.rs spectral.rs entropy.rs views.rs streaming.rs multistream.rs
 python/tsxtract/  __init__.py  _core.pyi  py.typed  (+ ../tsxtractor/ deprecated shim, removal >= 0.7.0)

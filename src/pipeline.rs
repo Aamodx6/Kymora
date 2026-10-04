@@ -248,13 +248,3 @@ pub fn run_core33_f32(x: &[f32], scratch: &mut Scratch, out: &mut [f64]) {
     out[31] = cent;
     out[32] = sent;
 }
-
-/// Run core33 pipeline over f32 series writing directly to f32 output buffer.
-#[inline]
-pub fn run_core33_f32_out32(x: &[f32], scratch: &mut Scratch, out: &mut [f32]) {
-    let mut tmp = [0.0f64; CORE33_COUNT];
-    run_core33_f32(x, scratch, &mut tmp);
-    for (o, &v) in out[..CORE33_COUNT].iter_mut().zip(tmp.iter()) {
-        *o = v as f32;
-    }
-}

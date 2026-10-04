@@ -317,4 +317,8 @@ Microbenchmarks execution variants on current hardware and caches optimal execut
 ## Threading & Runtime Controls
 
 - Scheduling is Rayon today: `n_jobs` builds a dedicated pool for the call, otherwise the global pool is used (honors `RAYON_NUM_THREADS=N`).
-- `TSXTRACT_POOL` (`spin`/`rayon`) is currently **read by nothing** — a persistent spin-pool prototype exists in `src/pool.rs` but is not wired up. Treat any `tune()` pool recommendation as provisional until the backend lands.
+- `TSXTRACT_POOL` (`spin`/`rayon`) is currently **read by nothing** — the
+  persistent spin-pool prototype was removed from main to
+  `experiment/spin-pool` (see `docs/ROADMAP.md`; revival is gated on
+  arch.md Z6). Treat any `tune()` pool recommendation as provisional until
+  the backend lands.
