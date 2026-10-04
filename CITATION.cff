@@ -6,7 +6,7 @@ authors:
   - family-names: Kumar
     given-names: Aamod
     affiliation: "Independent Researcher, Uttar Pradesh, India"
-version: 0.5.0
+version: 0.6.0
 date-released: 2026-10-04
 license: MIT
 repository-code: "https://github.com/Aamodx6/Tsxtract"

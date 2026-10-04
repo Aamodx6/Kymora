@@ -15,7 +15,7 @@ print(tsxtract.__version__)
 
 ```text
 ['MultiStreamExtractor', 'StreamingExtractor', 'TsxSelector', '__version__', 'describe_feature', 'extract_features', 'extract_features_df', 'extract_features_mc', 'extract_features_mc_df', 'extract_features_ragged', 'feature_names', 'feature_names_mc', 'list_profiles', 'select_features', 'sliding_features', 'tune']
-0.5.0
+0.6.0
 ```
 
 ## Batch & Multi-View Functions

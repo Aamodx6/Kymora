@@ -70,7 +70,7 @@ print("Computed mean value:", result[0, 0])
 ```
 
 ```text
-tsxtract version: 0.5.0
+tsxtract version: 0.6.0
 Total registered features: 33
 Test feature vector shape: (1, 33)
 Computed mean value: 5.0
@@ -171,7 +171,7 @@ pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bund
 ```
 
 ```text
-Successfully installed tsxtract-rs-0.5.0
+Successfully installed tsxtract-rs-0.6.0
 ```
 
 ### Contiguous and dtype errors at call time

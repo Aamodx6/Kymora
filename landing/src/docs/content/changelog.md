@@ -7,6 +7,20 @@ section: "Help"
 
 Releases follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Project-specific rule: `feature_names()` order and length are public API — reordering, renaming, or removing a feature is major, while appending at the end is minor.
 
+## 0.6.0 — 2026-10-04
+
+Packaging release: the import name, distribution name, and extension module now match the documented contract.
+
+### Fixed
+
+- PyPI distribution name is `tsxtract-rs` (`pip install tsxtract-rs`). The `v0.5.0` tag carried `name = "tsxtract"`, which would publish into an unrelated JAX project's namespace.
+- Import name is `tsxtract` with extension module `tsxtract._core`. The `v0.5.0` tag still built `tsxtractor._core`.
+- Version is single-sourced from `Cargo.toml`; `pyproject.toml` carries no `version`.
+
+### Deprecated
+
+- `import tsxtractor` is a thin shim that re-exports `tsxtract` and emits a `DeprecationWarning` on first import. Removal no earlier than 0.7.0.
+
 ## 0.5.0 — 2026-10-04
 
 Zenith Architecture release delivering vectorized compute enhancements, persistent low-latency worker pools, multi-view transforms with invariance pruning, multichannel sensor processing, real-time fleet streaming, and supervised feature selection.

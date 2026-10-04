@@ -15,11 +15,11 @@ export const Features: React.FC = () => {
     {
       number: '01',
       title: 'Rust-Core Speed',
-      tag: 'LLVM + SIMD',
+      tag: 'Rust + Rayon',
       description:
-        'Inner computational loops are compiled with full LLVM optimizations and vectorized instructions. Computes 33 features across 1,000 series in 1.2 ms flat.',
+        'Inner computational loops are compiled with full optimizations and run across worker threads. Computes 33 features at 3.18 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory).',
       codeSnippet: '// Rayon parallel chunk iterator\nseries.par_chunks(chunk_size)\n  .map(|chunk| compute_features(chunk))',
-      badge: '1.2ms latency',
+      badge: '3.18 ms median (1k x 500)',
     },
     {
       number: '02',
@@ -28,7 +28,7 @@ export const Features: React.FC = () => {
       description:
         'The GIL is released immediately upon entering Rust. Extraction parallelises across the series dimension using Rayon, scaling linearly with available CPU cores.',
       codeSnippet: '# GIL released, 16 cores fully saturated\nX = np.random.randn(100_000, 500)\nfeats = tsxtract.extract_features(X)',
-      badge: 'Scales to 64+ cores',
+      badge: 'GIL-free Rayon scaling',
     },
     {
       number: '03',
@@ -37,7 +37,7 @@ export const Features: React.FC = () => {
       description:
         'Carefully selected feature set covering statistical moments (mean, variance, skewness, kurtosis), temporal dynamics (autocorrelation, zero-crossings), and FFT spectral energy.',
       codeSnippet: 'features = [\n  "mean", "variance", "skewness",\n  "sample_entropy", "spectral_centroid"\n]',
-      badge: 'Zero NaN guarantees',
+      badge: 'Documented NaN contract',
     },
     {
       number: '04',

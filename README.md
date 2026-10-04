@@ -6,9 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml)
 
-> **What if time-series feature engineering was 800× faster and used zero defensive memory copies?**
+> **Batch time-series feature extraction: 33 features at 3.18 ms median per 1,000 series x 500 steps, with zero defensive memory copies.**
 
-**Tsxtract** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets blazingly fast, memory-efficient, and effortless. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
+**Tsxtract** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
 [PyPI](https://pypi.org/project/tsxtract-rs/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
 
@@ -31,7 +31,7 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 * **Zero-Copy Hybrid Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native-Rust multi-core loops without copying a single byte.
 * **Batch-First Parallelism:** Processes $N$ series in parallel across hardware threads instead of running serial Python loops.
 * **Dual API Support:** Extract raw 2D NumPy matrices for maximum speed, or labeled Pandas/Polars DataFrames for immediate exploratory analysis.
-* **Scikit-Learn Compatible:** Seamlessly drop `TsxtractTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
+* **Scikit-Learn Compatible:** Drop `TsxtractTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
 * **Realfft & Histogram Quantiles:** Preallocated per-worker FFT scratch and histogram multi-select quantiles ensure predictable sub-millisecond execution.
 * **Streaming & Sliding Windows:** Extract rolling features over continuous data streams without reallocating buffers.
 

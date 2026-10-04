@@ -118,7 +118,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://pypi.org/project/tsxtract"
+                  href="https://pypi.org/project/tsxtract-rs"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -143,14 +143,14 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11.5px] text-muted">
           <div>
-            <span>Dual-licensed under </span>
+            <span>Licensed under </span>
             <a
               href="https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="text-ink hover:underline"
             >
-              MIT &amp; Apache 2.0
+              MIT
             </a>
             <span>. Copyright &copy; {new Date().getFullYear()} Tsxtract contributors.</span>
           </div>

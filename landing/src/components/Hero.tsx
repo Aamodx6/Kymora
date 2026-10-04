@@ -310,7 +310,7 @@ export const Hero: React.FC = () => {
               <strong className="font-bold text-[#000000]">
                 The time-series extractor that shows its work.
               </strong>{' '}
-              Tsxtract maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features across 100k series in 1.2 ms. Every number links back to the rows it came from.
+              Tsxtract maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 3.18 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}
@@ -334,7 +334,7 @@ export const Hero: React.FC = () => {
               </button>
 
               <a
-                href="https://github.com/Aam007/Tsxtract"
+                href="https://github.com/Aamodx6/Tsxtract"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-[36px] items-center justify-center gap-2 rounded-md border border-[#D8D9D2] bg-white px-3.5 text-xs font-semibold text-black shadow-btn transition hover:border-black"

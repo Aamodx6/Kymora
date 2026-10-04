@@ -144,6 +144,14 @@ arch.md is the architecture source of truth.
 - [x] Step 6: `benchmarks/LINUX_16VCPU_PLAN.md` — exact setup/measure/
       commit commands, ~60–75 min estimate, outputs list. NOT run.
 - [ ] CI failure fixes, one root cause per commit (unblocks after push)
+- Release 0.6.0 (2026-10-04): packaging release — dist `tsxtract-rs`,
+  import `tsxtract`, ext `tsxtract._core`, single-sourced version,
+  `tsxtractor` shim deprecated (removal >= 0.7.0). Website docs corrected
+  from `CLAIMS.md` artifact (hero/features perf sentences, Benchmarks µs
+  unit, Footer PyPI URL + MIT-only license, Hero repo URL typo).
+  Personal-profile links (`Aamod007` byline/footer) untouched per
+  NEEDS-OWNER #1. Measured benchmark tables stay pinned to the 0.5.0
+  artifact by design.
 - NO PR: owner directed commit + push directly, no pull request.
   Merged 2026-10-04: local `main` (was stale at `4c268ca`) fast-forwarded
   to `88298f5` via `refactor/tsxtract` (origin/main `f6b670c` proved to be

@@ -188,7 +188,7 @@ export const Benchmarks: React.FC = () => {
                       style={{ width: `${percent}%` }}
                     >
                       {item.isTsxtract && (
-                        <span className="truncate">Tsxtract (314k series/s*)</span>
+                        <span className="truncate">Tsxtract (314k series/s, exploratory)</span>
                       )}
                     </div>
                   </div>
@@ -206,7 +206,7 @@ export const Benchmarks: React.FC = () => {
               </div>
               <div className="flex items-center gap-4 text-muted">
                 <span>Features: <strong className="text-ink font-medium">{selectedItem.featuresCount}</strong></span>
-                <span>Time/feat: <strong className="text-ink font-medium">{selectedItem.msPerFeature} ms</strong></span>
+                <span>Time/feat: <strong className="text-ink font-medium">{selectedItem.msPerFeature} µs</strong></span>
               </div>
             </div>
           </div>

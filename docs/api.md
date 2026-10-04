@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `tsxtract` v0.5.0.
+Complete Python API specification for `tsxtract` v0.6.0.
 
 ```python
 import tsxtract
 
-tsxtract.__version__  # "0.5.0"
+tsxtract.__version__  # "0.6.0"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.

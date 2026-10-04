@@ -10,21 +10,20 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
-## [Unreleased]
+## [0.6.0] - 2026-10-04
 
-### Changed
-- **Canonical import name is now `tsxtract`** (installed via
-  `pip install tsxtract-rs`; the bare PyPI name `tsxtract` belongs to an
-  unrelated JAX project and must not be installed in the same environment).
-  Real code moved from `python/tsxtractor/` to `python/tsxtract/`; the Rust
-  crate was renamed `tsxtractor` -> `tsxtract` and the extension module is
-  now `tsxtract._core`.
-- **PyPI distribution name restored to `tsxtract-rs`.** The previous
-  `name = "tsxtract"` broke the release smoke-test (which installs
-  `tsxtract-rs` from the built wheel) and would have published into the
-  unrelated JAX project's namespace.
-- Version is now single-sourced from `Cargo.toml` (maturin injects the crate
+### Fixed
+- **PyPI distribution name is `tsxtract-rs`.** The `v0.5.0` tag carried
+  `name = "tsxtract"`, which would publish into the unrelated JAX project's
+  namespace; `pyproject.toml` now sets `name = "tsxtract-rs"` with the
+  version single-sourced from `Cargo.toml` (maturin injects the crate
   version into the wheel metadata; `pyproject.toml` carries no `version`).
+- **Import name is `tsxtract`, extension module `tsxtract._core`.** The
+  `v0.5.0` tag still built `tsxtractor._core`; real code now lives in
+  `python/tsxtract/` and the Rust crate was renamed `tsxtractor` ->
+  `tsxtract`. The bare PyPI name `tsxtract` belongs to an unrelated JAX
+  project and must not be installed in the same environment (both provide
+  a top-level `tsxtract` import and will shadow each other).
 
 ### Deprecated
 - `import tsxtractor` is a thin shim that re-exports `tsxtract` and emits a
@@ -218,9 +217,13 @@ an sdist build; that is fixed here.
   `sliding_features()`.
 - Windows x86_64 wheel and sdist only — see 0.2.0 for the full platform matrix.
 
-[Unreleased]: https://github.com/Aamod007/Tsxtract/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/Aamod007/Tsxtract/compare/v0.2.1...v0.3.0
-[0.2.1]: https://github.com/Aamod007/Tsxtract/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/Aamod007/Tsxtract/compare/v0.1.1...v0.2.0
-[0.1.1]: https://github.com/Aamod007/Tsxtract/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/Aamod007/Tsxtract/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Aamodx6/Tsxtract/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Aamodx6/Tsxtract/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/Aamodx6/Tsxtract/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/Aamodx6/Tsxtract/compare/v0.3.2...v0.4.0
+[0.3.2]: https://github.com/Aamodx6/Tsxtract/compare/v0.3.0...v0.3.2
+[0.3.0]: https://github.com/Aamodx6/Tsxtract/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/Aamodx6/Tsxtract/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Aamodx6/Tsxtract/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/Aamodx6/Tsxtract/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/Aamodx6/Tsxtract/releases/tag/v0.1.0
