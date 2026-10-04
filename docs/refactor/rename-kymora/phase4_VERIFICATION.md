@@ -74,6 +74,16 @@ older `tsxtractor` alias **deleted outright** instead of kept as a shim.
 
 ## Incidents
 
+- Worktree integrity scare: commit `3e42b2e` accidentally recorded the
+  deletion of `python/tsxtract/__init__.py` (the shim to keep) alongside the
+  intended `python/tsxtractor/` removal — the file vanished from the working
+  tree at an unidentified point after the last clean `git status`, and
+  `git add -u` staged the deletion. Caught in post-commit review via
+  `git show --stat`; the intact blob was restored from `7e10b38` in the
+  follow-up commit, and a full `git diff 8662146 --name-status` audit
+  confirmed no other unintended deletions. Installed-wheel tests were
+  unaffected throughout (they import from site-packages, not the tree).
+
 - Stale-wheel false alarm (Phase 0): installed 0.5.0 vs repo 0.6.0 — resolved
   by rebuild+reinstall; recorded the dev-loop hazard again.
 - Old-dist uninstall wiped shared shim files (`tsxtract-rs` 0.6.0 removal
