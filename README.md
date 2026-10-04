@@ -18,7 +18,7 @@
 
 Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Tsxtract eliminates that trade-off.
 
-* **Blazing Fast:** Computes up to **800,256 series/second** on standard hardware—outperforming `catch22` by **820×** and `tsfresh` by **14,000×**.
+* **Throughput (measured):** Best run **436,719 series/second** (median 307,366) on an i7-13620H laptop, 10 cores / 16 threads — about **261×** `catch22` and **7,038×** `tsfresh` on the same machine (see Benchmarks and `CLAIMS.md`).
 * **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No data duplication, no DataFrame melting, and zero intermediate memory ballooning.
 * **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
 * **Full Multi-Core Scaling (GIL-Free):** Releases Python's Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
@@ -170,7 +170,7 @@ for tick in incoming_data_feed:
 Choose the performance-to-breadth profile that fits your pipeline:
 
 * **`minimal` (10 features):** Centered moments, extrema, energy, zero crossings. Zero sorting and zero FFT overhead (~0.51 ms per 1,000 series; **~2,000,000 series/sec**).
-* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~1.80 ms per 1,000 series; **555,000 series/sec**).
+* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~3.25 ms median per 1,000 series on i7-13620H / 16 threads; **307,366 series/sec**, best 436,719).
 * **`extended` (143 features):** Adds distribution statistics, crossings, nonlinear stats, PACF (Levinson-Durbin), full linear regression trend, and spectral aggregations.
 * **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
 
@@ -189,17 +189,19 @@ print(tsxtract.describe_feature("autocorrelation__lag_1"))
 
 ### Benchmarks
 
-Measured on a 16-core system across **1,000 series of 500 steps** (500,000 data points total), traceable to CI artifacts in `benchmarks/results/bench_matrix.json`:
+Re-measured 2026-10-04 across **1,000 series of 500 steps** (500,000 data points total) — i7-13620H laptop, 10 cores (6P+4E) / 16 threads, Performance plan, AC online, interleaved pre-refactor vs HEAD (see `benchmarks/results/F1_REPORT.md`). The `core33` and competitor rows below are from that run; all other rows predate it (†) and are pending re-baseline (tracked in `CLAIMS.md`):
 
 #### Profile Throughput (1,000 × 500):
 | Profile | Features | Latency (1k) | Per-Series | Per-Feature Cost | Throughput |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `minimal` | 10 | **0.51 ms** | **0.51 µs** | 0.0507 µs | **1,972,776 series/s** |
-| `core33` | 33 | **1.80 ms** | **1.80 µs** | 0.0546 µs | **555,016 series/s** |
-| `extended` | 143 | **7.12 ms** | **7.12 µs** | 0.0498 µs | **140,395 series/s** |
-| `full` | 543 | **8.36 ms** | **8.36 µs** | 0.0154 µs | **119,654 series/s** |
+| `minimal`† | 10 | **0.51 ms** | **0.51 µs** | 0.0507 µs | **1,972,776 series/s** |
+| `core33` | 33 | **3.25 ms** | **3.25 µs** | 0.0986 µs | **307,366 series/s** |
+| `extended`† | 143 | **7.12 ms** | **7.12 µs** | 0.0498 µs | **140,395 series/s** |
+| `full`† | 543 | **8.36 ms** | **8.36 µs** | 0.0154 µs | **119,654 series/s** |
 
-#### Multi-Core Scaling (`core33`, 1,000 × 500):
+† predates the 2026-10-04 re-baseline; pending re-measurement.
+
+#### Multi-Core Scaling (`core33`, 1,000 × 500) †:
 | Worker Threads | Latency | Per-Series Cost | Speedup vs 1 Thread | Scaling Efficiency |
 | :---: | :---: | :---: | :---: | :---: |
 | 1 Thread | 11.31 ms | 11.31 µs | 1.00× | 100.0% |
@@ -211,12 +213,14 @@ Measured on a 16-core system across **1,000 series of 500 steps** (500,000 data 
 #### Competitive Landscape (1,000 × 500):
 | Library | Features | Runtime (1k × 500) | Series / sec | Speedup vs Competitor |
 | :--- | :---: | :---: | :---: | :--- |
-| **Tsxtract (`core33`)** | **33** | **1.80 ms** | **555,016** | **Baseline (1.0×)** |
-| `catch22` | 22 | 1,045.8 ms | 956 | **580× slower** |
-| `TSFEL` | 156 | 9,806.6 ms | 102 | **5,443× slower** |
-| `tsfresh` | 777 | 100,500.0 ms | 10 | **55,779× slower** |
+| **Tsxtract (`core33`)** | **33** | **3.25 ms** | **307,366** | **Baseline (1.0×)** |
+| `catch22` | 22 | 848.5 ms | 1,179 | **261× slower** |
+| `TSFEL` | 156 | 2,698.7 ms | 371 | **829× slower** |
+| `tsfresh` | 777 | 22,896.5 ms | 44 | **7,038× slower** |
 
-#### Memory Footprint (100,000 series × 500 steps):
+Pooled medians across the interleaved rounds (tsxtract n=200; competitors n=10–16); 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`.
+
+#### Memory Footprint (100,000 series × 500 steps) †:
 * **Tsxtract:** **25.18 MiB** allocated memory (strictly the output matrix: $100,000 \times 33 \times 8\text{ B}$, with **+0.00 MiB intermediate overhead**).
 * **tsfresh / Pandas:** **+1,250 MiB** memory ballooning due to melted DataFrame indices.
 

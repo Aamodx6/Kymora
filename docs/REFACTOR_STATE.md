@@ -93,8 +93,15 @@ arch.md is the architecture source of truth.
 
 - [ ] Step 1: quarantine #7/#8 → `experiment/spin-pool` + `experiment/soa-4x`
       + `docs/ROADMAP.md` (revival gates Z6/Z2)
-- [ ] Step 2: F1 interleaved benchmark pre-refactor vs HEAD; update
-      README/CLAIMS.md only from that artifact
+- [x] Step 2: F1 interleaved benchmark pre-refactor vs HEAD (P1→H1→P2→H2,
+      same machine/env/harness; only the wheel varied). Pooled: tsxtract
+      P med 3.31 CI [3.26,3.36] vs H med 3.25 CI [3.21,3.32] — overlap,
+      refactor perf-neutral. README headline/table/competitor rows
+      rewritten from the artifact (307,366 s/s med; 261×/829×/7,038×);
+      stale rows marked †; root CLAIMS.md created per arch §14.1.
+      Artifact: `benchmarks/results/F1_REPORT.md` + `F1_{P1,H1,P2,H2}/`.
+      LOSS_LEDGER.md restored byte-identical. Landing/docs figures stay
+      stale (pending section in CLAIMS.md).
 - [ ] Step 3: verify-results checks (golden diff empty, hash, API dump
       diff, clean-venv wheel install + verbatim quickstart)
 - [ ] Step 4: draft PR text; NO push until canonical remote confirmed
