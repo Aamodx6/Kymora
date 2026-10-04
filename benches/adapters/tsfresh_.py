@@ -23,9 +23,29 @@ class Adapter(BaseAdapter):
     name = "tsfresh"
     version = _VERSION
 
+    # The 13 tsfresh features whose definitions agree with tsxtract core33
+    # (frozen in benches/agreement/feature_map.json, Phase B1). Used for the
+    # matched-feature view (arch.md §11.6): time ONLY the agreed definitions.
+    MATCHED_FC_PARAMS = {
+        "median": None,
+        "quantile": [{"q": 0.1}, {"q": 0.9}],
+        "abs_energy": None,
+        "root_mean_square": None,
+        "mean_abs_change": None,
+        "mean_change": None,
+        "mean_second_derivative_central": None,
+        "longest_strike_above_mean": None,
+        "longest_strike_below_mean": None,
+        "autocorrelation": [{"lag": 1}, {"lag": 2}, {"lag": 5}],
+    }
+
     def feature_names(self, feature_set: str = "default") -> list[str]:
         if not _HAS_TSFRESH:
             return []
+        if feature_set == "matched":
+            dummy = pd.DataFrame({"id": [0, 0, 0, 0], "val": [1.0, 2.0, 3.0, 4.0]})
+            df = tsf_extract(dummy, column_id="id", default_fc_parameters=dict(self.MATCHED_FC_PARAMS), disable_progressbar=True)
+            return list(df.columns)
         dummy = pd.DataFrame({"id": [0, 0, 0, 0], "val": [1.0, 2.0, 3.0, 4.0]})
         params = EfficientFCParameters() if feature_set in ("default", "efficient") else MinimalFCParameters()
         df = tsf_extract(dummy, column_id="id", default_fc_parameters=params, disable_progressbar=True)
@@ -50,6 +70,9 @@ class Adapter(BaseAdapter):
             fc_params = ComprehensiveFCParameters()
         elif feature_set in ("minimal", "core"):
             fc_params = MinimalFCParameters()
+        elif feature_set == "matched":
+            # Only the 13 definition-matched features (B1 frozen set)
+            fc_params = dict(self.MATCHED_FC_PARAMS)
         else:
             fc_params = EfficientFCParameters()
 

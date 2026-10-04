@@ -49,3 +49,13 @@ On the current test environment (Intel Core i7-13620H 10 cores / 16 threads @ 2.
 2. **OS & SMT Topology:** Windows thread scheduling across hybrid P-cores (6) and E-cores (4) introduces core migration jitter compared to homogeneous Linux servers.
 3. Both libraries scale proportionally (~85-95% shift), confirming that Tsxtract maintains its relative 550× advantage over catch22 under identical hardware conditions.
 
+
+### README Reproduction Discrepancy Ledger Entries
+**Audit Run Date:** 2026-10-04 12:12:50  
+| Item ID | Library | Target Feats | README ms | Meas Best ms | Meas Med ms | Dev % | Status |
+|---|---|---|---|---|---|---|---|
+| `README-DISCREPANCY-TSXTRACT` | tsxtract | 33 | 1.80 | 2.90 | 3.56 | +60.9% | OPEN |
+| `README-DISCREPANCY-TSFEL` | tsfel | 156 | 9806.60 | 2433.66 | 2495.76 | -75.2% | OPEN |
+| `README-DISCREPANCY-TSFRESH` | tsfresh | 777 | 100500.00 | 20081.46 | 20398.95 | -80.0% | OPEN |
+
+**Investigation Requirement:** Competitor methodology, core pinning, and multiprocessing pool overhead must be investigated before Phase B3.

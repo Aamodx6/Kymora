@@ -194,11 +194,13 @@ class Adapter(BaseAdapter):
             dom_idx = np.argmax(power, axis=1)
             dom_freq = freqs[dom_idx]
             dom_freq[total_power == 0] = np.nan
+            dom_freq[const_mask] = np.nan
             out[:, 30] = dom_freq
 
             with np.errstate(divide="ignore", invalid="ignore"):
                 centroid = (power * freqs).sum(axis=1) / total_power
             centroid[total_power == 0] = np.nan
+            centroid[const_mask] = np.nan
             out[:, 31] = centroid
 
             # Spectral entropy
@@ -209,7 +211,7 @@ class Adapter(BaseAdapter):
                 log_bins = math.log(nbins)
                 for i in range(n_series):
                     tot = total_power[i]
-                    if tot == 0 or np.isnan(tot):
+                    if tot == 0 or np.isnan(tot) or const_mask[i]:
                         spec_ent[i] = np.nan
                     else:
                         p_norm = power[i][power[i] > 0] / tot

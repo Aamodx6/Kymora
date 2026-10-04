@@ -11,6 +11,24 @@ from benches.adapters.base import BaseAdapter
 class Adapter(BaseAdapter):
     name = "tsxtract"
 
+    # Frozen matched sets from benches/agreement/feature_map.json (Phase B1).
+    # feature_set="matched_<competitor>" extracts ONLY the features whose
+    # definitions agree with that competitor -> matched-feature view (§11.6).
+    MATCHED_SETS = {
+        "matched_tsfresh": [
+            "median", "quantile_10", "quantile_90", "abs_energy",
+            "root_mean_square", "mean_abs_change", "mean_change",
+            "mean_second_derivative_central", "longest_strike_above_mean",
+            "longest_strike_below_mean", "autocorr_lag_1", "autocorr_lag_2",
+            "autocorr_lag_5",
+        ],
+        "matched_tsfel": [
+            "mean", "std", "var", "min", "max", "median", "skewness",
+            "kurtosis", "abs_energy", "root_mean_square", "mean_abs_change",
+            "mean_change", "zero_crossings",
+        ],
+    }
+
     def __init__(self) -> None:
         try:
             import tsxtractor
@@ -48,6 +66,14 @@ class Adapter(BaseAdapter):
 
         prof = "core33" if feature_set in ("default", "core33") else feature_set
         precision = kwargs.get("precision", "f64")
+
+        # Matched-subset extraction (only definition-agreed features)
+        if feature_set in self.MATCHED_SETS:
+            return self.lib.extract_features(
+                X,
+                features=list(self.MATCHED_SETS[feature_set]),
+                n_jobs=threads,
+            )
 
         # Call native zero-copy extract_features
         try:

@@ -20,6 +20,14 @@ class Adapter(BaseAdapter):
     name = "tsfel"
     version = _VERSION
 
+    # The 13 TSFEL feature functions whose definitions agree with tsxtract
+    # core33 (frozen in benches/agreement/feature_map.json, Phase B1).
+    MATCHED_TSFEL_NAMES = [
+        "Mean", "Standard deviation", "Variance", "Min", "Max", "Median",
+        "Skewness", "Kurtosis", "Absolute energy", "Root mean square",
+        "Mean absolute diff", "Mean diff", "Zero crossing rate",
+    ]
+
     def __init__(self) -> None:
         self._cfg = None
         if _HAS_TSFEL:
@@ -31,9 +39,19 @@ class Adapter(BaseAdapter):
     def feature_names(self, feature_set: str = "default") -> list[str]:
         if not _HAS_TSFEL or self._cfg is None:
             return []
-        dummy = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
-        df = tsfel.time_series_features_extractor(self._cfg, dummy, verbose=0)
+        cfg = self._matched_cfg() if feature_set == "matched" else self._cfg
+        dummy = np.linspace(0.0, 10.0, 500)
+        df = tsfel.time_series_features_extractor(cfg, dummy, verbose=0)
         return list(df.columns)
+
+    def _matched_cfg(self):
+        """Filter the full config down to the 13 definition-matched features."""
+        cfg = {}
+        for domain, funcs in (self._cfg or {}).items():
+            kept = {name: settings for name, settings in funcs.items() if name in self.MATCHED_TSFEL_NAMES}
+            if kept:
+                cfg[domain] = kept
+        return cfg
 
     def extract(
         self,
@@ -45,7 +63,10 @@ class Adapter(BaseAdapter):
         if not _HAS_TSFEL:
             raise RuntimeError("tsfel is not installed.")
 
-        cfg = self._cfg or tsfel.get_features_by_domain()
+        if feature_set == "matched":
+            cfg = self._matched_cfg()
+        else:
+            cfg = self._cfg or tsfel.get_features_by_domain()
         n_series = X.shape[0]
 
         # TSFEL time_series_features_extractor operates on 1D series or 2D multichannel.

@@ -53,6 +53,8 @@ def main():
     layout = config.get("layout", "C")
     min_runs = int(config.get("min_runs", 15))
     time_budget = float(config.get("time_budget", 2.0))
+    # Distribution aliases: suite generators use "heavy_tailed", legacy worker used "heavy_tail"
+    dist = {"heavy_tailed": "heavy_tail"}.get(dist, dist)
 
     # Set threading env variables inside process
     os.environ["RAYON_NUM_THREADS"] = str(threads)
@@ -111,6 +113,20 @@ def main():
     extra_kwargs = {"guarded": guarded}
     if fastmath is not None:
         extra_kwargs["fastmath"] = fastmath
+
+    # Variant-specific pre-timed setup (e.g. tsfresh extract-only: build long_df
+    # OUTSIDE the timed region so only the extraction is measured)
+    variant = config.get("variant")
+    adapter_kwargs = dict(config.get("adapter_kwargs") or {})
+    if variant == "extract_only" and adapter_name == "tsfresh":
+        # Imported lazily so isolated venvs without pandas (antropy) still work
+        import pandas as pd
+        long_df = pd.DataFrame({
+            "id": np.repeat(np.arange(n_series), length),
+            "val": data.ravel(),
+        })
+        adapter_kwargs["long_df"] = long_df
+    extra_kwargs.update(adapter_kwargs)
 
     # Import adapter
     try:
@@ -220,6 +236,9 @@ def run_benchmark_subprocess(
     fastmath: bool | None = None,
     min_runs: int = 15,
     time_budget: float = 2.0,
+    timeout_s: float = 180.0,
+    variant: str | None = None,
+    adapter_kwargs: dict[str, Any] | None = None,
     python_bin: str | Path | None = None,
     env_ref: str = "env.json",
     seed: int = 42,
@@ -258,21 +277,33 @@ def run_benchmark_subprocess(
         "min_runs": min_runs,
         "time_budget": time_budget,
         "seed": seed,
+        "variant": variant,
+        "adapter_kwargs": adapter_kwargs or {},
     }
     worker_code = _worker_script()
 
     def _exec() -> dict[str, Any]:
         env = os.environ.copy()
         env["PYTHONPATH"] = str(repo_root) + (os.pathsep + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
-        proc = subprocess.run(
-            [py_exec, "-c", worker_code],
-            input=json.dumps(config),
-            capture_output=True,
-            text=True,
-            cwd=repo_root,
-            env=env,
-            timeout=180,
-        )
+        try:
+            proc = subprocess.run(
+                [py_exec, "-c", worker_code],
+                input=json.dumps(config),
+                capture_output=True,
+                text=True,
+                cwd=repo_root,
+                env=env,
+                timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "status": "timeout",
+                "runs": [],
+                "peak_rss_mb": 0.0,
+                "error_msg": f"TimeoutExpired: case exceeded {timeout_s:.0f}s wall clock (recorded as explicit timeout row)",
+                "exception_type": "TimeoutExpired",
+                "exception_message": f"timeout_s={timeout_s}",
+            }
         if proc.returncode != 0:
             return {
                 "status": "error",
@@ -313,6 +344,8 @@ def run_benchmark_subprocess(
     if raw.get("exception_type"):
         extra["exception_type"] = raw.get("exception_type")
         extra["exception_message"] = raw.get("exception_message")
+    if variant:
+        extra["variant"] = variant
     if adapter == "numba_baseline":
         fm_val = fastmath if fastmath is not None else (feature_set not in ("strict", "no_fastmath", "agreement", "robustness"))
         extra["fastmath_variant"] = f"fastmath={fm_val}"
