@@ -39,7 +39,14 @@ arch.md is the architecture source of truth.
       missing sections, `site_url` aligned (closes #6), mkdocs strict
       INFO-free, roles decision (no landing merge). PRD/patent untouched
       (#4/#5). See `docs/refactor/phase5_VERIFICATION.md`.
-- [ ] Phase 6: website
+- [x] Phase 6: website (2026-10-04). Gate: landing build clean; removed
+      4 false conda-forge blocks (Anaconda API 404 on both names) and
+      fixed 9 wrong `tsxtract` dist names in install commands (would hit
+      the unrelated JAX PyPI project); docs/api.md D8 violation fixed;
+      dead `TSXTRACT_VERSION` removed; nav/links/figures integrity
+      16/16. **#2 RESOLVED** (PyPI `tsxtract-rs` owned by `aamoddev11`,
+      0.5.0 live). F1 exposure + Footer profile deferred (#1/B-track).
+      See `docs/refactor/phase6_VERIFICATION.md`.
 - [ ] Phase 7: CI/CD, tooling, contributor experience
 - [ ] Phase 8: final verification & report
 
@@ -69,9 +76,10 @@ arch.md is the architecture source of truth.
 
 1. Confirm canonical repo (`Aamodx6/Tsxtract`) and fate of anything under
    handle `Aamod007` (no second remote is configured locally).
-2. (Phase 1 input) PyPI `tsxtract` ownership — the unrelated JAX project
-   holds the name; confirm keeping PyPI distribution name `tsxtract-rs`
-   if `tsxtract` is not ours. crates.io check for `tsxtract` pending.
+2. ~~PyPI `tsxtract-rs` ownership~~ — resolved Phase 6: PyPI API shows
+   releases 0.3.0–0.5.0 under owner `aamoddev11`, metadata identical to
+   this repo. JAX project keeps bare `tsxtract` (D8 still applies:
+   never `pip install tsxtract`).
 3. Stashed prior-session work: resolved (popped + committed in Phase 1).
 4. `PRD.md`: archive or migrate-then-delete (sole product-requirements
    record; weak references only).

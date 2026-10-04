@@ -72,7 +72,7 @@ extract_features_df(
 
 Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
 
-Requires `pandas` (`pip install "tsxtract[pandas]"`).
+Requires `pandas` (`pip install "tsxtract-rs[pandas]"`).
 
 ---
 

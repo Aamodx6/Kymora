@@ -15,12 +15,8 @@ pip install tsxtract-rs
 uv add tsxtract-rs
 ```
 
-```bash tab="conda"
-conda install -c conda-forge tsxtract
-```
-
 > [!NOTE]
-> The PyPI package uses `abi3` wheels for Python 3.10+, so one wheel per architecture covers CPython 3.10 through 3.13. This matches the `abi3-py310` feature in `Cargo.toml` and `requires-python = ">=3.10"` in `pyproject.toml`.
+> The PyPI package uses `abi3` wheels for Python 3.10+, so one wheel per architecture covers CPython 3.10 through 3.13. This matches the `abi3-py310` feature in `Cargo.toml` and `requires-python = ">=3.10"` in `pyproject.toml`. There is no conda-forge package (checked against the Anaconda API) — install from PyPI.
 
 ## Requirements
 
@@ -34,7 +30,7 @@ conda install -c conda-forge tsxtract
 | **pandas** | Optional, `>=1.5` | `>=2.0` | Needed solely for `extract_features_df()` |
 
 > [!WARNING]
-> TODO(verify): exact minimum OS releases, glibc/manylinux tags, and conda-forge availability. Wheel targets above come from the README; `pyproject.toml` pins only Python and NumPy, so treat the conda channel and precise OS floors as unverified until checked against PyPI.
+> TODO(verify): exact minimum OS releases and glibc/manylinux tags. Wheel targets above come from the README; `pyproject.toml` pins only Python and NumPy, so treat the precise OS floors as unverified until checked against PyPI. (conda-forge availability *was* checked on 2026-10-04: no package exists under either `tsxtract` or `tsxtractor`.)
 
 ## Optional extras
 
@@ -51,15 +47,11 @@ uv add "tsxtract-rs[pandas]"
 uv add "tsxtract-rs[test]"
 ```
 
-```bash tab="conda"
-conda install -c conda-forge tsxtract pandas
-```
-
 Available extras and their contents:
 
-- **Pandas support:** `"tsxtract[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
-- **Test suite:** `"tsxtract[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
-- **Benchmarks:** `"tsxtract[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
+- **Pandas support:** `"tsxtract-rs[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
+- **Test suite:** `"tsxtract-rs[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
+- **Benchmarks:** `"tsxtract-rs[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
 - **Docs tooling:** the `docs` extra pulls `mkdocs` and `mkdocs-material` for local docs builds.
 
 ## Verify installation
@@ -78,7 +70,7 @@ print("Computed mean value:", result[0, 0])
 ```
 
 ```text
-tsxtract version: 0.3.0
+tsxtract version: 0.5.0
 Total registered features: 33
 Test feature vector shape: (1, 33)
 Computed mean value: 5.0
@@ -116,16 +108,12 @@ cargo test --no-default-features
 Move to the latest published release with your usual manager:
 
 ```bash tab="pip"
-pip install --upgrade tsxtract
+pip install --upgrade tsxtract-rs
 ```
 
 ```bash tab="uv"
-uv lock --upgrade-package tsxtract
+uv lock --upgrade-package tsxtract-rs
 uv sync
-```
-
-```bash tab="conda"
-conda update -c conda-forge tsxtract
 ```
 
 ## Uninstall
@@ -133,22 +121,18 @@ conda update -c conda-forge tsxtract
 Remove the library cleanly when switching environments:
 
 ```bash tab="pip"
-pip uninstall -y tsxtract
+pip uninstall -y tsxtract-rs
 ```
 
 ```bash tab="uv"
-uv remove tsxtract
-```
-
-```bash tab="conda"
-conda remove tsxtract
+uv remove tsxtract-rs
 ```
 
 ## Troubleshooting
 
 ### Wheel not found during install
 
-- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract`.
+- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract-rs`.
 - **Cause:** Python older than 3.10 or an unsupported architecture such as 32-bit x86.
 - **Resolution:** check `python --version`, then recreate the environment on Python 3.10+.
 
@@ -174,7 +158,7 @@ conda remove tsxtract
 
 - **Symptom:** `ImportError: DLL load failed` on Windows or `undefined symbol` on Linux.
 - **Cause:** stale virtual environment paths or an outdated system C runtime.
-- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract` plus `numpy>=1.24`.
+- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract-rs` plus `numpy>=1.24`.
 
 ### Proxy and corporate firewall timeouts
 
@@ -183,11 +167,11 @@ conda remove tsxtract
 - **Resolution:** pass your proxy and certificate bundle explicitly during install.
 
 ```bash
-pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract
+pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract-rs
 ```
 
 ```text
-Successfully installed tsxtract-0.5.0
+Successfully installed tsxtract-rs-0.5.0
 ```
 
 ### Contiguous and dtype errors at call time
