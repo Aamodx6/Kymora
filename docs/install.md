@@ -1,7 +1,7 @@
 # Install
 
 ```bash
-pip install tsxtract
+pip install tsxtract-rs
 ```
 
 That is the whole story on Linux (x86_64, aarch64), macOS (Intel and Apple
@@ -21,7 +21,7 @@ The only required runtime dependency is numpy (>= 1.24).
 | `docs` | mkdocs, mkdocs-material | building this site |
 
 ```bash
-pip install "tsxtract[pandas]"
+pip install "tsxtract-rs[pandas]"
 ```
 
 ## Building from source
@@ -30,7 +30,7 @@ Needed only on a platform without a prebuilt wheel, or when working on the
 library itself. Requires a [Rust toolchain](https://rustup.rs/):
 
 ```bash
-git clone https://github.com/Aamod007/Tsxtract
+git clone https://github.com/Aamodx6/Tsxtract
 cd Tsxtract
 python -m venv .venv && . .venv/bin/activate   # .venv\Scripts\activate on Windows
 pip install maturin

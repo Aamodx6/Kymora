@@ -1,7 +1,7 @@
 # Tsxtract Adapter Tuning Notes
 
 ## Library Overview
-- **Name:** Tsxtract (`tsxtractor._core`)
+- **Name:** Tsxtract (`tsxtract._core`)
 - **Version:** 0.5.0
 - **Implementation:** Rust native extension with PyO3 bindings and Rayon/SpinPool execution.
 

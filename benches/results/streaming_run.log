@@ -1,0 +1,33 @@
+  [resume] 7 case_ids already in streaming.jsonl
+====================================================================================================
+  B3 Streaming Suite (Rule 1 gate: compute == batch extract before timing)
+====================================================================================================
+
+  capacity=64:
+    skip (already recorded)
+
+  capacity=256:
+    gate ok (max rel 6.90e-15)
+    push: 0.099 µs/push (50000 pushes)
+    compute(fast): p50=0.60 µs p95=0.90 µs
+    compute(all): p50=12.10 µs p95=15.00 µs
+    naive recompute: p50=179.25 µs
+    speedup vs naive: fast 298.7×  all 23.0×
+
+  capacity=4096:
+    gate ok (max rel 1.52e-14)
+    push: 0.128 µs/push (50000 pushes)
+    compute(fast): p50=5.60 µs p95=6.20 µs
+    compute(all): p50=94.70 µs p95=157.00 µs
+    naive recompute: p50=253.45 µs
+    speedup vs naive: fast 51.7×  all 2.8×
+
+  capacity=65536:
+    gate ok (max rel 6.36e-15)
+    push: 0.151 µs/push (50000 pushes)
+    compute(fast): p50=76.50 µs p95=104.90 µs
+    compute(all): p50=1833.95 µs p95=3239.02 µs
+    naive recompute: p50=4493.95 µs
+    speedup vs naive: fast 44.4×  all 2.8×
+
+Done. Rows in F:\Active Repo\Tsxtract\benches\results\streaming.jsonl

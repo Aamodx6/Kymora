@@ -1,8 +1,8 @@
-site_name: tsxtractor
+site_name: tsxtract
 site_description: Batch time-series feature extraction for Python, with a Rust core.
 site_url: https://aamod007.github.io/Tsxtract/
-repo_url: https://github.com/Aamod007/Tsxtract
-repo_name: Aamod007/Tsxtract
+repo_url: https://github.com/Aamodx6/Tsxtract
+repo_name: Aamodx6/Tsxtract
 edit_uri: edit/main/docs/
 
 theme:
@@ -46,6 +46,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Aamod007/Tsxtract
+      link: https://github.com/Aamodx6/Tsxtract
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/tsxtractor/
+      link: https://pypi.org/project/tsxtract-rs/

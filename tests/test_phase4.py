@@ -12,24 +12,24 @@ try:
 except ImportError:
     tsf_calc = None
 
-import tsxtractor
+import tsxtract
 
 
 def test_phase4_profile_shapes():
-    profiles = tsxtractor.list_profiles()
+    profiles = tsxtract.list_profiles()
     assert profiles["core33"] == 33
     assert profiles["extended"] == 143
     assert profiles["full"] == 543
 
     X = np.random.default_rng(42).standard_normal((10, 100))
 
-    out_ext = tsxtractor.extract_features(X, profile="extended")
+    out_ext = tsxtract.extract_features(X, profile="extended")
     assert out_ext.shape == (10, 143)
-    assert len(tsxtractor.feature_names(profile="extended")) == 143
+    assert len(tsxtract.feature_names(profile="extended")) == 143
 
-    out_full = tsxtractor.extract_features(X, profile="full")
+    out_full = tsxtract.extract_features(X, profile="full")
     assert out_full.shape == (10, 543)
-    assert len(tsxtractor.feature_names(profile="full")) == 543
+    assert len(tsxtract.feature_names(profile="full")) == 543
 
 
 def test_reference_parity_c3_and_time_reversal():
@@ -41,13 +41,13 @@ def test_reference_parity_c3_and_time_reversal():
 
     for lag in (1, 2, 3):
         feat_name = f"c3__lag_{lag}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_val = tsf_calc.c3(x, lag)
         np.testing.assert_allclose(our_val, tsf_val, rtol=1e-12, atol=1e-12)
 
     for lag in (1, 2, 3):
         feat_name = f"time_reversal_asymmetry_statistic__lag_{lag}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_val = tsf_calc.time_reversal_asymmetry_statistic(x, lag)
         np.testing.assert_allclose(our_val, tsf_val, rtol=1e-12, atol=1e-12)
 
@@ -61,13 +61,13 @@ def test_reference_parity_crossings_and_peaks():
 
     for m in (-1.0, 1.0):
         feat_name = f"number_crossing_m__m_{int(m)}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_val = tsf_calc.number_crossing_m(x, m)
         assert our_val == tsf_val
 
     for n in (1, 5, 10, 50):
         feat_name = f"number_peaks__n_{n}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_val = tsf_calc.number_peaks(x, n)
         assert our_val == tsf_val
 
@@ -81,14 +81,14 @@ def test_reference_parity_autocorrelation_and_pacf():
 
     for lag in (0, 3, 4, 6, 7, 8, 9):
         feat_name = f"autocorrelation__lag_{lag}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_val = tsf_calc.autocorrelation(x, lag)
         np.testing.assert_allclose(our_val, tsf_val, rtol=1e-12, atol=1e-12)
 
     sm_pacf = stattools.pacf(x, nlags=9, method="ld")
     for lag in range(1, 10):
         feat_name = f"partial_autocorrelation__lag_{lag}"
-        our_val = tsxtractor.extract_features(X, features=[feat_name])[0, 0]
+        our_val = tsxtract.extract_features(X, features=[feat_name])[0, 0]
         tsf_param = [{"lag": lag}]
         tsf_val = list(tsf_calc.partial_autocorrelation(x, tsf_param))[0][1]
         np.testing.assert_allclose(our_val, tsf_val, rtol=1e-10, atol=1e-10)
@@ -101,7 +101,7 @@ def test_reference_parity_linear_trend_intercept_and_stderr():
     X = x.reshape(1, -1)
 
     reg = stats.linregress(np.arange(len(x)), x)
-    our_vals = tsxtractor.extract_features(
+    our_vals = tsxtract.extract_features(
         X, features=['linear_trend__attr_"intercept"', 'linear_trend__attr_"stderr"']
     )[0]
     np.testing.assert_allclose(our_vals[0], reg.intercept, rtol=1e-12, atol=1e-12)
@@ -122,7 +122,7 @@ def test_reference_parity_fft_coefficients_and_aggregated():
             f'fft_coefficient__coeff_{k}__attr_"abs"',
             f'fft_coefficient__coeff_{k}__attr_"angle"',
         ]
-        our_vals = tsxtractor.extract_features(X, features=feats)[0]
+        our_vals = tsxtract.extract_features(X, features=feats)[0]
         np.testing.assert_allclose(our_vals[0], rfft_x[k].real, rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(our_vals[1], rfft_x[k].imag, rtol=1e-12, atol=1e-12)
         np.testing.assert_allclose(our_vals[2], np.abs(rfft_x[k]), rtol=1e-12, atol=1e-12)
@@ -136,7 +136,7 @@ def test_reference_parity_fft_coefficients_and_aggregated():
             'fft_aggregated__aggtype_"skew"',
             'fft_aggregated__aggtype_"kurtosis"',
         ]
-        our_agg = tsxtractor.extract_features(X, features=agg_names)[0]
+        our_agg = tsxtract.extract_features(X, features=agg_names)[0]
         tsf_agg = dict(tsf_calc.fft_aggregated(x, [{"aggtype": a} for a in ["centroid", "variance", "skew", "kurtosis"]]))
         np.testing.assert_allclose(our_agg[0], tsf_agg['aggtype_"centroid"'], rtol=1e-10, atol=1e-10)
         np.testing.assert_allclose(our_agg[1], tsf_agg['aggtype_"variance"'], rtol=1e-10, atol=1e-10)
@@ -166,7 +166,7 @@ def test_reference_parity_distribution_and_change_stats():
         "absolute_sum_of_changes",
         "cid_ce_raw",
     ]
-    our_vals = tsxtractor.extract_features(X, features=feats)[0]
+    our_vals = tsxtract.extract_features(X, features=feats)[0]
     assert our_vals[0] == pytest.approx(np.sum(x), rel=1e-12)
     assert our_vals[1] == len(x)
     assert our_vals[2] == np.sum(x > np.mean(x))
@@ -187,17 +187,17 @@ def test_reference_parity_distribution_and_change_stats():
 def test_edge_cases_extended():
     # Constant series
     const_x = np.ones((1, 50)) * 5.0
-    out_const = tsxtractor.extract_features(const_x, profile="extended")[0]
+    out_const = tsxtract.extract_features(const_x, profile="extended")[0]
     assert np.isfinite(out_const[0])  # mean is 5.0
     # NaN check: NaN in input -> all features NaN
     nan_x = const_x.copy()
     nan_x[0, 10] = np.nan
-    out_nan = tsxtractor.extract_features(nan_x, profile="extended")[0]
+    out_nan = tsxtract.extract_features(nan_x, profile="extended")[0]
     assert np.all(np.isnan(out_nan))
 
     # Large offset cancellation series
     large_x = np.ones((1, 100)) * 1e9 + np.random.default_rng(42).standard_normal(100)
-    out_large = tsxtractor.extract_features(large_x, profile="extended")[0]
+    out_large = tsxtract.extract_features(large_x, profile="extended")[0]
     # Variance of standard normal should match numpy even with 1e9 mean
-    var_idx = tsxtractor.feature_names(profile="extended").index("var")
+    var_idx = tsxtract.feature_names(profile="extended").index("var")
     np.testing.assert_allclose(out_large[var_idx], np.var(large_x), rtol=1e-8)

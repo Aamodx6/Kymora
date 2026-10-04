@@ -28,7 +28,7 @@ Libraries that are not installed are reported as skipped rather than failing the
 run, so you can benchmark a subset:
 
 ```bash
-python benches/bench_libraries.py --only tsxtractor catch22
+python benches/bench_libraries.py --only tsxtract catch22
 ```
 
 Useful flags: `--seed` (input reproducibility), `--json` / `--markdown` (write
@@ -41,7 +41,7 @@ as fit in a two-second budget per library:
 
 | library | features | total time | series/s | ms/feature |
 |---|---:|---:|---:|---:|
-| **tsxtractor 0.2.1** | 33 | **1.2 ms** | 800,256 | 0.0379 |
+| **tsxtract 0.2.1** | 33 | **1.2 ms** | 800,256 | 0.0379 |
 | `catch22` (pycatch22) | 22 | 1.02 s | 976 | 46.58 |
 | `TSFEL` (all domains) | 156 | 7.15 s | 140 | 45.86 |
 | `tsfresh` (EfficientFCParameters) | 777 | 17.68 s | 57 | 22.76 |
@@ -55,11 +55,11 @@ estimators, that difference is not overhead you can optimise away.
 
 ## Published numbers
 
-The [Benchmark workflow](https://github.com/Aamod007/Tsxtract/actions/workflows/benchmark.yml)
+The [Benchmark workflow](https://github.com/Aamodx6/Tsxtract/actions/workflows/benchmark.yml)
 runs this on a GitHub Linux runner weekly and on demand, recording the runner's
 core count alongside the timings, and uploads both the JSON and the Markdown
 table as artifacts. The most recent committed run lives in
-[`benches/results/`](https://github.com/Aamod007/Tsxtract/tree/main/benches/results).
+[`benches/results/`](https://github.com/Aamodx6/Tsxtract/tree/main/benches/results).
 
 Numbers measured on one laptop are not evidence anyone else can act on, which is
 why the reproducible-runner result is the one published rather than a local best

@@ -9,11 +9,11 @@ This page explains the mental model behind Tsxtract: what counts as a series, wh
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 X = np.ascontiguousarray(np.arange(12.0).reshape(3, 4))
-feats = tsxtractor.extract_features(X)
+feats = tsxtract.extract_features(X)
 print(feats.shape)
-print(tsxtractor.feature_names()[:3])
+print(tsxtract.feature_names()[:3])
 print(feats[:, 0])
 ```
 
@@ -71,13 +71,13 @@ Dtype and layout rules are strict because the core borrows buffers without copyi
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 x = np.arange(8.0)
 try:
-    tsxtractor.extract_features(x)
+    tsxtract.extract_features(x)
 except TypeError as exc:
     print("TypeError:", str(exc)[:60])
-print(tsxtractor.extract_features(x.reshape(1, -1)).shape)
+print(tsxtract.extract_features(x.reshape(1, -1)).shape)
 ```
 
 ```text
@@ -91,10 +91,10 @@ A ragged batch is a list of 1D arrays with different lengths, used when recordin
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 rng = np.random.default_rng(3)
 ragged = [np.ascontiguousarray(rng.standard_normal(n)) for n in (60, 200, 120)]
-out = tsxtractor.extract_features(ragged)
+out = tsxtract.extract_features(ragged)
 print(out.shape)
 ```
 
@@ -130,11 +130,11 @@ flowchart TD
 
 ```python
 import numpy as np
-import tsxtractor
-names = tsxtractor.feature_names()
-poisoned = tsxtractor.extract_features([np.array([1.0, 2.0, np.nan, 4.0])])[0]
+import tsxtract
+names = tsxtract.feature_names()
+poisoned = tsxtract.extract_features([np.array([1.0, 2.0, np.nan, 4.0])])[0]
 print("NaN row is all NaN:", bool(np.isnan(poisoned).all()))
-const = tsxtractor.extract_features([np.full(10, 3.7)])[0]
+const = tsxtract.extract_features([np.full(10, 3.7)])[0]
 d = dict(zip(names, const))
 print("Constant mean/std:", d["mean"], d["std"])
 print("Constant skew/autocorr_1:", d["skewness"], d["autocorr_lag_1"])

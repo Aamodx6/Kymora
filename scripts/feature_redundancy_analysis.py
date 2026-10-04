@@ -1,7 +1,7 @@
 """Information-Theoretic Feature Redundancy and Collinearity Analysis.
 
 Analyzes the mathematical orthogonality, mutual correlation, and dimensional
-expressiveness of tsxtractor's 33 curated features across diverse time-series archetypes.
+expressiveness of tsxtract's 33 curated features across diverse time-series archetypes.
 
 Produces quantitative proofs required for academic peer review:
   1. Pairwise Pearson/Spearman Collinearity Distribution
@@ -19,7 +19,7 @@ import os
 import numpy as np
 from sklearn.decomposition import PCA
 
-import tsxtractor
+import tsxtract
 
 
 def generate_diverse_series_bank(n_series: int = 2000, length: int = 300) -> np.ndarray:
@@ -139,15 +139,15 @@ def format_report(metrics: dict, feature_names: list[str]) -> str:
         f"- **High Collinearity (|r| >= 0.90)**: {metrics['high_corr_frac'] * 100:.1f}% of feature pairs",
         "",
         "## 2. Principal Component Analysis (Intrinsic Dimensionality)",
-        "| Variance Explained Threshold | Components Required (tsxtractor) | Percentage of Bank Spanned |",
+        "| Variance Explained Threshold | Components Required (tsxtract) | Percentage of Bank Spanned |",
         "|---|---:|---:|",
         f"| **80% Variance** | **{metrics['n_components_80']}** / 33 | {metrics['n_components_80'] / 33 * 100:.1f}% |",
         f"| **90% Variance** | **{metrics['n_components_90']}** / 33 | {metrics['n_components_90'] / 33 * 100:.1f}% |",
         f"| **95% Variance** | **{metrics['n_components_95']}** / 33 | {metrics['n_components_95'] / 33 * 100:.1f}% |",
         "",
         "### Significance for Research Paper & Patent:",
-        "1. **High Intrinsic Dimensionality**: In over-parameterized libraries (such as TSFEL with ~390 features), empirical studies show that only 4 principal components account for >90% of variance, demonstrating severe redundancy. In contrast, tsxtractor requires high-order components to span 90% variance, confirming that its 33 features represent distinct, non-redundant dynamical signals.",
-        "2. **Information Efficiency**: By eliminating redundant calculations, tsxtractor maximizes the signal-to-noise ratio per FLOP, drastically reducing energy footprint and model overfitting.",
+        "1. **High Intrinsic Dimensionality**: In over-parameterized libraries (such as TSFEL with ~390 features), empirical studies show that only 4 principal components account for >90% of variance, demonstrating severe redundancy. In contrast, tsxtract requires high-order components to span 90% variance, confirming that its 33 features represent distinct, non-redundant dynamical signals.",
+        "2. **Information Efficiency**: By eliminating redundant calculations, tsxtract maximizes the signal-to-noise ratio per FLOP, drastically reducing energy footprint and model overfitting.",
     ]
     return "\n".join(lines)
 
@@ -162,9 +162,9 @@ def main():
     print(f"Generating heterogeneous time-series corpus ({args.n_series} series, length={args.length})...")
     X = generate_diverse_series_bank(args.n_series, args.length)
 
-    print("Extracting features with tsxtractor...")
-    feats = tsxtractor.extract_features(X)
-    names = tsxtractor.feature_names()
+    print("Extracting features with tsxtract...")
+    feats = tsxtract.extract_features(X)
+    names = tsxtract.feature_names()
 
     print("Computing correlation matrix and PCA dimensionality...")
     metrics = analyze_redundancy(feats, names)

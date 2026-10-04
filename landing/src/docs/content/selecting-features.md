@@ -5,26 +5,26 @@ order: 9
 section: "Guides"
 ---
 
-Feature selection reduces model complexity, prevents overfitting, and speeds up inference. `tsxtractor` provides both high-level automated supervised selection (`select_features`, `TsxSelector`) and manual domain-guided filtering.
+Feature selection reduces model complexity, prevents overfitting, and speeds up inference. `tsxtract` provides both high-level automated supervised selection (`select_features`, `TsxSelector`) and manual domain-guided filtering.
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 
 rng = np.random.default_rng(42)
 X = rng.standard_normal((100, 500))
 y = rng.integers(0, 2, size=100)
 
-F = tsxtractor.extract_features(X)
+F = tsxtract.extract_features(X)
 
 # Fast automated feature selection with FDR control
-selected_idx, report = tsxtractor.select_features(F, y, task="classification", fdr=0.05)
+selected_idx, report = tsxtract.select_features(F, y, task="classification", fdr=0.05)
 print(f"Selected {len(selected_idx)} non-redundant features.")
 ```
 
 ## Native Supervised Selection (`TsxSelector`)
 
-`tsxtractor.TsxSelector` is a scikit-learn compatible transformer that:
+`tsxtract.TsxSelector` is a scikit-learn compatible transformer that:
 1. Computes univariate relevance statistics (ANOVA F-statistic for classification, Pearson correlation for regression).
 2. Controls the False Discovery Rate (FDR) using the Benjamini-Hochberg procedure at a configurable threshold $\alpha$ (default `0.05`).
 3. Clusters surviving features by pairwise correlation and prunes collinear duplicates (`max_corr=0.90`).
@@ -34,7 +34,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import HistGradientBoostingClassifier
 
 pipeline = Pipeline([
-    ("selector", tsxtractor.TsxSelector(task="classification", fdr=0.05)),
+    ("selector", tsxtract.TsxSelector(task="classification", fdr=0.05)),
     ("classifier", HistGradientBoostingClassifier())
 ])
 
@@ -49,7 +49,7 @@ predictions = pipeline.predict(F)
 Group features by physical properties and resolve indices dynamically:
 
 ```python
-names = tsxtractor.feature_names()
+names = tsxtract.feature_names()
 
 groups = {
     "level": ["mean", "median", "min", "max"],

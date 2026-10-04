@@ -13,15 +13,15 @@ and requires a version bump per architecture §9.
 import numpy as np
 import pytest
 
-import tsxtractor
+import tsxtract
 
-NAMES = tsxtractor.feature_names()
+NAMES = tsxtract.feature_names()
 N_FEATURES = len(NAMES)
 
 
 def nan_set(x):
     """Names of the features that come back NaN for series ``x``."""
-    row = tsxtractor.extract_features([np.asarray(x, dtype=np.float64)])[0]
+    row = tsxtract.extract_features([np.asarray(x, dtype=np.float64)])[0]
     return {n for n, v in zip(NAMES, row) if np.isnan(v)}
 
 
@@ -42,7 +42,7 @@ SERIES_WITH_NAN = {
 
 @pytest.mark.parametrize("name", SERIES_WITH_NAN)
 def test_any_nan_makes_every_feature_nan(name):
-    row = tsxtractor.extract_features([SERIES_WITH_NAN[name]])[0]
+    row = tsxtract.extract_features([SERIES_WITH_NAN[name]])[0]
     assert row.shape == (N_FEATURES,)
     assert np.isnan(row).all(), f"{name}: partial computation leaked through"
 
@@ -55,15 +55,15 @@ def test_nan_row_does_not_contaminate_its_neighbours():
     X = clean.copy()
     X[2, 30] = np.nan
 
-    out = tsxtractor.extract_features(X)
+    out = tsxtract.extract_features(X)
     assert np.isnan(out[2]).all()
     assert not np.isnan(np.delete(out, 2, axis=0)).any()
 
     # the surviving rows must be bit-identical to extracting them alone
-    reference = tsxtractor.extract_features(np.ascontiguousarray(np.delete(clean, 2, axis=0)))
+    reference = tsxtract.extract_features(np.ascontiguousarray(np.delete(clean, 2, axis=0)))
     np.testing.assert_array_equal(np.delete(out, 2, axis=0), reference)
 
-    ragged = tsxtractor.extract_features(list(X))
+    ragged = tsxtract.extract_features(list(X))
     np.testing.assert_array_equal(ragged, out)
 
 
@@ -75,9 +75,9 @@ def test_no_silent_imputation():
     with_nan = base.copy()
     with_nan[10] = np.nan
 
-    poisoned = tsxtractor.extract_features([with_nan])[0]
-    dropped = tsxtractor.extract_features([np.delete(base, 10)])[0]
-    zeroed = tsxtractor.extract_features([np.where(np.isnan(with_nan), 0.0, with_nan)])[0]
+    poisoned = tsxtract.extract_features([with_nan])[0]
+    dropped = tsxtract.extract_features([np.delete(base, 10)])[0]
+    zeroed = tsxtract.extract_features([np.where(np.isnan(with_nan), 0.0, with_nan)])[0]
 
     assert np.isnan(poisoned).all()
     assert not np.isnan(dropped).any()
@@ -89,7 +89,7 @@ def test_sliding_features_nan_is_windowed_not_global():
     NaN — the contract is per extracted series, and each window is a series."""
     x = np.arange(100.0)
     x[55] = np.nan
-    out = tsxtractor.sliding_features(x, window=10, stride=10)
+    out = tsxtract.sliding_features(x, window=10, stride=10)
     assert out.shape == (10, N_FEATURES)
     poisoned = np.isnan(out).all(axis=1)
     assert poisoned[5]
@@ -158,7 +158,7 @@ def test_undefined_features_do_not_poison_the_rest_of_the_row():
     """The distinguishing property of feature-level NaN: everything else in the
     same row still computes."""
     x = np.full(100, 3.7)
-    row = tsxtractor.extract_features([x])[0]
+    row = tsxtract.extract_features([x])[0]
     defined = {n: v for n, v in zip(NAMES, row) if n not in CONSTANT_UNDEFINED}
 
     assert len(defined) == N_FEATURES - len(CONSTANT_UNDEFINED)
@@ -176,7 +176,7 @@ def test_constant_series_variance_is_exactly_zero_not_float_noise():
     1e-31 residue from summation order would silently flip these features from
     NaN to garbage."""
     for value in (3.7, -1e6, 1e-8, 0.0):
-        row = tsxtractor.extract_features([np.full(1000, value)])[0]
+        row = tsxtract.extract_features([np.full(1000, value)])[0]
         got = dict(zip(NAMES, row))
         assert got["var"] == 0.0
         assert got["std"] == 0.0
@@ -189,7 +189,7 @@ def test_constant_series_variance_is_exactly_zero_not_float_noise():
 
 def test_empty_series_is_an_error_not_a_nan_row():
     with pytest.raises(ValueError):
-        tsxtractor.extract_features([np.array([], dtype=np.float64)])
+        tsxtract.extract_features([np.array([], dtype=np.float64)])
 
 
 def test_empty_series_error_takes_precedence_over_nan_neighbours():
@@ -197,7 +197,7 @@ def test_empty_series_error_takes_precedence_over_nan_neighbours():
     reported even when another series in the batch would have produced NaN."""
     batch = [np.array([1.0, np.nan]), np.array([], dtype=np.float64)]
     with pytest.raises(ValueError, match="index 1"):
-        tsxtractor.extract_features(batch)
+        tsxtract.extract_features(batch)
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ def test_infinite_input_is_a_value_not_an_error_and_not_nan_row():
     not be silently converted into the all-NaN row that NaN triggers.
     """
     x = np.array([1.0, np.inf, 2.0, 3.0])
-    row = tsxtractor.extract_features([x])[0]
+    row = tsxtract.extract_features([x])[0]
     assert row.shape == (N_FEATURES,)
     assert not np.isnan(row).all()
     assert np.isinf(dict(zip(NAMES, row))["max"])

@@ -1,15 +1,15 @@
-# tsxtractor — Product Requirements Document (v1.0 Launch)
+# tsxtract — Product Requirements Document (v1.0 Launch)
 
 **Doc owner:** Aamod | **Status:** Draft for build | **Target:** v1.0.0 public launch
-**Repo:** https://github.com/Aamod007/Tsxtract | **Current version:** 0.1.1 (repo) / 0.1.0 (PyPI, Windows-only wheel)
+**Repo:** https://github.com/Aamodx6/Tsxtract | **Current version:** 0.1.1 (repo) / 0.1.0 (PyPI, Windows-only wheel)
 
 ---
 
 ## 0. TL;DR
 
-`tsxtractor` is a Rust-core Python library that extracts 33 curated statistical/temporal/spectral features from batches of time series, using zero-copy numpy views and `rayon` multi-core parallelism. Core extraction logic already works and is benchmarked against `tsfresh`. **The gap between "works on my machine" and "market ready" is not more features — it's packaging, correctness proof, docs, and distribution.** This PRD scopes exactly that gap and nothing else, so it can be handed straight to a coding agent.
+`tsxtract` is a Rust-core Python library that extracts 33 curated statistical/temporal/spectral features from batches of time series, using zero-copy numpy views and `rayon` multi-core parallelism. Core extraction logic already works and is benchmarked against `tsfresh`. **The gap between "works on my machine" and "market ready" is not more features — it's packaging, correctness proof, docs, and distribution.** This PRD scopes exactly that gap and nothing else, so it can be handed straight to a coding agent.
 
-**Ship bar for v1.0:** `pip install tsxtractor` works on Linux/macOS/Windows × Python 3.10–3.13 with zero Rust toolchain required, correctness is validated against reference implementations with a public test report, and the README leads with an honest, defensible benchmark.
+**Ship bar for v1.0:** `pip install tsxtract` works on Linux/macOS/Windows × Python 3.10–3.13 with zero Rust toolchain required, correctness is validated against reference implementations with a public test report, and the README leads with an honest, defensible benchmark.
 
 ---
 
@@ -18,7 +18,7 @@
 | Item | Status |
 |---|---|
 | Core Rust extraction engine | Fully optimized — `src/`, fused passes, thread-local `Scratch`, RealFFT, branchless perm entropy, lazy intermediate DAG |
-| Python bindings | PyO3 + maturin, module `tsxtractor._core`, ABI3 Python ≥ 3.10 support |
+| Python bindings | PyO3 + maturin, module `tsxtract._core`, ABI3 Python ≥ 3.10 support |
 | Python API surface | `extract_features`, `extract_features_ragged` (CSR), `extract_features_df`, `sliding_features`, `StreamingExtractor` (with O(1) `kind="fast"` and complete `kind="all"`), `list_profiles`, `describe_feature`, `feature_names` |
 | Feature Catalog & Profiles | Shipped profiles: `minimal` (10), `core33` (33 frozen), `extended` (143), `full` (543), with full tsfresh canonical alias support |
 | Invariant & Correctness Suite | 132/132 tests green in CI/local (golden file parity ≤ 1e-12, NaN contract, zero copy, GIL release across Rayon parallel loops) |
@@ -45,7 +45,7 @@ Data scientists building tabular features from time series (sensor data, finance
 | `catch22` | 22 | C (bound into Python/R/Julia/MATLAB) | ~0.1 ms/feature, fastest per-feature academically benchmarked | Fixed, non-extensible set; found less effective specifically for algorithm-selection tasks in at least one benchmark |
 | `tsflex` | processing framework, not a fixed feature set | Python | ~3x faster than closest competitor in its own benchmark, via view-based windowing | Framework, not a ready feature bank — still calls into `tsfresh`/others for the actual features |
 | `Kats` / `tsfeatures` / `feasts` | 40 / 63 / 42 | Python / R / R | Not competitive on raw speed | Meta's `Kats` has had maintenance gaps; R-only options don't reach Python-first users |
-| **`tsxtractor`** | 33, curated | Rust core + PyO3, `rayon` multi-core | Batch-parallel: whole matrices of series extracted concurrently across cores, zero-copy numpy ingestion | Unproven at scale outside one local benchmark; no cross-platform wheels yet; smaller feature set won't satisfy users who want exhaustive coverage |
+| **`tsxtract`** | 33, curated | Rust core + PyO3, `rayon` multi-core | Batch-parallel: whole matrices of series extracted concurrently across cores, zero-copy numpy ingestion | Unproven at scale outside one local benchmark; no cross-platform wheels yet; smaller feature set won't satisfy users who want exhaustive coverage |
 
 **Honest positioning implication:** don't claim "fastest per feature" — `catch22`/`TSFEL` already contest that ground and the current README's "1700x faster per feature" framing (vs. `tsfresh` only) invites a "did you benchmark catch22?" comment on launch day. The defensible claim is **batch throughput on many series at once via native multi-core parallelism**, plus a feature set deliberately sized to avoid the redundancy `tsfresh`/`TSFEL` are documented to have.
 
@@ -64,7 +64,7 @@ Not targeting (v1.0): users who need an exhaustive 1000+ feature bank (`tsfresh`
 ## 5. Goals / Non-Goals for v1.0
 
 **Goals**
-- Zero-friction install: `pip install tsxtractor` produces a working wheel on Linux (manylinux), macOS (x86_64 + arm64), Windows, for Python 3.10–3.13, no Rust toolchain needed by the end user.
+- Zero-friction install: `pip install tsxtract` produces a working wheel on Linux (manylinux), macOS (x86_64 + arm64), Windows, for Python 3.10–3.13, no Rust toolchain needed by the end user.
 - Publicly reproducible correctness: CI runs the reference-validation test suite on every push/PR across all supported platforms.
 - Publicly reproducible benchmark: a benchmark script anyone can run locally that compares against `tsfresh` **and** `catch22`/`TSFEL` (not just `tsfresh`), with results published in the README and re-run in CI or documented as reproducible-but-manual.
 - A README and docs site good enough to survive a Hacker News/Reddit front page without embarrassing gaps.
@@ -95,16 +95,16 @@ Not targeting (v1.0): users who need an exhaustive 1000+ feature bank (`tsfresh`
 ## 7. Functional Requirements — API Surface (freeze for v1.0)
 
 ```python
-tsxtractor.extract_features(X) -> np.ndarray        # shape (n_series, 33), float64
-tsxtractor.extract_features(list_of_1d_arrays) -> np.ndarray  # ragged series support
-tsxtractor.feature_names() -> list[str]              # column order, stable across versions
-tsxtractor.sliding_features(x, window: int, stride: int) -> np.ndarray  # rolling windows over one series
+tsxtract.extract_features(X) -> np.ndarray        # shape (n_series, 33), float64
+tsxtract.extract_features(list_of_1d_arrays) -> np.ndarray  # ragged series support
+tsxtract.feature_names() -> list[str]              # column order, stable across versions
+tsxtract.sliding_features(x, window: int, stride: int) -> np.ndarray  # rolling windows over one series
 ```
 
 Requirements to add before launch (not new features — API hygiene):
 - [ ] `extract_features` must raise a clear `ValueError` (not a Rust panic) on empty input, 0-length series, or non-numeric dtype.
 - [ ] `feature_names()` order must be documented as a **stability guarantee** — breaking the column order is a major-version change.
-- [ ] Add `__version__` attribute to the package, exposed via `tsxtractor.__version__`.
+- [ ] Add `__version__` attribute to the package, exposed via `tsxtract.__version__`.
 - [ ] Add type stubs (`.pyi`) so IDEs/mypy get real signatures instead of opaque `_core` bindings.
 - [ ] Return a `pandas.DataFrame` variant (`extract_features_df`) with `feature_names()` as columns — this single addition removes the most common first-hour friction (users immediately want named columns, not a bare ndarray). This is the **one net-new function** allowed in v1.0 scope; everything else above is hardening.
 
@@ -139,7 +139,7 @@ flowchart LR
 
 - **Core**: Rust crate (`src/`) implementing the 33 features across 6 groups (Stats, Change, Counts, Correlation, Entropy, Spectral).
 - **Parallelism**: `rayon` `par_iter` across the series dimension — this is the batch-throughput differentiator; document it explicitly as "one series per core, not one feature-op per core," so users understand why small single-series calls won't show the speedup (that only shows up at batch scale).
-- **Bindings**: PyO3, built via `maturin`, module `tsxtractor._core`, thin Python wrapper package (`python/tsxtractor`) for the public API + docstrings + the new `extract_features_df` convenience function.
+- **Bindings**: PyO3, built via `maturin`, module `tsxtract._core`, thin Python wrapper package (`python/tsxtract`) for the public API + docstrings + the new `extract_features_df` convenience function.
 - **No external runtime deps** beyond `numpy` — keep it that way; this is a selling point for security-conscious/enterprise adopters.
 
 ---
@@ -189,14 +189,14 @@ flowchart LR
 **Phase A — Fix the foundation (private, no announcement yet)**
 1. Ship CI + full wheel matrix, republish as `0.2.0`.
 2. Ship docs site + rewritten README.
-3. Verify `pip install tsxtractor` works cleanly on a fresh Linux and Mac machine (not just locally) — do this manually before any public post.
+3. Verify `pip install tsxtract` works cleanly on a fresh Linux and Mac machine (not just locally) — do this manually before any public post.
 
 **Phase B — Soft launch**
 1. Post in a small, high-signal community first (e.g., a relevant Discord/subreddit for time-series or Rust+Python) to catch obvious issues before wider exposure.
 2. Fix anything that surfaces within 48 hours.
 
 **Phase C — Public launch**
-1. Show HN ("Show HN: tsxtractor – batch time-series feature extraction with a Rust core").
+1. Show HN ("Show HN: tsxtract – batch time-series feature extraction with a Rust core").
 2. r/Python and r/MachineLearning, framed around the benchmark, not the tool ("I benchmarked 4 time-series feature libraries on batch throughput").
 3. Build-in-public thread on X/LinkedIn with the benchmark chart as the hook image.
 4. Submit PRs to `awesome-python`, `awesome-time-series` lists.

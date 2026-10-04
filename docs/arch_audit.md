@@ -1,17 +1,17 @@
 # Architecture and Feature Catalog Audit (`docs/arch_audit.md`)
 
 **Date:** 2026-10-04  
-**Audit Target:** Alignment between built library `tsxtractor.feature_names()`, `README.md`, `arch.md`, and `benches/agreement/feature_map.json`.
+**Audit Target:** Alignment between built library `tsxtract.feature_names()`, `README.md`, `arch.md`, and `benches/agreement/feature_map.json`.
 
 ---
 
 ## 1. Single Source of Truth: Built Library Core33
 
-The authoritative single source of truth for the 33 features is `tsxtractor.feature_names()` (or `tsxtract.feature_names()`) as exported by the compiled Rust core extension `_core`:
+The authoritative single source of truth for the 33 features is `tsxtract.feature_names()` (or `tsxtract.feature_names()`) as exported by the compiled Rust core extension `_core`:
 
 ```python
-import tsxtractor
-names = tsxtractor.feature_names()
+import tsxtract
+names = tsxtract.feature_names()
 assert len(names) == 33
 ```
 
@@ -86,4 +86,4 @@ In `README.md` lines 220–230 ("The 33 Curated Features"), several descriptive 
 | *Omitted from README list* | `trend_r2` | **Omission**: Present in `core33`. |
 
 ### Action Item for Documentation:
-Update `README.md` § "The 33 Curated Features" to list the exact 33 features emitted by `tsxtractor.feature_names()`. All agreement matrices and benchmark suites MUST use the built library names.
+Update `README.md` § "The 33 Curated Features" to list the exact 33 features emitted by `tsxtract.feature_names()`. All agreement matrices and benchmark suites MUST use the built library names.

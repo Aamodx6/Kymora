@@ -9,14 +9,14 @@ Scale beyond RAM with fixed-size chunks, turn single long recordings into window
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 rng = np.random.default_rng(4)
 big = np.ascontiguousarray(rng.standard_normal((2500, 200)))
 print("Input MB:", big.nbytes / 1e6)
-chunks = [tsxtractor.extract_features(big[i:i + 500]) for i in range(0, 2500, 500)]
+chunks = [tsxtract.extract_features(big[i:i + 500]) for i in range(0, 2500, 500)]
 F = np.vstack(chunks)
 print("Chunked shape:", F.shape)
-print("Identical to one call:", bool((F == tsxtractor.extract_features(big)).all()))
+print("Identical to one call:", bool((F == tsxtract.extract_features(big)).all()))
 ```
 
 ```text
@@ -43,7 +43,7 @@ You need only the core package, plus a mental model of two terms:
 - **Rolling window:** a fixed-length slice that advances by `stride` samples across one long series.
 
 ```bash
-pip install tsxtract
+pip install tsxtract-rs
 ```
 
 ## Steps
@@ -71,11 +71,11 @@ Loop over row blocks, extract each block independently, and stack the results. C
 
 ```python
 chunk_rows = 10_000
-names = tsxtractor.feature_names()
+names = tsxtract.feature_names()
 out_blocks = []
 for start in range(0, big.shape[0], chunk_rows):
     block = np.ascontiguousarray(big[start:start + chunk_rows])
-    out_blocks.append(tsxtractor.extract_features(block))
+    out_blocks.append(tsxtract.extract_features(block))
 F_full = np.vstack(out_blocks)
 print("Reassembled:", F_full.shape, F_full.dtype)
 print("First column:", names[0])
@@ -92,7 +92,7 @@ A single series offers Rayon no batch dimension, so `sliding_features()` creates
 
 ```python
 x = np.ascontiguousarray(rng.standard_normal(2000))
-S = tsxtractor.sliding_features(x, window=256, stride=128)
+S = tsxtract.sliding_features(x, window=256, stride=128)
 print("Sliding shape:", S.shape)
 ```
 
@@ -117,7 +117,7 @@ flowchart LR
 ```
 
 ```python
-stream = tsxtractor.StreamingExtractor(window_size=16)
+stream = tsxtract.StreamingExtractor(window_size=16)
 x = np.sin(np.linspace(0, 10, 50))
 first_ready = None
 for i, v in enumerate(x):
@@ -128,7 +128,7 @@ for i, v in enumerate(x):
 print("First ready index:", first_ready)
 print("Feature length:", len(last))
 print("All finite:", bool(np.all(np.isfinite(last))))
-batch = tsxtractor.extract_features(x[-16:].reshape(1, -1))[0]
+batch = tsxtract.extract_features(x[-16:].reshape(1, -1))[0]
 print("Matches batch:", float(np.nanmax(np.abs(last - batch))))
 ```
 
@@ -176,13 +176,13 @@ Chunked file-to-features conversion with a memmapped input, so a 4 GB matrix nev
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 rng = np.random.default_rng(4)
 big = np.ascontiguousarray(rng.standard_normal((2500, 200)))
 np.save("/tmp/series.npy", big)
 mm = np.load("/tmp/series.npy", mmap_mode="r")
-names = tsxtractor.feature_names()
-blocks = [tsxtractor.extract_features(np.ascontiguousarray(mm[i:i + 500])) for i in range(0, mm.shape[0], 500)]
+names = tsxtract.feature_names()
+blocks = [tsxtract.extract_features(np.ascontiguousarray(mm[i:i + 500])) for i in range(0, mm.shape[0], 500)]
 F = np.vstack(blocks)
 np.save("/tmp/features.npy", F)
 print("Saved:", F.shape, "columns start with:", names[:3])

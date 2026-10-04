@@ -58,13 +58,13 @@ impl fmt::Display for TsxError {
                 Some(i) => write!(
                     f,
                     "series at index {i} is not contiguous; pass \
-                     np.ascontiguousarray(x) (tsxtractor reads numpy buffers \
+                     np.ascontiguousarray(x) (tsxtract reads numpy buffers \
                      without copying, so a strided view cannot be used)"
                 ),
                 None => write!(
                     f,
                     "input array is not C-contiguous; pass \
-                     np.ascontiguousarray(X) (tsxtractor reads numpy buffers \
+                     np.ascontiguousarray(X) (tsxtract reads numpy buffers \
                      without copying, so a strided view cannot be used)"
                 ),
             },
@@ -82,7 +82,7 @@ impl fmt::Display for TsxError {
             TsxError::UnknownFeature { name } => {
                 write!(
                     f,
-                    "unknown feature '{name}'; check tsxtractor.feature_names()"
+                    "unknown feature '{name}'; check tsxtract.feature_names()"
                 )
             }
             TsxError::UnknownProfile { profile } => {

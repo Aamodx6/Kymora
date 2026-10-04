@@ -7,7 +7,7 @@ cannot survive a merge. The run below is from a maintainer machine; the CI run
 publishes the same table as a job summary and an artifact.
 
 
-tsxtractor 0.2.0 on Windows-11-10.0.26200-SP0, Python 3.14.6, numpy 2.4.6.
+tsxtract 0.2.0 on Windows-11-10.0.26200-SP0, Python 3.14.6, numpy 2.4.6.
 
 Each of the 33 features is compared against a numpy/scipy reference implementation across 7 sample series (gaussian, trend, sine, constant, tiny, single, integers_with_ties), covering normal, trending, periodic, constant, two-element, single-element, and heavily-tied data.
 

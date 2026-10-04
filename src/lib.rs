@@ -1,4 +1,4 @@
-//! tsxtractor Rust core — PyO3 module registration only. No numeric logic here.
+//! tsxtract Rust core — PyO3 module registration only. No numeric logic here.
 
 mod error;
 pub mod exec;

@@ -10,17 +10,17 @@ import platform
 import time
 import tracemalloc
 import numpy as np
-import tsxtractor
+import tsxtract
 
 def measure_benchmark(X, n_runs=10, warmup=2):
     # Warmup
     for _ in range(warmup):
-        _ = tsxtractor.extract_features(X[:min(len(X), 32)])
+        _ = tsxtract.extract_features(X[:min(len(X), 32)])
 
     times = []
     for _ in range(n_runs):
         t0 = time.perf_counter()
-        _ = tsxtractor.extract_features(X)
+        _ = tsxtract.extract_features(X)
         t1 = time.perf_counter()
         times.append(t1 - t0)
 
@@ -52,7 +52,7 @@ def main():
             "platform": platform.platform(),
             "cpu_count": os.cpu_count(),
             "python": platform.python_version(),
-            "tsxtractor_version": tsxtractor.__version__,
+            "tsxtractor_version": tsxtract.__version__,
         },
         "shapes": {},
     }
@@ -76,7 +76,7 @@ def main():
     snap_before = tracemalloc.take_snapshot()
     X_mem = rng.standard_normal((50000, 500))
     t0 = time.perf_counter()
-    out = tsxtractor.extract_features(X_mem)
+    out = tsxtract.extract_features(X_mem)
     elapsed_mem = time.perf_counter() - t0
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -96,7 +96,7 @@ def main():
     single_runs = 2000
     t0 = time.perf_counter()
     for _ in range(single_runs):
-        _ = tsxtractor.extract_features(X_single)
+        _ = tsxtract.extract_features(X_single)
     total_single = (time.perf_counter() - t0) / single_runs
     print(f"  Single series len=500 latency: {total_single*1e6:.2f} us")
     results["single_series_500_us"] = total_single * 1e6

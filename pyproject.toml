@@ -3,8 +3,10 @@ requires = ["maturin>=1.14,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "tsxtract"
-version = "0.5.0"
+name = "tsxtract-rs"
+# Version is single-sourced from Cargo.toml; maturin injects the crate
+# version into the wheel metadata at build time. Do not add `version` here.
+dynamic = ["version"]
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"
 license = "MIT"
@@ -39,6 +41,6 @@ Changelog = "https://github.com/Aamodx6/Tsxtract/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 python-source = "python"
-module-name = "tsxtractor._core"
-python-packages = ["tsxtractor", "tsxtract"]
+module-name = "tsxtract._core"
+python-packages = ["tsxtract", "tsxtractor"]
 features = ["pyo3/extension-module"]

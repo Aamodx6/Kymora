@@ -16,10 +16,10 @@ features = extract_features(
     default_fc_parameters=EfficientFCParameters(),
 )
 
-# tsxtractor
-import tsxtractor
+# tsxtract
+import tsxtract
 X = values.reshape(n_series, n_steps)          # already sorted per series
-features = tsxtractor.extract_features_df(X)   # DataFrame, 33 columns
+features = tsxtract.extract_features_df(X)   # DataFrame, 33 columns
 ```
 
 If your data is already long-format and you want to keep it that way:
@@ -27,7 +27,7 @@ If your data is already long-format and you want to keep it that way:
 ```python
 groups = long_df.sort_values("time").groupby("id")["value"]
 series = [g.to_numpy(dtype="float64") for _, g in groups]
-features = tsxtractor.extract_features_df(series)   # ragged input is fine
+features = tsxtract.extract_features_df(series)   # ragged input is fine
 features.index = list(groups.groups)               # keep the original ids
 ```
 
@@ -38,7 +38,7 @@ because the input is an array whose order is already meaningful.
 
 Many features have a direct `tsfresh` counterpart under a different name:
 
-| tsxtractor | tsfresh |
+| tsxtract | tsfresh |
 |---|---|
 | `mean`, `std`, `var`, `median`, `min`, `max` | `mean`, `standard_deviation`, `variance`, `median`, `minimum`, `maximum` |
 | `quantile_10` ... `quantile_90` | `quantile__q_0.1` ... `quantile__q_0.9` |
@@ -78,7 +78,7 @@ depends on those, `tsfresh` is the right tool and this library is not.
 
 ## Behaviour differences worth knowing
 
-| | tsfresh | tsxtractor |
+| | tsfresh | tsxtract |
 |---|---|---|
 | NaN in a series | varies per feature; some impute, some return NaN | every feature for that series is NaN, always |
 | Empty series | dropped or NaN-filled | `ValueError` |

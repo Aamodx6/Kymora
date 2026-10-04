@@ -1,4 +1,4 @@
-# Contributing to tsxtractor
+# Contributing to tsxtract
 
 Thanks for looking. This project has a deliberately small surface, so the most
 useful contributions are usually correctness work, docs, and platform support
@@ -10,7 +10,7 @@ before opening a PR that adds one.
 You need a [Rust toolchain](https://rustup.rs/) and Python 3.10+.
 
 ```bash
-git clone https://github.com/Aamod007/Tsxtract
+git clone https://github.com/Aamodx6/Tsxtract
 cd Tsxtract
 python -m venv .venv
 . .venv/bin/activate          # .venv\Scripts\activate on Windows
@@ -43,7 +43,7 @@ flag.
 Three constraints keep the correctness story tractable. A PR that breaks one will
 be asked to change approach, not just to fix a test.
 
-1. **No numeric logic in Python.** `python/tsxtractor/__init__.py` is a
+1. **No numeric logic in Python.** `python/tsxtract/__init__.py` is a
    pass-through with docstrings. All math lives in `src/features/`, so there is
    exactly one implementation to validate.
 2. **No panic may cross the FFI boundary.** No `unwrap`, `expect`, or panicking
@@ -112,7 +112,7 @@ Everyone participating agrees to follow the
 
 ## Reporting bugs
 
-Include your OS, Python version, `tsxtractor.__version__`, and a runnable
+Include your OS, Python version, `tsxtract.__version__`, and a runnable
 snippet. For a wrong-value report, include what you expected and how you
 computed it (a numpy/scipy expression is ideal) — that turns the report straight
 into a test case.

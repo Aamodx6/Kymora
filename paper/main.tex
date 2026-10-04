@@ -18,7 +18,7 @@
 
 % Consistent aliases and macros as recommended for ML scientific papers
 \newcommand{\tsxtract}{\texttt{Tsxtract}}
-\newcommand{\tsxtractor}{\texttt{tsxtractor}}
+\newcommand{\tsxtract}{\texttt{tsxtract}}
 \newcommand{\tsfresh}{\texttt{tsfresh}}
 \newcommand{\catchtwentytwo}{\texttt{catch22}}
 \newcommand{\tsfel}{\texttt{TSFEL}}
@@ -101,13 +101,13 @@
 \IEEEauthorblockA{\textit{Department of Computer Science and Engineering}\\
 \textit{Independent Researcher}\\
 Uttar Pradesh, India\\
-\url{https://github.com/Aamod007/Tsxtract}}
+\url{https://github.com/Aamodx6/Tsxtract}}
 }
 
 \maketitle
 
 \begin{abstract}
-Extracting descriptive mathematical features from time series is a foundational primitive across machine learning, industrial Internet of Things (IoT), and signal processing. However, established Python frameworks such as \tsfresh{}, \catchtwentytwo{}, and \tsfel{} encounter severe throughput bottlenecks when processing large batches ($10^4$--$10^6$ series), driven by serial Foreign Function Interface (FFI) dispatch loops, Global Interpreter Lock (GIL) contention, defensive array copying, and high intra-feature redundancy. This paper investigates whether a batch-oriented systems architecture for classical time-series feature extraction can reduce computational latency and memory overhead at scale while preserving numerical precision and downstream predictive utility. We present \tsxtract{} (\tsxtractor{}), an open-source systems library with a multi-threaded Rust computational core. \tsxtract{} implements zero-copy NumPy buffer ingestion (performing no input-buffer copy during ingestion), releases the GIL, parallelizes work across the series dimension via work-stealing thread pools, and condenses time-domain scans into five cache-conscious fused memory sweeps. Furthermore, it introduces an incremental $O(1)$ stateful accumulator engine for running moments and trend covariance, reducing sliding-window extraction complexity from $O(TW)$ to $O(T)$ for $T$ streamed samples over window capacity $W$. On a benchmark of 1,000 series of length 500 using 16 worker threads on a 10-core/16-thread processor, \tsxtract{} achieves a median throughput of 800,256 series/sec (median execution time of 1.25~ms, IQR: 0.26~ms), outperforming single-series looped C and Python libraries by over two orders of magnitude in feature-normalized latency. Empirical evaluations on synthetic and canonical dynamic time-series tasks demonstrate strong predictive discriminability (96.5\%--100.0\% cross-validated accuracy) with sub-millisecond extraction, while collinearity analysis across diverse dynamic regimes reveals that 83.3\% of feature pairs exhibit low pairwise linear correlation ($|r| < 0.70$).
+Extracting descriptive mathematical features from time series is a foundational primitive across machine learning, industrial Internet of Things (IoT), and signal processing. However, established Python frameworks such as \tsfresh{}, \catchtwentytwo{}, and \tsfel{} encounter severe throughput bottlenecks when processing large batches ($10^4$--$10^6$ series), driven by serial Foreign Function Interface (FFI) dispatch loops, Global Interpreter Lock (GIL) contention, defensive array copying, and high intra-feature redundancy. This paper investigates whether a batch-oriented systems architecture for classical time-series feature extraction can reduce computational latency and memory overhead at scale while preserving numerical precision and downstream predictive utility. We present \tsxtract{} (\tsxtract{}), an open-source systems library with a multi-threaded Rust computational core. \tsxtract{} implements zero-copy NumPy buffer ingestion (performing no input-buffer copy during ingestion), releases the GIL, parallelizes work across the series dimension via work-stealing thread pools, and condenses time-domain scans into five cache-conscious fused memory sweeps. Furthermore, it introduces an incremental $O(1)$ stateful accumulator engine for running moments and trend covariance, reducing sliding-window extraction complexity from $O(TW)$ to $O(T)$ for $T$ streamed samples over window capacity $W$. On a benchmark of 1,000 series of length 500 using 16 worker threads on a 10-core/16-thread processor, \tsxtract{} achieves a median throughput of 800,256 series/sec (median execution time of 1.25~ms, IQR: 0.26~ms), outperforming single-series looped C and Python libraries by over two orders of magnitude in feature-normalized latency. Empirical evaluations on synthetic and canonical dynamic time-series tasks demonstrate strong predictive discriminability (96.5\%--100.0\% cross-validated accuracy) with sub-millisecond extraction, while collinearity analysis across diverse dynamic regimes reveals that 83.3\% of feature pairs exhibit low pairwise linear correlation ($|r| < 0.70$).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -581,7 +581,7 @@ Numerical reliability is validated against NumPy and SciPy reference implementat
 \label{sec:reproducibility}
 To ensure complete reproducibility, all artifacts, scripts, and tests are released under the MIT license at:
 \begin{center}
-\url{https://github.com/Aamod007/Tsxtract}
+\url{https://github.com/Aamodx6/Tsxtract}
 \end{center}
 Benchmarks execute with random seed 42, preceded by two untimed warmup iterations per framework to mitigate cache cold-start effects, reporting median $\pm$ IQR over $k=10$ measured runs ($k \ge 2$ for slow baselines). Experiments were executed on an Intel Core i7-13620H processor running Windows 11 Enterprise with OS high-performance power plan enabled and non-essential background processes terminated. The benchmark suite and paper figures can be reproduced via:
 \begin{lstlisting}[language=bash]

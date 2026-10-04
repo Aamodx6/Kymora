@@ -1,8 +1,8 @@
 # Tsxtract
 ### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
 
-[![PyPI - Version](https://img.shields.io/pypi/v/tsxtract.svg?color=blue)](https://pypi.org/project/tsxtract/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tsxtract.svg)](https://pypi.org/project/tsxtract/)
+[![PyPI - Version](https://img.shields.io/pypi/v/tsxtract-rs.svg?color=blue)](https://pypi.org/project/tsxtract-rs/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tsxtract-rs.svg)](https://pypi.org/project/tsxtract-rs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml)
 
@@ -10,7 +10,7 @@
 
 **Tsxtract** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets blazingly fast, memory-efficient, and effortless. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
-[PyPI](https://pypi.org/project/tsxtract/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
+[PyPI](https://pypi.org/project/tsxtract-rs/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
 
 ---
 
@@ -40,15 +40,21 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 ### Installation
 
 #### Prebuilt Wheels (Recommended)
-Precompiled binary wheels are available on [PyPI (tsxtract)](https://pypi.org/project/tsxtract/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
+Precompiled binary wheels are available on [PyPI (tsxtract-rs)](https://pypi.org/project/tsxtract-rs/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
 
 ```bash
-pip install tsxtract
+pip install tsxtract-rs
 ```
+
+> **Name collision warning:** the bare PyPI name `tsxtract` belongs to an
+> unrelated JAX-based project. Do not install `tsxtract` and `tsxtract-rs`
+> in the same environment — both provide a top-level `tsxtract` import and
+> they will shadow each other. This package is always installed as
+> `pip install tsxtract-rs` and imported as `import tsxtract`.
 
 #### From Source (Development)
 ```bash
-git clone https://github.com/Aamod007/Tsxtract.git
+git clone https://github.com/Aamodx6/Tsxtract.git
 cd Tsxtract
 pip install maturin
 maturin develop --release
@@ -63,7 +69,7 @@ Extract 33 features from 100,000 series in under a second:
 
 ```python
 import numpy as np
-import tsxtractor as tsx
+import tsxtract as tsx
 
 # 1,000 series of 500 time-steps (float64)
 X = np.random.randn(1000, 500)
@@ -109,7 +115,7 @@ Integrate directly into standard classification, regression, or clustering pipel
 
 ```python
 import numpy as np
-import tsxtractor as tsx
+import tsxtract as tsx
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
@@ -140,7 +146,7 @@ y_pred = pipeline.predict(X_test)
 Maintain running statistical features in real-time embedded systems or trading loops without recomputing from scratch:
 
 ```python
-from tsxtractor import StreamingExtractor
+from tsxtract import StreamingExtractor
 
 # Initialize streaming extractor with window capacity
 stream = StreamingExtractor(capacity=500)
@@ -169,14 +175,14 @@ Choose the performance-to-breadth profile that fits your pipeline:
 * **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
 
 ```python
-import tsxtractor
+import tsxtract
 
 # List available profiles and feature counts
-print(tsxtractor.list_profiles())
+print(tsxtract.list_profiles())
 # {'minimal': 10, 'core33': 33, 'extended': 143, 'full': 543}
 
 # Inspect individual features and their computational prerequisites
-print(tsxtractor.describe_feature("autocorrelation__lag_1"))
+print(tsxtract.describe_feature("autocorrelation__lag_1"))
 ```
 
 ---
@@ -233,12 +239,12 @@ Tsxtract deliberately computes 33 high-signal, non-redundant features spanning a
 ### Contributing
 
 Contributions, bug reports, and PRs are welcome!
-Please check [`CONTRIBUTING.md`](https://github.com/Aamod007/Tsxtract/blob/main/CONTRIBUTING.md) for details on setting up the local Rust/Python development environment and running the benchmark suites.
+Please check [`CONTRIBUTING.md`](https://github.com/Aamodx6/Tsxtract/blob/main/CONTRIBUTING.md) for details on setting up the local Rust/Python development environment and running the benchmark suites.
 
 ---
 
 ### License
 
-Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamod007/Tsxtract/blob/main/LICENSE) for details.
+Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE) for details.
 
 *Built with Rust and Python by [Aamod](https://github.com/Aamod007).*

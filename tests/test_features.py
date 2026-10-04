@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 import scipy.stats
-import tsxtractor
+import tsxtract
 
 rng = np.random.default_rng(42)
 
@@ -143,7 +143,7 @@ SERIES = {
 @pytest.mark.parametrize("name", SERIES)
 def test_against_reference(name):
     x = SERIES[name]
-    got = dict(zip(tsxtractor.feature_names(), tsxtractor.extract_features([x])[0]))
+    got = dict(zip(tsxtract.feature_names(), tsxtract.extract_features([x])[0]))
     want = reference(x, level=got["mean"])
     assert set(got) == set(want)
     for feat in want:
@@ -155,26 +155,26 @@ def test_against_reference(name):
 
 def test_2d_matches_ragged():
     X = rng.standard_normal((50, 128))
-    a = tsxtractor.extract_features(X)
-    b = tsxtractor.extract_features(list(X))
+    a = tsxtract.extract_features(X)
+    b = tsxtract.extract_features(list(X))
     np.testing.assert_array_equal(a, b)
 
 
 def test_nan_propagates():
     x = rng.standard_normal(100)
     x[13] = np.nan
-    out = tsxtractor.extract_features([x])
+    out = tsxtract.extract_features([x])
     assert np.isnan(out).all()
 
 
 def test_sliding_matches_manual():
     x = rng.standard_normal(1000)
-    s = tsxtractor.sliding_features(x, window=100, stride=37)
-    manual = tsxtractor.extract_features([x[i : i + 100] for i in range(0, 901, 37)])
+    s = tsxtract.sliding_features(x, window=100, stride=37)
+    manual = tsxtract.extract_features([x[i : i + 100] for i in range(0, 901, 37)])
     np.testing.assert_array_equal(s, manual)
 
 
 def test_non_contiguous_rejected():
     X = rng.standard_normal((100, 100))[:, ::2]
     with pytest.raises(ValueError):
-        tsxtractor.extract_features(X)
+        tsxtract.extract_features(X)

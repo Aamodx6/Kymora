@@ -347,7 +347,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tsxtractor"
+name = "tsxtract"
 version = "0.5.0"
 dependencies = [
  "bitflags",

@@ -12,6 +12,25 @@ feature is a **major** version change; appending a new feature at the end is a
 
 ## [Unreleased]
 
+### Changed
+- **Canonical import name is now `tsxtract`** (installed via
+  `pip install tsxtract-rs`; the bare PyPI name `tsxtract` belongs to an
+  unrelated JAX project and must not be installed in the same environment).
+  Real code moved from `python/tsxtractor/` to `python/tsxtract/`; the Rust
+  crate was renamed `tsxtractor` -> `tsxtract` and the extension module is
+  now `tsxtract._core`.
+- **PyPI distribution name restored to `tsxtract-rs`.** The previous
+  `name = "tsxtract"` broke the release smoke-test (which installs
+  `tsxtract-rs` from the built wheel) and would have published into the
+  unrelated JAX project's namespace.
+- Version is now single-sourced from `Cargo.toml` (maturin injects the crate
+  version into the wheel metadata; `pyproject.toml` carries no `version`).
+
+### Deprecated
+- `import tsxtractor` is a thin shim that re-exports `tsxtract` and emits a
+  `DeprecationWarning` on first import. Removal scheduled no earlier than
+  **0.7.0**.
+
 ## [0.5.0] - 2026-10-04
 
 ### Added

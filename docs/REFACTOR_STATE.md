@@ -7,7 +7,11 @@ arch.md is the architecture source of truth.
 
 - [x] Phase 0: baseline & inventory (2026-10-04). Gate: baseline recorded;
       two known-red items documented (mypy 10 errors, mkdocs warnings).
-- [ ] Phase 1: naming decision & packaging
+- [x] Phase 1: naming decision & packaging (2026-10-04). Gate: wheel builds
+      as `tsxtract-rs 0.5.0`, `import tsxtract` works, `import tsxtractor`
+      warns + works, 138 tests pass, feature hash unchanged, clean-venv
+      install verified. See `docs/refactor/naming.md`,
+      `docs/refactor/phase1_VERIFICATION.md`.
 - [ ] Phase 2: repository structure & obsolete file removal
 - [ ] Phase 3: Rust core cleanup
 - [ ] Phase 4: Python package cleanup

@@ -1,0 +1,22 @@
+  [resume] 3 case_ids already in memory.jsonl
+====================================================================================================
+  B3 Memory Suite (fresh subprocess per case; steady-state RSS delta + cold first call)
+====================================================================================================
+  [ 1/16] mem_tsxtract_core33_1000x500               skip (already recorded)
+  [ 2/16] mem_tsxtract_core33_10000x500              skip (already recorded)
+  [ 3/16] mem_tsxtract_core33_100000x500             skip (already recorded)
+  [ 4/16] mem_tsxtract_extended_10000x500            (timeout 180s)... ok  steadyΔ=    15.8 MB  out=   11.4 MB  firstΔ=   15.7 MB  import=   51.3 ms  first_call=    82.7 ms
+  [ 5/16] mem_tsxtract_extended_100000x500           (timeout 300s)... ok  steadyΔ=   119.5 MB  out=  114.4 MB  firstΔ=  119.5 MB  import=   47.4 ms  first_call=   763.8 ms
+  [ 6/16] mem_tsxtract_full_1000x500                 (timeout 180s)... ok  steadyΔ=     7.1 MB  out=    4.3 MB  firstΔ=    7.0 MB  import=   43.1 ms  first_call=    10.8 ms
+  [ 7/16] mem_tsxtract_full_10000x500                (timeout 300s)... ok  steadyΔ=    46.4 MB  out=   43.4 MB  firstΔ=   46.4 MB  import=   35.1 ms  first_call=    92.5 ms
+  [ 8/16] mem_numpy_baseline_1000x500                (timeout 120s)... ok  steadyΔ=     2.6 MB  out=    0.3 MB  firstΔ=    2.1 MB  import=  765.0 ms  first_call=   974.5 ms
+  [ 9/16] mem_numpy_baseline_10000x500               (timeout 180s)... ok  steadyΔ=     4.7 MB  out=    2.6 MB  firstΔ=    4.6 MB  import=  759.2 ms  first_call=  2621.4 ms
+  [10/16] mem_numpy_baseline_100000x500              (timeout 300s)... ok  steadyΔ=    26.6 MB  out=   26.4 MB  firstΔ=   26.6 MB  import=  754.2 ms  first_call= 33914.5 ms
+  [11/16] mem_tsfresh_efficient_1000x500             (timeout 300s)... ok  steadyΔ=    94.3 MB  out=    6.2 MB  firstΔ=   78.4 MB  import= 3288.6 ms  first_call= 21844.5 ms
+  [12/16] mem_tsfresh_efficient_10000x500            (timeout 600s)... timeout TimeoutExpired: case exceeded 600s wall clock (recorded as explicit timeout row)
+  [13/16] mem_tsfel_156_1000x500                     (timeout 300s)... ok  steadyΔ=     4.0 MB  out=    1.2 MB  firstΔ=    3.5 MB  import= 2903.5 ms  first_call= 10241.3 ms
+  [14/16] mem_tsfel_156_10000x500                    (timeout 600s)... ok  steadyΔ=    17.9 MB  out=   12.5 MB  firstΔ=   17.7 MB  import= 2575.4 ms  first_call= 32538.1 ms
+  [15/16] mem_catch22_1000x500                       (timeout 300s)... ok  steadyΔ=     4.5 MB  out=    0.2 MB  firstΔ=    4.3 MB  import=   16.1 ms  first_call=   846.1 ms
+  [16/16] mem_catch22_10000x500                      (timeout 600s)... ok  steadyΔ=    16.5 MB  out=    1.8 MB  firstΔ=   16.5 MB  import=   19.9 ms  first_call=  2320.1 ms
+
+Done. Rows in F:\Active Repo\Tsxtract\benches\results\memory.jsonl

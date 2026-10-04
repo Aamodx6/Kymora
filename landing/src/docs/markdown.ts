@@ -56,7 +56,7 @@ export function escapeHtml(str: string): string {
 }
 
 function highlightPython(code: string): string {
-  const tokenRegex = /(#[^\r\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*')|(\b(?:def|class|return|import|from|as|if|elif|else|for|while|in|is|not|and|or|try|except|finally|with|raise|yield|async|await|None|True|False)\b)|(\b(?:tsxtractor|extract_features|extract_features_df|sliding_features|feature_names|StreamingExtractor|np|pd|print|len|range|enumerate|zip|int|float|str|list|dict|tuple|bool)\b)|(\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b)/g;
+  const tokenRegex = /(#[^\r\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\r\n])*"|'(?:\\.|[^'\\\r\n])*')|(\b(?:def|class|return|import|from|as|if|elif|else|for|while|in|is|not|and|or|try|except|finally|with|raise|yield|async|await|None|True|False)\b)|(\b(?:tsxtract|extract_features|extract_features_df|sliding_features|feature_names|StreamingExtractor|np|pd|print|len|range|enumerate|zip|int|float|str|list|dict|tuple|bool)\b)|(\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b)/g;
 
   let lastIndex = 0;
   let out = '';

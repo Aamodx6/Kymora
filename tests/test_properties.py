@@ -18,9 +18,9 @@ from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as hnp
 
-import tsxtractor
+import tsxtract
 
-NAMES = tsxtractor.feature_names()
+NAMES = tsxtract.feature_names()
 N_FEATURES = len(NAMES)
 
 SETTINGS = settings(
@@ -78,7 +78,7 @@ DEGENERATE = st.one_of(
 @SETTINGS
 @given(x=st.one_of(series(), DEGENERATE))
 def test_single_series_shape_and_no_panic(x):
-    out = tsxtractor.extract_features([x])
+    out = tsxtract.extract_features([x])
     assert out.shape == (1, N_FEATURES)
     assert out.dtype == np.float64
 
@@ -89,7 +89,7 @@ def test_nan_policy_holds_for_finite_input(x):
     """For an input free of NaN and inf, the all-NaN row is reserved exclusively
     for NaN-containing input — so it must never appear here."""
     assume(np.isfinite(x).all())
-    row = tsxtractor.extract_features([x])[0]
+    row = tsxtract.extract_features([x])[0]
     assert not np.isnan(row).all()
     assert not np.isnan(row[NAMES.index("mean")])
 
@@ -99,7 +99,7 @@ def test_nan_policy_holds_for_finite_input(x):
 def test_injected_nan_always_produces_a_full_nan_row(x, i):
     x = x.copy()
     x[i % len(x)] = np.nan
-    row = tsxtractor.extract_features([x])[0]
+    row = tsxtract.extract_features([x])[0]
     assert np.isnan(row).all()
 
 
@@ -107,8 +107,8 @@ def test_injected_nan_always_produces_a_full_nan_row(x, i):
 @given(x=st.one_of(series(), DEGENERATE))
 def test_extraction_is_deterministic(x):
     """Parallel reduction order must not leak into the result."""
-    a = tsxtractor.extract_features([x])
-    b = tsxtractor.extract_features([x])
+    a = tsxtract.extract_features([x])
+    b = tsxtract.extract_features([x])
     np.testing.assert_array_equal(a, b)
 
 
@@ -120,10 +120,10 @@ def test_extraction_is_deterministic(x):
 @SETTINGS
 @given(batch=st.lists(st.one_of(series(), DEGENERATE), min_size=1, max_size=12))
 def test_ragged_batch_equals_per_series_extraction(batch):
-    together = tsxtractor.extract_features(batch)
+    together = tsxtract.extract_features(batch)
     assert together.shape == (len(batch), N_FEATURES)
     for i, x in enumerate(batch):
-        alone = tsxtractor.extract_features([x])[0]
+        alone = tsxtract.extract_features([x])[0]
         np.testing.assert_array_equal(together[i], alone, err_msg=f"series {i}")
 
 
@@ -137,16 +137,16 @@ def test_ragged_batch_equals_per_series_extraction(batch):
 )
 def test_2d_path_equals_ragged_path(batch):
     np.testing.assert_array_equal(
-        tsxtractor.extract_features(batch),
-        tsxtractor.extract_features(list(batch)),
+        tsxtract.extract_features(batch),
+        tsxtract.extract_features(list(batch)),
     )
 
 
 @SETTINGS
 @given(batch=st.lists(st.one_of(series(), DEGENERATE), min_size=2, max_size=10))
 def test_batch_order_permutes_rows_but_not_values(batch):
-    straight = tsxtractor.extract_features(batch)
-    reversed_ = tsxtractor.extract_features(batch[::-1])
+    straight = tsxtract.extract_features(batch)
+    reversed_ = tsxtract.extract_features(batch[::-1])
     np.testing.assert_array_equal(straight, reversed_[::-1])
 
 
@@ -164,9 +164,9 @@ def test_batch_order_permutes_rows_but_not_values(batch):
 def test_sliding_features_either_raises_valueerror_or_returns_exact_shape(x, window, stride):
     if window > len(x):
         with pytest.raises(ValueError):
-            tsxtractor.sliding_features(x, window=window, stride=stride)
+            tsxtract.sliding_features(x, window=window, stride=stride)
         return
-    out = tsxtractor.sliding_features(x, window=window, stride=stride)
+    out = tsxtract.sliding_features(x, window=window, stride=stride)
     assert out.shape == ((len(x) - window) // stride + 1, N_FEATURES)
 
 
@@ -178,9 +178,9 @@ def test_sliding_features_either_raises_valueerror_or_returns_exact_shape(x, win
 )
 def test_sliding_window_rows_equal_extracting_those_windows(x, window, stride):
     assume(window <= len(x))
-    out = tsxtractor.sliding_features(x, window=window, stride=stride)
+    out = tsxtract.sliding_features(x, window=window, stride=stride)
     starts = range(0, len(x) - window + 1, stride)
-    manual = tsxtractor.extract_features([x[s : s + window] for s in starts])
+    manual = tsxtract.extract_features([x[s : s + window] for s in starts])
     np.testing.assert_array_equal(out, manual)
 
 
@@ -192,7 +192,7 @@ def test_sliding_window_rows_equal_extracting_those_windows(x, window, stride):
 )
 def test_sliding_features_rejects_non_positive_geometry(x, window, stride):
     with pytest.raises(ValueError):
-        tsxtractor.sliding_features(x, window=window, stride=stride)
+        tsxtract.sliding_features(x, window=window, stride=stride)
 
 
 # ---------------------------------------------------------------------------
@@ -209,7 +209,7 @@ def test_zero_length_series_anywhere_in_a_batch_raises_value_error(batch, empty_
     batch = list(batch)
     batch.insert(min(empty_at, len(batch)), np.array([], dtype=np.float64))
     with pytest.raises(ValueError):
-        tsxtractor.extract_features(batch)
+        tsxtract.extract_features(batch)
 
 
 @SETTINGS
@@ -218,7 +218,7 @@ def test_zero_length_series_anywhere_in_a_batch_raises_value_error(batch, empty_
 )
 def test_degenerate_2d_shapes_raise_value_error(shape):
     with pytest.raises(ValueError):
-        tsxtractor.extract_features(np.zeros(shape))
+        tsxtract.extract_features(np.zeros(shape))
 
 
 @SETTINGS
@@ -230,7 +230,7 @@ def test_degenerate_2d_shapes_raise_value_error(shape):
 )
 def test_wrong_dtype_raises_type_error(x):
     with pytest.raises(TypeError):
-        tsxtractor.extract_features(x)
+        tsxtract.extract_features(x)
 
 
 @SETTINGS
@@ -246,7 +246,7 @@ def test_wrong_dtype_raises_type_error(x):
 )
 def test_wrong_dimensionality_raises_type_error(x):
     with pytest.raises(TypeError):
-        tsxtractor.extract_features(x)
+        tsxtract.extract_features(x)
 
 
 @SETTINGS
@@ -258,4 +258,4 @@ def test_non_contiguous_views_raise_value_error(x, step):
     assume(len(view) >= 2)
     assert not view.flags["C_CONTIGUOUS"]
     with pytest.raises(ValueError):
-        tsxtractor.sliding_features(view, window=1)
+        tsxtract.sliding_features(view, window=1)

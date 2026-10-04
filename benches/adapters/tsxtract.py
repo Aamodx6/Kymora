@@ -31,14 +31,14 @@ class Adapter(BaseAdapter):
 
     def __init__(self) -> None:
         try:
-            import tsxtractor
-            self.lib = tsxtractor
-            self.version = getattr(tsxtractor, "__version__", "0.5.0")
+            import tsxtract
+            self.lib = tsxtract
+            self.version = getattr(tsxtract, "__version__", "0.5.0")
         except ImportError:
             try:
-                import tsxtract
-                self.lib = tsxtract
-                self.version = getattr(tsxtract, "__version__", "0.5.0")
+                import tsxtractor
+                self.lib = tsxtractor
+                self.version = getattr(tsxtractor, "__version__", "0.5.0")
             except ImportError:
                 self.lib = None
                 self.version = "not_installed"

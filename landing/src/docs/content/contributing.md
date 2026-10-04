@@ -8,7 +8,7 @@ section: "Help"
 Contributions with the highest leverage are correctness work, documentation, and platform support — the 33-feature set is closed on purpose. This guide covers environment setup, repo layout, checks, the add-a-feature walkthrough, and pull-request expectations.
 
 ```bash
-git clone https://github.com/Aamod007/Tsxtract.git
+git clone https://github.com/Aamodx6/Tsxtract.git
 cd Tsxtract
 python -m venv .venv
 source .venv/bin/activate
@@ -23,7 +23,7 @@ You need a stable Rust toolchain (from [rustup.rs](https://rustup.rs/)) and Pyth
 
 - **Release builds only:** debug builds run roughly an order of magnitude slower and invalidate every timing observation.
 - **Virtualenv for CI parity:** `maturin develop` requires an active virtualenv; bare interpreters fail the same way CI once did.
-- **Verify the setup:** `python -c "import tsxtractor; print(tsxtractor.__version__)"` should print the built version.
+- **Verify the setup:** `python -c "import tsxtract; print(tsxtract.__version__)"` should print the built version.
 
 ## Repository layout
 
@@ -35,7 +35,7 @@ Tsxtract/
   src/extract.rs        # Dispatch, batch validation, Rayon fan-out
   src/features/mod.rs   # NAMES registry + compute_all (single source of truth)
   src/features/         # stats, temporal, spectral, entropy, streaming
-  python/tsxtractor/    # __init__.py, _core.pyi stubs, py.typed marker
+  python/tsxtract/    # __init__.py, _core.pyi stubs, py.typed marker
   tests/                # reference, property, NaN, validation, streaming suites
   benches/              # bench_libraries, ablation, UCR downstream + results/
   scripts/              # validation_report, feature_redundancy_analysis
@@ -89,7 +89,7 @@ Version impact follows the policy table: appending at the end is a minor bump, w
 - **Regression test:** new behavior needs a test that fails without the change.
 - **Version impact:** note the bump implied by the versioning table.
 - **Style match:** `cargo fmt` clean, Clippy silent, and comments explaining reasoning rather than restating code.
-- **Bug reports:** include OS, Python version, `tsxtractor.__version__`, a runnable snippet, and the expected NumPy/SciPy expression for wrong values.
+- **Bug reports:** include OS, Python version, `tsxtract.__version__`, a runnable snippet, and the expected NumPy/SciPy expression for wrong values.
 
 > [!WARNING]
 > TODO(verify): commit-message convention and Code of Conduct file. No commit convention is configured in-repo, and `CONTRIBUTING.md` links `CODE_OF_CONDUCT.md` but that file is absent from the repo root — confirm both before enforcing them on contributors.

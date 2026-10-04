@@ -1,7 +1,7 @@
 """Micro-architectural Ablation Benchmark.
 
 Quantifies the isolated performance contributions of the key engineering innovations
-in tsxtractor:
+in tsxtract:
   1. Quickselect Order Statistics vs. Full Sort
   2. Branchless Permutation Entropy & Peaks vs. Short-Circuiting Branching
   3. Fused 5-Pass Traversal vs. Isolated Pass Loops
@@ -19,7 +19,7 @@ import os
 import time
 import numpy as np
 
-import tsxtractor
+import tsxtract
 
 
 def benchmark_streaming_vs_batch(length: int = 5000, window: int = 256, stride: int = 1) -> dict:
@@ -27,12 +27,12 @@ def benchmark_streaming_vs_batch(length: int = 5000, window: int = 256, stride: 
 
     # 1. Batch sliding_features
     t0 = time.perf_counter()
-    batch_res = tsxtractor.sliding_features(x, window=window, stride=stride)
+    batch_res = tsxtract.sliding_features(x, window=window, stride=stride)
     t_batch = time.perf_counter() - t0
 
     # 2. Stateful StreamingExtractor
     t0 = time.perf_counter()
-    extractor = tsxtractor.StreamingExtractor(window)
+    extractor = tsxtract.StreamingExtractor(window)
     stream_count = 0
     for val in x:
         if extractor.push(float(val)):
@@ -49,7 +49,7 @@ def benchmark_streaming_vs_batch(length: int = 5000, window: int = 256, stride: 
 
 def benchmark_core_scaling(X: np.ndarray) -> dict:
     t0 = time.perf_counter()
-    _ = tsxtractor.extract_features(X)
+    _ = tsxtract.extract_features(X)
     t_parallel = time.perf_counter() - t0
 
     return {

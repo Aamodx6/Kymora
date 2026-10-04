@@ -5,15 +5,15 @@ order: 1
 section: "Start here"
 ---
 
-Tsxtract (distributed on PyPI as `tsxtractor`) is a batch time-series feature extraction library with a Rust core and an idiomatic Python interface. It computes 33 curated statistical, temporal, and spectral features across whole batches of series at once, returning a dense `(n_series, 33)` float64 matrix ready for classifiers, clustering, or retrieval.
+Tsxtract (distributed on PyPI as `tsxtract`) is a batch time-series feature extraction library with a Rust core and an idiomatic Python interface. It computes 33 curated statistical, temporal, and spectral features across whole batches of series at once, returning a dense `(n_series, 33)` float64 matrix ready for classifiers, clustering, or retrieval.
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 rng = np.random.default_rng(42)
 X = rng.standard_normal((1000, 500))
-features = tsxtractor.extract_features(X)
-names = tsxtractor.feature_names()
+features = tsxtract.extract_features(X)
+names = tsxtract.feature_names()
 print(features.shape)
 print(names[:5])
 print(np.round(features[0, :2], 4))
@@ -26,7 +26,7 @@ print(np.round(features[0, :2], 4))
 ```
 
 > [!NOTE]
-> The Python package and import name is `tsxtractor` (`import tsxtractor`). Tsxtract is the project and documentation name for the same library.
+> The Python package and import name is `tsxtract` (`import tsxtract`). Tsxtract is the project and documentation name for the same library.
 
 ## What it is
 
@@ -84,7 +84,7 @@ For library-level throughput, the benchmark suite measures end-to-end batch timi
 
 | Library | Feature count | Total time | Series/s | Per-feature cost |
 | :--- | ---: | ---: | ---: | :--- |
-| **tsxtractor** | 33 | **1.2 ms** | **800,256** | Baseline (1.0x) |
+| **tsxtract** | 33 | **1.2 ms** | **800,256** | Baseline (1.0x) |
 | `catch22` (pycatch22) | 22 | 1.02 s | 976 | About 820x slower overall |
 | `TSFEL` (all domains) | 156 | 7.15 s | 140 | About 5,725x slower overall |
 | `tsfresh` (EfficientFC) | 777 | 17.68 s | 57 | About 14,151x slower overall |

@@ -105,7 +105,7 @@ const DocsLayoutInner: React.FC<DocsLayoutInnerProps> = ({ children, headings })
             </button>
 
             <a
-              href="https://github.com/Aamod007/Tsxtract"
+              href="https://github.com/Aamodx6/Tsxtract"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-md border border-borderLine bg-card px-2.5 text-xs font-medium text-ink hover:border-ink transition"

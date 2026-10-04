@@ -80,7 +80,7 @@ This document maps every feature from the tsfresh 777 EfficientFCParameters set 
 
 ## Complete 777 Feature Manifest
 
-| # | tsfresh Name | Canonical Tsxtractor Name | Profile | Cost Class |
+| # | tsfresh Name | Canonical tsxtract Name | Profile | Cost Class |
 |---|---|---|---|---|
 | 1 | variance_larger_than_standard_deviation | variance_larger_than_standard_deviation | full | A/B/C/D |
 | 2 | has_duplicate_max | has_duplicate_max | full | A/B/C/D |

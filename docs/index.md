@@ -1,21 +1,21 @@
-# tsxtractor
+# tsxtract
 
 High-performance time-series feature extraction for Python, powered by a native Rust engine.
 
 Extract curated statistical, temporal, spectral, multichannel, and multi-view features across large batches of time series. The Rust core operates directly on zero-copy NumPy buffers, releases the GIL, and maximizes throughput via SIMD vectorization and persistent low-latency worker pools.
 
 ```bash
-pip install tsxtract
+pip install tsxtract-rs
 ```
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 
 # Batch extraction over 100,000 series
 X = np.random.randn(100_000, 500)
-feats = tsxtractor.extract_features(X)       # (100_000, 33) float64
-df = tsxtractor.extract_features_df(X)       # pandas DataFrame with labeled columns
+feats = tsxtract.extract_features(X)       # (100_000, 33) float64
+df = tsxtract.extract_features_df(X)       # pandas DataFrame with labeled columns
 ```
 
 ---

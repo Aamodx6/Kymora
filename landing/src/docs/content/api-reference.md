@@ -1,16 +1,16 @@
 ---
 title: "API Reference"
-description: "Comprehensive public API reference for tsxtractor functions, classes, type stubs, and constants."
+description: "Comprehensive public API reference for tsxtract functions, classes, type stubs, and constants."
 order: 10
 section: "Reference"
 ---
 
-The public surface covers batch, streaming, multichannel, and supervised feature extraction. Stubs live in `python/tsxtractor/_core.pyi` with a `py.typed` marker for IDEs and type checkers.
+The public surface covers batch, streaming, multichannel, and supervised feature extraction. Stubs live in `python/tsxtract/_core.pyi` with a `py.typed` marker for IDEs and type checkers.
 
 ```python
-import tsxtractor
-print(sorted(tsxtractor.__all__))
-print(tsxtractor.__version__)
+import tsxtract
+print(sorted(tsxtract.__all__))
+print(tsxtract.__version__)
 ```
 
 ```text

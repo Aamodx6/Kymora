@@ -8,8 +8,8 @@ section: "Reference"
 All 33 features in output column order, grouped by category. Column `i` of every output matrix equals the `i`-th row below, matching `feature_names()` and the interactive feature table below.
 
 ```python
-import tsxtractor
-names = tsxtractor.feature_names()
+import tsxtract
+names = tsxtract.feature_names()
 print(len(names))
 print(names[14:18])
 ```

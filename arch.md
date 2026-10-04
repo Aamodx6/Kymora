@@ -56,7 +56,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | F1 | **Throughput claims disagree:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cite ~1.80 ms / 555k series/s for `core33` | README vs release notes | Run `suites/reproduce_readme.py` (A5); explain regression or methodology difference before any new claim |
 | F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (tsxtract) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
 | F3 | Feature-name lists differ between README and old `arch.md` | audit | `feature_names()` is truth; list mismatches in `docs/arch_audit.md` |
-| F4 | Naming: PyPI `tsxtract-rs`, imports `tsxtract` + `tsxtractor`; unrelated JAX PyPI project `tsxtract` exists; two GitHub accounts/repos | repos, PyPI | Decision D3 |
+| F4 | Naming: PyPI `tsxtract-rs`, imports `tsxtract` + `tsxtract`; unrelated JAX PyPI project `tsxtract` exists; two GitHub accounts/repos | repos, PyPI | Decision D3 |
 | F5 | Hardware wording: i7-13620H = 10 cores (6P+4E) / 16 threads, not "16 cores" | env.json | Reword all claims (§14) |
 | F6 | Streaming claim "O(1)" does not hold for quantile/spectral/entropy features | code | O(1) vs O(n) tiers documented (§8) |
 | F7 | Landing site is a client-rendered SPA (empty HTML to crawlers), default Vercel domain | fetch | Prerender, OG tags, domain (§14.4) |
@@ -86,7 +86,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 |---|---|---|
 | D1 | `feature_names()` from the built library is the single source of truth for feature names; README/docs generated from it | ✅ |
 | D2 | **Non-contiguous input:** default `contiguous="error"` (preserves documented `ValueError`); `contiguous="copy"` opt-in performs one explicit copy with a one-time warning stating the cost. Never copy silently | ✅ |
-| D3 | **Canonical import/package name.** Recommendation: PyPI `tsxtract-rs` (or rename), import `tsxtractor` only; keep `tsxtract` alias as deprecated shim that warns, because an unrelated PyPI `tsxtract` (JAX) exists and can collide | ❓ owner decision |
+| D3 | **Canonical import/package name.** Recommendation: PyPI `tsxtract-rs` (or rename), import `tsxtract` only; keep `tsxtract` alias as deprecated shim that warns, because an unrelated PyPI `tsxtract` (JAX) exists and can collide | ❓ owner decision |
 | D4 | `compute()` of `StreamingExtractor` is **not** O(1) for all features; API exposes `compute(kind="fast"\|"all")` | ✅ |
 | D5 | Exact (unpadded) FFT is default; padded `fft_mode="fast"` is opt-in and documented non-identical | ✅ |
 | D6 | `precision="f32"` is opt-in; default stays f64 | ✅ |
@@ -99,7 +99,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 
 ```mermaid
 flowchart TB
-    subgraph PY["Python — python/tsxtractor/"]
+    subgraph PY["Python — python/tsxtract/"]
         API["extract_features · extract_features_ragged · extract_features_df\nsliding_features · StreamingExtractor · feature_names · list_profiles · describe_feature\nselect_features (planned) · extract_features_mc (planned)"]
     end
     subgraph FFI["src/ffi.rs"]
@@ -124,7 +124,7 @@ src/
   lib.rs ffi.rs error.rs plan.rs exec.rs pipeline.rs scratch.rs intermediates.rs registry.rs streaming.rs
   kernels/   mod.rs(dispatch) reduce.rs select.rs sort.rs fft.rs perm.rs        # only place for unsafe/SIMD
   features/  core33.rs stats.rs change.rs counts.rs acf.rs trend.rs spectral.rs entropy.rs complexity.rs catch22.rs
-python/tsxtractor/  __init__.py  _core.pyi  py.typed  compat.py(tsxtract shim)
+python/tsxtract/  __init__.py  _core.pyi  py.typed  compat.py(tsxtract shim)
 benches/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md  Makefile  Dockerfile
 tests/     golden/ reference/ property/ fixtures/
 docs/      arch_audit.md  parity_matrix.md  PROGRESS.md  (website: landing/)

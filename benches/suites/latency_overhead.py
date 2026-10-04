@@ -33,7 +33,7 @@ if str(REPO_ROOT) not in sys.path:
 
 import numpy as np
 
-import tsxtractor
+import tsxtract
 
 
 def benchmark_stage(fn, iterations: int = 20000) -> float:
@@ -69,16 +69,16 @@ def run_latency_decomposition(iterations: int = 20000) -> dict[str, Any]:
         out_buf = np.empty((n_series, 33), dtype=np.float64)
 
         # 1. Full standard call: extract_features(data_c)
-        t_full = benchmark_stage(lambda: tsxtractor.extract_features(data_c), iterations)
+        t_full = benchmark_stage(lambda: tsxtract.extract_features(data_c), iterations)
 
         # 2. Preallocated output call: extract_features(data_c, out=out_buf)
-        t_prealloc = benchmark_stage(lambda: tsxtractor.extract_features(data_c, out=out_buf), iterations)
+        t_prealloc = benchmark_stage(lambda: tsxtract.extract_features(data_c, out=out_buf), iterations)
 
         # 3. Allocation overhead = full - prealloc
         t_alloc = max(0.0, t_full - t_prealloc)
 
         # 4. Feature names query (baseline PyO3 metadata round-trip)
-        t_names = benchmark_stage(lambda: tsxtractor.feature_names(), iterations)
+        t_names = benchmark_stage(lambda: tsxtract.feature_names(), iterations)
 
         # 5. Pure Python baseline (empty lambda / no-op)
         t_noop = benchmark_stage(lambda: None, iterations)
@@ -132,7 +132,7 @@ def run_latency_decomposition(iterations: int = 20000) -> dict[str, Any]:
 - **Impact Score:** 4 (High impact for real-time single-sample telemetry / online streaming)
 
 ### Summary & Evidence
-When invoking `tsxtractor.extract_features` on tiny series ($n=1, \\text{{len}}=10$ or $n=2, \\text{{len}}=32$), execution exhibits a fixed latency floor of **{results['n=1, len=10']['t_full_us']} µs** (preallocated: **{results['n=1, len=10']['t_prealloc_us']} µs**), compared to pure mathematical kernel execution time of **~{results['n=1, len=10']['estimated_kernel_us']} µs**. Over 75% of the wall-clock time is spent in fixed dispatch overhead.
+When invoking `tsxtract.extract_features` on tiny series ($n=1, \\text{{len}}=10$ or $n=2, \\text{{len}}=32$), execution exhibits a fixed latency floor of **{results['n=1, len=10']['t_full_us']} µs** (preallocated: **{results['n=1, len=10']['t_prealloc_us']} µs**), compared to pure mathematical kernel execution time of **~{results['n=1, len=10']['estimated_kernel_us']} µs**. Over 75% of the wall-clock time is spent in fixed dispatch overhead.
 
 ### Quantitative Decomposition Table:
 | Stage / Benchmark Component | n=1, len=10 (µs) | n=2, len=32 (µs) | Percentage (n=1) |

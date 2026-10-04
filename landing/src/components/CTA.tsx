@@ -5,7 +5,7 @@ export const CTA: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract');
+      await navigator.clipboard.writeText('pip install tsxtract-rs');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -43,7 +43,7 @@ export const CTA: React.FC = () => {
             <div className="mx-auto mb-8 flex max-w-md items-center justify-between rounded-lg border border-borderLine bg-canvas px-4 py-3 font-mono text-sm text-ink shadow-inner">
               <div className="flex items-center gap-2">
                 <span className="text-muted select-none">$</span>
-                <span className="font-semibold">pip install tsxtract</span>
+                <span className="font-semibold">pip install tsxtract-rs</span>
               </div>
               <button
                 type="button"
@@ -68,7 +68,7 @@ export const CTA: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4">
               <a
-                href="https://github.com/Aamod007/Tsxtract"
+                href="https://github.com/Aamodx6/Tsxtract"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-ink px-6 text-sm font-semibold text-white shadow-btn transition hover:bg-ink-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
@@ -83,7 +83,7 @@ export const CTA: React.FC = () => {
               </a>
 
               <a
-                href="https://github.com/Aamod007/Tsxtract#readme"
+                href="https://github.com/Aamodx6/Tsxtract#readme"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-borderLine bg-card px-6 text-sm font-semibold text-ink shadow-btn transition hover:border-ink hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"

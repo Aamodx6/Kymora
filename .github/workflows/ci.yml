@@ -137,4 +137,4 @@ jobs:
           python -m pip install --upgrade pip maturin mypy pandas-stubs
           python -m pip install -e ".[pandas]"
           maturin develop --release
-      - run: mypy python/tsxtractor
+      - run: mypy python/tsxtract

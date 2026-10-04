@@ -39,7 +39,7 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   runner: "16-core AMD Ryzen / GitHub Linux Actions Runner",
 };
 
-/* PLACEHOLDER DATA: Calibrated against published tsxtractor 0.2.1 suite */
+/* PLACEHOLDER DATA: Calibrated against published tsxtract 0.2.1 suite */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "tsxtract",

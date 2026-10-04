@@ -9,8 +9,8 @@ Short answers to the questions that recur in issues and integrations. Each answe
 
 ```python
 import numpy as np
-import tsxtractor
-print(tsxtractor.__version__, len(tsxtractor.feature_names()))
+import tsxtract
+print(tsxtract.__version__, len(tsxtract.feature_names()))
 ```
 
 ```text
@@ -26,7 +26,7 @@ print(tsxtractor.__version__, len(tsxtractor.feature_names()))
 
 ```python
 X = np.ascontiguousarray(np.arange(20.0).reshape(2, 10).astype(np.int64).astype(np.float64))
-print(tsxtractor.extract_features(X).shape)
+print(tsxtract.extract_features(X).shape)
 ```
 
 ```text
@@ -78,7 +78,7 @@ print(tsxtractor.extract_features(X).shape)
 ### How do I use Tsxtract with Polars?
 
 - **Answer:** through an explicit NumPy bridge — Tsxtract ships no Polars-native function.
-- **Pattern:** select value columns, convert with `.to_numpy()`, extract, and wrap back with `pl.DataFrame(feats, schema=tsxtractor.feature_names())`.
+- **Pattern:** select value columns, convert with `.to_numpy()`, extract, and wrap back with `pl.DataFrame(feats, schema=tsxtract.feature_names())`.
 
 ### Is `StreamingExtractor` output identical to batch output?
 
@@ -99,7 +99,7 @@ print(tsxtractor.extract_features(X).shape)
 
 ### Where do I report a wrong value?
 
-- **Requirement:** include OS, Python version, `tsxtractor.__version__`, a runnable snippet, and the expected value with its NumPy/SciPy expression.
+- **Requirement:** include OS, Python version, `tsxtract.__version__`, a runnable snippet, and the expected value with its NumPy/SciPy expression.
 - **Reason:** that expression converts directly into a reference test, which is the fastest path to a fix.
 
 ## See also

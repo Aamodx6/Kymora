@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
               Engineered for data science teams and real-time inference pipelines.
             </p>
             <div className="pt-1 font-mono text-[11px] text-muted">
-              Repository: <a href="https://github.com/Aamod007/Tsxtract" className="text-ink hover:underline">github.com/Aamod007/Tsxtract</a>
+              Repository: <a href="https://github.com/Aamodx6/Tsxtract" className="text-ink hover:underline">github.com/Aamodx6/Tsxtract</a>
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamod007/Tsxtract#features"
+                  href="https://github.com/Aamodx6/Tsxtract#features"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -98,7 +98,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="https://github.com/Aamod007/Tsxtract"
+                  href="https://github.com/Aamodx6/Tsxtract"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -108,7 +108,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamod007/Tsxtract/issues"
+                  href="https://github.com/Aamodx6/Tsxtract/issues"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -128,7 +128,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/Aamod007/Tsxtract/blob/main/LICENSE"
+                  href="https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-ink transition-colors"
@@ -145,7 +145,7 @@ export const Footer: React.FC = () => {
           <div>
             <span>Dual-licensed under </span>
             <a
-              href="https://github.com/Aamod007/Tsxtract/blob/main/LICENSE"
+              href="https://github.com/Aamodx6/Tsxtract/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="text-ink hover:underline"

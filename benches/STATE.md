@@ -48,7 +48,7 @@
 - [x] **A6 — Competitor Config Pinning:** Pinned tsfresh to 777-feature set (`EfficientFCParameters()`) and TSFEL to 156-feature set (`get_features_by_domain()`) as primary configs. Recorded `n_features` in every record.
 - [x] **A7 — Latency Decomposition:** Implemented `benches/suites/latency_overhead.py` decomposing fixed overhead for $n=1, \text{len}=10$ and $n=2, \text{len}=32$ across PyO3 wrapper, contiguity/dtype checks, plan building, output allocation, GIL release/acquire, and math kernel. Logged `HIGH-LATENCY-SMALL-CALL` in `LOSS_LEDGER.md`.
 - [x] **A8 — JAX Collision Exclusion:** Excluded `tsxtract_jax` from win/loss counts and loss ledgers in `make_report.py`, isolating it in a dedicated name-collision diagnostic note.
-- [x] **A9 — Authoritative Feature Names:** Used `tsxtractor.feature_names()` from built library as single source of truth for the 33 names in `benches/agreement/feature_map.json`. Documented all discrepancies with `README.md` and `arch.md` in `docs/arch_audit.md`.
+- [x] **A9 — Authoritative Feature Names:** Used `tsxtract.feature_names()` from built library as single source of truth for the 33 names in `benches/agreement/feature_map.json`. Documented all discrepancies with `README.md` and `arch.md` in `docs/arch_audit.md`.
 
 ### Phase B1: Correctness & Agreement
 - [x] Feature mapping table `benches/agreement/feature_map.json`: tsxtract_name -> {tsfresh, tsfel, catch22, antropy, numpy_reference} + definition diffs
@@ -130,7 +130,7 @@
   - A6: Pinned primary competitor configs (tsfresh 777-feature set, TSFEL 156-feature set); recorded `n_features` in every record.
   - A7: Implemented `benches/suites/latency_overhead.py` decomposing fixed overhead floor for $n=1, \text{len}=10$ and $n=2, \text{len}=32$; logged `HIGH-LATENCY-SMALL-CALL` in `LOSS_LEDGER.md`.
   - A8: Excluded `tsxtract_jax` from win/loss counts and ledgers in `make_report.py`, isolating in name-collision diagnostic note.
-  - A9: Frozen 33 names from `tsxtractor.feature_names()` as single source of truth in `benches/agreement/feature_map.json`; audited and documented README/arch discrepancies in `docs/arch_audit.md`.
+  - A9: Frozen 33 names from `tsxtract.feature_names()` as single source of truth in `benches/agreement/feature_map.json`; audited and documented README/arch discrepancies in `docs/arch_audit.md`.
 - **2026-10-04:** Phase B1 Correctness & Agreement — **GATE ✅ PASS**:
   - Expanded agreement suite to 25 distributions (20 synthetic + 5 UCR real datasets).
   - All 33 features **EXACT** vs NumPy reference on 23/25 distributions; 9 features **CLOSE** on `cancellation` (1e9+noise) due to expected catastrophic cancellation in floating-point variance — documented, not a bug.
@@ -151,8 +151,8 @@
 
 ### 2026-10-04: B3 GATE AUDIT (pre-continuation audit ordered by owner)
 - **A1–A9 verified in code/artifacts:**
-  - A1 ✅ `numba_baseline.py` uses iterative Radix-2 + Bluestein O(N log N) FFT (no O(N²) DFT). A2 ✅ dual fastmath variants, recorded per row (`extra.fastmath_variant`). A3 ✅ `guarded` on schema + runner; sktime raw mode raises instead of silent NaN. A4 ✅ `env.json` captures power scheme/AC/P-E-topology/frequencies. A5 ✅ `suites/reproduce_readme.py` exists (see F1 below). A6 ✅ tsfresh=EfficientFCParameters(777), TSFEL=get_features_by_domain()(156), targets match README table. A7 ✅ `suites/latency_overhead.py` + ledger `HIGH-LATENCY-SMALL-CALL`. A8 ✅ `benches/report/make_report.py` excludes `tsxtract_jax` from win/loss (dedicated collision note). A9 ✅ `tsxtractor.feature_names()` source of truth in `feature_map.json`; discrepancies in `docs/arch_audit.md`.
-  - Note: `tsxtractor` and `tsxtract` wheels both installed; verified identical 0.5.0 build (bitwise-equal output, same feature_names). B3_REPORT header's "tsxtractor 0.3.0" is a stale version string (pip metadata) — library under test is 0.5.0.
+  - A1 ✅ `numba_baseline.py` uses iterative Radix-2 + Bluestein O(N log N) FFT (no O(N²) DFT). A2 ✅ dual fastmath variants, recorded per row (`extra.fastmath_variant`). A3 ✅ `guarded` on schema + runner; sktime raw mode raises instead of silent NaN. A4 ✅ `env.json` captures power scheme/AC/P-E-topology/frequencies. A5 ✅ `suites/reproduce_readme.py` exists (see F1 below). A6 ✅ tsfresh=EfficientFCParameters(777), TSFEL=get_features_by_domain()(156), targets match README table. A7 ✅ `suites/latency_overhead.py` + ledger `HIGH-LATENCY-SMALL-CALL`. A8 ✅ `benches/report/make_report.py` excludes `tsxtract_jax` from win/loss (dedicated collision note). A9 ✅ `tsxtract.feature_names()` source of truth in `feature_map.json`; discrepancies in `docs/arch_audit.md`.
+  - Note: `tsxtract` and `tsxtract` wheels both installed; verified identical 0.5.0 build (bitwise-equal output, same feature_names). B3_REPORT header's "tsxtract 0.3.0" is a stale version string (pip metadata) — library under test is 0.5.0.
 - **F1 reproduce_readme — WAS INCOMPLETE, COMPLETED THIS AUDIT.** Prior run had only tsxtract (2 rows) + catch22 (1 error + 1 OK); tsfel/tsfresh rows missing. Full re-run (`benches/results/2026-10-04_gate_audit/`):
   - tsxtract core33: README 1.80 ms → measured best 2.90 ms / median 3.56 ms = **+60.9% deviation → discrepancy CONFIRMED** (README headline 1.25 ms/800,256 series-s disagrees with README table 1.80 ms/555k, and neither reproduces on this harness).
   - catch22: 1045.8 → 1034.6 ms = −1.1% ✅ reproduces.

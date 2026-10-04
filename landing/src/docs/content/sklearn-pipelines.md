@@ -9,13 +9,13 @@ Wrap extraction in a stateless transformer so scaling, selection, and classifica
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 from sklearn.base import BaseEstimator, TransformerMixin
 class TsxtractTransformer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
     def transform(self, X):
-        return tsxtractor.extract_features(np.ascontiguousarray(X, dtype=np.float64))
+        return tsxtract.extract_features(np.ascontiguousarray(X, dtype=np.float64))
 rng = np.random.default_rng(42)
 X = np.ascontiguousarray(rng.standard_normal((20, 120)))
 print(TsxtractTransformer().fit_transform(X).shape)
@@ -43,7 +43,7 @@ You need scikit-learn alongside Tsxtract, plus an understanding of two terms:
 - **Transformer:** an estimator with `transform()` that converts input rows into a new representation.
 
 ```bash
-pip install "tsxtract[pandas]" scikit-learn
+pip install "tsxtract-rs[pandas]" scikit-learn
 ```
 
 ## Steps
@@ -54,7 +54,7 @@ A transformer is a class mixing in `BaseEstimator` and `TransformerMixin` with `
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 from sklearn.base import BaseEstimator, TransformerMixin
 class TsxtractTransformer(BaseEstimator, TransformerMixin):
     """Extract 33 Tsxtract features per input row (one series per row)."""
@@ -62,7 +62,7 @@ class TsxtractTransformer(BaseEstimator, TransformerMixin):
         return self
     def transform(self, X):
         X = np.ascontiguousarray(X, dtype=np.float64)
-        return tsxtractor.extract_features(X)
+        return tsxtract.extract_features(X)
 ```
 
 ### 2. Assemble the pipeline
@@ -152,7 +152,7 @@ End-to-end transformer, pipeline, tuning, and persistence in one file:
 ```python
 import pickle
 import numpy as np
-import tsxtractor
+import tsxtract
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -162,7 +162,7 @@ class TsxtractTransformer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
     def transform(self, X):
-        return tsxtractor.extract_features(np.ascontiguousarray(X, dtype=np.float64))
+        return tsxtract.extract_features(np.ascontiguousarray(X, dtype=np.float64))
 rng = np.random.default_rng(42)
 c0 = rng.standard_normal((100, 120))
 t = np.linspace(0, 5, 120)

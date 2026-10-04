@@ -8,11 +8,11 @@ section: "Start here"
 Install Tsxtract from PyPI as precompiled wheels with no Rust toolchain required, then verify the native extension loads. Standard use needs only Python 3.10+ and NumPy on a 64-bit OS.
 
 ```bash tab="pip"
-pip install tsxtract
+pip install tsxtract-rs
 ```
 
 ```bash tab="uv"
-uv add tsxtract
+uv add tsxtract-rs
 ```
 
 ```bash tab="conda"
@@ -41,25 +41,25 @@ conda install -c conda-forge tsxtract
 The core install stays NumPy-only, so install extras only for the workflow you need:
 
 ```bash tab="pip"
-pip install "tsxtract[pandas]"
-pip install "tsxtract[test]"
-pip install "tsxtract[bench]"
+pip install "tsxtract-rs[pandas]"
+pip install "tsxtract-rs[test]"
+pip install "tsxtract-rs[bench]"
 ```
 
 ```bash tab="uv"
-uv add "tsxtract[pandas]"
-uv add "tsxtract[test]"
+uv add "tsxtract-rs[pandas]"
+uv add "tsxtract-rs[test]"
 ```
 
 ```bash tab="conda"
-conda install -c conda-forge tsxtractor pandas
+conda install -c conda-forge tsxtract pandas
 ```
 
 Available extras and their contents:
 
-- **Pandas support:** `"tsxtractor[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
-- **Test suite:** `"tsxtractor[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
-- **Benchmarks:** `"tsxtractor[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
+- **Pandas support:** `"tsxtract[pandas]"` pulls `pandas>=1.5` for `extract_features_df()`.
+- **Test suite:** `"tsxtract[test]"` pulls `pytest`, `scipy`, `hypothesis`, and `pandas`.
+- **Benchmarks:** `"tsxtract[bench]"` pulls `pandas`, `tsfresh`, `pycatch22`, and `tsfel`.
 - **Docs tooling:** the `docs` extra pulls `mkdocs` and `mkdocs-material` for local docs builds.
 
 ## Verify installation
@@ -68,17 +68,17 @@ Run this snippet to confirm the version, the 33-feature registry, and a real ext
 
 ```python
 import numpy as np
-import tsxtractor
-print("tsxtractor version:", tsxtractor.__version__)
-print("Total registered features:", len(tsxtractor.feature_names()))
+import tsxtract
+print("tsxtract version:", tsxtract.__version__)
+print("Total registered features:", len(tsxtract.feature_names()))
 sample = np.linspace(0.0, 10.0, 100, dtype=np.float64).reshape(1, -1)
-result = tsxtractor.extract_features(sample)
+result = tsxtract.extract_features(sample)
 print("Test feature vector shape:", result.shape)
 print("Computed mean value:", result[0, 0])
 ```
 
 ```text
-tsxtractor version: 0.3.0
+tsxtract version: 0.3.0
 Total registered features: 33
 Test feature vector shape: (1, 33)
 Computed mean value: 5.0
@@ -97,7 +97,7 @@ Build from source when developing features, targeting an architecture without pr
 ### Compile steps
 
 ```bash
-git clone https://github.com/Aamod007/Tsxtract.git
+git clone https://github.com/Aamodx6/Tsxtract.git
 cd Tsxtract
 python -m venv .venv
 source .venv/bin/activate

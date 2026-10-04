@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `tsxtractor` v0.5.0.
+Complete Python API specification for `tsxtract` v0.5.0.
 
 ```python
-import tsxtractor
+import tsxtract
 
-tsxtractor.__version__  # "0.5.0"
+tsxtract.__version__  # "0.5.0"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.
@@ -44,15 +44,15 @@ A 2D `float64` array of shape `(n_series, n_features)`.
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 
 X = np.random.default_rng(0).standard_normal((1000, 500))
 
 # Default Core33 batch extraction
-feats = tsxtractor.extract_features(X)
+feats = tsxtract.extract_features(X)
 
 # Multi-view extraction across raw, differences, and z-normalization
-feats_views = tsxtractor.extract_features(X, views=["raw", "diff", "znorm"])
+feats_views = tsxtract.extract_features(X, views=["raw", "diff", "znorm"])
 ```
 
 ---
@@ -72,7 +72,7 @@ extract_features_df(
 
 Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
 
-Requires `pandas` (`pip install "tsxtractor[pandas]"`).
+Requires `pandas` (`pip install "tsxtract[pandas]"`).
 
 ---
 

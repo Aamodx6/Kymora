@@ -9,9 +9,9 @@ Tsxtract is fast for two separable reasons: it parallelizes across series with t
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 X = np.ascontiguousarray(np.random.default_rng(11).standard_normal((1000, 500)))
-feats = tsxtractor.extract_features(X)
+feats = tsxtract.extract_features(X)
 print(feats.shape, feats.dtype)
 ```
 
@@ -32,7 +32,7 @@ The core system is structured across a thin Python binding layer and a compiled 
 flowchart TD
     subgraph PY["Python User Space"]
         INPUT["NumPy 2D Array X\n(N × n, C-contiguous float64)"]
-        CALL["tsxtractor.extract_features(X)"]
+        CALL["tsxtract.extract_features(X)"]
         OUTPUT["Output Matrix Y\n(N × 33, float64)"]
     end
 

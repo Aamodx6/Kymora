@@ -30,7 +30,7 @@ from sklearn.linear_model import RidgeClassifier
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import StratifiedKFold
 
-import tsxtractor
+import tsxtract
 
 
 @dataclass
@@ -163,7 +163,7 @@ def generate_power_demand(n_samples: int = 400, length: int = 150) -> Tuple[np.n
 # ---------------------------------------------------------------------
 
 def extract_tsxtractor(X: np.ndarray) -> np.ndarray:
-    return tsxtractor.extract_features(X)
+    return tsxtract.extract_features(X)
 
 
 def extract_catch22(X: np.ndarray) -> np.ndarray | None:

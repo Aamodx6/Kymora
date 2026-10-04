@@ -8,9 +8,9 @@ section: "Reference"
 Tsxtract has no configuration file and reads no library-specific environment variables: every call is fully described by its arguments. The tunable surface is therefore small — build flags at compile time and process-level thread controls at run time.
 
 ```python
-import tsxtractor
-print(tsxtractor.__version__)
-print(len(tsxtractor.feature_names()))
+import tsxtract
+print(tsxtract.__version__)
+print(len(tsxtract.feature_names()))
 ```
 
 ```text
@@ -71,7 +71,7 @@ Version floors from `pyproject.toml` that constrain environments:
 | :--- | :--- | :--- | :--- |
 | `requires-python` | `>=3.10` | Older interpreters cannot install the package | `python --version` |
 | `numpy` | `>=1.24` | Minimum array runtime | `pip install "numpy>=1.24"` |
-| `pandas` (extra) | `>=1.5` | Needed only for `extract_features_df()` | `pip install "tsxtract[pandas]"` |
+| `pandas` (extra) | `>=1.5` | Needed only for `extract_features_df()` | `pip install "tsxtract-rs[pandas]"` |
 | `maturin` (build) | `>=1.14,<2.0` | Build backend for source builds | `pip install "maturin>=1.14,<2.0"` |
 
 ## See also

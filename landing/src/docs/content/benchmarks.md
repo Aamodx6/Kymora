@@ -9,13 +9,13 @@ Time-series feature extraction in Python has historically forced data scientists
 
 ```python
 import numpy as np
-import tsxtractor
+import tsxtract
 
 # 1,000 series × 500 time steps: 500,000 data points
 X = np.ascontiguousarray(np.random.default_rng(42).standard_normal((1000, 500)))
 
 # Wall-clock extraction across 16 worker threads
-features = tsxtractor.extract_features(X)
+features = tsxtract.extract_features(X)
 print(f"Extracted shape: {features.shape} in ~1.2 ms")
 ```
 
@@ -219,7 +219,7 @@ You can reproduce all benchmark tables and figures locally:
 
 ```bash
 # 1. Install benchmark dependencies
-git clone https://github.com/Aamod007/Tsxtract.git
+git clone https://github.com/Aamodx6/Tsxtract.git
 cd Tsxtract
 pip install -e ".[bench]"
 
