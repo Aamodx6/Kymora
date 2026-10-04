@@ -1,6 +1,7 @@
 """Deterministic synthetic time-series dataset generator.
 
-Generates realistic, challenging, and adversarial time-series shapes and distributions:
+Generates realistic, challenging, and adversarial time-series shapes and distributions
+per arch.md §11.4:
 - Gaussian white noise
 - Random walk
 - Sinusoid + noise (multiple SNR)
@@ -26,6 +27,48 @@ from __future__ import annotations
 
 import hashlib
 import numpy as np
+
+
+# ────────────────────────────────────────────────────────────
+#  All supported distribution names
+# ────────────────────────────────────────────────────────────
+
+ALL_DISTRIBUTIONS = [
+    "gaussian",
+    "random_walk",
+    "sinusoid",
+    "ar1",          # phi=0.7 (default)
+    "ar1_0.1",
+    "ar1_0.9",
+    "ar1_0.99",
+    "trend_seasonality",
+    "heavy_tailed",
+    "cauchy",
+    "spikes",
+    "step_changes",
+    "piecewise_constant",
+    "quantized_8bit",
+    "quantized_16bit",
+    "sparse",
+    "bimodal",
+    "constant",
+    "cancellation",
+    "tiny_scale",
+    "huge_scale",
+    "mixed_magnitudes",
+]
+
+# Benchmark shapes per arch.md §11.4
+BENCHMARK_SHAPES = [
+    (1, 10), (1, 100), (1, 100_000), (1, 1_000_000),
+    (10, 500), (100, 100), (100, 500),
+    (1000, 100), (1000, 500), (1000, 5000),
+    (10_000, 500), (100_000, 500), (100_000, 100),
+    (1_000_000, 100), (100, 50_000),
+]
+
+# Odd / adversarial lengths per arch.md §11.4
+ODD_LENGTHS = [7, 31, 499, 500, 503, 997, 1000, 1024, 2047, 4093, 65536, 100003]
 
 
 def generate_series(
@@ -115,6 +158,13 @@ def generate_series(
         noisy = continuous[None, :] + noise
         data = np.clip(np.round(noisy), 0, 255)
 
+    elif dist == "quantized_16bit":
+        # 16-bit ADC simulation: ties but more dynamic range
+        continuous = 32767.5 * (1.0 + np.sin(np.linspace(0, 6 * np.pi, length)))
+        noise = rng.standard_normal((n_series, length)) * 100.0
+        noisy = continuous[None, :] + noise
+        data = np.clip(np.round(noisy), 0, 65535)
+
     elif dist == "sparse":
         # 95% zeros
         mask = rng.random((n_series, length)) > 0.95
@@ -145,6 +195,13 @@ def generate_series(
         scales = 10.0 ** rng.uniform(-50, 50, size=(n_series, 1))
         data = rng.standard_normal((n_series, length)) * scales
 
+    elif dist == "quantized":
+        # Alias for quantized_8bit
+        continuous = 127.5 * (1.0 + np.sin(np.linspace(0, 6 * np.pi, length)))
+        noise = rng.standard_normal((n_series, length)) * 5.0
+        noisy = continuous[None, :] + noise
+        data = np.clip(np.round(noisy), 0, 255)
+
     else:
         # Default gaussian
         data = rng.standard_normal((n_series, length))
@@ -155,6 +212,8 @@ def generate_series(
         data = np.clip(data * 100, -2e9, 2e9).astype(np.int32)
     elif dtype == "int16":
         data = np.clip(data * 100, -32768, 32767).astype(np.int16)
+    elif dtype == "uint8":
+        data = np.clip(data, 0, 255).astype(np.uint8)
     else:
         data = data.astype(np.float64)
 
@@ -164,3 +223,44 @@ def generate_series(
 def array_sha256(arr: np.ndarray) -> str:
     """Compute sha256 checksum of raw numpy array buffer."""
     return hashlib.sha256(arr.tobytes()).hexdigest()
+
+
+def verify_determinism(
+    dist: str = "gaussian",
+    n_series: int = 100,
+    length: int = 500,
+    seed: int = 42,
+) -> tuple[bool, str, str]:
+    """Verify that the same seed produces identical output. Returns (match, sha1, sha2)."""
+    a = generate_series(dist, n_series, length, seed=seed)
+    b = generate_series(dist, n_series, length, seed=seed)
+    h1 = array_sha256(a)
+    h2 = array_sha256(b)
+    return h1 == h2, h1, h2
+
+
+def generate_benchmark_matrix(
+    distributions: list[str] | None = None,
+    shapes: list[tuple[int, int]] | None = None,
+    seed: int = 42,
+) -> dict[str, dict[str, np.ndarray]]:
+    """Generate the full benchmark dataset matrix: {dist: {shape_key: array}}.
+
+    Only generates shape/dist combos that fit in memory (< 2 GB).
+    """
+    if distributions is None:
+        distributions = ["gaussian", "random_walk", "ar1", "heavy_tailed"]
+    if shapes is None:
+        shapes = BENCHMARK_SHAPES
+
+    matrix = {}
+    for dist in distributions:
+        matrix[dist] = {}
+        for n, l in shapes:
+            # Skip shapes > ~2 GB (n * l * 8 bytes)
+            mem_bytes = n * l * 8
+            if mem_bytes > 2e9:
+                continue
+            key = f"{n}x{l}"
+            matrix[dist][key] = generate_series(dist, n, l, seed=seed)
+    return matrix

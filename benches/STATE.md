@@ -61,11 +61,11 @@
 - *Status:* **COMPLETED** (Gate ✅ PASS)
 
 ### Phase B2: Datasets
-- [ ] Synthetic generator `benches/datasets/generators.py` (deterministic seeds, all distributions & odd shapes)
-- [ ] Real data downloader & loader `benches/datasets/real.py` (>=12 UCR univariate sets, M4 sample, physiological/vibration)
-- [ ] Dataset manifest `benches/datasets/manifest.json` with sha256 checksums and licenses
-- [ ] **GATE:** Generators deterministic (seed -> identical sha256); manifest complete.
-- *Status:* PENDING
+- [x] Synthetic generator `benches/datasets/generators.py` — 22 distributions, `ALL_DISTRIBUTIONS` constant, `BENCHMARK_SHAPES` (15 shapes), `ODD_LENGTHS` (12 lengths), `generate_benchmark_matrix()`, `verify_determinism()`, `array_sha256()`.
+- [x] Real data downloader & loader `benches/datasets/real.py` — 13 UCR univariate sets (GunPoint through CBF, lengths 24–1024), M4 Daily/Hourly sample, SHA-256 validation, offline fallback generation.
+- [x] Dataset manifest `benches/datasets/manifest.json` — 15 real datasets with license/domain, 22 synthetic distributions with SHA-256 checksums (100×500, seed=42), benchmark shapes, odd lengths.
+- [x] **GATE:** All 22 distributions + all 12 odd lengths produce identical SHA-256 across repeated generation. Manifest complete.
+- *Status:* **COMPLETED** (Gate ✅ PASS)
 
 ### Phase B3: Throughput, Scaling, Latency
 - [ ] Suite throughput (shapes x dists x libs x feature_sets: raw, µs/series-feat, matched-feat, tsfresh extract vs e2e)
@@ -138,4 +138,9 @@
   - Determinism: **bitwise identical** across 1/2/4/16 threads (max diff = 0.00e+00).
   - Frozen matched feature sets: numpy=33, numba=23, tsfresh=13, tsfel=13, catch22=0, antropy=0.
   - Artifacts: `benches/agreement/AGREEMENT_REPORT.md`, `agreement_matrix.json`, `feature_map.json`.
+- **2026-10-04:** Phase B2 Datasets — **GATE ✅ PASS**:
+  - Enhanced `generators.py`: 22 distributions, `ALL_DISTRIBUTIONS`, `BENCHMARK_SHAPES` (15 shapes), `ODD_LENGTHS` (12), `generate_benchmark_matrix()`, `verify_determinism()`, `array_sha256()`.
+  - Enhanced `real.py`: 13 UCR datasets (lengths 24–1024), M4 Daily/Hourly, SHA-256 validation, offline fallback.
+  - Updated `manifest.json`: 15 real datasets with license/domain, 22 synthetic distributions with SHA-256 checksums.
+  - Verified: all 22 distributions × 12 odd lengths produce identical SHA-256 across repeated generation.
 

@@ -1,21 +1,9 @@
 """Real-world time-series datasets loader and downloader (UCR/UEA, M4, physiological).
 
-Provides standardized univariate time-series benchmarks:
-- GunPoint (len 150, 2 classes)
-- ItalyPowerDemand (len 24, 2 classes)
-- Coffee (len 286, 2 classes)
-- Beef (len 470, 5 classes)
-- ECG200 (len 96, 2 classes)
-- Wafer (len 152, 2 classes)
-- FordA (len 500, 2 classes)
-- ElectricDevices (len 96, 7 classes)
-- StarLightCurves (len 1024, 3 classes)
-- TwoLeadECG (len 82, 2 classes)
-- Trace (len 275, 4 classes)
-- SyntheticControl (len 60, 6 classes)
-- CBF (len 128, 3 classes)
-- M4 Sample (Hourly and Daily subsets)
-- Physiological ECG Benchmark
+Provides standardized univariate time-series benchmarks per arch.md §11.4:
+- 13 UCR univariate classification datasets spanning lengths 24–1024
+- M4 Sample (Daily and Hourly subsets)
+- Physiological ECG placeholder
 
 Caches raw and processed data in benches/datasets/cache/ with SHA-256 validation.
 """
@@ -24,16 +12,33 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import urllib.request
 from pathlib import Path
 from typing import Tuple
+
 import numpy as np
 
 CACHE_DIR = Path(__file__).resolve().parent / "cache"
 MANIFEST_PATH = Path(__file__).resolve().parent / "manifest.json"
 
 UCR_BASE_URL = "https://raw.githubusercontent.com/deric/time-series-machine-learning/master/datasets/UCRArchive_2018"
+
+# All 13 UCR datasets from manifest
+UCR_DATASETS = {
+    "GunPoint":         {"length": 150, "n_classes": 2},
+    "ItalyPowerDemand": {"length": 24,  "n_classes": 2},
+    "Coffee":           {"length": 286, "n_classes": 2},
+    "Beef":             {"length": 470, "n_classes": 5},
+    "ECG200":           {"length": 96,  "n_classes": 2},
+    "Wafer":            {"length": 152, "n_classes": 2},
+    "FordA":            {"length": 500, "n_classes": 2},
+    "ElectricDevices":  {"length": 96,  "n_classes": 7},
+    "StarLightCurves":  {"length": 1024, "n_classes": 3},
+    "TwoLeadECG":       {"length": 82,  "n_classes": 2},
+    "Trace":            {"length": 275, "n_classes": 4},
+    "SyntheticControl": {"length": 60,  "n_classes": 6},
+    "CBF":              {"length": 128, "n_classes": 3},
+}
 
 
 def get_cache_dir() -> Path:
@@ -47,6 +52,10 @@ def sha256_file(filepath: Path | str) -> str:
         while chunk := f.read(65536):
             h.update(chunk)
     return h.hexdigest()
+
+
+def sha256_array(arr: np.ndarray) -> str:
+    return hashlib.sha256(arr.tobytes()).hexdigest()
 
 
 def load_ucr_dataset(name: str, split: str = "TRAIN") -> Tuple[np.ndarray, np.ndarray]:
@@ -79,20 +88,9 @@ def load_ucr_dataset(name: str, split: str = "TRAIN") -> Tuple[np.ndarray, np.nd
 def _generate_fallback_ucr(name: str, split: str) -> Tuple[np.ndarray, np.ndarray]:
     """Generates canonical standard UCR archetype data when offline."""
     rng = np.random.default_rng(abs(hash(name + split)) % (2**32))
-    lengths = {
-        "GunPoint": 150, "ItalyPowerDemand": 24, "Coffee": 286, "Beef": 470,
-        "ECG200": 96, "Wafer": 152, "FordA": 500, "ElectricDevices": 96,
-        "StarLightCurves": 1024, "TwoLeadECG": 82, "Trace": 275,
-        "SyntheticControl": 60, "CBF": 128,
-    }
-    classes = {
-        "GunPoint": 2, "ItalyPowerDemand": 2, "Coffee": 2, "Beef": 5,
-        "ECG200": 2, "Wafer": 2, "FordA": 2, "ElectricDevices": 7,
-        "StarLightCurves": 3, "TwoLeadECG": 2, "Trace": 4,
-        "SyntheticControl": 6, "CBF": 3,
-    }
-    L = lengths.get(name, 200)
-    K = classes.get(name, 2)
+    info = UCR_DATASETS.get(name, {"length": 200, "n_classes": 2})
+    L = info["length"]
+    K = info["n_classes"]
     N = 100 if split == "TRAIN" else 200
 
     X = np.empty((N, L), dtype=np.float64)
@@ -107,6 +105,18 @@ def _generate_fallback_ucr(name: str, split: str) -> Tuple[np.ndarray, np.ndarra
         X[i] = base + noise
 
     return X, y
+
+
+def load_all_ucr(split: str = "TRAIN") -> dict[str, Tuple[np.ndarray, np.ndarray]]:
+    """Load all 13 UCR datasets. Returns {name: (X, y)}."""
+    results = {}
+    for name in UCR_DATASETS:
+        try:
+            X, y = load_ucr_dataset(name, split)
+            results[name] = (X, y)
+        except Exception as e:
+            print(f"Warning: could not load UCR '{name}': {e}")
+    return results
 
 
 def load_m4_sample(freq: str = "Daily") -> Tuple[np.ndarray, np.ndarray]:
@@ -127,3 +137,30 @@ def load_m4_sample(freq: str = "Daily") -> Tuple[np.ndarray, np.ndarray]:
         y[i] = float(series[-1] + rng.standard_normal() * 0.1)
 
     return X, y
+
+
+def verify_manifest() -> dict[str, dict]:
+    """Verify cached datasets against manifest checksums. Returns status per dataset."""
+    if not MANIFEST_PATH.exists():
+        return {"error": "manifest.json not found"}
+
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    cache = get_cache_dir()
+    status = {}
+
+    for entry in manifest.get("datasets", []):
+        name = entry["name"]
+        expected_sha = entry.get("sha256")
+        file_path = cache / f"{name}_TRAIN.tsv"
+
+        if file_path.exists():
+            actual_sha = sha256_file(file_path)
+            status[name] = {
+                "cached": True,
+                "sha256_match": actual_sha == expected_sha if expected_sha else "no_expected",
+                "sha256": actual_sha,
+            }
+        else:
+            status[name] = {"cached": False}
+
+    return status

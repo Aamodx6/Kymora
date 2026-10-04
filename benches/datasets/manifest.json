@@ -121,6 +121,74 @@
       "domain": "Utility / Hourly load"
     }
   ],
+  "synthetic_distributions": {
+    "gaussian": {
+      "sha256_100x500_seed42": "a3a46aae249dcf6659beb1e890414f8e8db0c4958e1195053cb49a89723182a5"
+    },
+    "random_walk": {
+      "sha256_100x500_seed42": "8b8c4b1cb0dea1fbcb990f97ff4e8dcb274f2a1cb83c5d08686ad1924eb9f919"
+    },
+    "sinusoid": {
+      "sha256_100x500_seed42": "44ce83a492fff09424112869dd20c10120e3c929d7a0b26b7b528d8873d112c3"
+    },
+    "ar1": {
+      "sha256_100x500_seed42": "d8b9ef3ae4b17de5c91e5d24f20ec907848c1cd55696badc9345f998d14c6dc6"
+    },
+    "ar1_0.1": {
+      "sha256_100x500_seed42": "0965d146ccea82ee8a559d2e3e90b2c43d0028f9f6d812b48735296126473522"
+    },
+    "ar1_0.9": {
+      "sha256_100x500_seed42": "43d6ad4aa97ee60779c8359c21bd83b367c90ca64421d77d2d96f162feeb8d1e"
+    },
+    "ar1_0.99": {
+      "sha256_100x500_seed42": "41469badfb6c43f7c8b5cc5da70ae2bd48bf13b7aeb77182f3bee4cf8a1b2488"
+    },
+    "trend_seasonality": {
+      "sha256_100x500_seed42": "9d13e4359d0a6aa0e9a41a024c22c6a9f6c15e8db8c1821621fa8b372251badb"
+    },
+    "heavy_tailed": {
+      "sha256_100x500_seed42": "77060c7e36c2eeeec0d93a545cdf96ea6293b93fc6b784a4d72b9c26cd18ff7a"
+    },
+    "cauchy": {
+      "sha256_100x500_seed42": "f480d85281293aad25e1efc1542cbd9b69aa0602fa8fe0fb7eac28db7f42392d"
+    },
+    "spikes": {
+      "sha256_100x500_seed42": "2e5164ea6ec3c148f715167773e868c92ce454805c09702db1b3a310c2f5d478"
+    },
+    "step_changes": {
+      "sha256_100x500_seed42": "b82a7289e56c7bc61c96cd32e915970a9d1f8aeb7066a8b9883f7b617d08c530"
+    },
+    "piecewise_constant": {
+      "sha256_100x500_seed42": "0d4bc489155421783cd339292f8fd4022a27ccb41f5860280c5a96bf8d88fb59"
+    },
+    "quantized_8bit": {
+      "sha256_100x500_seed42": "4719ebd87c03f63b41ce0e2ed7468ed1b2fa91a8b6a5ffd1fbc808ab04062293"
+    },
+    "quantized_16bit": {
+      "sha256_100x500_seed42": "25169415120d806e4cdda219b421eb6308fe5a96881a4d020b229b60eb3aef4b"
+    },
+    "sparse": {
+      "sha256_100x500_seed42": "5091708ef16caade35b81e0d24a7a57a7d2089b15ade4d998e3a05dda64c6d4b"
+    },
+    "bimodal": {
+      "sha256_100x500_seed42": "af96fbd69e4670b4e6b0e5209b4aac325c886a3d867913dce405971b87885f8d"
+    },
+    "constant": {
+      "sha256_100x500_seed42": "2bdd2cd33b13a85b6282423e70ab6625322750b6cd2f6fd0b7e6002a59b208cb"
+    },
+    "cancellation": {
+      "sha256_100x500_seed42": "8c8c32bed4897f55feb7959d239ad1e38bd5bafe5da4328d14fed5d6dc720d39"
+    },
+    "tiny_scale": {
+      "sha256_100x500_seed42": "1771ed3fc29593c1336265f050f4fe42cc3e2cbff69f7023869969e019a505af"
+    },
+    "huge_scale": {
+      "sha256_100x500_seed42": "eabacb74df85a0bf6ed06a6d73770254000eda5078f1bcc093f13b611c229cf0"
+    },
+    "mixed_magnitudes": {
+      "sha256_100x500_seed42": "dcf1f32c867a98ff9d44d197f65306eeb4959c34349921cb960a6ddf40cd22f3"
+    }
+  },
   "synthetic_benchmark_shapes": [
     [1, 10], [1, 100], [1, 100000], [1, 1000000],
     [10, 500], [100, 100], [100, 500],
@@ -129,6 +197,6 @@
     [1000000, 100], [100, 50000]
   ],
   "odd_lengths": [
-    7, 31, 499, 500, 503, 997, 1000, 1024, 2047, 4093, 100003, 65536
+    7, 31, 499, 500, 503, 997, 1000, 1024, 2047, 4093, 65536, 100003
   ]
 }
