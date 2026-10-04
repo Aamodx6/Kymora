@@ -91,8 +91,9 @@ arch.md is the architecture source of truth.
 
 ## Follow-up — post-Phase-8 steps (owner-directed, in order, gate each)
 
-- [ ] Step 1: quarantine #7/#8 → `experiment/spin-pool` + `experiment/soa-4x`
-      + `docs/ROADMAP.md` (revival gates Z6/Z2)
+- [x] Step 1: quarantine #7/#8 → `experiment/spin-pool` +
+      `experiment/soa-4x` + `docs/ROADMAP.md` (revival gates Z6/Z2).
+      Committed `9c1b3dd`; branches local until push.
 - [x] Step 2: F1 interleaved benchmark pre-refactor vs HEAD (P1→H1→P2→H2,
       same machine/env/harness; only the wheel varied). Pooled: tsxtract
       P med 3.31 CI [3.26,3.36] vs H med 3.25 CI [3.21,3.32] — overlap,
@@ -102,10 +103,39 @@ arch.md is the architecture source of truth.
       Artifact: `benchmarks/results/F1_REPORT.md` + `F1_{P1,H1,P2,H2}/`.
       LOSS_LEDGER.md restored byte-identical. Landing/docs figures stay
       stale (pending section in CLAIMS.md).
-- [ ] Step 3: verify-results checks (golden diff empty, hash, API dump
-      diff, clean-venv wheel install + verbatim quickstart)
-- [ ] Step 4: draft PR text; NO push until canonical remote confirmed
-- [ ] Step 5: CI failure fixes, one root cause per commit (blocked on push)
+- [x] Step 3: verify-results checks — golden diff vs pre-refactor EMPTY,
+      feature hash MATCH, API dump PRE-vs-HEAD diff empty (33 lines, only
+      venv path differs), clean-venv (`vCLEAN`, numpy+pandas+wheel, no
+      repo on sys.path) README quickstart blocks 1–4 verbatim: exit 0,
+      (1000,33), DataFrame [5×33], ragged (3,33). sklearn/streaming
+      blocks need user data (X_train/incoming_data_feed undefined) —
+      not self-contained, reported not run.
+- [x] Step 3b: version bisect, interleaved + rotated (suite R1:
+      032pb/040/PRE/HEAD; R2 rotated PRE/HEAD/040/032pb; probe sets PA2 +
+      PB rotated). Excluded: B_PRE_R1 (Silent plan + battery flap),
+      B_PRE_R1b partial (aborted, superseded by R1c), PA-v032
+      (franken-import: measured main-env code). Result: 0.3.2 probe med
+      2.00 CI [1.97,2.02] vs 0.4.0 2.41 / pre 2.34 / HEAD 2.35 (overlap)
+      → ~15% step 0.3.2→0.4.0 on the IDENTICAL 33-name catalog (hashes
+      equal); 0.4.0≈pre≈HEAD flat. Old 1.25/1.80 ms figures
+      irreproducible on this machine at EVERY version → different
+      hardware, not a regression. Artifacts untracked (commit in step 4).
+- [x] Step 4 (this commit): F1 artifacts committed — `F1_REPORT.md`
+      (+3b bisect appendix), `F1_SUMMARY.json`, 10 suite dirs
+      (`F1_*`, `B_040_R*`, `B_PRE_R1c/R2`, `B_HEAD_R*` with jsonl+env),
+      8 probe JSONs. Excluded rounds deleted (R1 battery flap, R1b
+      partial). Total ~250KB, no LFS. Step-3/3b tracker folded in.
+- [ ] Step 3c: per-feature table (µs/series-feature + ratios) in
+      F1_REPORT.md; README/CLAIMS.md show raw + per-feature
+- [ ] Step 3d: single-thread core33 cost at 500 pts vs §9.3 budgets +
+      headroom factor (no optimization)
+- [ ] Step 5 (pending claims, in order): PyPI long_description, then
+      landing/docs figures, then other 800k/1.25ms/14,000× quotes —
+      artifacts only; laptop numbers marked "exploratory"
+- [ ] Step 6: authoritative Linux 16-vCPU run plan (commands + estimate;
+      do not run)
+- [ ] CI failure fixes, one root cause per commit (unblocks after push)
+- NO PR: owner directed commit + push directly, no pull request
 
 ## NEEDS-OWNER
 
