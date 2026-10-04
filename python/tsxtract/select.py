@@ -19,7 +19,7 @@ def _calc_p_value_f(f_stat: float, df1: int, df2: int) -> float:
     if np.isnan(f_stat) or f_stat <= 0:
         return 1.0
     try:
-        from scipy.stats import f
+        from scipy.stats import f  # type: ignore[import-untyped]
         return float(f.sf(f_stat, df1, df2))
     except ImportError:
         # High-accuracy approximation
@@ -35,7 +35,7 @@ def _calc_p_value_t(t_stat: float, df: int) -> float:
         return 1.0
     t_abs = abs(t_stat)
     try:
-        from scipy.stats import t
+        from scipy.stats import t  # type: ignore[import-untyped]
         return float(2.0 * t.sf(t_abs, df))
     except ImportError:
         x = df / (df + t_abs * t_abs)
@@ -184,16 +184,19 @@ def select_features(
         candidate_indices = np.argsort(p_values)[:min(10, n_features)]
 
     # 4. Redundancy pruning via pairwise correlation clustering
-    # Sort candidates by relevance (highest statistic / lowest p-value)
-    candidate_indices = sorted(
-        candidate_indices, key=lambda idx: (-test_stats[idx], p_values[idx])
-    )
+    # Sort candidates by relevance (highest statistic / lowest p-value).
+    # Normalized to plain ints: these flow into indexing, dict keys, and the
+    # user-facing return value, where numpy scalars would otherwise leak out.
+    ranked_candidates: list[int] = [
+        int(i)
+        for i in sorted(candidate_indices, key=lambda idx: (-test_stats[idx], p_values[idx]))
+    ]
 
     clusters = {}
-    selected_indices = []
+    selected_indices: list[int] = []
     cluster_labels = [-1] * n_features
 
-    for feat_idx in candidate_indices:
+    for feat_idx in ranked_candidates:
         f_vec = F_mat[:, feat_idx]
         f_std = np.nanstd(f_vec)
         assigned_cluster = None
@@ -237,7 +240,7 @@ def select_features(
 
     try:
         import pandas as pd
-        report = pd.DataFrame(report_data)
+        report: Any = pd.DataFrame(report_data)
     except ImportError:
         report = report_data
 

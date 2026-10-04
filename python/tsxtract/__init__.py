@@ -2,8 +2,7 @@
 
 Extracts curated statistical, temporal, spectral, multichannel, and multi-view
 features from batches of time series. The Rust core takes zero-copy views of
-numpy buffers, releases the GIL, and parallelizes across series with persistent
-spin workers and Rayon.
+numpy buffers, releases the GIL, and parallelizes across series with Rayon.
 
 Usage:
     import numpy as np, tsxtract

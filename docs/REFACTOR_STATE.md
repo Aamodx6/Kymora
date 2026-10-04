@@ -26,7 +26,13 @@ arch.md is the architecture source of truth.
       cargo/pytest green, feature hash unchanged, perf no-regression.
       Fresh Zenith experiments kept (pool.rs, soa_4x, out32) pending owner
       wire-or-delete. See `docs/refactor/phase3_VERIFICATION.md`.
-- [ ] Phase 4: Python package cleanup
+- [x] Phase 4: Python package cleanup (2026-10-04). Gate: mypy clean
+      (was 10 errors; stubs completed from `ffi.rs` signatures, select.py
+      typing fixed, scipy import made hermetic), 138 tests pass, feature
+      hash unchanged. Dev-loop hazard found: tests import site-packages,
+      so the wheel must be rebuilt+reinstalled before pytest means
+      anything (done this phase; Phase 7 tooling candidate). See
+      `docs/refactor/phase4_VERIFICATION.md`.
 - [ ] Phase 5: documentation architecture
 - [ ] Phase 6: website
 - [ ] Phase 7: CI/CD, tooling, contributor experience
@@ -47,6 +53,9 @@ arch.md is the architecture source of truth.
 - D11 (Phase 3): deleted only legacy-superseded dead code; kept fresh
   Zenith-session experiments (`pool.rs`, `soa_4x`, `run_core33_f32_out32`)
   for an owner wire-or-delete call.
+- D12 (Phase 4): `_core.pyi` is complete and runtime-verified; mypy gate is
+  hermetic (no new CI deps needed for scipy); `select_features` returns
+  plain `int` indices.
 
 ## NEEDS-OWNER
 

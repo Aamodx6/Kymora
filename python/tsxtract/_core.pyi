@@ -15,7 +15,10 @@ def extract_features(
     features: Sequence[str] | None = None,
     n_jobs: int | None = None,
     out: _F64Array | None = None,
-) -> _F64Array:
+    views: Sequence[str] | None = None,
+    precision: str | None = None,
+    out_dtype: str | None = None,
+) -> _F64Array | _F32Array:
     """Extract features per series according to profile or feature list.
 
     Args:
@@ -26,9 +29,13 @@ def extract_features(
         n_jobs: Optional number of worker threads to use. None uses all available cores.
         out: Optional pre-allocated C-contiguous float64 array of shape
             ``(n_series, n_features)`` for in-place writing.
+        views: Optional sequence of data views ("raw", "diff", "znorm", ...).
+        precision: Optional compute precision ("float64" or "float32").
+        out_dtype: Optional output dtype ("float64" or "float32").
 
     Returns:
-        Float64 array of shape ``(n_series, n_features)``.
+        Array of shape ``(n_series, n_features)``; float32 when
+        ``out_dtype="float32"``, otherwise float64.
     """
     ...
 
@@ -87,6 +94,7 @@ def sliding_features(
 def feature_names(
     profile: str | None = None,
     features: Sequence[str] | None = None,
+    views: Sequence[str] | None = None,
 ) -> list[str]:
     """Feature names in output column order."""
     ...
@@ -111,5 +119,62 @@ class StreamingExtractor:
     def reset(self) -> None: ...
     def compute(self, kind: str = "all") -> _F64Array: ...
     def compute_features(self) -> _F64Array: ...
+    @staticmethod
+    def fast_feature_names() -> list[str]: ...
+
+def extract_features_mc(
+    X: _F64Array | Sequence[_F64Array],
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    cross: bool = True,
+    max_pairs: int = 8,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+) -> _F64Array:
+    """Extract per-channel and cross-channel features from multichannel series.
+
+    Args:
+        X: 3D C-contiguous float64 array of shape ``(n_samples, n_channels, length)``
+            (other shapes/dtypes raise at runtime).
+        profile: Optional profile name ("minimal", "core33", "extended", "full").
+        features: Optional sequence of feature names or aliases.
+        cross: Whether to compute pairwise cross-channel features.
+        max_pairs: Maximum number of channel pairs for cross features.
+        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        views: Optional sequence of data views ("raw", "diff", "znorm", ...).
+
+    Returns:
+        Float64 array of shape ``(n_samples, n_channels * n_plan + n_cross)``.
+    """
+    ...
+
+def feature_names_mc(
+    n_channels: int,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    cross: bool = True,
+    max_pairs: int = 8,
+    views: Sequence[str] | None = None,
+) -> list[str]:
+    """Column names for :func:`extract_features_mc` output, in order."""
+    ...
+
+class MultiStreamExtractor:
+    """Fleet streaming extractor: rolling windows over many streams at once."""
+
+    def __init__(self, n_streams: int, window_size: int) -> None: ...
+    @property
+    def n_streams(self) -> int: ...
+    @property
+    def window_size(self) -> int: ...
+    @property
+    def is_full(self) -> bool: ...
+    @property
+    def count(self) -> int: ...
+    def push_many(self, values: _F64Array) -> bool: ...
+    def reset(self, stream_idx: int | None = None) -> None: ...
+    def compute(
+        self, streams: Sequence[int] | None = None, kind: str = "all"
+    ) -> _F64Array: ...
     @staticmethod
     def fast_feature_names() -> list[str]: ...
