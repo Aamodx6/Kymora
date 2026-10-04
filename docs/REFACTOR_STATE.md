@@ -135,7 +135,15 @@ arch.md is the architecture source of truth.
 - [ ] Step 6: authoritative Linux 16-vCPU run plan (commands + estimate;
       do not run)
 - [ ] CI failure fixes, one root cause per commit (unblocks after push)
-- NO PR: owner directed commit + push directly, no pull request
+- NO PR: owner directed commit + push directly, no pull request.
+  Merged 2026-10-04: local `main` (was stale at `4c268ca`) fast-forwarded
+  to `88298f5` via `refactor/tsxtract` (origin/main `f6b670c` proved to be
+  a direct ancestor — no divergent owner commits, no conflicts);
+  `experiment/*` merges were no-ops by design (pre-deletion snapshots,
+  deletions stand). `main` pushed (fast-forward, no force). CI + docs +
+  wheel-build workflows triggered by the push. Incidental find during
+  merge: `benchmarks/results/LOSS_LEDGER.md` is TRACKED (committed long
+  ago) — 3b suite appends reverted to keep others' evidence intact.
 
 ## NEEDS-OWNER
 
