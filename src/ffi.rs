@@ -49,6 +49,38 @@ fn get_out_array<'py>(
     }
 }
 
+/// Mutable write view of an f64 output array for in-place feature writes.
+///
+/// Centralizes the `as_slice_mut` uses of this module (the only `unsafe` in
+/// the file) behind one audited point. Callers pass either a freshly
+/// allocated `zeros` array, which cannot be aliased, or a caller-supplied
+/// `out` buffer whose shape was validated by [`get_out_array`].
+///
+/// Contract upheld at every call site: the array is C-contiguous and
+/// writeable (a non-contiguous or read-only buffer surfaces as `Err` below,
+/// never as a partial borrow); the returned slice is the only live Rust
+/// borrow of the data until the array is handed back to Python; the borrow is
+/// created while the GIL is held and compute only touches the borrow, never
+/// Python objects. A caller-supplied `out` buffer must not alias the input
+/// series buffer (same rule as `numpy.copyto` with `out=`).
+#[inline]
+// `mut_from_ref` is the point of this helper (numpy hands out `&mut` from a
+// shared `Bound`); soundness rests on the contract above, not on the borrow.
+#[allow(clippy::mut_from_ref)]
+fn out_slice_mut<'a>(arr: &'a Bound<'_, PyArray2<f64>>) -> Result<&'a mut [f64], TsxError> {
+    // SAFETY: upheld per the contract above.
+    unsafe { arr.as_slice_mut() }.map_err(|_| TsxError::NotContiguous { index: None })
+}
+
+/// f32-output variant of [`out_slice_mut`]; same contract.
+#[inline]
+// See `out_slice_mut` for why `mut_from_ref` is allowed here.
+#[allow(clippy::mut_from_ref)]
+fn out_slice_mut_f32<'a>(arr: &'a Bound<'_, PyArray2<f32>>) -> Result<&'a mut [f32], TsxError> {
+    // SAFETY: upheld per the contract above.
+    unsafe { arr.as_slice_mut() }.map_err(|_| TsxError::NotContiguous { index: None })
+}
+
 fn run_in_pool<F, R>(n_jobs: Option<usize>, f: F) -> R
 where
     F: FnOnce() -> R + Send,
@@ -105,11 +137,7 @@ pub fn extract_features<'py>(
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
-            let out_slice = unsafe {
-                out_arr
-                    .as_slice_mut()
-                    .map_err(|_| TsxError::NotContiguous { index: None })?
-            };
+            let out_slice = out_slice_mut_f32(&out_arr)?;
             py.detach(|| {
                 run_in_pool(n_jobs, || {
                     let mut tmp = vec![0.0f64; nrows * n_cols];
@@ -124,11 +152,7 @@ pub fn extract_features<'py>(
         }
 
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 let rows: Vec<&[f64]> = slice.chunks_exact(ncols).collect();
@@ -155,11 +179,7 @@ pub fn extract_features<'py>(
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
-            let out_slice = unsafe {
-                out_arr
-                    .as_slice_mut()
-                    .map_err(|_| TsxError::NotContiguous { index: None })?
-            };
+            let out_slice = out_slice_mut_f32(&out_arr)?;
             py.detach(|| {
                 run_in_pool(n_jobs, || {
                     let mut tmp = vec![0.0f64; nrows * n_cols];
@@ -174,11 +194,7 @@ pub fn extract_features<'py>(
         }
 
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
@@ -201,11 +217,7 @@ pub fn extract_features<'py>(
         extract::validate_batch(&slices)?;
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 crate::exec::extract_plan_into_slice(&slices, &plan, out_slice)
@@ -231,11 +243,7 @@ pub fn extract_features<'py>(
         }
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 crate::exec::extract_into_slice_f32(&slices, out_slice, n_cols)
@@ -434,11 +442,7 @@ pub fn extract_features_mc<'py>(
     let total_cols = n_channels * n_plan_cols + n_cross_cols;
 
     let out_arr = PyArray2::<f64>::zeros(py, [n_samples, total_cols], false);
-    let out_slice = unsafe {
-        out_arr
-            .as_slice_mut()
-            .map_err(|_| TsxError::NotContiguous { index: None })?
-    };
+    let out_slice = out_slice_mut(&out_arr)?;
 
     py.detach(|| {
         run_in_pool(n_jobs, || {
@@ -546,11 +550,7 @@ pub fn extract_features_ragged<'py>(
             .as_slice()
             .map_err(|_| TsxError::NotContiguous { index: None })?;
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 crate::exec::extract_ragged_csr_plan(v_slice, offsets_slice, &plan, out_slice)
@@ -564,11 +564,7 @@ pub fn extract_features_ragged<'py>(
             .as_slice()
             .map_err(|_| TsxError::NotContiguous { index: None })?;
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
-        let out_slice = unsafe {
-            out_arr
-                .as_slice_mut()
-                .map_err(|_| TsxError::NotContiguous { index: None })?
-        };
+        let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
                 crate::exec::extract_ragged_csr_f32(v_slice, offsets_slice, out_slice, n_cols)
@@ -606,11 +602,7 @@ pub fn sliding_features<'py>(
     let n_cols = plan.n_features();
 
     let out_arr = get_out_array(py, n_windows, n_cols, out)?;
-    let out_slice = unsafe {
-        out_arr
-            .as_slice_mut()
-            .map_err(|_| TsxError::NotContiguous { index: None })?
-    };
+    let out_slice = out_slice_mut(&out_arr)?;
     py.detach(|| {
         run_in_pool(n_jobs, || {
             crate::exec::extract_windows_plan_into_slice(slice, window, stride, &plan, out_slice)
@@ -833,22 +825,14 @@ impl PyMultiStreamExtractor {
             "fast" => {
                 let n_cols = features::multistream::MULTISTREAM_FAST_NAMES.len();
                 let out_arr = PyArray2::<f64>::zeros(py, [stream_list.len(), n_cols], false);
-                let out_slice = unsafe {
-                    out_arr
-                        .as_slice_mut()
-                        .map_err(|_| TsxError::NotContiguous { index: None })?
-                };
+                let out_slice = out_slice_mut(&out_arr)?;
                 self.inner.compute_fast(&stream_list, out_slice);
                 Ok(out_arr)
             }
             "all" => {
                 let n_cols = pipeline::CORE33_COUNT;
                 let out_arr = PyArray2::<f64>::zeros(py, [stream_list.len(), n_cols], false);
-                let out_slice = unsafe {
-                    out_arr
-                        .as_slice_mut()
-                        .map_err(|_| TsxError::NotContiguous { index: None })?
-                };
+                let out_slice = out_slice_mut(&out_arr)?;
                 let mut scratch = Scratch::new(self.inner.window_size());
                 self.inner
                     .compute_all(&stream_list, &mut scratch, out_slice);

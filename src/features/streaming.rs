@@ -57,7 +57,6 @@ impl StreamingExtractor {
 
     /// Returns the number of samples ingested so far.
     #[inline]
-    #[allow(dead_code)]
     pub fn count(&self) -> usize {
         self.count
     }

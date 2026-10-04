@@ -36,34 +36,6 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
     }
 }
 
-/// Extract features into pre-allocated flat slice for core33 (f64).
-pub fn extract_into_slice(rows: &[&[f64]], out_slice: &mut [f64], n_cols: usize) {
-    let n_rows = rows.len();
-    if n_rows == 0 {
-        return;
-    }
-
-    let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
-
-    if n_rows < SERIAL_THRESHOLD {
-        let mut scratch = Scratch::new(max_len);
-        for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
-            pipeline::run_core33(row, &mut scratch, row_out);
-        }
-    } else {
-        out_slice
-            .par_chunks_exact_mut(n_cols)
-            .with_min_len(MIN_ROWS_PER_TASK)
-            .zip(rows.par_iter())
-            .for_each_init(
-                || Scratch::new(max_len),
-                |scratch, (row_out, row)| {
-                    pipeline::run_core33(row, scratch, row_out);
-                },
-            );
-    }
-}
-
 /// Extract features into pre-allocated flat slice in row-major order (f32).
 pub fn extract_into_slice_f32(rows: &[&[f32]], out_slice: &mut [f64], n_cols: usize) {
     let n_rows = rows.len();
@@ -90,18 +62,6 @@ pub fn extract_into_slice_f32(rows: &[&[f32]], out_slice: &mut [f64], n_cols: us
                 },
             );
     }
-}
-
-/// Extract features for rolling sliding windows into pre-allocated flat slice.
-pub fn extract_windows_into_slice(
-    x: &[f64],
-    window: usize,
-    stride: usize,
-    out_slice: &mut [f64],
-    n_cols: usize,
-) {
-    let rows: Vec<&[f64]> = x.windows(window).step_by(stride).collect();
-    extract_into_slice(&rows, out_slice, n_cols);
 }
 
 /// Extract features for rolling sliding windows using FeaturePlan.
@@ -140,37 +100,6 @@ pub fn extract_windows_plan_into_slice(
                 },
             );
     }
-}
-
-/// Extract features from CSR ragged arrays (values: 1D, offsets: 1D int64).
-pub fn extract_ragged_csr(
-    values: &[f64],
-    offsets: &[i64],
-    out_slice: &mut [f64],
-    n_cols: usize,
-) -> Result<(), crate::error::TsxError> {
-    if offsets.len() < 2 {
-        return Err(crate::error::TsxError::EmptyInput);
-    }
-    let n_series = offsets.len() - 1;
-
-    let mut rows = Vec::with_capacity(n_series);
-    for i in 0..n_series {
-        let start = offsets[i];
-        let end = offsets[i + 1];
-        if start < 0 || end < start || (end as usize) > values.len() {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
-        }
-        let start_u = start as usize;
-        let end_u = end as usize;
-        if start_u == end_u {
-            return Err(crate::error::TsxError::EmptySeries { index: i });
-        }
-        rows.push(&values[start_u..end_u]);
-    }
-
-    extract_into_slice(&rows, out_slice, n_cols);
-    Ok(())
 }
 
 /// Extract features from CSR ragged arrays using FeaturePlan.

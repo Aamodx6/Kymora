@@ -6,16 +6,6 @@
 //! entirely in `features::compute_all`.
 
 use crate::error::TsxError;
-use crate::features;
-use numpy::ndarray::Array2;
-use rayon::prelude::*;
-
-/// Number of output columns.
-#[inline]
-#[allow(dead_code)]
-pub fn n_features() -> usize {
-    features::NAMES.len()
-}
 
 /// Structural validation of a batch of series views.
 ///
@@ -31,32 +21,6 @@ pub fn validate_batch(rows: &[&[f64]]) -> Result<(), TsxError> {
         }
     }
     Ok(())
-}
-
-/// Compute all features for every series, in parallel across series.
-///
-/// Callers must have validated with [`validate_batch`] first. The GIL is
-/// expected to be released by the caller around this call.
-#[allow(dead_code)]
-pub fn extract_rows(rows: &[&[f64]]) -> Vec<f64> {
-    let nf = n_features();
-    let mut out = vec![0.0f64; rows.len() * nf];
-    out.par_chunks_mut(nf)
-        .zip(rows.par_iter())
-        .for_each(|(chunk, row)| features::compute_all(row, chunk));
-    out
-}
-
-/// Shape a flat feature buffer into `(nrows, n_features)` without panicking.
-#[allow(dead_code)]
-pub fn build_matrix(flat: Vec<f64>, nrows: usize) -> Result<Array2<f64>, TsxError> {
-    let cols = n_features();
-    let len = flat.len();
-    Array2::from_shape_vec((nrows, cols), flat).map_err(|_| TsxError::OutputShape {
-        rows: nrows,
-        cols,
-        len,
-    })
 }
 
 /// Validated sliding-window geometry: `(window, stride, n_windows)`.
@@ -91,15 +55,6 @@ pub fn window_geometry(
     }
     let n_windows = (len - window) / stride + 1;
     Ok((window, stride, n_windows))
-}
-
-/// Feature matrix over rolling windows of one series.
-///
-/// Windows are borrowed slices of the caller's buffer — no data is copied.
-#[allow(dead_code)]
-pub fn extract_windows(x: &[f64], window: usize, stride: usize) -> Vec<f64> {
-    let rows: Vec<&[f64]> = x.windows(window).step_by(stride).collect();
-    extract_rows(&rows)
 }
 
 #[cfg(test)]
