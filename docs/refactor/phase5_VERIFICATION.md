@@ -52,10 +52,31 @@ Left alone (historical record, not live claims): `timeline_progress.md`,
 
 - `mkdocs build --strict`: exit 0, no anchor diagnostics
 - `cargo test`: 16/16 (comment-only Rust change)
-- `pytest tests -q`: 138 passed, 0 warnings
+- `cargo clippy --all-targets -- -D warnings`: exit 0
+- `cargo fmt --check`: exit 0; `cargo doc --no-deps`: 0 warnings
+- `pytest tests -q -W error`: 138 passed
 - `feature_names()` sha256: MATCH
 - `mypy python/tsxtract`: clean (unchanged)
+- `landing npm run build`: ✓ built in 48.76s (pre-existing chunk-size
+  warning only) — **was missed in the first Phase 5 pass, run during
+  diff review**
+
+## Post-completion diff review (2026-10-04)
+
+Full `git diff --stat pre-refactor..HEAD` audit (214 files, +6862/−2280):
+all regions accounted for — renames (benches→benchmarks, tests subdirs),
+evidenced deletions (arch_max/zenith, insp/, py.typed, STATE.md), and
+rename-driven edits in landing/paper/scripts/Makefile/CONTRIBUTING.
+
+One defect found and fixed in this review: **Phase 1's rename broke
+`paper/main.tex`** — the sed turned the `\tsxtractor` alias into a second
+`\newcommand{\tsxtract}` (LaTeX "already defined" error) and left a
+redundant `(\tsxtract{})` in the abstract. Removed the duplicate macro;
+abstract now `(\texttt{tsxtract})`. Structural check: 7 unique macros,
+0 `\tsxtractor` refs, balanced braces (no pdflatex on this machine, so
+compile check deferred to CI/manual).
 
 ## Commits
 
-- (this phase) docs + `mkdocs.yml` + streaming.rs comment — single commit below
+- `afc9bf0` docs(refactor): Phase 5 claims cleanup, anchors, site_url, state
+- (follow-up) fix(paper): undo duplicate \newcommand created by rename
