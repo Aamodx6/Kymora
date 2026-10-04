@@ -33,7 +33,12 @@ arch.md is the architecture source of truth.
       so the wheel must be rebuilt+reinstalled before pytest means
       anything (done this phase; Phase 7 tooling candidate). See
       `docs/refactor/phase4_VERIFICATION.md`.
-- [ ] Phase 5: documentation architecture
+- [x] Phase 5: documentation architecture (2026-10-04). Gate: false
+      SIMD/spin-pool/O(1)/sub-microsecond claims corrected in `docs/` +
+      README (measured 1.8 µs fast-tier), 2 anchors fixed by adding the
+      missing sections, `site_url` aligned (closes #6), mkdocs strict
+      INFO-free, roles decision (no landing merge). PRD/patent untouched
+      (#4/#5). See `docs/refactor/phase5_VERIFICATION.md`.
 - [ ] Phase 6: website
 - [ ] Phase 7: CI/CD, tooling, contributor experience
 - [ ] Phase 8: final verification & report
@@ -56,6 +61,9 @@ arch.md is the architecture source of truth.
 - D12 (Phase 4): `_core.pyi` is complete and runtime-verified; mypy gate is
   hermetic (no new CI deps needed for scipy); `select_features` returns
   plain `int` indices.
+- D13 (Phase 5): `docs/` is the versioned project reference, landing docs
+  are product-site content — no mirroring either way (overlap 0.02–0.29);
+  new shared facts go in `docs/` first; historical reports stay out of nav.
 
 ## NEEDS-OWNER
 
@@ -69,10 +77,12 @@ arch.md is the architecture source of truth.
    record; weak references only).
 5. `patent/patent_disclosure.md`: 0 references, but IP content — confirm
    keep (do NOT delete on usage heuristic).
-6. `mkdocs.yml: site_url` still `aamod007.github.io` (Phase 5 docs decision).
-7. `pool.rs` / `TSXTRACT_POOL`: Rust ignores the env var, but `tune.py` and
-   `docs/api.md` present spin-vs-rayon as functional — wire it (behavior
-   change), delete `pool.rs`, or keep as documented prototype?
+6. ~~`mkdocs.yml: site_url` still `aamod007.github.io`~~ — resolved Phase 5
+   (`aamodx6.github.io`, per D0).
+7. `pool.rs` / `TSXTRACT_POOL`: Rust ignores the env var; docs now say so
+   (`api.md`, `quickstart.md`), but `tune.py` still records spin-vs-rayon
+   recommendations — wire the backend (behavior change), delete `pool.rs`,
+   or keep as documented prototype?
 8. `soa_4x` kernels + `run_core33_f32_out32`: uncalled Zenith-session
    experiments — keep or delete?
 

@@ -310,12 +310,11 @@ tune(
 ) -> dict[str, Any]
 ```
 
-Microbenchmarks execution variants (spin pool vs Rayon, chunk sizes) on current hardware and caches optimal execution parameters locally.
+Microbenchmarks execution variants on current hardware and caches optimal execution parameters locally. Pool selection is recorded for forward compatibility.
 
 ---
 
 ## Threading & Runtime Controls
 
-- `TSXTRACT_POOL=spin` (default): Uses the persistent spin-then-park worker pool for low-latency batch processing.
-- `TSXTRACT_POOL=rayon`: Forces fallback to the Rayon global work-stealing pool.
-- `RAYON_NUM_THREADS=N`: Sets thread pool size.
+- Scheduling is Rayon today: `n_jobs` builds a dedicated pool for the call, otherwise the global pool is used (honors `RAYON_NUM_THREADS=N`).
+- `TSXTRACT_POOL` (`spin`/`rayon`) is currently **read by nothing** — a persistent spin-pool prototype exists in `src/pool.rs` but is not wired up. Treat any `tune()` pool recommendation as provisional until the backend lands.

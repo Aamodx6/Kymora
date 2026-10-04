@@ -22,17 +22,17 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 * **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No data duplication, no DataFrame melting, and zero intermediate memory ballooning.
 * **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
 * **Full Multi-Core Scaling (GIL-Free):** Releases Python's Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
-* **Real-Time Streaming Ready:** Compute streaming features with constant memory $O(1)$ state updates using the built-in `StreamingExtractor`.
+* **Real-Time Streaming Ready:** Maintain rolling windows with incremental state updates using the built-in `StreamingExtractor` — amortized $O(1)$ per-sample ingestion plus a fast 12-feature tier with no sorting and no FFT.
 
 ---
 
 ### Key Features
 
-* **Zero-Copy Hybrid Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native Rust SIMD and multi-core loops without copying a single byte.
+* **Zero-Copy Hybrid Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native-Rust multi-core loops without copying a single byte.
 * **Batch-First Parallelism:** Processes $N$ series in parallel across hardware threads instead of running serial Python loops.
 * **Dual API Support:** Extract raw 2D NumPy matrices for maximum speed, or labeled Pandas/Polars DataFrames for immediate exploratory analysis.
 * **Scikit-Learn Compatible:** Seamlessly drop `TsxtractTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
-* **Realfft & Branchless Primitives:** Preallocated thread-local FFT workspaces and branchless quantile quickselects ensure predictable sub-millisecond execution.
+* **Realfft & Histogram Quantiles:** Preallocated per-worker FFT scratch and histogram multi-select quantiles ensure predictable sub-millisecond execution.
 * **Streaming & Sliding Windows:** Extract rolling features over continuous data streams without reallocating buffers.
 
 ---
@@ -154,7 +154,7 @@ stream = StreamingExtractor(capacity=500)
 for tick in incoming_data_feed:
     stream.push(tick)
     
-    # 1. True O(1) online fast tier (sub-microsecond, no sorting, no FFT):
+    # 1. Fast 12-feature tier (no sorting, no FFT — two linear passes over the window):
     # Returns 12 features: mean, std, var, skew, kurt, abs_energy, rms,
     # mean_abs_change, mean_change, cid_ce, zero_crossings, trend_slope
     fast_features = stream.compute(kind="fast")

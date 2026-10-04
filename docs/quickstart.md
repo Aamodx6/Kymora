@@ -68,7 +68,7 @@ new_tick = rng.standard_normal(n_streams)
 is_ready = extractor.push_many(new_tick)
 
 if is_ready:
-    # Sub-microsecond fast features (mean, std, RMS, etc.)
+    # Fast 12-feature tier (mean, std, RMS, etc.) — no sorting, no FFT
     fast_matrix = extractor.compute(kind="fast")
 ```
 
@@ -100,7 +100,12 @@ predictions = pipe.predict(feats)
 Benchmark your local architecture to configure the optimal execution backend:
 
 ```python
-# Auto-tunes spin-wait thresholds and thread pool strategies
+# Microbenchmarks execution variants and caches the best configuration
 profile = tsxtract.tune(shapes=[(1000, 500)], budget_s=5.0)
 print(f"Optimal pool: {profile['best_config']['pool']}")
 ```
+
+!!! note "Pool selection is provisional"
+    `tune()` records a `spin`/`rayon` recommendation, but the `TSXTRACT_POOL`
+    switch is not wired up yet (see [Threading & Runtime Controls](api.md#threading-runtime-controls)) —
+    scheduling is Rayon either way today.

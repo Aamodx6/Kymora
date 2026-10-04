@@ -230,7 +230,10 @@ impl StreamingExtractor {
         compute_all(&window_buf, out);
     }
 
-    /// Computes the O(1) subset of 12 online features directly with centered moment passes.
+    /// Computes the 12-feature online subset (no sorting, no FFT).
+    ///
+    /// Two linear passes over the window plus accumulator reads — O(window),
+    /// not O(1); the O(1)-amortized part is the per-sample `push` update.
     pub fn compute_fast(&self, out: &mut [f64]) {
         assert_eq!(out.len(), FAST_NAMES.len());
         if !self.is_full() {
