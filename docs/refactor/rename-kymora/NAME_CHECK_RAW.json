@@ -1,0 +1,155 @@
+{
+  "Kymora": {
+    "variants": {
+      "kymora": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "kymora-rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "kymora_rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "pykymora": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "kymora-py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "kymora_py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      }
+    },
+    "github": {
+      "search": "0 shown; exact-name repos: none",
+      "user/org": "users/kymora: TAKEN; orgs/kymora: FREE (404)"
+    },
+    "domains": {
+      "com": "TAKEN (RDAP 200: registered)",
+      "dev": "TAKEN (RDAP 200: registered)",
+      "io": "likely FREE (RDAP 404)",
+      "org": "TAKEN (RDAP 200: registered)"
+    },
+    "import": "FREE (import kymora fails as required)",
+    "pep503-collisions": [
+      "kymora",
+      "kymora-py",
+      "kymora-rs",
+      "pykymora"
+    ]
+  },
+  "Tachyra": {
+    "variants": {
+      "tachyra": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "tachyra-rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "tachyra_rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "pytachyra": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "tachyra-py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "tachyra_py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      }
+    },
+    "github": {
+      "search": "0 shown; exact-name repos: none",
+      "user/org": "users/tachyra: TAKEN; orgs/tachyra: FREE (404)"
+    },
+    "domains": {
+      "com": "TAKEN (RDAP 200: registered)",
+      "dev": "likely FREE (RDAP 404)",
+      "io": "likely FREE (RDAP 404)",
+      "org": "TAKEN (RDAP 200: registered)"
+    },
+    "import": "FREE (import tachyra fails as required)",
+    "pep503-collisions": [
+      "pytachyra",
+      "tachyra",
+      "tachyra-py",
+      "tachyra-rs"
+    ]
+  },
+  "Aevra": {
+    "variants": {
+      "aevra": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "aevra-rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "aevra_rs": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "pyaevra": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "aevra-py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      },
+      "aevra_py": {
+        "pypi": "FREE (404)",
+        "crates.io": "FREE (404)",
+        "npm": "FREE (404)"
+      }
+    },
+    "github": {
+      "search": "0 shown; exact-name repos: none",
+      "user/org": "users/aevra: TAKEN; orgs/aevra: FREE (404)"
+    },
+    "domains": {
+      "com": "TAKEN (RDAP 200: registered)",
+      "dev": "TAKEN (RDAP 200: registered)",
+      "io": "likely FREE (RDAP 404)",
+      "org": "TAKEN (RDAP 200: registered)"
+    },
+    "import": "FREE (import aevra fails as required)",
+    "pep503-collisions": [
+      "aevra",
+      "aevra-py",
+      "aevra-rs",
+      "pyaevra"
+    ]
+  }
+}
