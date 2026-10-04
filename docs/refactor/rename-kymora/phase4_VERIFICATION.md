@@ -1,7 +1,8 @@
 # Phase 4 verification — rename to Kymora (2026-10-04)
 
 Owner confirmations applied mid-phase: final name **Kymora**, bare (no `-rs`
-suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1).
+suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1), and the
+older `tsxtractor` alias **deleted outright** instead of kept as a shim.
 
 ## Method (scripted, once)
 
@@ -15,10 +16,16 @@ suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1).
   `benchmarks/requirements-tsxtract.txt` → `requirements-kymora.txt`,
   `scripts/` → `tools/` (Phase 3).
 - Hand-written after the script: `python/kymora/__init__.py`,
-  `python/tsxtract/__init__.py` (new shim), `python/tsxtractor/__init__.py`,
+  `python/tsxtract/__init__.py` (new single shim),
   `KymoraSelector` + `TsxSelector` alias, `tests/test_python_api.py` shim
-  matrix, CHANGELOG 0.7.0, `docs/migrating.md` section, `docs/RENAME_RELEASE_CHECKLIST.md`,
+  contract, CHANGELOG 0.7.0, `docs/migrating.md` section, `docs/RENAME_RELEASE_CHECKLIST.md`,
   `release.yml` smoke block, CLAUDE naming rule, JAX-note restores.
+- `python/tsxtractor/` **deleted** (`git rm`) per owner direction: no
+  `km`-style replacement was requested; the single `tsxtract` shim covers
+  the migration path. `pyproject.toml` ships `[kymora, tsxtract]` only;
+  adapter fallbacks, startup size targets, release smoke, and all live docs
+  updated; history/data keys (`feature_map.json`, `tsxtractor_version`,
+  B-track rows) untouched.
 - Rust: `TsxError` → `KymoraError` (internal only; Python still gets
   `ValueError` with identical messages) + one `cargo fmt` width fix.
 
@@ -27,8 +34,9 @@ suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1).
 - `Cargo.toml`: crate `kymora` **0.7.0**; `pyproject.toml`: dist **`kymora`**,
   `module-name kymora._core`, `python-packages [kymora, tsxtract, tsxtractor]`.
 - Wheel: `kymora-0.7.0-cp310-abi3-win_amd64.whl` builds clean.
-- `import kymora` canonical (`as km`); `import tsxtract` / `import tsxtractor`
-  warn + re-export identically; removal >= 0.8.0.
+- `import kymora` canonical (`as km`); `import tsxtract` warns + re-exports
+  identically; removal >= 0.8.0. `import tsxtractor` is gone (deleted outright;
+  enforced by `test_tsxtractor_shim_is_gone`).
 - `TsxSelector` kept as alias of `KymoraSelector`; env `KYMORA_*`
   (old names/paths not read — documented breaking change, re-run `tune()`).
 
@@ -39,7 +47,7 @@ suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1).
 | wheel build + clean-venv install (`vKYM`, no repo on path) | `import kymora` works: (1000,33), df (5,33); old imports warn + match `kymora` output exactly |
 | `feature_names()` hash | **MATCH** `8a1e2794…31af2e` (33 names) |
 | golden diff vs `pre-rename` | **EMPTY** (`tests/golden`, `tests/fixtures`) |
-| `pytest tests -q` | **139 passed** (138 + 1 new shim case) |
+| `pytest tests -q` | **139 passed** (138 + shim-gone contract) |
 | `cargo test --no-default-features` | **16 passed** |
 | `cargo fmt --check` / `clippy -D warnings` | exit **0** / exit **0** |
 | `tools/validation_report.py` | all 33 within tolerance |
@@ -61,8 +69,8 @@ suffix — bare `kymora` is FREE on PyPI/crates.io/npm per Phase 1).
 - **Collision markers (the JAX project is literally named `tsxtract`):**
   `tsxtract_jax.*`, `requirements-jax-collision.txt`, JAX-warning sentences in
   README/CLAUDE/arch/intro, `tsxtract_pipe`→renamed, localStorage keys kept stable.
-- **Migration shims (by design):** `python/tsxtract/`, `python/tsxtractor/`,
-  fallback imports in `kymora.py` adapter + `l1_root_cause.py`, release smoke checks.
+- **Migration shim (by design):** `python/tsxtract/` (fallback import in
+  the `kymora.py` adapter, release smoke check); `python/tsxtractor/` deleted.
 
 ## Incidents
 

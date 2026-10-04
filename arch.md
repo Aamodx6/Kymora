@@ -56,7 +56,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | F1 | **Throughput claims disagreed:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cited ~1.80 ms / 555k series/s for `core33` | README vs release notes | ✅ RESOLVED 2026-10-04: interleaved `suites/reproduce_readme.py` (+0.3.2/0.4.0 bisect) shows BOTH old figures irreproducible on this machine at every version — README+`CLAIMS.md` rewritten from artifact (3.18 ms med / 314,450 s/s; raw 262×/799×/6,570×, per-feature 393×/169×/279×). Artifact: `benchmarks/results/F1_REPORT.md` |
 | F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (kymora) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
 | F3 | Feature-name lists differ between README and old `arch.md` | audit | `feature_names()` is truth; list mismatches in `docs/arch_audit.md` |
-| F4 | Naming: PyPI `kymora`, import `kymora`, crate `kymora`; unrelated JAX PyPI project `tsxtract` keeps the bare name (deprecated `tsxtract`/`tsxtractor` shims warn); two GitHub accounts/repos | repos, PyPI | Decision D3 (decided 2026-10-04: rename to Kymora, 0.7.0) |
+| F4 | Naming: PyPI `kymora`, import `kymora`, crate `kymora`; unrelated JAX PyPI project `tsxtract` keeps the bare name (deprecated `tsxtract` shim warns); two GitHub accounts/repos | repos, PyPI | Decision D3 (decided 2026-10-04: rename to Kymora, 0.7.0) |
 | F5 | Hardware wording: i7-13620H = 10 cores (6P+4E) / 16 threads, not "16 cores" | env.json | Reword all claims (§14) |
 | F6 | Streaming claim "O(1)" does not hold for quantile/spectral/entropy features | code | O(1) vs O(n) tiers documented (§8) |
 | F7 | Landing site is a client-rendered SPA (empty HTML to crawlers), default Vercel domain | fetch | Prerender, OG tags, domain (§14.4) |
@@ -86,7 +86,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 |---|---|---|
 | D1 | `feature_names()` from the built library is the single source of truth for feature names; README/docs generated from it | ✅ |
 | D2 | **Non-contiguous input:** default `contiguous="error"` (preserves documented `ValueError`); `contiguous="copy"` opt-in performs one explicit copy with a one-time warning stating the cost. Never copy silently | ✅ |
-| D3 | **Canonical import/package name (decided 2026-10-04).** PyPI `kymora`, import `kymora` only, crate `kymora`; `tsxtract` + `tsxtractor` remain as deprecated warning shims (removal >= 0.8.0) because an unrelated PyPI `tsxtract` (JAX) exists and can collide — never `pip install tsxtract` | ✅ |
+| D3 | **Canonical import/package name (decided 2026-10-04).** PyPI `kymora`, import `kymora` only, crate `kymora`; `tsxtract` remains as a deprecated warning shim (removal >= 0.8.0; the older `tsxtractor` alias was deleted outright) because an unrelated PyPI `tsxtract` (JAX) exists and can collide — never `pip install tsxtract` | ✅ |
 | D4 | `compute()` of `StreamingExtractor` is **not** O(1) for all features; API exposes `compute(kind="fast"\|"all")` | ✅ |
 | D5 | Exact (unpadded) FFT is default; padded `fft_mode="fast"` is opt-in and documented non-identical | ✅ |
 | D6 | `precision="f32"` is opt-in; default stays f64 | ✅ |
@@ -126,7 +126,7 @@ src/
   (quarantined to experiment/spin-pool + experiment/soa-4x — see docs/ROADMAP.md; revival gated on Z6/Z2)
   kernels/   mod.rs reduce.rs sort.rs fft.rs perm.rs        # designated home for unsafe/SIMD (currently unsafe-free)
   features/  mod.rs stats.rs temporal.rs spectral.rs entropy.rs views.rs streaming.rs multistream.rs
-python/kymora/  __init__.py  _core.pyi  py.typed  (+ ../tsxtract/ + ../tsxtractor/ deprecated shims, removal >= 0.8.0)
+python/kymora/  __init__.py  _core.pyi  py.typed  (+ ../tsxtract/ deprecated shim, removal >= 0.8.0)
 benchmarks/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md
 Makefile  Dockerfile  reproduce.sh  (repo root: benchmark + build entry points)
 tests/     golden/ reference/ property/ fixtures/

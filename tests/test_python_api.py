@@ -56,14 +56,13 @@ def test_public_api_surface_is_exactly_what_is_documented():
         assert hasattr(kymora, name), name
 
 
-@pytest.mark.parametrize("shim_name", ["tsxtract", "tsxtractor"])
-def test_deprecated_shims_warn_and_reexport_identical_objects(shim_name):
+def test_deprecated_tsxtract_shim_warns_and_reexports_identical_objects():
     import importlib
 
     # First import must emit the warning; capture it so the suite stays
     # warning-clean even under `-W error`.
     with pytest.warns(DeprecationWarning, match="deprecated"):
-        shim = importlib.import_module(shim_name)
+        import tsxtract as shim
 
     assert set(shim.__all__) == set(kymora.__all__)
     for name in kymora.__all__:
@@ -71,6 +70,12 @@ def test_deprecated_shims_warn_and_reexport_identical_objects(shim_name):
     assert shim.__version__ == kymora.__version__
     with pytest.warns(DeprecationWarning, match="deprecated"):
         importlib.reload(shim)
+
+
+def test_tsxtractor_shim_is_gone():
+    import importlib.util
+
+    assert importlib.util.find_spec("tsxtractor") is None
 
 
 def test_py_typed_marker_ships_with_the_package():

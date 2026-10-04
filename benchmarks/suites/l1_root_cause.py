@@ -363,7 +363,7 @@ def build_numba_stages():
 # ---------------------------------------------------------------------------
 
 def main() -> int:
-    import tsxtractor as km
+    import kymora as km
 
     import gc  # noqa: F401
 

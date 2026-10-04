@@ -19,7 +19,8 @@ Skipped (frozen evidence / history / foreign IP / generated lock data):
     Cargo.lock (cargo regenerates), landing/package-lock.json,
     target/**, dist/**, node_modules/**, site/**, __pycache__.
 
-`tsxtractor` (legacy shim name) and `tsxtract_jax` (JAX collision marker)
+`tsxtract` (single deprecated shim; the older `tsxtractor` alias was deleted
+outright per owner direction) and `tsxtract_jax` (JAX collision marker)
 are intentionally NOT matched: `_`/letters after `tsxtract` block the
 word-boundary rule, and no explicit rule targets them.
 JAX-context sentences (bare-PyPI-name notes) are fixed by hand afterwards;

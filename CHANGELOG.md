@@ -27,9 +27,9 @@ feature is a **major** version change; appending a new feature at the end is a
   receive `ValueError` with identical messages).
 
 ### Deprecated
-- `import tsxtract` and `import tsxtractor` are thin shims that re-export
-  `kymora` and emit a `DeprecationWarning` on first import. Removal no
-  earlier than **0.8.0**. Migrate with:
+- `import tsxtract` is a thin shim that re-exports `kymora` and emits a
+  `DeprecationWarning` on first import. Removal no earlier than **0.8.0**
+  (the older `tsxtractor` alias was deleted outright). Migrate with:
   `pip install kymora` + `import kymora as km` (was `import tsxtract as tsx`).
 - `tsxtract-rs` will receive one final deprecation release that depends on
   `kymora` and re-exports it with a warning. Not yet published — see

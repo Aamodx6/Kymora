@@ -14,8 +14,9 @@ NaN/error contracts are unchanged — only names moved:
 | `TSXTRACT_WISDOM` / `TSXTRACT_POOL` | `KYMORA_WISDOM` / `KYMORA_POOL` |
 | `~/.cache/tsxtract/wisdom.json` | `~/.cache/kymora/wisdom.json` (re-run `tune()`) |
 
-`import tsxtract` and `import tsxtractor` keep working but emit a
-`DeprecationWarning`; they are removed no earlier than 0.8.0. Old benchmark
+`import tsxtract` keeps working but emits a `DeprecationWarning`; it is
+removed no earlier than 0.8.0. (The older `tsxtractor` alias was deleted
+outright.) Old benchmark
 rows and reports still carry the `tsxtract` library id — that is data, not
 a bug; new runs record `kymora`.
 

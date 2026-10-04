@@ -47,8 +47,7 @@ Feature-order invariant: `feature_names()` must keep sha256
   import `kymora`, PyPI dist `kymora` (bare `tsxtract` on PyPI is an
   unrelated JAX project — never `pip install tsxtract`), crate `kymora`,
   `KymoraSelector` (with deprecated alias `TsxSelector`),
-  `python/tsxtract/` + `python/tsxtractor/` are deprecated shims
-  (removal >= 0.8.0).
+  `python/tsxtract/` is a deprecated shim (removal >= 0.8.0).
 - Never edit `benchmarks/results/` artifacts in place; never `git add -A`
   (bench run outputs must stay untracked).
 
@@ -57,7 +56,7 @@ Feature-order invariant: `feature_names()` must keep sha256
 - `src/` Rust core; unsafe only in `ffi.rs` (helpers + SAFETY contract) and
   `kernels/` by convention (`#![deny(unsafe_code)]` elsewhere).
 - `python/kymora/` real package (`__init__.py`, `select.py`, `tune.py`,
-  `_core.pyi`); `python/tsxtract/` + `python/tsxtractor/` shims.
+  `_core.pyi`); `python/tsxtract/` shim.
 - `tests/` goldens in `tests/golden/` — never regenerate to "fix" a failure
   without understanding the drift first.
 - `docs/` mkdocs site (deployed by `.github/workflows/docs.yml`);

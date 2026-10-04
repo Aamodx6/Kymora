@@ -18,7 +18,7 @@ Rename release: `tsxtract` is now **Kymora**. No numerics changed — feature va
 
 ### Deprecated
 
-- `import tsxtract` and `import tsxtractor` are thin shims that re-export `kymora` with a `DeprecationWarning`. Removal no earlier than 0.8.0.
+- `import tsxtract` is a thin shim that re-exports `kymora` with a `DeprecationWarning`. Removal no earlier than 0.8.0. (The older `tsxtractor` alias was deleted outright.)
 
 ## 0.6.0 — 2026-10-04
 

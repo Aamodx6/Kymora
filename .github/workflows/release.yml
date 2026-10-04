@@ -137,9 +137,8 @@ jobs:
           import warnings
           with warnings.catch_warnings():
               warnings.simplefilter('ignore', DeprecationWarning)
-              import tsxtract, tsxtractor
+              import tsxtract
           assert tsxtract.extract_features is kymora.extract_features
-          assert tsxtractor.extract_features is kymora.extract_features
           print('ok', kymora.__version__, f.shape)
           "
 

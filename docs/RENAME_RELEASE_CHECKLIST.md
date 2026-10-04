@@ -36,7 +36,7 @@ project needs its own entry:
 3. Publish a GitHub Release `v0.7.0` → workflow builds the matrix and
    uploads `kymora 0.7.0` wheels. Verify:
    fresh venv → `pip install kymora` → `import kymora` works,
-   `import tsxtract` / `import tsxtractor` warn and work.
+   `import tsxtract` warns and works.
 
 ## 3. `tsxtract-rs` final deprecation release (0.6.1, owner)
 
@@ -68,14 +68,14 @@ No further `tsxtract-rs` releases after 0.6.1.
 
 ## 4. Removal schedule (already recorded in CHANGELOG)
 
-- `import tsxtract` / `import tsxtractor` shims: removal >= **0.8.0**.
+- `import tsxtract` shim: removal >= **0.8.0** (`tsxtractor` already deleted).
 - `TsxSelector` alias: removal >= **0.8.0**.
 - `tsxtract-rs` 0.6.1 shim dist: no updates, ever.
 
 ## 5. Post-publish verification (paste output into the release notes PR)
 
 - `pip download kymora==0.7.0 --no-deps` + clean-venv
-  `import kymora` / `import tsxtract` (warns) / `import tsxtractor` (warns).
+  `import kymora` / `import tsxtract` (warns).
 - `feature_names()` sha256 still
   `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`.
 - README quickstart blocks 1–4 verbatim in the clean venv.

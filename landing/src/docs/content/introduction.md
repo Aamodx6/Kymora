@@ -26,7 +26,7 @@ print(np.round(features[0, :2], 4))
 ```
 
 > [!NOTE]
-> The Python package and import name is `kymora` (`import kymora`), installed from PyPI as `pip install kymora`. The bare PyPI name `tsxtract` belongs to an unrelated JAX project and must not be installed in the same environment. The old `tsxtract` and `tsxtractor` imports remain as deprecated shims that warn on first use.
+> The Python package and import name is `kymora` (`import kymora`), installed from PyPI as `pip install kymora`. The bare PyPI name `tsxtract` belongs to an unrelated JAX project and must not be installed in the same environment. The old `tsxtract` import remains as a deprecated shim that warns on first use.
 
 ## What it is
 

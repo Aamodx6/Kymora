@@ -24,10 +24,10 @@ Usage:
 
 .. note::
     The PyPI distribution name is ``kymora`` (``pip install kymora``).
-    The old distribution ``tsxtract-rs`` and the old import names
-    ``tsxtract`` / ``tsxtractor`` remain as deprecated shims (removal no
-    earlier than 0.8.0). The bare ``tsxtract`` name on PyPI belongs to an
-    unrelated JAX project and must not be installed in the same environment.
+    The old distribution ``tsxtract-rs`` and the old import name ``tsxtract``
+    remain as a deprecated shim (removal no earlier than 0.8.0). The bare
+    ``tsxtract`` name on PyPI belongs to an unrelated JAX project and must
+    not be installed in the same environment.
 """
 
 from __future__ import annotations
