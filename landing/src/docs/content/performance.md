@@ -135,11 +135,11 @@ Every feature is `O(n)` or `O(n log n)` by construction, with `n` as series leng
 
 ![Batch Throughput Benchmark: Tsxtract vs catch22, TSFEL, tsfresh](/figures/throughput.png "Figure 5: Batch Throughput Benchmark (1,000 series × 500 steps, 16 threads, log-scale). Tsxtract delivers 800,256 series/sec, outperforming catch22 by 820x and tsfresh by 14,000x.")
 
-`benches/bench_libraries.py` measures end-to-end wall-clock batch throughput, deliberately including each library's required input reshaping (`tsfresh` needs a long DataFrame; `catch22` and `TSFEL` need per-series loops):
+`benchmarks/bench_libraries.py` measures end-to-end wall-clock batch throughput, deliberately including each library's required input reshaping (`tsfresh` needs a long DataFrame; `catch22` and `TSFEL` need per-series loops):
 
 ```bash
 pip install -e ".[bench]"
-python benches/bench_libraries.py --n-series 1000 --n-steps 500 --json benches/results/latest.json --markdown benches/results/latest.md
+python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500 --json benchmarks/results/latest.json --markdown benchmarks/results/latest.md
 ```
 
 Published benchmark results:

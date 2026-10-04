@@ -5,7 +5,7 @@
  * NOTE: REPLACE WITH REAL NUMBERS WHEN UPDATING YOUR REPRODUCIBLE BENCHMARKS
  * =========================================================================
  * Reference command:
- *   python benches/bench_libraries.py --n-series 1000 --n-steps 500
+ *   python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500
  * Tested on: 1,000 series x 500 steps, 16 cores (float64, C-contiguous)
  */
 

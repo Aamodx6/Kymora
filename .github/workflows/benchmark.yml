@@ -39,13 +39,13 @@ jobs:
           echo "cores: $(nproc)" | tee -a "$GITHUB_STEP_SUMMARY"
           python -c "import platform;print('python:', platform.python_version())" | tee -a "$GITHUB_STEP_SUMMARY"
       - run: |
-          python benches/bench_libraries.py \
+          python benchmarks/bench_libraries.py \
             --n-series ${{ github.event.inputs.n_series || '1000' }} \
             --n-steps ${{ github.event.inputs.n_steps || '500' }} \
-            --json benches/results/latest.json \
-            --markdown benches/results/latest.md
-      - run: cat benches/results/latest.md >> "$GITHUB_STEP_SUMMARY"
+            --json benchmarks/results/latest.json \
+            --markdown benchmarks/results/latest.md
+      - run: cat benchmarks/results/latest.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
-          path: benches/results/
+          path: benchmarks/results/

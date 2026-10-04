@@ -37,7 +37,7 @@ Tsxtract/
   src/features/         # stats, temporal, spectral, entropy, streaming
   python/tsxtract/    # __init__.py, _core.pyi stubs, py.typed marker
   tests/                # reference, property, NaN, validation, streaming suites
-  benches/              # bench_libraries, ablation, UCR downstream + results/
+  benchmarks/              # bench_libraries, ablation, UCR downstream + results/
   scripts/              # validation_report, feature_redundancy_analysis
   docs/                 # MkDocs site sources (validation, features, nan-policy)
   landing/src/docs/     # This documentation site (content, nav, features.ts)

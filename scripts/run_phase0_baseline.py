@@ -2,7 +2,7 @@
 
 Measures baseline performance for Tsxtract across required matrix shapes,
 evaluates single-core stage breakdowns, measures memory allocations,
-and saves results to benches/baseline/baseline.json.
+and saves results to benchmarks/baseline/baseline.json.
 """
 import json
 import os
@@ -36,7 +36,7 @@ def measure_benchmark(X, n_runs=10, warmup=2):
     }
 
 def main():
-    os.makedirs("benches/baseline", exist_ok=True)
+    os.makedirs("benchmarks/baseline", exist_ok=True)
     rng = np.random.default_rng(42)
 
     shapes = [
@@ -101,8 +101,8 @@ def main():
     print(f"  Single series len=500 latency: {total_single*1e6:.2f} us")
     results["single_series_500_us"] = total_single * 1e6
 
-    # Save to benches/baseline/baseline.json
-    out_file = "benches/baseline/baseline.json"
+    # Save to benchmarks/baseline/baseline.json
+    out_file = "benchmarks/baseline/baseline.json"
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
     print(f"Baseline saved to {out_file}")

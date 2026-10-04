@@ -189,7 +189,7 @@ print(tsxtract.describe_feature("autocorrelation__lag_1"))
 
 ### Benchmarks
 
-Measured on a 16-core system across **1,000 series of 500 steps** (500,000 data points total), traceable to CI artifacts in `benches/results/bench_matrix.json`:
+Measured on a 16-core system across **1,000 series of 500 steps** (500,000 data points total), traceable to CI artifacts in `benchmarks/results/bench_matrix.json`:
 
 #### Profile Throughput (1,000 × 500):
 | Profile | Features | Latency (1k) | Per-Series | Per-Feature Cost | Throughput |

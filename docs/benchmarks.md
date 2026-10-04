@@ -20,7 +20,7 @@ library computes, not only how well it computes them.
 
 ```bash
 pip install -e ".[bench]"
-python benches/bench_libraries.py --n-series 1000 --n-steps 500 \
+python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500 \
     --json results.json --markdown results.md
 ```
 
@@ -28,7 +28,7 @@ Libraries that are not installed are reported as skipped rather than failing the
 run, so you can benchmark a subset:
 
 ```bash
-python benches/bench_libraries.py --only tsxtract catch22
+python benchmarks/bench_libraries.py --only tsxtract catch22
 ```
 
 Useful flags: `--seed` (input reproducibility), `--json` / `--markdown` (write
@@ -59,7 +59,7 @@ The [Benchmark workflow](https://github.com/Aamodx6/Tsxtract/actions/workflows/b
 runs this on a GitHub Linux runner weekly and on demand, recording the runner's
 core count alongside the timings, and uploads both the JSON and the Markdown
 table as artifacts. The most recent committed run lives in
-[`benches/results/`](https://github.com/Aamodx6/Tsxtract/tree/main/benches/results).
+[`benchmarks/results/`](https://github.com/Aamodx6/Tsxtract/tree/main/benchmarks/results).
 
 Numbers measured on one laptop are not evidence anyone else can act on, which is
 why the reproducible-runner result is the one published rather than a local best

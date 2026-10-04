@@ -26,7 +26,7 @@ This document tracks the execution, brutal testing, benchmark results, and phase
 - **Files Audited:**
   - `src/lib.rs`, `src/ffi.rs`, `src/extract.rs`, `src/features/`
   - `python/tsxtract/__init__.py`, `python/tsxtract/_core.pyi`
-  - `Cargo.toml`, `pyproject.toml`, `benches/`
+  - `Cargo.toml`, `pyproject.toml`, `benchmarks/`
 - **Reconciliation:**
   - Confirmed `src/features/mod.rs` as the single source of truth for the 33 frozen features.
   - Generated `tests/golden/core33_names.json` (frozen column order).
@@ -98,8 +98,8 @@ This document tracks the execution, brutal testing, benchmark results, and phase
   - Full support for `profile=`, `features=`, and pre-allocated in-place `out=` buffers.
 ### Phase 6: Benchmarks, CI Gate, Docs & Launch Claims (Complete)
 - **Automated §7 Benchmark Matrix:**
-  - Created `benches/bench_matrix.py` automating measurement of profile throughput, thread scaling (1 to 16 cores), output-only memory allocation (100k × 500 series), and competitive comparison against `catch22`, `TSFEL`, and `tsfresh`.
-  - Artifacts generated: `benches/results/bench_matrix.json` and `benches/results/bench_matrix.md`.
+  - Created `benchmarks/bench_matrix.py` automating measurement of profile throughput, thread scaling (1 to 16 cores), output-only memory allocation (100k × 500 series), and competitive comparison against `catch22`, `TSFEL`, and `tsfresh`.
+  - Artifacts generated: `benchmarks/results/bench_matrix.json` and `benchmarks/results/bench_matrix.md`.
 - **Empirical Measured Results (1,000 × 500 series):**
   - `minimal` (10 feats): **0.51 ms** (0.51 µs/series, **1,972,776 series/sec**, 0.0507 µs/feat).
   - `core33` (33 feats): **1.80 ms** (1.80 µs/series, **555,016 series/sec**, 0.0546 µs/feat).

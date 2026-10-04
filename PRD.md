@@ -22,7 +22,7 @@
 | Python API surface | `extract_features`, `extract_features_ragged` (CSR), `extract_features_df`, `sliding_features`, `StreamingExtractor` (with O(1) `kind="fast"` and complete `kind="all"`), `list_profiles`, `describe_feature`, `feature_names` |
 | Feature Catalog & Profiles | Shipped profiles: `minimal` (10), `core33` (33 frozen), `extended` (143), `full` (543), with full tsfresh canonical alias support |
 | Invariant & Correctness Suite | 132/132 tests green in CI/local (golden file parity ≤ 1e-12, NaN contract, zero copy, GIL release across Rayon parallel loops) |
-| Benchmark Matrix | Full §7 matrix automated in `benches/bench_matrix.py` (profiles, thread scaling 1-16, memory, competitors `catch22`, `TSFEL`, `tsfresh`) |
+| Benchmark Matrix | Full §7 matrix automated in `benchmarks/bench_matrix.py` (profiles, thread scaling 1-16, memory, competitors `catch22`, `TSFEL`, `tsfresh`) |
 | Packaging & Distribution | Multi-platform binary wheels built via GitHub Actions (`release.yml` across Linux x86_64/aarch64, macOS arm64/x86_64, Windows x64) |
 | Documentation | Complete documentation, landing page (`landing/`), API reference, parity matrix (`docs/parity_matrix.md`), and progress timeline |
 
@@ -244,7 +244,7 @@ flowchart LR
 - [ ] Add `CHANGELOG.md`, backfill 0.1.0/0.1.1 entries
 
 **Phase 2 — Proof**
-- [ ] Extend `benches/bench_vs_tsfresh.py` to also benchmark `catch22` and `TSFEL`, run on Linux CI runner, save results as a committed artifact
+- [ ] Extend `benchmarks/bench_vs_tsfresh.py` to also benchmark `catch22` and `TSFEL`, run on Linux CI runner, save results as a committed artifact
 - [ ] Generate reference-validation report (max error per feature vs numpy/scipy) as a CI artifact
 - [ ] Rewrite `README.md` per Section 12
 - [ ] Stand up MkDocs site + GitHub Pages deploy workflow

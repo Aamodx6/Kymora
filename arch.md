@@ -8,8 +8,8 @@
     
 ## 0. How to use this document
 
-1. **Truth hierarchy:** (a) current *behavior* = the code and its tests; (b) *target design* = this file; (c) *measured performance* = committed benchmark artifacts under `benches/results/`. If they disagree, record it in `docs/arch_audit.md` and in the Decision Log (§3), then fix the code or this file — never leave a silent divergence.
-2. **Phase protocol:** work phase by phase (§15). Each phase has a **gate**. Do not start a phase before the previous gate is green. Track progress in `benches/STATE.md` (benchmarks) and `docs/PROGRESS.md` (build).
+1. **Truth hierarchy:** (a) current *behavior* = the code and its tests; (b) *target design* = this file; (c) *measured performance* = committed benchmark artifacts under `benchmarks/results/`. If they disagree, record it in `docs/arch_audit.md` and in the Decision Log (§3), then fix the code or this file — never leave a silent divergence.
+2. **Phase protocol:** work phase by phase (§15). Each phase has a **gate**. Do not start a phase before the previous gate is green. Track progress in `benchmarks/STATE.md` (benchmarks) and `docs/PROGRESS.md` (build).
 3. **Evidence rule:** no performance or correctness claim in README, landing page, PyPI text or release notes without an artifact path + commit hash (§14).
 4. **Honesty rule:** record every loss, bug, and limitation (Loss Ledger, §13). A thin lead or a known weakness is documented, not hidden.
 5. **Estimates vs measurements:** numbers marked *(est.)* are first-principles estimates to be falsified by measurement.
@@ -124,8 +124,9 @@ src/
   lib.rs ffi.rs error.rs plan.rs exec.rs pipeline.rs scratch.rs intermediates.rs registry.rs streaming.rs
   kernels/   mod.rs(dispatch) reduce.rs select.rs sort.rs fft.rs perm.rs        # only place for unsafe/SIMD
   features/  core33.rs stats.rs change.rs counts.rs acf.rs trend.rs spectral.rs entropy.rs complexity.rs catch22.rs
-python/tsxtract/  __init__.py  _core.pyi  py.typed  compat.py(tsxtract shim)
-benches/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md  Makefile  Dockerfile
+python/tsxtract/  __init__.py  _core.pyi  py.typed  (+ ../tsxtractor/ deprecated shim, removal >= 0.7.0)
+benchmarks/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md
+Makefile  Dockerfile  reproduce.sh  (repo root: benchmark + build entry points)
 tests/     golden/ reference/ property/ fixtures/
 docs/      arch_audit.md  parity_matrix.md  PROGRESS.md  (website: landing/)
 arch.md    (this file)
@@ -344,7 +345,7 @@ Decision table (fill at re-baseline): SORT >25% → Z1 · η<0.85 → Z6 · FFT 
 Correctness before timing · no cherry-picking (losses reported) · equal tuning effort per competitor with documented tuning · every number carries hardware, threads, shape, dtype, versions, commit · three views per row (raw / µs per series-feature / matched-feature).
 
 ### 11.2 Layout & harness
-`benches/{harness,adapters,datasets,suites,agreement,results,report}`. One isolated `uv` venv per competitor with pinned versions (`requirements-<lib>.txt`). Runner: fresh subprocess per measurement (pyperf-style), warmup, GC disabled during timing, ≥15 runs or ≥2 s budget (documented), record min/median/IQR/mean/p95/CV, bootstrap 95% CI for ratios, auto-rerun once if CV>5%, report best-of and median **separately**. Peak RSS via subprocess sampling. If a competitor lacks support for the benchmark Python (e.g., 3.14), run the main matrix on the newest common version and a secondary run on 3.14.
+`benchmarks/{harness,adapters,datasets,suites,agreement,results,report}`. One isolated `uv` venv per competitor with pinned versions (`requirements-<lib>.txt`). Runner: fresh subprocess per measurement (pyperf-style), warmup, GC disabled during timing, ≥15 runs or ≥2 s budget (documented), record min/median/IQR/mean/p95/CV, bootstrap 95% CI for ratios, auto-rerun once if CV>5%, report best-of and median **separately**. Peak RSS via subprocess sampling. If a competitor lacks support for the benchmark Python (e.g., 3.14), run the main matrix on the newest common version and a secondary run on 3.14.
 
 ### 11.3 Competitors
 tsfresh (README 777-feature config primary; Efficient/Minimal secondary; "extract-only" and "end-to-end incl. long-format construction"), TSFEL (README 156-feature config), pycatch22 (serial loop + multiprocessing Pool), antropy, tsflex, sktime (Catch22/TSFresh transformers), **honest baselines**: vectorized numpy/scipy implementation of the 33 features and a numba hand-rolled version (real FFT via `rocket-fft` or a proper iterative/mixed-radix/Bluestein FFT — never an O(n²) DFT; `fastmath=False` for agreement/robustness, `fastmath=True` only for throughput and labeled), plus the unrelated JAX `tsxtract` only to document the name collision (excluded from win/loss counts).
@@ -404,9 +405,9 @@ Fork after rayon init can deadlock → detect and document; `os.register_at_fork
 
 ## 13. Loss Ledger & Improvement Loop
 
-`benches/results/LOSS_LEDGER.md`, one row per finding: `ID | category | case | measured gap | evidence path | suspected cause | impact (likelihood × gap) | status`. Categories: SLOWER-THAN-COMPETITOR · SLOWER-THAN-NUMPY/NUMBA-BASELINE · LOW-PARALLEL-EFFICIENCY · HIGH-LATENCY(-SMALL-CALL) · HIGH-MEMORY · CRASH/HANG · SILENT-WRONG · UNEXPECTED-COPY · FEATURE-GAP · STARTUP-COST · DEFINITION-MISMATCH. Also list **wins by <2×** (thin leads are a risk). Ranked by impact; ranking confirmed by the owner before fixes start.
+`benchmarks/results/LOSS_LEDGER.md`, one row per finding: `ID | category | case | measured gap | evidence path | suspected cause | impact (likelihood × gap) | status`. Categories: SLOWER-THAN-COMPETITOR · SLOWER-THAN-NUMPY/NUMBA-BASELINE · LOW-PARALLEL-EFFICIENCY · HIGH-LATENCY(-SMALL-CALL) · HIGH-MEMORY · CRASH/HANG · SILENT-WRONG · UNEXPECTED-COPY · FEATURE-GAP · STARTUP-COST · DEFINITION-MISMATCH. Also list **wins by <2×** (thin leads are a risk). Ranked by impact; ranking confirmed by the owner before fixes start.
 
-**Loop (per item, impact order):** reproduce with the smallest benchmark → profile (flamegraph, `perf stat` IPC/cache misses, allocation counts, `cargo asm`) → classify (algorithmic / layout / overhead / threading / missing fast path / FFI copy / correctness / missing feature) → fix (prefer §10 items; numerics changes behind parity tests; tolerance-changing modes opt-in only) → add regression benchmark (Criterion + pytest-benchmark) and an **instruction-count gate** (`iai-callgrind`/cachegrind, fail >2%) → re-run only the affected slice → record before/after with CIs in `benches/results/PERF_CHANGELOG.md` → update ledger. Re-run the smoke matrix after every 5 closed items. Unfixable items (physical limit, genuinely better competitor) are documented in the ledger and the report, not hidden. Apply the §9.4 stop rule.
+**Loop (per item, impact order):** reproduce with the smallest benchmark → profile (flamegraph, `perf stat` IPC/cache misses, allocation counts, `cargo asm`) → classify (algorithmic / layout / overhead / threading / missing fast path / FFI copy / correctness / missing feature) → fix (prefer §10 items; numerics changes behind parity tests; tolerance-changing modes opt-in only) → add regression benchmark (Criterion + pytest-benchmark) and an **instruction-count gate** (`iai-callgrind`/cachegrind, fail >2%) → re-run only the affected slice → record before/after with CIs in `benchmarks/results/PERF_CHANGELOG.md` → update ledger. Re-run the smoke matrix after every 5 closed items. Unfixable items (physical limit, genuinely better competitor) are documented in the ledger and the report, not hidden. Apply the §9.4 stop rule.
 
 ---
 
@@ -428,7 +429,7 @@ Every README/landing/PyPI/release-note claim → `CLAIMS.md` row: claim → arti
 core33 26.4 MB · extended (~150) ~120 MB · full (777) ~622 MB · views×features (~1,200 cols) ~960 MB. Provide `out_dtype="float32"` and the chunked API for large profiles.
 
 ### 14.4 Website requirements (landing/)
-Prerender/SSG (no empty-HTML SPA); OG/Twitter tags + 1200×630 image, favicon, canonical, sitemap, robots, `SoftwareApplication` JSON-LD; real domain; benchmark centerpiece (log-scale chart with raw / per-feature / matched toggles, hardware caption, reproduce command, artifact link); full feature table (grouped, formulas, NaN behavior); "When not to use Tsxtract"; data fed from `benches/report/results.json` only; one docs source of truth (MkDocs *or* site, not both); Lighthouse ≥95, `prefers-reduced-motion` honored, 375 px mobile, WCAG AA contrast. **Anti-slop rules:** no gradient text/glow blobs/glass cards/pill badges/fake terminal chrome/icon-card grids/invented testimonials; hero = real code + real output + number with its conditions; one accent color, one display font + one mono; cover-the-logo test.
+Prerender/SSG (no empty-HTML SPA); OG/Twitter tags + 1200×630 image, favicon, canonical, sitemap, robots, `SoftwareApplication` JSON-LD; real domain; benchmark centerpiece (log-scale chart with raw / per-feature / matched toggles, hardware caption, reproduce command, artifact link); full feature table (grouped, formulas, NaN behavior); "When not to use Tsxtract"; data fed from `benchmarks/report/results.json` only; one docs source of truth (MkDocs *or* site, not both); Lighthouse ≥95, `prefers-reduced-motion` honored, 375 px mobile, WCAG AA contrast. **Anti-slop rules:** no gradient text/glow blobs/glass cards/pill badges/fake terminal chrome/icon-card grids/invented testimonials; hero = real code + real output + number with its conditions; one accent color, one display font + one mono; cover-the-logo test.
 
 ---
 
@@ -494,7 +495,7 @@ Z0 re-baseline (stage table, η, IPC, LLC-miss) → Z1 select → Z2 runtime (Z6
 
 **Re-baseline (Z0):**
 ```
-Read arch.md §9–§10 and §13. On current main produce benches/zenith_baseline.md: per-stage time
+Read arch.md §9–§10 and §13. On current main produce benchmarks/zenith_baseline.md: per-stage time
 table, parallel efficiency at (1k,500) for 1/2/4/8/16 threads (logical and physical), IPC and
 LLC-miss rate (perf stat on Linux). Fill the §10 decision table; state which Z-items are gated in.
 No library changes.
@@ -513,7 +514,7 @@ a public dataset. Report column counts and timing.
 ```
 **Benchmark continuation:**
 ```
-Resume from benches/STATE.md. Follow arch.md §11 and §15.3 exactly. Apply amendments A1–A9 if not
+Resume from benchmarks/STATE.md. Follow arch.md §11 and §15.3 exactly. Apply amendments A1–A9 if not
 done, then run B1. Stop at each gate and report: what was done, artifact paths, key numbers, open problems.
 ```
 
@@ -523,7 +524,7 @@ done, then run B1. Stop at each gate and report: what was done, artifact paths, 
 ## Appendix C — Consolidation / migration checklist (run once)
 1. Diff the **old** `arch.md` against this file; any requirement that exists only in the old file (error-model wording, NaN edge cases, versioning rules, CI details) must be copied into §3 before deleting it.
 2. Replace `arch.md` with this file; delete `arch_max.md` and `arch_zenith.md`.
-3. `grep -rn "arch_max\|arch_zenith\|arch\.md" .` (README, `docs/`, `PRD.md`, `CLAUDE.md`, prompts, CI, `benches/`, `landing/`) and update every reference to point at `arch.md` sections (§-numbers above).
+3. `grep -rn "arch_max\|arch_zenith\|arch\.md" .` (README, `docs/`, `PRD.md`, `CLAUDE.md`, prompts, CI, `benchmarks/`, `landing/`) and update every reference to point at `arch.md` sections (§-numbers above).
 4. Update section references in code comments/tests (e.g., "see arch_max.md §8.2" → "arch.md §12.2").
 5. Commit message: `docs: consolidate architecture into single arch.md`.
 6. Verify no link/CI check still references the removed files.

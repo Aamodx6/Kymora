@@ -1,7 +1,7 @@
 # Architecture and Feature Catalog Audit (`docs/arch_audit.md`)
 
 **Date:** 2026-10-04  
-**Audit Target:** Alignment between built library `tsxtract.feature_names()`, `README.md`, `arch.md`, and `benches/agreement/feature_map.json`.
+**Audit Target:** Alignment between built library `tsxtract.feature_names()`, `README.md`, `arch.md`, and `benchmarks/agreement/feature_map.json`.
 
 ---
 

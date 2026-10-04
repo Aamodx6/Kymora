@@ -11,5 +11,6 @@ site/
 node_modules/
 landing/dist/
 .gstack/
-benches/.venvs/
-benches/datasets/cache/
+benchmarks/.venvs/
+benchmarks/datasets/cache/
+.DS_Store

@@ -24,7 +24,7 @@ Extracted shape: (1000, 33) in ~1.2 ms
 ```
 
 > [!NOTE]
-> All benchmarks reported on this page were executed under Python 3.14 on a 16-core system (Windows 11) using the publicly committed harness in `benches/bench_libraries.py`. Missing packages report as skipped rather than failing.
+> All benchmarks reported on this page were executed under Python 3.14 on a 16-core system (Windows 11) using the publicly committed harness in `benchmarks/bench_libraries.py`. Missing packages report as skipped rather than failing.
 
 ---
 
@@ -224,14 +224,14 @@ cd Tsxtract
 pip install -e ".[bench]"
 
 # 2. Run the batch throughput suite
-python benches/bench_libraries.py \
+python benchmarks/bench_libraries.py \
     --n-series 1000 \
     --n-steps 500 \
-    --json benches/results/latest.json \
-    --markdown benches/results/latest.md
+    --json benchmarks/results/latest.json \
+    --markdown benchmarks/results/latest.md
 
 # 3. Run the downstream machine learning validation
-python benches/bench_ucr_downstream.py
+python benchmarks/bench_ucr_downstream.py
 ```
 
 ### Reference test environment

@@ -7,7 +7,7 @@ export const Benchmarks: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BenchmarkItem>(BENCHMARK_DATA[0]);
   const [copiedBenchCmd, setCopiedBenchCmd] = useState(false);
 
-  const benchCommand = 'python benches/bench_libraries.py --n-series 1000 --n-steps 500';
+  const benchCommand = 'python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500';
 
   const copyBenchCommand = async () => {
     try {

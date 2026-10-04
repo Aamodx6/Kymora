@@ -13,16 +13,16 @@ help:
 	@echo "  make report          Generate REPORT.md and results.json from latest run"
 
 setup-venvs:
-	$(PYTHON) benches/setup_venvs.py --lib all
+	$(PYTHON) benchmarks/setup_venvs.py --lib all
 
 bench-smoke:
-	$(PYTHON) benches/smoke.py
+	$(PYTHON) benchmarks/smoke.py
 
 bench-agreement:
-	$(PYTHON) benches/suites/agreement.py
+	$(PYTHON) benchmarks/suites/agreement.py
 
 bench-all:
-	$(PYTHON) benches/reproduce.py --suite all
+	$(PYTHON) benchmarks/reproduce.py --suite all
 
 report:
-	$(PYTHON) benches/report/make_report.py
+	$(PYTHON) benchmarks/report/make_report.py

@@ -12,15 +12,15 @@ echo "1. Checking environment..."
 $PYTHON -c "import sys; print(f'Python: {sys.version}')"
 
 echo "2. Setting up competitor environments..."
-$PYTHON benches/setup_venvs.py --lib all
+$PYTHON benchmarks/setup_venvs.py --lib all
 
 echo "3. Running Phase B0 Smoke Test..."
-$PYTHON benches/smoke.py
+$PYTHON benchmarks/smoke.py
 
 echo "4. Running Phase B1 Correctness & Agreement Suite..."
-$PYTHON benches/suites/agreement.py || true
+$PYTHON benchmarks/suites/agreement.py || true
 
 echo "5. Generating Report..."
-$PYTHON benches/report/make_report.py || true
+$PYTHON benchmarks/report/make_report.py || true
 
 echo "Benchmark reproduction completed."
