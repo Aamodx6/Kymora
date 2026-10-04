@@ -137,7 +137,7 @@ jobs:
           assert np.isfinite(f).all()
           import warnings
           with warnings.catch_warnings():
-              warnings.simplefilter("ignore", DeprecationWarning)
+              warnings.simplefilter('ignore', DeprecationWarning)
               import tsxtractor
           assert tsxtractor.extract_features is tsxtract.extract_features
           print('ok', tsxtract.__version__, f.shape)
