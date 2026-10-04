@@ -14,14 +14,14 @@ print(tsxtract.__version__, len(tsxtract.feature_names()))
 ```
 
 ```text
-0.3.0 33
+0.6.0 33
 ```
 
 ## Errors and inputs
 
 ### Why does `extract_features()` raise `TypeError` on my integer array?
 
-- **Cause:** the zero-copy core accepts float64 buffers only and refuses to silently copy or reinterpret other dtypes.
+- **Cause:** the zero-copy core accepts float64 and float32 buffers only and refuses to silently copy or reinterpret other dtypes.
 - **Fix:** convert once upstream with `X.astype(np.float64)` and keep that buffer for all calls.
 
 ```python
@@ -94,7 +94,7 @@ print(tsxtract.extract_features(X).shape)
 
 ### Which versions introduced the current API?
 
-- **Summary:** `0.1.0` shipped the 33 features on Windows only; `0.2.0` added wheels for Linux/macOS, `extract_features_df()`, `__version__`, stubs, validation, and the NaN contract; `0.2.1` fixed packaging only; `0.3.0` made extraction about 1.8x faster with identical values.
+- **Summary:** `0.1.0` shipped the 33 features on Windows only; `0.2.0` added wheels for Linux/macOS, `extract_features_df()`, `__version__`, stubs, validation, and the NaN contract; `0.2.1` fixed packaging only; `0.3.0` made extraction about 1.8x faster with identical values; `0.4.0` added profiles, native float32 ingestion, `out=`, CSR ragged input, `n_jobs`, and streaming; `0.5.0` expanded the catalog (`extended`/`full`), multichannel extraction, feature selection, and tuning; `0.6.0` standardized packaging on `tsxtract-rs` / `import tsxtract` with the `tsxtractor` shim deprecated.
 - **Detail:** see the full per-release record in [Changelog](/docs/changelog).
 
 ### Where do I report a wrong value?

@@ -5,7 +5,7 @@ order: 1
 section: "Start here"
 ---
 
-Tsxtract (distributed on PyPI as `tsxtract`) is a batch time-series feature extraction library with a Rust core and an idiomatic Python interface. It computes 33 curated statistical, temporal, and spectral features across whole batches of series at once, returning a dense `(n_series, 33)` float64 matrix ready for classifiers, clustering, or retrieval.
+Tsxtract (distributed on PyPI as `tsxtract-rs`) is a batch time-series feature extraction library with a Rust core and an idiomatic Python interface. It computes 33 curated statistical, temporal, and spectral features across whole batches of series at once, returning a dense `(n_series, 33)` float64 matrix ready for classifiers, clustering, or retrieval.
 
 ```python
 import numpy as np
@@ -26,7 +26,7 @@ print(np.round(features[0, :2], 4))
 ```
 
 > [!NOTE]
-> The Python package and import name is `tsxtract` (`import tsxtract`). Tsxtract is the project and documentation name for the same library.
+> The Python package and import name is `tsxtract` (`import tsxtract`), installed from PyPI as `pip install tsxtract-rs`. The bare PyPI name `tsxtract` belongs to an unrelated JAX project and must not be installed in the same environment. The old `tsxtractor` import remains as a deprecated shim that warns on first use.
 
 ## What it is
 
@@ -118,7 +118,7 @@ flowchart TD
 Three input rules prevent most integration failures:
 
 - **Non-contiguous views:** strided slices such as `X[:, ::2]` raise `ValueError`. Repair with `np.ascontiguousarray(X)` before calling.
-- **Wrong dtype:** integer, `float32`, or `float16` arrays raise `TypeError` rather than being silently copied. Convert once with `X.astype(np.float64)`.
+- **Wrong dtype:** integer or `float16` arrays raise `TypeError` rather than being silently copied. Convert once with `X.astype(np.float64)`. Contiguous `float32` is read natively with float64 accumulation.
 - **NaN propagation:** one NaN anywhere in a series makes all 33 of that row NaN. Impute or drop missing samples before extraction when row-level output is required.
 
 ## Next steps

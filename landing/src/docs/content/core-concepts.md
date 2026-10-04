@@ -64,7 +64,7 @@ flowchart LR
 
 Dtype and layout rules are strict because the core borrows buffers without copying:
 
-- **Float64 only:** `int64`, `float32`, and other dtypes raise `TypeError`. Convert once with `X.astype(np.float64)`.
+- **Float64 and float32:** integer, `float16`, and other dtypes raise `TypeError`. Convert once with `X.astype(np.float64)`. Contiguous `float32` is read natively with float64 accumulation.
 - **C-contiguous only:** strided views such as `X[:, ::2]` raise `ValueError`. Repair with `np.ascontiguousarray(X)`.
 - **No empty input:** zero rows, zero columns, or a zero-length member raises `ValueError` naming the offending index.
 - **Single series:** reshape 1D input to `(1, length)` for `extract_features()`, since a bare 1D array raises `TypeError`.

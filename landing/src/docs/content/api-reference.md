@@ -76,6 +76,10 @@ def sliding_features(
     x: np.ndarray,
     window: int,
     stride: int = 1,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: np.ndarray | None = None,
 ) -> np.ndarray
 ```
 
@@ -84,6 +88,10 @@ def sliding_features(
 | `x` | 1D float64 array | Required | Continuous series to window |
 | `window` | int | Required | Window length; must satisfy `1 <= window <= len(x)` |
 | `stride` | int | `1` | Step between window starts; must be `>= 1` |
+| `profile` | str | `"core33"` | Feature tier (`"minimal"`, `"core33"`, `"extended"`, `"full"`) |
+| `features` | Sequence[str] | None | Explicit list of feature names to extract |
+| `n_jobs` | int | None | Worker thread count override |
+| `out` | np.ndarray | None | Optional pre-allocated buffer for zero-allocation writes |
 
 ---
 
@@ -216,7 +224,7 @@ class MultiStreamExtractor:
 
 ### `tune`
 
-Microbenchmarks execution variants (spin pool vs Rayon, chunk sizes) and caches optimal execution parameters.
+Microbenchmarks execution variants on this hardware and caches optimal execution parameters to `wisdom.json` (Windows: `%LOCALAPPDATA%\tsxtract\`; POSIX: `~/.cache/tsxtract/`). Set `TSXTRACT_WISDOM=off` to skip the cache.
 
 ```python
 def tune(
@@ -224,3 +232,6 @@ def tune(
     budget_s: float = 10.0,
 ) -> dict[str, Any]
 ```
+
+- **Returns:** wisdom dict with machine signature, per-shape timings, and the winning config.
+- **Note:** the cached `pool` recommendation is advisory — the alternative spin backend lives in `experiment/spin-pool`, so main currently runs the Rayon pool regardless of the recorded value.

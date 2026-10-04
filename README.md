@@ -234,7 +234,7 @@ Tsxtract deliberately computes 33 high-signal, non-redundant features spanning a
 * **Extrema & Spans:** Min, Max, Peak-to-Peak Range, Quantiles (q05, q25, median, q75, q95), Interquartile Range (IQR).
 * **Dynamics & Crossing:** Zero Crossing Rate, Mean Crossing Rate, Root Mean Square (RMS), Crest Factor, Median Absolute Deviation (MAD).
 * **Temporal Differences:** Mean Absolute Change, Mean Consecutive Change, Number of Local Peaks.
-* **Autocorrelation Structure:** Lag-1, Lag-2, Lag-3, Lag-5, Lag-10 Autocorrelation.
+* **Autocorrelation Structure:** Lag-1, Lag-2, Lag-5, Lag-10 Autocorrelation.
 * **Spectral Domain:** Energy, Spectral Energy, Dominant Frequency, Spectral Centroid, Spectral Spread, Spectral Roll-off.
 * **Complexity:** Permutation Entropy (order 3, delay 1).
 

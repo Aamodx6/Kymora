@@ -228,7 +228,7 @@ Top 3 features: ['mean_abs_change', 'spectral_entropy', 'cid_ce']
 ## Common pitfalls
 
 - **1D input to `extract_features()`:** a bare 1D array raises `TypeError` because the batch API needs shape `(n_series, length)`. Reshape single series with `x.reshape(1, -1)` or use `sliding_features()` for rolling windows.
-- **Wrong dtype:** `int64`, `float32`, and `float16` arrays raise `TypeError` instead of being copied silently. Convert once with `X.astype(np.float64)` and keep that buffer.
+- **Wrong dtype:** `int64` and `float16` arrays raise `TypeError` instead of being copied silently. Convert once with `X.astype(np.float64)` and keep that buffer. Contiguous `float32` is accepted natively with float64 accumulation.
 - **Empty series in ragged lists:** an empty 1D member raises `ValueError` naming its index. Filter zero-length recordings before extraction.
 - **NaN rows after extraction:** any NaN in a series blanks all 33 columns for that row by design. Impute upstream when partial features are required.
 

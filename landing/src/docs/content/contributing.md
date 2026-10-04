@@ -5,7 +5,7 @@ order: 14
 section: "Help"
 ---
 
-Contributions with the highest leverage are correctness work, documentation, and platform support — the 33-feature set is closed on purpose. This guide covers environment setup, repo layout, checks, the add-a-feature walkthrough, and pull-request expectations.
+Contributions with the highest leverage are correctness work, documentation, and platform support — the `core33` set is frozen on purpose (new features are append-only). This guide covers environment setup, repo layout, checks, the add-a-feature walkthrough, and pull-request expectations.
 
 ```bash
 git clone https://github.com/Aamodx6/Tsxtract.git
@@ -91,12 +91,12 @@ Version impact follows the policy table: appending at the end is a minor bump, w
 - **Style match:** `cargo fmt` clean, Clippy silent, and comments explaining reasoning rather than restating code.
 - **Bug reports:** include OS, Python version, `tsxtract.__version__`, a runnable snippet, and the expected NumPy/SciPy expression for wrong values.
 
-> [!WARNING]
-> TODO(verify): commit-message convention and Code of Conduct file. No commit convention is configured in-repo, and `CONTRIBUTING.md` links `CODE_OF_CONDUCT.md` but that file is absent from the repo root — confirm both before enforcing them on contributors.
+> [!NOTE]
+> Commit messages in this repo follow the `area(scope): summary` convention (for example `release(0.6.0): ...`), and participation follows `CODE_OF_CONDUCT.md` at the repo root.
 
 ## License and conduct
 
-The project is MIT-licensed (see `LICENSE` and the `MIT` classifier in `pyproject.toml`). Participation follows the Code of Conduct linked from `CONTRIBUTING.md`; report gaps in that file as part of the `TODO(verify)` above rather than assuming coverage.
+The project is MIT-licensed (see `LICENSE` and the `MIT` classifier in `pyproject.toml`). Participation follows the Code of Conduct at the repo root; report conduct issues per that file.
 
 ## See also
 
