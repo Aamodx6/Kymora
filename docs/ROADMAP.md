@@ -5,6 +5,23 @@ Two uncalled Zenith-session prototypes were removed from `main`
 deleted**; they are **not wired**. Revival is gated on measurement per
 `arch.md` — "decide, then build".
 
+## PRD legacy (migrated 2026-10-04 from `PRD.md`, file removed)
+
+Still-true post-1.0 ideas from the v1.0 PRD (§15), not otherwise tracked:
+
+- **Polars output option** alongside `pandas` (`extract_features_df`
+  equivalent). Portability row in arch.md §4.5 already requires Polars
+  inputs to work without copy where layout allows; a dedicated Polars
+  output frame remains open.
+- **R/Julia bindings** — exploratory only, gated on demonstrated community
+  demand (consistent with arch.md Z-GPU demand-gating posture).
+- **Launch-plan content** (PRD §§6, 14, 17–18: install/star targets, GTM
+  phases, open questions) was **dropped as dated**, not migrated — §17
+  implementation items are all shipped (error wrapping, `__version__`,
+  `.pyi` stubs, `extract_features_df`, property tests, NaN-policy tests,
+  wheel matrix, CHANGELOG, CoC, templates). Product definition and
+  non-goals already live in arch.md §1.
+
 ## experiment/spin-pool — persistent spin-then-park pool (NEEDS-OWNER #7)
 
 - Contents: `src/pool.rs` (222 lines) as of `f7282a0`; was declared as
