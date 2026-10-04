@@ -16,15 +16,15 @@ X = np.ascontiguousarray(np.random.default_rng(42).standard_normal((1000, 500)))
 
 # Wall-clock extraction across 16 worker threads
 features = tsxtract.extract_features(X)
-print(f"Extracted shape: {features.shape} in ~1.2 ms")
+print(f"Extracted shape: {features.shape} in ~3.2 ms")
 ```
 
 ```text
-Extracted shape: (1000, 33) in ~1.2 ms
+Extracted shape: (1000, 33) in ~3.2 ms
 ```
 
 > [!NOTE]
-> All benchmarks reported on this page were executed under Python 3.14 on a 16-core system (Windows 11) using the publicly committed harness in `benchmarks/bench_libraries.py`. Missing packages report as skipped rather than failing.
+> All benchmark figures on this page were re-measured 2026-10-04 under Python 3.14 on an i7-13620H laptop (10 cores / 16 threads, Windows 11) using the committed harness in `benchmarks/` (artifact: `benchmarks/results/F1_REPORT.md`). They are exploratory single-machine numbers. Missing packages report as skipped rather than failing.
 
 ---
 
@@ -91,25 +91,25 @@ flowchart TD
 
 We measured end-to-end wall-clock time to process **1,000 series of 500 steps** (500,000 data points total). The harness measures the complete user journey, including any required array transposition or DataFrame formatting:
 
-![Batch Throughput Benchmark across Competitor Libraries](/figures/throughput.png "Figure 1: Batch Throughput Comparison (1,000 series × 500 steps, 16 worker threads, log scale). Tsxtract reaches 800,256 series/sec, outperforming catch22 by 820x and tsfresh by 14,000x.")
+![Batch Throughput Benchmark across Competitor Libraries](/figures/throughput.png "Figure 1: Batch Throughput Comparison (1,000 series × 500 steps, 16 worker threads, log scale). Tsxtract reaches 314,450 series/sec median (exploratory laptop run), outperforming catch22 by 262x and tsfresh by 6,570x raw time. Figure file predates the re-baseline.")
 
-### Empirical results summary
+### Empirical results summary (exploratory — i7-13620H, 10 cores / 16 threads; artifact `benchmarks/results/F1_REPORT.md`)
 
 | Library | Features | Median runtime | Total series/sec | Per-feature cost | Speedup vs Tsxtract |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Tsxtract 0.3.0** | **33** | **1.25 ms** | **800,256** | **0.038 µs** | **Baseline (1.0x)** |
-| `catch22` (pycatch22) | 22 | 1,024.8 ms | 976 | 46.58 µs | **820x slower** |
-| `TSFEL` (all domains) | 156 | 7,154.0 ms | 140 | 45.86 µs | **5,725x slower** |
-| `tsfresh` (EfficientFC) | 777 | 17,683.3 ms | 57 | 22.76 µs | **14,151x slower** |
+| **Tsxtract 0.5.0** | **33** | **3.18 ms** | **314,450** | **0.0964 µs** | **Baseline (1.0x)** |
+| `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | 37.87 µs | **262x slower** |
+| `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | 16.29 µs | **799x slower** |
+| `tsfresh` (EfficientFC) | 777 | 20,891.2 ms | 48 | 26.89 µs | **6,570x slower** |
 
 > [!TIP]
-> **Reading the per-feature metric:** Notice that `catch22` and `TSFEL` take roughly ~46 µs per feature per series, whereas Tsxtract computes each feature in **0.038 µs** (38 nanoseconds). This 1,200x per-feature efficiency stems directly from fused multi-pass loops that eliminate redundant scans of array memory.
+> **Reading the per-feature metric:** Notice that `catch22` takes ~37.87 µs per feature per series, whereas Tsxtract computes each feature in **0.0964 µs**. This ~393x per-feature efficiency stems directly from fused multi-pass loops that eliminate redundant scans of array memory.
 
 ---
 
 ## Benchmark 2: Multi-core thread scaling & parallel efficiency
 
-How well does feature extraction scale as you add CPU cores? We evaluated Tsxtract on a 16-core system across thread counts $p \in \{1, 2, 4, 8, 16\}$:
+How well does feature extraction scale as you add CPU cores? We evaluated Tsxtract on a 10-core / 16-thread laptop across thread counts $p \in \{1, 2, 4, 8, 16\}$ (scaling + memory tables below predate the 2026-10-04 re-baseline — exploratory, pending re-measurement):
 
 ![Parallel Speedup and Rayon Scaling Efficiency](/figures/speedup.png "Figure 2: Parallel Speedup S(p) = T₁/T_p and Rayon Scaling Efficiency η(p) across 16 Worker Threads.")
 
@@ -204,7 +204,7 @@ We evaluated pairwise Pearson correlation $|r|$ across 2,000 diverse time-series
 
 | If your workload looks like this... | Recommended tool | Why |
 | :--- | :--- | :--- |
-| **Batch pipelines ($10^2$ to $10^6$ series) in Python** | **Tsxtract** | **800k series/sec, zero-copy, 16-core parallel throughput.** |
+| **Batch pipelines ($10^2$ to $10^6$ series) in Python** | **Tsxtract** | **314k series/sec (exploratory laptop figure), zero-copy, 10-core / 16-thread parallel throughput.** |
 | **Real-time rolling window / streaming telemetry** | **Tsxtract (`StreamingExtractor`)** | **$O(1)$ sample updates, stateful ring buffer without rescanning.** |
 | **Exhaustive exploratory hypothesis screening** | `tsfresh` | When you need 1,500+ features and have cluster compute time to spare. |
 | **Domain-specific biomechanical / EEG signals** | `TSFEL` | Pre-configured spectral sub-bands tailored for human activity recognition. |

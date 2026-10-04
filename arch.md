@@ -53,7 +53,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 
 | ID | Finding | Evidence | Action |
 |---|---|---|---|
-| F1 | **Throughput claims disagree:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cite ~1.80 ms / 555k series/s for `core33` | README vs release notes | Run `suites/reproduce_readme.py` (A5); explain regression or methodology difference before any new claim |
+| F1 | **Throughput claims disagreed:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cited ~1.80 ms / 555k series/s for `core33` | README vs release notes | ✅ RESOLVED 2026-10-04: interleaved `suites/reproduce_readme.py` (+0.3.2/0.4.0 bisect) shows BOTH old figures irreproducible on this machine at every version — README+`CLAIMS.md` rewritten from artifact (3.18 ms med / 314,450 s/s; raw 262×/799×/6,570×, per-feature 393×/169×/279×). Artifact: `benchmarks/results/F1_REPORT.md` |
 | F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (tsxtract) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
 | F3 | Feature-name lists differ between README and old `arch.md` | audit | `feature_names()` is truth; list mismatches in `docs/arch_audit.md` |
 | F4 | Naming: PyPI `tsxtract-rs`, imports `tsxtract` + `tsxtract`; unrelated JAX PyPI project `tsxtract` exists; two GitHub accounts/repos | repos, PyPI | Decision D3 |
@@ -285,15 +285,15 @@ SORT/FFT dominate `core33`, so incremental moments alone barely move `core33`; t
 
 ## 9. Performance Model & Ceilings
 
-### 9.1 Reference baseline (README; **verify per F1**)
-1,000 series × 500, 16 threads on a 10-core hybrid laptop CPU, Windows 11, best-of-N within a 2 s budget.
+### 9.1 Reference baseline (measured 2026-10-04, F1 artifact; exploratory laptop numbers)
+1,000 series × 500, 16 threads on i7-13620H laptop (10 cores/16 threads), Windows 11, Performance plan, AC online. Pooled medians (tsxtract n=400 runs over 4 HEAD rounds; competitors n=53/83/64 over 10 rounds), 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`.
 
 | Library | Features | Runtime | µs / series-feature | Raw ratio | **Per-feature ratio** |
 |---|---|---|---|---|---|
-| Tsxtract core33 | 33 | 1.25 ms | 0.038 | — | — |
-| catch22 | 22 | 1,024.8 ms | 46.58 | 820× | ~1,230× |
-| TSFEL | 156 | 7,154.0 ms | 45.86 | 5,725× | ~1,210× |
-| tsfresh | 777 | 17,683.3 ms | 22.76 | 14,151× | ~600× |
+| Tsxtract core33 | 33 | 3.18 ms | 0.0964 | — | — |
+| catch22 | 22 | 833.1 ms | 37.87 | 262× | 393× |
+| TSFEL | 156 | 2,541.6 ms | 16.29 | 799× | 169× |
+| tsfresh | 777 | 20,891.2 ms | 26.89 | 6,570× | 279× |
 
 The raw ratio compares 33 vs 777 features; publish raw, per-feature **and** matched-feature ratios (§11.6).
 

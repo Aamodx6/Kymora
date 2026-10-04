@@ -133,7 +133,7 @@ Every feature is `O(n)` or `O(n log n)` by construction, with `n` as series leng
 
 ## Benchmark comparison
 
-![Batch Throughput Benchmark: Tsxtract vs catch22, TSFEL, tsfresh](/figures/throughput.png "Figure 5: Batch Throughput Benchmark (1,000 series × 500 steps, 16 threads, log-scale). Tsxtract delivers 800,256 series/sec, outperforming catch22 by 820x and tsfresh by 14,000x.")
+![Batch Throughput Benchmark: Tsxtract vs catch22, TSFEL, tsfresh](/figures/throughput.png "Figure 5: Batch Throughput Benchmark (1,000 series × 500 steps, 16 threads, log-scale). Tsxtract delivers 314,450 series/sec median (exploratory laptop run), outperforming catch22 by 262x and tsfresh by 6,570x raw time.")
 
 `benchmarks/bench_libraries.py` measures end-to-end wall-clock batch throughput, deliberately including each library's required input reshaping (`tsfresh` needs a long DataFrame; `catch22` and `TSFEL` need per-series loops):
 
@@ -142,14 +142,15 @@ pip install -e ".[bench]"
 python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500 --json benchmarks/results/latest.json --markdown benchmarks/results/latest.md
 ```
 
-Published benchmark results:
+Published benchmark results (exploratory — i7-13620H laptop, 10 cores /
+16 threads; artifact: `benchmarks/results/F1_REPORT.md`):
 
 | Library | Feature count | Total time | Series/s | Speedup vs Tsxtract |
 | :--- | ---: | ---: | ---: | :--- |
-| **Tsxtract** | 33 | **1.2 ms** | **800,256** | **Baseline (1.0x)** |
-| `catch22` (pycatch22) | 22 | 1.02 s | 976 | ~820x slower |
-| `TSFEL` (all domains) | 156 | 7.15 s | 140 | ~5,725x slower |
-| `tsfresh` (EfficientFC) | 777 | 17.68 s | 57 | ~14,151x slower |
+| **Tsxtract** | 33 | **3.18 ms** | **314,450** | **Baseline (1.0x)** |
+| `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | ~262x slower |
+| `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | ~799x slower |
+| `tsfresh` (EfficientFC) | 777 | 20,891.2 ms | 48 | ~6,570x slower |
 
 Tuning tips that follow from the architecture:
 

@@ -125,15 +125,24 @@ arch.md is the architecture source of truth.
       (`F1_*`, `B_040_R*`, `B_PRE_R1c/R2`, `B_HEAD_R*` with jsonl+env),
       8 probe JSONs. Excluded rounds deleted (R1 battery flap, R1b
       partial). Total ~250KB, no LFS. Step-3/3b tracker folded in.
-- [ ] Step 3c: per-feature table (µs/series-feature + ratios) in
-      F1_REPORT.md; README/CLAIMS.md show raw + per-feature
-- [ ] Step 3d: single-thread core33 cost at 500 pts vs §9.3 budgets +
-      headroom factor (no optimization)
-- [ ] Step 5 (pending claims, in order): PyPI long_description, then
-      landing/docs figures, then other 800k/1.25ms/14,000× quotes —
-      artifacts only; laptop numbers marked "exploratory"
-- [ ] Step 6: authoritative Linux 16-vCPU run plan (commands + estimate;
-      do not run)
+- [x] Step 3c: per-feature table (µs/series-feature + ratios) in
+      F1_REPORT.md; README competitive table + CLAIMS.md show raw AND
+      per-feature (10-round pools: 0.0964 / 37.87 / 16.29 / 26.89 µs;
+      393×/169×/279×).
+- [x] Step 3d: single-thread core33 at 500 pts via scaling-suite protocol
+      (threads=1, n=122): 12.163 µs/series — at the §9.3 estimate band
+      top (6–11 µs, marked est.); headroom to Zenith floor (2.5–5 µs) is
+      ~2.4–4.9×. No optimization. Recorded in F1_REPORT.md.
+- [x] Step 5 (pending claims, in order): PyPI source-verified
+      (`readme = "README.md"` — self-corrects on next release, no edit);
+      landing data + 3 docs tables + meta + mermaid + captions rewritten
+      from the 10-round artifact; `docs/benchmarks.md` measured-run
+      refreshed; arch.md F1 closed + §9.1 rebaselined; stale single-series
+      + scaling/memory rows marked †/pending. All laptop numbers labeled
+      exploratory. Final sweep: only new values + intentional historical
+      references remain.
+- [x] Step 6: `benchmarks/LINUX_16VCPU_PLAN.md` — exact setup/measure/
+      commit commands, ~60–75 min estimate, outputs list. NOT run.
 - [ ] CI failure fixes, one root cause per commit (unblocks after push)
 - NO PR: owner directed commit + push directly, no pull request.
   Merged 2026-10-04: local `main` (was stale at `4c268ca`) fast-forwarded

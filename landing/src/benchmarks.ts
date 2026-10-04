@@ -1,12 +1,12 @@
 /**
  * Benchmark Datasets for Tsxtract Landing Page
- * 
- * =========================================================================
- * NOTE: REPLACE WITH REAL NUMBERS WHEN UPDATING YOUR REPRODUCIBLE BENCHMARKS
- * =========================================================================
+ *
+ * Measured 2026-10-04 (EXPLORATORY single-machine numbers — see CLAIMS.md).
+ * Artifact: benchmarks/results/F1_REPORT.md (10 interleaved rounds).
  * Reference command:
  *   python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500
- * Tested on: 1,000 series x 500 steps, 16 cores (float64, C-contiguous)
+ * Tested on: 1,000 series x 500 steps, i7-13620H laptop, 10 cores (6P+4E) /
+ * 16 threads, Windows 11, Performance plan, AC online, float64 C-contiguous.
  */
 
 export interface BenchmarkItem {
@@ -18,7 +18,7 @@ export interface BenchmarkItem {
   totalTimeMs: number; // in milliseconds
   seriesPerSec: number;
   msPerFeature: number;
-  multiplierVsTsxtract: number; // e.g. 1 for baseline, 820 for 820x slower
+  multiplierVsTsxtract: number; // e.g. 1 for baseline, 262 for 262x slower
   isTsxtract: boolean;
   notes: string;
 }
@@ -27,6 +27,7 @@ export interface BenchmarkConfig {
   seriesCount: number;
   stepsCount: number;
   cpuCores: number;
+  threadsCount: number;
   dtype: string;
   runner: string;
 }
@@ -34,22 +35,23 @@ export interface BenchmarkConfig {
 export const BENCHMARK_CONFIG: BenchmarkConfig = {
   seriesCount: 1000,
   stepsCount: 500,
-  cpuCores: 16,
+  cpuCores: 10,
+  threadsCount: 16,
   dtype: "float64",
-  runner: "16-core AMD Ryzen / GitHub Linux Actions Runner",
+  runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
 };
 
-/* PLACEHOLDER DATA: Calibrated against published tsxtract 0.2.1 suite */
+/* Measured 2026-10-04, pooled medians; artifact benchmarks/results/F1_REPORT.md */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "tsxtract",
     name: "Tsxtract",
-    version: "0.2.1",
+    version: "0.5.0",
     language: "Rust + PyO3",
     featuresCount: 33,
-    totalTimeMs: 1.2,
-    seriesPerSec: 800256,
-    msPerFeature: 0.0379,
+    totalTimeMs: 3.18,
+    seriesPerSec: 314450,
+    msPerFeature: 0.0964,
     multiplierVsTsxtract: 1.0,
     isTsxtract: true,
     notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
@@ -57,39 +59,39 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "catch22",
     name: "catch22 (pycatch22)",
-    version: "0.4.4",
+    version: "0.5.0",
     language: "C wrapper",
     featuresCount: 22,
-    totalTimeMs: 1020.0,
-    seriesPerSec: 976,
-    msPerFeature: 46.58,
-    multiplierVsTsxtract: 820.0,
+    totalTimeMs: 833.1,
+    seriesPerSec: 1200,
+    msPerFeature: 37.87,
+    multiplierVsTsxtract: 262.0,
     isTsxtract: false,
     notes: "Per-series Python iteration loop overhead",
   },
   {
     id: "tsfel",
     name: "TSFEL (all domains)",
-    version: "0.1.6",
+    version: "0.2.0",
     language: "Pure Python / NumPy",
     featuresCount: 156,
-    totalTimeMs: 7150.0,
-    seriesPerSec: 140,
-    msPerFeature: 45.86,
-    multiplierVsTsxtract: 5725.0,
+    totalTimeMs: 2541.6,
+    seriesPerSec: 393,
+    msPerFeature: 16.29,
+    multiplierVsTsxtract: 799.2,
     isTsxtract: false,
     notes: "Sequential python feature routines with heavy array copies",
   },
   {
     id: "tsfresh",
     name: "tsfresh (EfficientFC)",
-    version: "0.20.2",
+    version: "0.21.2",
     language: "Python + Multiprocessing",
     featuresCount: 777,
-    totalTimeMs: 17680.0,
-    seriesPerSec: 57,
-    msPerFeature: 22.76,
-    multiplierVsTsxtract: 14151.0,
+    totalTimeMs: 20891.2,
+    seriesPerSec: 48,
+    msPerFeature: 26.89,
+    multiplierVsTsxtract: 6570.0,
     isTsxtract: false,
     notes: "Requires long DataFrame melt; IPC and pickle serialization cost",
   },

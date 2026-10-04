@@ -78,16 +78,16 @@ A hand-rolled NumPy pipeline can compute a few moments quickly, but it re-scans 
 | **Per-series NumPy loop** | No, serial Python loop | Per-slice views and temporaries | You own every formula and edge case | A handful of series |
 | **Pandas `.apply()` per row** | No, interpreter-bound | Per-row Series objects | Concise but slow at scale | Interactive exploration |
 
-For library-level throughput, the benchmark suite measures end-to-end batch timings on 1,000 series of 500 steps (16 cores, Windows 11, Python 3.14):
+For library-level throughput, the benchmark suite measures end-to-end batch timings on 1,000 series of 500 steps (i7-13620H laptop, 10 cores / 16 threads, Windows 11, Python 3.14 — exploratory numbers, see CLAIMS.md):
 
-![Batch Throughput Comparison across Feature Extraction Libraries](/figures/throughput.png "Figure: Batch Throughput Comparison (1,000 series × 500 steps, 16 threads, log scale). Tsxtract executes 800,256 series/s, compared to 976 for catch22, 140 for TSFEL, and 57 for tsfresh.")
+![Batch Throughput Comparison across Feature Extraction Libraries](/figures/throughput.png "Figure: Batch Throughput Comparison (1,000 series × 500 steps, 16 threads, log scale). Tsxtract executes 314,450 series/s median, compared to 1,200 for catch22, 393 for TSFEL, and 48 for tsfresh.")
 
 | Library | Feature count | Total time | Series/s | Per-feature cost |
 | :--- | ---: | ---: | ---: | :--- |
-| **tsxtract** | 33 | **1.2 ms** | **800,256** | Baseline (1.0x) |
-| `catch22` (pycatch22) | 22 | 1.02 s | 976 | About 820x slower overall |
-| `TSFEL` (all domains) | 156 | 7.15 s | 140 | About 5,725x slower overall |
-| `tsfresh` (EfficientFC) | 777 | 17.68 s | 57 | About 14,151x slower overall |
+| **tsxtract** | 33 | **3.18 ms** | **314,450** | Baseline (1.0x) |
+| `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | About 262x slower overall |
+| `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | About 799x slower overall |
+| `tsfresh` (EfficientFC) | 777 | 20,891.2 ms | 48 | About 6,570x slower overall |
 
 Two mechanisms explain the gap, and only one is engineering:
 
@@ -102,7 +102,7 @@ Tsxtract is intentionally opinionated, so several workloads belong elsewhere:
 flowchart TD
     START{"What is your extraction objective?"}
     
-    START -->|Thousands of series, batch throughput| TSX["Use Tsxtract\n(800k series/s, zero-copy, 33 curated features)"]
+    START -->|Thousands of series, batch throughput| TSX["Use Tsxtract\n(314k series/s exploratory, zero-copy, 33 curated features)"]
     START -->|Massive exploratory screening: >1,000 features| TSF["Use tsfresh or TSFEL\n(Slower, but hundreds of specialized metrics)"]
     START -->|Single short series: <50 samples| NUM["Use Plain NumPy\n(Direct scalar operations, zero FFI overhead)"]
     START -->|Non-Python stack: R / Julia / MATLAB| C22["Use catch22\n(C library with native multi-language bindings)"]

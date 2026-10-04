@@ -109,3 +109,41 @@ drifted coherently across rounds). The 1.25/1.80 ms figures are
 irreproducible at EVERY version on this machine (even 0.3.2's best,
 1.62 ms) → different hardware, not a regression. 0.3.2's own PyPI page
 already claimed 800,256.
+
+## Per-feature view, 3c (10 suite rounds)
+
+Every run records `n_features` (observed singleton sets: tsxtract {33},
+catch22 {22}, tsfel {156}, tsfresh {777}). tsxtract pool = 4 HEAD
+rounds (n=400); competitors pooled across all 10 rounds (identical code
+every round; n=53/83/64). Per-feature cost = pooled median ÷ (1000
+series × n_features); ratios take tsxtract as baseline.
+
+| Library | n_feats | Raw med ms (95% CI) | Series/s | Raw ratio | Per-feature µs | Per-feature ratio |
+|---|---|---|---|---|---|---|
+| tsxtract core33 | 33 | 3.1802 [3.15, 3.22] | 314,450 | 1.0× | 0.0964 | 1.0× |
+| catch22 | 22 | 833.08 [798.29, 850.81] | 1,200 | 262× | 37.8671 | 393× |
+| tsfel | 156 | 2541.61 [2463.14, 2672.21] | 393 | 799× | 16.2924 | 169× |
+| tsfresh | 777 | 20891.23 [20062.15, 21530.14] | 48 | 6,570× | 26.8870 | 279× |
+
+Read the two ratios together: raw time answers "how long for the
+batch", per-feature answers "how expensive is each number". tsfresh
+looks closer per-feature (279× vs 6,570× raw) because it computes 777
+features; catch22 looks worse (393× vs 262×) because its 22 features
+are individually costly (37.87 µs each vs 0.0964 µs).
+
+## Single-thread cost vs §9.3 budgets, 3d (no optimization)
+
+Same protocol as `benchmarks/suites/scaling.py::time_it` (2 warmup,
+GC-disabled, budget 1.5 s → n=122 runs), HEAD wheel 0.5.0, threads=1,
+core33, 1000×500 f64 gaussian seed-42, Performance plan, AC online:
+**median 12.163 ms total → 12.163 µs/series** (min 10.902, p95 14.983,
+CV 0.087; per-feature 0.369 µs).
+
+arch.md §9.3 budgets per series, one core, n=500: Phase-P estimate band
+**~6–11 µs**, Zenith floor **~2.5–5 µs**. Measured 12.16 µs sits just
+above the estimate band (≈1.1× its top — the band is marked *est.* and
+this laptop's single-core turbo behavior is uncharacterized, so this is
+agreement, not a finding). Headroom to the Zenith floor: **~2.4–4.9×**
+(12.16 ÷ 5 → 12.16 ÷ 2.5). No stage-level attribution was attempted;
+§9.4 stop-rule evaluation and any optimization are explicitly out of
+scope here.

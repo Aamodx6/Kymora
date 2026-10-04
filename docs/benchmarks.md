@@ -36,22 +36,27 @@ machine- and human-readable results).
 
 ## A measured run
 
-1000 series x 500 steps, 16 cores, Windows 11, Python 3.14, best of as many runs
-as fit in a two-second budget per library:
+1,000 series × 500 steps, i7-13620H laptop, 10 cores (6P+4E) / 16 threads,
+Windows 11, Python 3.14, Performance plan, AC online — interleaved rounds,
+pooled medians with 95% bootstrap CIs (artifact:
+`benchmarks/results/F1_REPORT.md`; exploratory single-machine numbers):
 
 | library | features | total time | series/s | ms/feature |
 |---|---:|---:|---:|---:|
-| **tsxtract 0.2.1** | 33 | **1.2 ms** | 800,256 | 0.0379 |
-| `catch22` (pycatch22) | 22 | 1.02 s | 976 | 46.58 |
-| `TSFEL` (all domains) | 156 | 7.15 s | 140 | 45.86 |
-| `tsfresh` (EfficientFCParameters) | 777 | 17.68 s | 57 | 22.76 |
+| **tsxtract 0.5.0** | 33 | **3.18 ms** | 314,450 | 0.0964 |
+| `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | 37.87 |
+| `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | 16.29 |
+| `tsfresh` (EfficientFCParameters) | 777 | 20,891.2 ms | 48 | 26.89 |
 
 The batch gap has two independent causes. One is parallelism plus a single FFI
 crossing instead of a thousand Python calls. The other is that all 33 features
-here are O(n) or O(n log n), while `catch22` includes costlier estimators -- on
-one 500-point series, `catch22_all` takes 945 us against 9.4 us for
-`extract_features` (best of 200 runs each). If you need those specific
+here are O(n) or O(n log n), while `catch22` includes costlier estimators --
+on one 500-point series, `catch22_all` takes 945 us against 9.4 us for
+`extract_features` (best of 200 runs each) †. If you need those specific
 estimators, that difference is not overhead you can optimise away.
+
+† predates the 2026-10-04 re-baseline; single-series figures pending
+re-measurement (tracked in `CLAIMS.md`).
 
 ## Published numbers
 

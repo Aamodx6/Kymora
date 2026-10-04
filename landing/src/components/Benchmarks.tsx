@@ -54,9 +54,9 @@ export const Benchmarks: React.FC = () => {
               !
             </span>
             <div className="text-body">
-              <span className="font-semibold text-ink">REPRODUCIBLE TEST BENCHMARK</span>
+              <span className="font-semibold text-ink">EXPLORATORY LAPTOP BENCHMARK</span>
               <p className="mt-0.5 text-muted">
-                /* Numbers below are calibrated benchmark placeholders from benchmarks.ts. Run the script below on your machine to verify. */
+                /* Numbers below are single-machine measurements (i7-13620H, 10 cores/16 threads — see CLAIMS.md), not fleet evidence. Run the script below on your machine to verify. */
               </p>
             </div>
           </div>
@@ -80,10 +80,10 @@ export const Benchmarks: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-borderDim px-5 py-4 sm:px-7">
             <div>
               <h3 className="font-sans text-base font-bold text-ink">
-                1,000 Series × 500 Steps (16-core parallel)
+                1,000 Series × 500 Steps (10 cores / 16 threads, exploratory)
               </h3>
               <p className="font-mono text-xs text-muted">
-                {BENCHMARK_CONFIG.seriesCount} series · {BENCHMARK_CONFIG.stepsCount} timesteps · {BENCHMARK_CONFIG.dtype} · {BENCHMARK_CONFIG.cpuCores} cores
+                {BENCHMARK_CONFIG.seriesCount} series · {BENCHMARK_CONFIG.stepsCount} timesteps · {BENCHMARK_CONFIG.dtype} · {BENCHMARK_CONFIG.cpuCores} cores / {BENCHMARK_CONFIG.threadsCount} threads
               </p>
             </div>
 
@@ -188,7 +188,7 @@ export const Benchmarks: React.FC = () => {
                       style={{ width: `${percent}%` }}
                     >
                       {item.isTsxtract && (
-                        <span className="truncate">Tsxtract (800k+ series/s)</span>
+                        <span className="truncate">Tsxtract (314k series/s*)</span>
                       )}
                     </div>
                   </div>
