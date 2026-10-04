@@ -21,7 +21,7 @@ The only required runtime dependency is numpy (>= 1.24).
 | `docs` | mkdocs, mkdocs-material | building this site |
 
 ```bash
-pip install "tsxtract-rs[pandas]"
+pip install "tsxtract[pandas]"
 ```
 
 ## Building from source

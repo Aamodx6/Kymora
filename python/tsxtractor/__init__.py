@@ -70,7 +70,7 @@ __all__ = [
 def _resolve_version() -> str:
     from importlib.metadata import PackageNotFoundError, version
 
-    for dist_name in ("tsxtract-rs", "tsxtractor", "tsxtract"):
+    for dist_name in ("tsxtract", "tsxtractor", "tsxtract-rs"):
         try:
             return version(dist_name)
         except PackageNotFoundError:
@@ -99,8 +99,8 @@ def extract_features_df(
         import pandas as pd
     except ImportError as exc:  # pragma: no cover - depends on environment
         raise ImportError(
-            "extract_features_df requires pandas, which tsxtract-rs does not "
-            'install by default. Install it with: pip install "tsxtract-rs[pandas]"'
+            "extract_features_df requires pandas, which tsxtract does not "
+            'install by default. Install it with: pip install "tsxtract[pandas]"'
         ) from exc
 
     values: Any = extract_features(
@@ -129,8 +129,8 @@ def extract_features_mc_df(
         import pandas as pd
     except ImportError as exc:  # pragma: no cover - depends on environment
         raise ImportError(
-            "extract_features_mc_df requires pandas, which tsxtract-rs does not "
-            'install by default. Install it with: pip install "tsxtract-rs[pandas]"'
+            "extract_features_mc_df requires pandas, which tsxtract does not "
+            'install by default. Install it with: pip install "tsxtract[pandas]"'
         ) from exc
 
     values = extract_features_mc(

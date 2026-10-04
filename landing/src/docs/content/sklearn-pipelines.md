@@ -43,7 +43,7 @@ You need scikit-learn alongside Tsxtract, plus an understanding of two terms:
 - **Transformer:** an estimator with `transform()` that converts input rows into a new representation.
 
 ```bash
-pip install "tsxtract-rs[pandas]" scikit-learn
+pip install "tsxtract[pandas]" scikit-learn
 ```
 
 ## Steps

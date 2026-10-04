@@ -1,8 +1,8 @@
 # Tsxtract
 ### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
 
-[![PyPI - Version](https://img.shields.io/pypi/v/tsxtract-rs.svg?color=blue)](https://pypi.org/project/tsxtract-rs/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tsxtract-rs.svg)](https://pypi.org/project/tsxtract-rs/)
+[![PyPI - Version](https://img.shields.io/pypi/v/tsxtract.svg?color=blue)](https://pypi.org/project/tsxtract/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tsxtract.svg)](https://pypi.org/project/tsxtract/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Tsxtract/actions/workflows/ci.yml)
 
@@ -10,7 +10,7 @@
 
 **Tsxtract** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets blazingly fast, memory-efficient, and effortless. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
-[PyPI](https://pypi.org/project/tsxtract-rs/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
+[PyPI](https://pypi.org/project/tsxtract/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Sliding Windows](#streaming--sliding-windows) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://landing-drab-six-14.vercel.app)
 
 ---
 
@@ -40,7 +40,7 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 ### Installation
 
 #### Prebuilt Wheels (Recommended)
-Precompiled binary wheels are available on [PyPI (tsxtract-rs)](https://pypi.org/project/tsxtract-rs/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
+Precompiled binary wheels are available on [PyPI (tsxtract)](https://pypi.org/project/tsxtract/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
 
 ```bash
 pip install tsxtract

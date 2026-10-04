@@ -36,12 +36,12 @@ By the end of this guide you will be able to:
 
 You need the optional frame libraries alongside Tsxtract:
 
-- **Pandas path:** `pip install "tsxtract-rs[pandas]"` for the built-in helper.
+- **Pandas path:** `pip install "tsxtract[pandas]"` for the built-in helper.
 - **Polars path:** `pip install polars` for the bridge pattern (no native Tsxtract bindings exist).
 - **NumPy discipline:** every matrix crossing the boundary must be C-contiguous `float64`.
 
 ```bash
-pip install "tsxtract-rs[pandas]" polars pyarrow
+pip install "tsxtract[pandas]" polars pyarrow
 ```
 
 > [!NOTE]

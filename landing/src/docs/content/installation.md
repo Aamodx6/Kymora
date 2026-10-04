@@ -12,11 +12,11 @@ pip install tsxtract
 ```
 
 ```bash tab="uv"
-uv add tsxtract-rs
+uv add tsxtract
 ```
 
 ```bash tab="conda"
-conda install -c conda-forge tsxtract-rs
+conda install -c conda-forge tsxtract
 ```
 
 > [!NOTE]
@@ -41,14 +41,14 @@ conda install -c conda-forge tsxtract-rs
 The core install stays NumPy-only, so install extras only for the workflow you need:
 
 ```bash tab="pip"
-pip install "tsxtract-rs[pandas]"
-pip install "tsxtract-rs[test]"
-pip install "tsxtract-rs[bench]"
+pip install "tsxtract[pandas]"
+pip install "tsxtract[test]"
+pip install "tsxtract[bench]"
 ```
 
 ```bash tab="uv"
-uv add "tsxtract-rs[pandas]"
-uv add "tsxtract-rs[test]"
+uv add "tsxtract[pandas]"
+uv add "tsxtract[test]"
 ```
 
 ```bash tab="conda"
@@ -116,16 +116,16 @@ cargo test --no-default-features
 Move to the latest published release with your usual manager:
 
 ```bash tab="pip"
-pip install --upgrade tsxtract-rs
+pip install --upgrade tsxtract
 ```
 
 ```bash tab="uv"
-uv lock --upgrade-package tsxtract-rs
+uv lock --upgrade-package tsxtract
 uv sync
 ```
 
 ```bash tab="conda"
-conda update -c conda-forge tsxtract-rs
+conda update -c conda-forge tsxtract
 ```
 
 ## Uninstall
@@ -133,22 +133,22 @@ conda update -c conda-forge tsxtract-rs
 Remove the library cleanly when switching environments:
 
 ```bash tab="pip"
-pip uninstall -y tsxtract-rs
+pip uninstall -y tsxtract
 ```
 
 ```bash tab="uv"
-uv remove tsxtract-rs
+uv remove tsxtract
 ```
 
 ```bash tab="conda"
-conda remove tsxtract-rs
+conda remove tsxtract
 ```
 
 ## Troubleshooting
 
 ### Wheel not found during install
 
-- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract-rs`.
+- **Symptom:** `ERROR: Could not find a version that satisfies the requirement tsxtract`.
 - **Cause:** Python older than 3.10 or an unsupported architecture such as 32-bit x86.
 - **Resolution:** check `python --version`, then recreate the environment on Python 3.10+.
 
@@ -174,7 +174,7 @@ conda remove tsxtract-rs
 
 - **Symptom:** `ImportError: DLL load failed` on Windows or `undefined symbol` on Linux.
 - **Cause:** stale virtual environment paths or an outdated system C runtime.
-- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract-rs` plus `numpy>=1.24`.
+- **Resolution:** recreate the virtual environment, update the OS runtime, and reinstall `tsxtract` plus `numpy>=1.24`.
 
 ### Proxy and corporate firewall timeouts
 
@@ -183,11 +183,11 @@ conda remove tsxtract-rs
 - **Resolution:** pass your proxy and certificate bundle explicitly during install.
 
 ```bash
-pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract-rs
+pip install --proxy http://proxy.corporate.internal:8080 --cert /path/to/ca-bundle.crt tsxtract
 ```
 
 ```text
-Successfully installed tsxtract-rs-0.3.2
+Successfully installed tsxtract-0.5.0
 ```
 
 ### Contiguous and dtype errors at call time
