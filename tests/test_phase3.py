@@ -136,13 +136,19 @@ def test_minimal_profile_is_faster_than_core33():
     tsxtract.extract_features(X[:50], profile="minimal")
     tsxtract.extract_features(X[:50], profile="core33")
 
-    t0 = time.perf_counter()
-    tsxtract.extract_features(X, profile="minimal")
-    t_min = time.perf_counter() - t0
+    # Best-of-N each: machine noise only ever ADDS time (loaded CI runners
+    # inverted this assertion with single samples), so the minimum is the
+    # robust estimator — same methodology as benchmarks/ (best-of-N).
+    def best_of(profile, n=5):
+        best = float("inf")
+        for _ in range(n):
+            t0 = time.perf_counter()
+            tsxtract.extract_features(X, profile=profile)
+            best = min(best, time.perf_counter() - t0)
+        return best
 
-    t0 = time.perf_counter()
-    tsxtract.extract_features(X, profile="core33")
-    t_core = time.perf_counter() - t0
+    t_min = best_of("minimal")
+    t_core = best_of("core33")
 
     # Minimal should be significantly faster because it skips sort and FFT
     assert t_min < t_core
