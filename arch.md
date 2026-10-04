@@ -76,7 +76,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | I5 | **GIL released** for the whole parallel region; inputs converted to plain slices before release | test: 2 Python threads scale ≈2× |
 | I6 | Input is **borrowed, never defensively copied** (contiguous f64/f32). Output float64 unless `out_dtype` given | allocation-counting test |
 | I7 | **Determinism:** results independent of thread count and scheduling (bitwise, per-series independence); SIMD vs scalar equal within §12.2 tolerances | `suites/agreement`, thread-sweep test |
-| I8 | `unsafe` only in `src/kernels/`; each block has `// SAFETY:` + `debug_assert!`; `#![deny(unsafe_code)]` elsewhere | CI lint |
+| I8 | `unsafe` only in `src/ffi.rs` (numpy buffer boundary: centralized `out_slice_mut` helpers + documented SAFETY contract) and `src/kernels/` (designated SIMD home, currently unsafe-free); every other module carries `#![deny(unsafe_code)]` | rustc (deny attributes; negative-tested) |
 | I9 | No numeric logic in Python | review + lint |
 | I10 | SemVer: additive changes (new features/profiles/params) = minor; changing existing feature values/order/NaN semantics = major | CHANGELOG gate |
 
@@ -121,9 +121,10 @@ flowchart TB
 
 ```
 src/
-  lib.rs ffi.rs error.rs plan.rs exec.rs pipeline.rs scratch.rs intermediates.rs registry.rs streaming.rs
-  kernels/   mod.rs(dispatch) reduce.rs select.rs sort.rs fft.rs perm.rs        # only place for unsafe/SIMD
-  features/  core33.rs stats.rs change.rs counts.rs acf.rs trend.rs spectral.rs entropy.rs complexity.rs catch22.rs
+  lib.rs ffi.rs error.rs extract.rs plan.rs exec.rs pipeline.rs scratch.rs intermediates.rs registry.rs
+  pool.rs    (unwired Z6 prototype, no callers — wire-or-delete pending owner decision)
+  kernels/   mod.rs reduce.rs sort.rs fft.rs perm.rs        # designated home for unsafe/SIMD (currently unsafe-free)
+  features/  mod.rs stats.rs temporal.rs spectral.rs entropy.rs views.rs streaming.rs multistream.rs
 python/tsxtract/  __init__.py  _core.pyi  py.typed  (+ ../tsxtractor/ deprecated shim, removal >= 0.7.0)
 benchmarks/   harness/ adapters/ datasets/ suites/ agreement/ results/ report/  STATE.md
 Makefile  Dockerfile  reproduce.sh  (repo root: benchmark + build entry points)

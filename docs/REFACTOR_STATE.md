@@ -19,8 +19,13 @@ arch.md is the architecture source of truth.
       `docs/refactor/deleted_files.md`. Contributor files
       (CODE_OF_CONDUCT, SECURITY, CITATION.cff, templates, dependabot)
       deferred to Phase 7; docs-system dedup deferred to Phase 5.
-- [ ] Phase 3: Rust core cleanup
-- [ ] Phase 3: Rust core cleanup
+- [x] Phase 3: Rust core cleanup (2026-10-04). Gate: legacy dead code
+      removed with evidence (−133 net), unsafe centralized into 2 helpers
+      with SAFETY contract, `deny(unsafe_code)` in 17 modules
+      (negative-tested), rustdoc warning-free, arch.md I8 + §4.1 aligned,
+      cargo/pytest green, feature hash unchanged, perf no-regression.
+      Fresh Zenith experiments kept (pool.rs, soa_4x, out32) pending owner
+      wire-or-delete. See `docs/refactor/phase3_VERIFICATION.md`.
 - [ ] Phase 4: Python package cleanup
 - [ ] Phase 5: documentation architecture
 - [ ] Phase 6: website
@@ -36,6 +41,12 @@ arch.md is the architecture source of truth.
 - D9 (Phase 2): `benchmarks/` is the Python harness dir (arch.md §4.1
   updated); `mkdocs build --strict` passes (docs CI green); `make` is
   unavailable on the owner's Windows box — runner consolidation is Phase 7.
+- D10 (Phase 3): unsafe lives only in `ffi.rs` (numpy boundary, centralized
+  helpers + SAFETY) and `kernels/` (designated home, currently unsafe-free);
+  compile-enforced elsewhere via `deny(unsafe_code)`.
+- D11 (Phase 3): deleted only legacy-superseded dead code; kept fresh
+  Zenith-session experiments (`pool.rs`, `soa_4x`, `run_core33_f32_out32`)
+  for an owner wire-or-delete call.
 
 ## NEEDS-OWNER
 
@@ -50,6 +61,11 @@ arch.md is the architecture source of truth.
 5. `patent/patent_disclosure.md`: 0 references, but IP content — confirm
    keep (do NOT delete on usage heuristic).
 6. `mkdocs.yml: site_url` still `aamod007.github.io` (Phase 5 docs decision).
+7. `pool.rs` / `TSXTRACT_POOL`: Rust ignores the env var, but `tune.py` and
+   `docs/api.md` present spin-vs-rayon as functional — wire it (behavior
+   change), delete `pool.rs`, or keep as documented prototype?
+8. `soa_4x` kernels + `run_core33_f32_out32`: uncalled Zenith-session
+   experiments — keep or delete?
 
 ## Stash register
 
