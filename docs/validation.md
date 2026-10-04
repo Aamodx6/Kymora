@@ -1,6 +1,6 @@
 # Validation report
 
-Regenerate this page with `python scripts/validation_report.py`. CI runs the same
+Regenerate this page with `python tools/validation_report.py`. CI runs the same
 script on every push and fails the build if any feature drifts outside tolerance
 or disagrees with the reference on NaN, so a stale or optimistic table here
 cannot survive a merge. The run below is from a maintainer machine; the CI run

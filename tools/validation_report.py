@@ -12,7 +12,7 @@ Two things are checked per (feature, series) pair:
   * Max absolute error over every series where both values are finite.
 
 Usage:
-    python scripts/validation_report.py [--out validation-report.md]
+    python tools/validation_report.py [--out validation-report.md]
 
 Exits non-zero if any feature exceeds the tolerance or disagrees on NaN, so CI
 fails loudly rather than publishing a report full of red rows.

@@ -9,7 +9,7 @@ Produces quantitative proofs required for academic peer review:
   3. Redundancy Metrics (comparing against over-parameterized feature banks)
 
 Usage:
-    python scripts/feature_redundancy_analysis.py --n-series 2000 --length 300 --output-md docs/redundancy_report.md
+    python tools/feature_redundancy_analysis.py --n-series 2000 --length 300 --output-md docs/redundancy_report.md
 """
 
 from __future__ import annotations

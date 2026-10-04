@@ -38,7 +38,7 @@ Tsxtract/
   python/tsxtract/    # __init__.py, _core.pyi stubs, py.typed marker
   tests/                # reference, property, NaN, validation, streaming suites
   benchmarks/              # bench_libraries, ablation, UCR downstream + results/
-  scripts/              # validation_report, feature_redundancy_analysis
+  tools/              # validation_report, feature_redundancy_analysis
   docs/                 # MkDocs site sources (validation, features, nan-policy)
   landing/src/docs/     # This documentation site (content, nav, features.ts)
 ```
@@ -58,7 +58,7 @@ pytest tests/
 cargo test --no-default-features
 cargo fmt --all -- --check
 cargo clippy --no-default-features --all-targets -- -D warnings
-python scripts/validation_report.py
+python tools/validation_report.py
 ```
 
 | Command | Scope | Notes |
@@ -67,7 +67,7 @@ python scripts/validation_report.py
 | `cargo test --no-default-features` | Pure-Rust unit tests | Flag disables `pyo3/extension-module` so binaries link |
 | `cargo fmt --all -- --check` | Rust formatting | Must pass with no diff |
 | `cargo clippy --no-default-features --all-targets -- -D warnings` | Lints as errors | Zero warnings accepted |
-| `python scripts/validation_report.py` | Reference drift gate | Exits non-zero if any feature drifts from NumPy/SciPy |
+| `python tools/validation_report.py` | Reference drift gate | Exits non-zero if any feature drifts from NumPy/SciPy |
 
 ## Adding a new feature
 

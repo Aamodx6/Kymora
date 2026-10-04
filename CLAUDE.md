@@ -26,7 +26,7 @@ pytest tests -q                              # must be 138 passed, 0 warnings
 cargo test --no-default-features
 cargo fmt --all -- --check
 cargo clippy --no-default-features --all-targets -- -D warnings
-python scripts/validation_report.py          # feature-drift check
+python tools/validation_report.py          # feature-drift check
 python -m mkdocs build --strict
 python -m mypy python/tsxtract
 ```

@@ -31,7 +31,7 @@ pytest tests/                        # Python-visible behaviour
 cargo test --no-default-features     # pure-Rust unit tests
 cargo fmt --all -- --check
 cargo clippy --no-default-features --all-targets -- -D warnings
-python scripts/validation_report.py  # exits non-zero if a feature drifts
+python tools/validation_report.py  # exits non-zero if a feature drifts
 ```
 
 `--no-default-features` disables `pyo3/extension-module`, which omits libpython

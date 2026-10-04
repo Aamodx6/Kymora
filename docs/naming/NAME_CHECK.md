@@ -1,8 +1,8 @@
 # Name check — Kymora / Tachyra / Aevra (2026-10-04)
 
-Script: `scripts/name_check.py` (stdlib only). Raw JSON:
+Script: `tools/name_check.py` (stdlib only). Raw JSON:
 `docs/refactor/rename-kymora/NAME_CHECK_RAW.json`.
-Command: `python scripts/name_check.py --out docs/refactor/rename-kymora/NAME_CHECK_RAW.json Kymora Tachyra Aevra`
+Command: `python tools/name_check.py --out docs/refactor/rename-kymora/NAME_CHECK_RAW.json Kymora Tachyra Aevra`
 
 Variants checked per candidate: `name`, `name-rs`, `py<name>`, `<name>-py`,
 plus hyphen/underscore/PEP 503 normalizations (all normalize identically —
