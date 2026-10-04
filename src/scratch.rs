@@ -6,6 +6,7 @@
 use realfft::num_complex::Complex;
 use realfft::RealFftPlanner;
 
+#[repr(align(64))]
 pub struct Scratch {
     pub centered: Vec<f64>,
     pub sorted: Vec<f64>,
@@ -16,6 +17,8 @@ pub struct Scratch {
     pub power: Vec<f64>,
     pub acf: Vec<f64>,
     pub planner: RealFftPlanner<f64>,
+    pub sel_scratch: crate::kernels::sort::SelScratch,
+    pub view_buf: Vec<f64>,
 }
 
 impl Scratch {
@@ -33,6 +36,8 @@ impl Scratch {
             power: Vec::with_capacity(nbins),
             acf: Vec::with_capacity(32),
             planner: RealFftPlanner::new(),
+            sel_scratch: crate::kernels::sort::SelScratch::new(),
+            view_buf: Vec::with_capacity(cap),
         }
     }
 
@@ -54,6 +59,10 @@ impl Scratch {
         let nbins = len / 2 + 1;
         if self.power.capacity() < nbins {
             self.power.reserve(nbins - self.power.capacity());
+        }
+        self.sel_scratch.ensure_capacity(len);
+        if self.view_buf.capacity() < len {
+            self.view_buf.reserve(len - self.view_buf.capacity());
         }
     }
 }

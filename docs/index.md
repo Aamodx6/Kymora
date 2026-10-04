@@ -1,51 +1,44 @@
 # tsxtractor
 
-Batch time-series feature extraction for Python, with a Rust core.
+High-performance time-series feature extraction for Python, powered by a native Rust engine.
 
-33 curated statistical, temporal, and spectral features, computed across a whole
-batch of series at once. The Rust core takes zero-copy views of your numpy
-buffers, releases the GIL, and parallelises across the *series* dimension with
-[rayon](https://github.com/rayon-rs/rayon).
+Extract curated statistical, temporal, spectral, multichannel, and multi-view features across large batches of time series. The Rust core operates directly on zero-copy NumPy buffers, releases the GIL, and maximizes throughput via SIMD vectorization and persistent low-latency worker pools.
 
 ```bash
 pip install tsxtract-rs
 ```
 
 ```python
-import numpy as np, tsxtractor
+import numpy as np
+import tsxtractor
 
+# Batch extraction over 100,000 series
 X = np.random.randn(100_000, 500)
-feats = tsxtractor.extract_features(X)   # (100_000, 33) float64
-df = tsxtractor.extract_features_df(X)   # same, labeled columns
+feats = tsxtractor.extract_features(X)       # (100_000, 33) float64
+df = tsxtractor.extract_features_df(X)       # pandas DataFrame with labeled columns
 ```
 
-## Where the speed comes from
+---
 
-Parallelism is across **series**, not across the feature computations within one
-series. Extracting from 100 000 series scales close to linearly with core count;
-extracting from *one* series shows no speedup versus a good numpy
-implementation, and is not meant to. For a single long series, use
-[`sliding_features`](api.md#sliding_features), which parallelises over windows.
+## Architectural Highlights
 
-## When not to use this
+- **Vectorized SIMD & SoA Transpositions**: First and second statistical passes, autocorrelations, and running aggregates run across SIMD lanes (AVX2/NEON) using Structure-of-Arrays (SoA) layouts.
+- **$O(n)$ Multi-Select Quantiles**: Direct histogram/selection multi-quantile evaluation eliminates sorting overhead on Core33 and minimal profiles.
+- **Persistent Spin-Then-Park Thread Pool**: Custom thread pool avoids operating system wake-up latencies by spin-waiting on high-frequency batches with automatic Rayon fallback.
+- **Multi-View Transform Engine**: Multiply feature coverage across 8 mathematical domain views (`raw`, `diff`, `diff2`, `detrend`, `znorm`, `abs`, `logret`, `rank`) with automatic invariance pruning.
+- **Multichannel & Cross-Channel Dynamics**: Full support for 3D time-series batches `(samples, channels, length)`, evaluating per-channel baselines and pairwise cross-correlation / covariance interactions.
+- **Fleet Real-Time Streaming**: `MultiStreamExtractor` monitors thousands of live time-series streams simultaneously with sub-microsecond $O(1)$ state updates.
+- **Supervised Feature Selection**: `select_features` and `TsxSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
 
-- **You need exhaustive coverage.** `tsfresh` computes up to 1 558 features,
-  `TSFEL` around 390. This library computes 33, chosen to stay low-redundancy.
-- **You need custom or parameterised features.** The set is intentionally
-  closed; there is no plugin hook.
-- **You are in R, Julia, or MATLAB.** Use `catch22`, which has bindings for all
-  three.
-- **Your workload is one short series at a time.** The parallelism has nothing
-  to work with.
+---
 
-## What is guaranteed
+## Guarantees
 
 | Surface | Guarantee |
 |---|---|
-| `feature_names()` order and length | Stable within a major version |
-| Output dtype | `float64`, always |
-| [NaN behaviour](nan-policy.md) | Documented and tested; changes are breaking |
-| No Rust panic crosses into Python | Enforced by property-based tests |
+| `feature_names()` order and length | Frozen across all minor releases within a major version |
+| Output dtype | `float64` default (with fast `float32` pipeline support) |
+| [NaN policy](nan-policy.md) | Exact and tested NaN propagation semantics |
+| Panic safety | Rust panics are intercepted and translated into Python exceptions |
 
-Correctness is checked feature by feature against numpy/scipy references — see
-the [validation report](validation.md).
+Numerical parity is validated feature by feature against NumPy and SciPy references.

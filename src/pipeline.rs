@@ -1,4 +1,4 @@
-use crate::intermediates::Intermediates;
+use crate::intermediates::{Intermediates, Needs};
 use crate::kernels;
 use crate::plan::FeaturePlan;
 use crate::registry;
@@ -6,7 +6,7 @@ use crate::scratch::Scratch;
 
 pub const CORE33_COUNT: usize = 33;
 
-/// Run a general feature plan on series `x` using lazy intermediates.
+/// Run a general feature plan on series `x` using lazy intermediates and multi-view dispatch.
 #[inline]
 pub fn run_plan(x: &[f64], plan: &FeaturePlan, scratch: &mut Scratch, out: &mut [f64]) {
     let nf = plan.n_features();
@@ -17,23 +17,76 @@ pub fn run_plan(x: &[f64], plan: &FeaturePlan, scratch: &mut Scratch, out: &mut 
         return;
     }
 
-    // Fast path: if plan is the default core33, use direct fused kernel pipeline
-    if plan.indices.len() == CORE33_COUNT
+    // Fast path: if plan is plain raw core33, use direct fused kernel pipeline
+    let is_plain_raw = plan.views.len() == 1 && plan.views[0] == "raw";
+    if is_plain_raw
+        && plan.indices.len() == CORE33_COUNT
         && plan.indices.iter().enumerate().all(|(i, &idx)| i == idx)
     {
         run_core33(x, scratch, out);
         return;
     }
 
-    let inter = Intermediates::compute(x, plan.needs, scratch);
-    if inter.has_nan {
-        out[..nf].fill(f64::NAN);
+    if is_plain_raw {
+        let inter = Intermediates::compute(x, plan.needs, scratch);
+        if inter.has_nan {
+            out[..nf].fill(f64::NAN);
+            return;
+        }
+
+        for (slot, item) in out[..nf].iter_mut().zip(&plan.items) {
+            let def = &registry::FEATURES[item.feature_idx];
+            *slot = def.compute(x, &inter);
+        }
         return;
     }
 
-    for (slot, &idx) in out[..nf].iter_mut().zip(&plan.indices) {
-        let def = &registry::FEATURES[idx];
-        *slot = def.compute(x, &inter);
+    let mut out_idx = 0usize;
+    for v in &plan.views {
+        let view_items: Vec<&crate::plan::PlanItem> =
+            plan.items.iter().filter(|it| &it.view == v).collect();
+
+        if view_items.is_empty() {
+            continue;
+        }
+
+        let mut view_needs = Needs::empty();
+        for it in &view_items {
+            view_needs |= registry::FEATURES[it.feature_idx].needs;
+        }
+
+        if v == "raw" {
+            let inter = Intermediates::compute(x, view_needs, scratch);
+            if inter.has_nan {
+                for _ in 0..view_items.len() {
+                    out[out_idx] = f64::NAN;
+                    out_idx += 1;
+                }
+            } else {
+                for it in view_items {
+                    let def = &registry::FEATURES[it.feature_idx];
+                    out[out_idx] = def.compute(x, &inter);
+                    out_idx += 1;
+                }
+            }
+        } else {
+            let mut view_buf = std::mem::take(&mut scratch.view_buf);
+            crate::features::views::compute_view(x, v, &mut view_buf);
+            let inter = Intermediates::compute(&view_buf, view_needs, scratch);
+            if inter.has_nan {
+                for _ in 0..view_items.len() {
+                    out[out_idx] = f64::NAN;
+                    out_idx += 1;
+                }
+            } else {
+                for it in view_items {
+                    let def = &registry::FEATURES[it.feature_idx];
+                    out[out_idx] = def.compute(&view_buf, &inter);
+                    out_idx += 1;
+                }
+            }
+            scratch.view_buf = view_buf;
+        }
     }
 }
 
@@ -60,8 +113,9 @@ pub fn run_core33(x: &[f64], scratch: &mut Scratch, out: &mut [f64]) {
     // Pass 2 Fused: writes centered buffer and computes m2, m3, m4, crossings, and strikes in one pass
     let p2 = kernels::reduce::pass2_fused(x, p1.mean, p1.constant, &mut scratch.centered);
 
-    // Order statistics via optimal partition selection
-    let quantiles = kernels::sort::quantiles(x, &mut scratch.sorted);
+    // Order statistics via optimal histogram multi-select
+    let quantiles =
+        kernels::sort::quantiles_multi_select(x, p1.min, p1.max, &mut scratch.sel_scratch);
 
     // Write moments, extremes, and quantiles
     out[0] = p1.mean;
@@ -184,4 +238,14 @@ pub fn run_core33_f32(x: &[f32], scratch: &mut Scratch, out: &mut [f64]) {
     out[30] = dom;
     out[31] = cent;
     out[32] = sent;
+}
+
+/// Run core33 pipeline over f32 series writing directly to f32 output buffer.
+#[inline]
+pub fn run_core33_f32_out32(x: &[f32], scratch: &mut Scratch, out: &mut [f32]) {
+    let mut tmp = [0.0f64; CORE33_COUNT];
+    run_core33_f32(x, scratch, &mut tmp);
+    for (o, &v) in out[..CORE33_COUNT].iter_mut().zip(tmp.iter()) {
+        *o = v as f32;
+    }
 }

@@ -1,122 +1,321 @@
-# API reference
+# API Reference
 
-Four public functions. That is the whole surface, and it is frozen for 1.0.
+Complete Python API specification for `tsxtractor` v0.5.0.
 
 ```python
 import tsxtractor
 
-tsxtractor.__version__      # e.g. "0.2.0"
+tsxtractor.__version__  # "0.5.0"
 ```
 
-The package ships type stubs and a `py.typed` marker, so mypy and IDEs see real
-signatures rather than `Any`.
+The package ships full type annotations and a `py.typed` marker for mypy and language servers.
 
-## extract_features
+---
+
+## Batch Extraction
+
+### extract_features
 
 ```python
-extract_features(X: np.ndarray | Sequence[np.ndarray]) -> np.ndarray
+extract_features(
+    X: np.ndarray | Sequence[np.ndarray],
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: np.ndarray | None = None,
+    views: Sequence[str] | None = None,
+) -> np.ndarray
 ```
 
-Extract all 33 features for every series in a batch.
+Extract features for every series in a batch.
 
 **Parameters**
 
-- `X` — either a 2D C-contiguous float64 array of shape `(n_series, length)`, or
-  a sequence of 1D C-contiguous float64 arrays whose lengths may differ.
+- `X` — 2D C-contiguous `float64` array of shape `(n_series, length)`, or a sequence of 1D C-contiguous `float64` arrays with variable lengths.
+- `profile` — Execution profile: `"minimal"` (12 features), `"core33"` (default 33 features), `"extended"`, or `"full"`.
+- `features` — Explicit list of feature names to extract, overriding profile selection.
+- `n_jobs` — Thread count override. Defaults to logical CPU core count.
+- `out` — Optional pre-allocated 2D array of shape `(n_series, n_features)` to receive results in place without allocation.
+- `views` — Optional sequence of time-series transform views to compute: `"raw"`, `"diff"`, `"diff2"`, `"detrend"`, `"znorm"`, `"abs"`, `"logret"`, `"rank"`. Features invariant to transforms are automatically pruned.
 
-**Returns** a `(n_series, 33)` float64 array. Column `i` corresponds to
-`feature_names()[i]`.
+**Returns**
 
-**Raises** `ValueError` for structural problems (no series, a zero-length
-series, a non-contiguous buffer) and `TypeError` for a wrong dtype or shape. See
-the [NaN policy](nan-policy.md) for what is a value rather than an error.
+A 2D `float64` array of shape `(n_series, n_features)`.
 
 ```python
+import numpy as np
+import tsxtractor
+
 X = np.random.default_rng(0).standard_normal((1000, 500))
-feats = tsxtractor.extract_features(X)          # (1000, 33)
 
-ragged = [np.arange(50.0), np.arange(120.0)]
-feats = tsxtractor.extract_features(ragged)     # (2, 33)
+# Default Core33 batch extraction
+feats = tsxtractor.extract_features(X)
+
+# Multi-view extraction across raw, differences, and z-normalization
+feats_views = tsxtractor.extract_features(X, views=["raw", "diff", "znorm"])
 ```
 
-Both input forms run the same per-series code; only the input handling differs,
-so a 2D array and the equivalent list of rows give bit-identical output.
+---
 
-## extract_features_df
+### extract_features_df
 
 ```python
-extract_features_df(X: np.ndarray | Sequence[np.ndarray]) -> pd.DataFrame
+extract_features_df(
+    X: np.ndarray | Sequence[np.ndarray],
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: np.ndarray | None = None,
+    views: Sequence[str] | None = None,
+) -> pd.DataFrame
 ```
 
-Same computation as `extract_features`, wrapped in a `pandas.DataFrame` whose
-columns are `feature_names()` and whose index is a plain `RangeIndex`.
+Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
 
-Requires pandas (`pip install "tsxtractor[pandas]"`); raises `ImportError` with
-that instruction if it is missing. Everything else behaves identically to
-`extract_features`.
+Requires `pandas` (`pip install "tsxtractor[pandas]"`).
 
-```python
-df = tsxtractor.extract_features_df(X)
-df[["mean", "std", "spectral_entropy"]].head()
-```
+---
 
-## sliding_features
+### sliding_features
 
 ```python
 sliding_features(x: np.ndarray, window: int, stride: int = 1) -> np.ndarray
 ```
 
-Feature matrix over rolling windows of a single series — the way to get
-parallelism out of one long recording rather than many short ones.
+Extracts rolling-window feature matrices across a single long 1D series without copying window data.
 
 **Parameters**
 
-- `x` — 1D C-contiguous float64 array.
-- `window` — window length in samples; must satisfy `1 <= window <= len(x)`.
-- `stride` — step between window starts; must be `>= 1`. Defaults to 1.
+- `x` — 1D C-contiguous `float64` array.
+- `window` — Window length in samples (`1 <= window <= len(x)`).
+- `stride` — Step between consecutive windows (`>= 1`, defaults to 1).
 
-**Returns** a `(n_windows, 33)` float64 array where
-`n_windows = (len(x) - window) // stride + 1`.
+**Returns**
 
-Windows are borrowed slices of your buffer, so no window data is copied.
+A 2D `float64` array of shape `(n_windows, 33)` where `n_windows = (len(x) - window) // stride + 1`.
 
-```python
-x = np.random.default_rng(0).standard_normal(10_000)
-feats = tsxtractor.sliding_features(x, window=256, stride=64)
-feats.shape        # (153, 33)
-```
+---
 
-`window > len(x)`, `window < 1`, and `stride < 1` all raise `ValueError` rather
-than returning an empty array — a silently empty result is a harder bug to find
-than an exception.
+## Multichannel & Cross-Channel Extraction
 
-## feature_names
+### extract_features_mc
 
 ```python
-feature_names() -> list[str]
+extract_features_mc(
+    X: np.ndarray | Sequence[np.ndarray],
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    cross: bool = True,
+    max_pairs: int = 8,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+) -> np.ndarray
 ```
 
-The output column names, in column order.
+Extract per-channel features and cross-channel interaction metrics from multichannel time-series data.
 
-**This order is a stability guarantee.** Column `i` means the same feature for
-every release within a major version. Reordering, renaming, or removing a name is
-a major-version change; appending a new feature at the end is a minor one.
+**Parameters**
+
+- `X` — 3D array of shape `(n_samples, n_channels, length)`.
+- `profile` — Profile applied to each channel.
+- `features` — Specific feature subset applied to each channel.
+- `cross` — When `True`, computes cross-channel interaction metrics (pairwise cross-correlation peaks, lag offsets, cross-covariance, Pearson correlation, and global spectral coherence / eigenvalue spread).
+- `max_pairs` — Maximum number of channel pairs evaluated for pairwise metrics (defaults to 8).
+- `n_jobs` — Thread count.
+- `views` — Optional multi-view transforms applied to each channel.
+
+**Returns**
+
+A 2D `float64` array of shape `(n_samples, total_features)`.
+
+---
+
+### extract_features_mc_df
 
 ```python
-names = tsxtractor.feature_names()
-len(names)      # 33
-names[:3]       # ['mean', 'std', 'var']
+extract_features_mc_df(
+    X: np.ndarray | Sequence[np.ndarray],
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    cross: bool = True,
+    max_pairs: int = 8,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+) -> pd.DataFrame
 ```
 
-## Threading
+Same computation as `extract_features_mc`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names_mc(...)`.
 
-The Rust core releases the GIL for the whole compute region and uses the default
-rayon pool, sized to your logical cores. Cap it with the standard rayon
-environment variable:
+---
 
-```bash
-RAYON_NUM_THREADS=4 python my_pipeline.py
+## Streaming Extractor
+
+### StreamingExtractor
+
+```python
+class StreamingExtractor:
+    def __init__(self, window_size: int) -> None: ...
+    def push(self, value: float) -> bool: ...
+    def compute(self, kind: str = "fast") -> np.ndarray: ...
+    def reset(self) -> None: ...
+    @property
+    def window_size(self) -> int: ...
+    @property
+    def is_full(self) -> bool: ...
+    @staticmethod
+    def fast_feature_names() -> list[str]: ...
 ```
 
-Calls hold no state between invocations — there is no thread pool to warm, no
-object to reuse, and nothing to clean up.
+Single-stream sliding-window extractor maintaining an internal circular buffer and $O(1)$ incremental state updates.
+
+- `push(value)` returns `True` once the circular buffer has reached `window_size`.
+- `compute("fast")` evaluates 12 streaming features in under 100 ns.
+- `compute("all")` evaluates all 33 Core features over the current window.
+
+---
+
+### MultiStreamExtractor
+
+```python
+class MultiStreamExtractor:
+    def __init__(self, n_streams: int, window_size: int) -> None: ...
+    def push_many(self, values: np.ndarray) -> bool: ...
+    def compute(self, streams: list[int] | None = None, kind: str = "all") -> np.ndarray: ...
+    def reset(self, stream_idx: int | None = None) -> None: ...
+    @property
+    def n_streams(self) -> int: ...
+    @property
+    def window_size(self) -> int: ...
+    @property
+    def is_full(self) -> bool: ...
+    @property
+    def count(self) -> int: ...
+    @staticmethod
+    def fast_feature_names() -> list[str]: ...
+```
+
+Fleet streaming engine for processing thousands of time-series streams concurrently with contiguous memory layout and cache locality.
+
+- `push_many(values)` ingests a vector of values for all active streams simultaneously.
+- `compute(streams=None, kind="fast"|"all")` extracts features across designated streams in parallel.
+
+---
+
+## Supervised Feature Selection
+
+### select_features
+
+```python
+select_features(
+    F: np.ndarray | pd.DataFrame,
+    y: Sequence[Any] | np.ndarray,
+    task: str = "auto",
+    fdr: float = 0.05,
+    max_corr: float = 0.90,
+) -> tuple[list[int], pd.DataFrame]
+```
+
+Select significant, non-redundant time-series features using hypothesis testing, False Discovery Rate (FDR) control, and correlation-threshold clustering.
+
+**Parameters**
+
+- `F` — Feature matrix of shape `(n_samples, n_features)`.
+- `y` — Target labels or values of shape `(n_samples,)`.
+- `task` — Task type: `"auto"`, `"classification"`, or `"regression"`.
+- `fdr` — Benjamini-Hochberg FDR significance threshold (defaults to 0.05).
+- `max_corr` — Pairwise correlation clustering threshold for redundancy pruning (defaults to 0.90).
+
+**Returns**
+
+`(selected_indices, report)` where `selected_indices` contains column indices of the selected features, and `report` provides a tabular summary of statistics, p-values, adjusted p-values, and cluster assignments.
+
+---
+
+### TsxSelector
+
+```python
+class TsxSelector:
+    def __init__(self, task: str = "auto", fdr: float = 0.05, max_corr: float = 0.90) -> None: ...
+    def fit(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> TsxSelector: ...
+    def transform(self, X: np.ndarray | pd.DataFrame) -> np.ndarray | pd.DataFrame: ...
+    def fit_transform(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> np.ndarray | pd.DataFrame: ...
+    def get_support(self, indices: bool = False) -> np.ndarray: ...
+```
+
+Scikit-learn compatible transformer implementing FDR-controlled supervised feature selection for direct inclusion in ML pipelines.
+
+---
+
+## Metadata & Introspection
+
+### feature_names
+
+```python
+feature_names(
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    views: Sequence[str] | None = None,
+) -> list[str]
+```
+
+Returns output feature names in exact column order. Features 0..32 are frozen across all minor releases.
+
+---
+
+### feature_names_mc
+
+```python
+feature_names_mc(
+    n_channels: int,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    cross: bool = True,
+    max_pairs: int = 8,
+    views: Sequence[str] | None = None,
+) -> list[str]
+```
+
+Returns output column names for multichannel extraction including channel prefixes and cross-channel metric names.
+
+---
+
+### list_profiles
+
+```python
+list_profiles() -> dict[str, int]
+```
+
+Returns available feature profile names mapped to their respective feature counts.
+
+---
+
+### describe_feature
+
+```python
+describe_feature(name: str) -> dict[str, str]
+```
+
+Returns metadata for a given feature name, including its cost class, dependencies, and registered aliases.
+
+---
+
+## Hardware Auto-Tuning
+
+### tune
+
+```python
+tune(
+    shapes: Sequence[tuple[int, int]] = ((1000, 500),),
+    budget_s: float = 10.0,
+) -> dict[str, Any]
+```
+
+Microbenchmarks execution variants (spin pool vs Rayon, chunk sizes) on current hardware and caches optimal execution parameters locally.
+
+---
+
+## Threading & Runtime Controls
+
+- `TSXTRACT_POOL=spin` (default): Uses the persistent spin-then-park worker pool for low-latency batch processing.
+- `TSXTRACT_POOL=rayon`: Forces fallback to the Rayon global work-stealing pool.
+- `RAYON_NUM_THREADS=N`: Sets thread pool size.

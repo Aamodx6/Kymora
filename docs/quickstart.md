@@ -1,85 +1,106 @@
 # Quickstart
 
-## A batch of equal-length series
+## Batch Feature Extraction
 
-The main path. One row in, one feature row out.
+One row in, one feature row out. The Rust engine executes without GIL contention.
 
 ```python
 import numpy as np
 import tsxtractor
 
-X = np.random.default_rng(0).standard_normal((10_000, 500))  # 10k series
+rng = np.random.default_rng(0)
+X = rng.standard_normal((10_000, 500))  # 10,000 series, 500 samples each
+
 feats = tsxtractor.extract_features(X)          # (10_000, 33) float64
-names = tsxtractor.feature_names()              # column order, stable
+names = tsxtractor.feature_names()              # canonical column names
 ```
 
-Input must be **float64 and C-contiguous**. A wrong dtype raises `TypeError`
-rather than being silently copied, so you decide where the conversion is paid:
+Input arrays must be **float64 and C-contiguous**. A wrong dtype or non-contiguous layout will raise `TypeError` or `ValueError` rather than silently copying.
+
+---
+
+## Multi-View Extraction
+
+Generate multi-domain feature representations across differences, detrending, and normalizations:
 
 ```python
-feats = tsxtractor.extract_features(X.astype(np.float64))
+# Compute features across original series, first differences, and z-normalization
+feats_views = tsxtractor.extract_features(
+    X,
+    views=["raw", "diff", "znorm"]
+)
+view_names = tsxtractor.feature_names(views=["raw", "diff", "znorm"])
+print(f"Extracted {len(view_names)} features across 3 views.")
 ```
 
-A slice like `X[:, ::2]` is not contiguous and raises `ValueError`; pass
-`np.ascontiguousarray(X[:, ::2])` if that is what you want.
+Features that are mathematically invariant to a transform (e.g. standard deviation under mean shift) are automatically pruned.
 
-## Labeled columns
+---
+
+## Multichannel Sensor Streams
+
+Extract features and cross-channel interaction dynamics from 3D arrays:
 
 ```python
-df = tsxtractor.extract_features_df(X)
-df.columns.tolist()[:3]     # ['mean', 'std', 'var']
+# (n_samples, n_channels, length)
+X_mc = rng.standard_normal((100, 4, 1000))
+
+# Extract per-channel features and cross-channel dynamics
+df_mc = tsxtractor.extract_features_mc_df(X_mc, cross=True)
+print(df_mc.shape)  # 100 rows x combined channel features
 ```
 
-Requires pandas (`pip install "tsxtract-rs[pandas]"`); it is not a hard
-dependency of the library.
+---
 
-## Series of different lengths
+## Real-Time Fleet Streaming
 
-Pass a list of 1D arrays. Each series is processed independently, so lengths do
-not need to match.
+Stream thousands of live signals concurrently with $O(1)$ updates:
 
 ```python
-series = [rng.standard_normal(n) for n in (120, 500, 37)]
-feats = tsxtractor.extract_features(series)      # (3, 33)
+n_streams = 1000
+window_size = 200
+
+# Fleet extractor maintains contiguous circular buffers for all streams
+extractor = tsxtractor.MultiStreamExtractor(n_streams, window_size)
+
+# Ingest new readings from IoT fleet or market feed
+new_tick = rng.standard_normal(n_streams)
+is_ready = extractor.push_many(new_tick)
+
+if is_ready:
+    # Sub-microsecond fast features (mean, std, RMS, etc.)
+    fast_matrix = extractor.compute(kind="fast")
 ```
 
-## Rolling windows over one long series
+---
+
+## Supervised Feature Selection in Scikit-Learn
+
+Select statistically significant, non-redundant features using FDR control and correlation clustering:
 
 ```python
-x = rng.standard_normal(100_000)
-feats = tsxtractor.sliding_features(x, window=256, stride=64)   # (1558, 33)
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import HistGradientBoostingClassifier
+
+# Seamless scikit-learn transformer
+pipe = Pipeline([
+    ("select", tsxtractor.TsxSelector(task="classification", fdr=0.05)),
+    ("clf", HistGradientBoostingClassifier())
+])
+
+# Fits FDR hypothesis tests and correlation clusters on X_feats, y
+pipe.fit(feats, y)
+predictions = pipe.predict(feats)
 ```
 
-Windows are borrowed slices of your buffer — nothing is copied — and the work is
-parallelised across windows. `window` must be at least 1 and no longer than the
-series; `stride` must be at least 1. Anything else raises `ValueError`.
+---
 
-## Into a scikit-learn pipeline
+## Hardware Auto-Tuning (Wisdom)
 
-Features come out as a plain dense matrix, so nothing special is required:
+Benchmark your local architecture to configure the optimal execution backend:
 
 ```python
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-
-X_feat = tsxtractor.extract_features(X)          # (n_series, 33)
-X_feat = np.nan_to_num(X_feat)                   # see the NaN policy first
-scores = cross_val_score(RandomForestClassifier(), X_feat, y, cv=5)
-```
-
-!!! note "Think before nan_to_num"
-    A NaN row means that series contained a NaN, and a NaN column entry means
-    that feature is undefined for that series (a constant series has no
-    autocorrelation). Both are real information. Read the
-    [NaN policy](nan-policy.md) before flattening them to zero.
-
-## Controlling thread count
-
-The Rust core uses the default rayon pool, which sizes itself to your logical
-cores. Cap it with the standard rayon environment variable — useful inside a
-container with a CPU quota, or when you are already parallelising at a higher
-level:
-
-```bash
-RAYON_NUM_THREADS=4 python my_pipeline.py
+# Auto-tunes spin-wait thresholds and thread pool strategies
+profile = tsxtractor.tune(shapes=[(1000, 500)], budget_s=5.0)
+print(f"Optimal pool: {profile['best_config']['pool']}")
 ```

@@ -34,13 +34,20 @@ def test_version_matches_installed_distribution_metadata():
 def test_public_api_surface_is_exactly_what_is_documented():
     assert set(tsxtractor.__all__) == {
         "extract_features",
+        "extract_features_mc",
         "extract_features_ragged",
         "extract_features_df",
+        "extract_features_mc_df",
         "sliding_features",
         "StreamingExtractor",
+        "MultiStreamExtractor",
         "feature_names",
+        "feature_names_mc",
         "list_profiles",
         "describe_feature",
+        "select_features",
+        "TsxSelector",
+        "tune",
         "__version__",
     }
     for name in tsxtractor.__all__:

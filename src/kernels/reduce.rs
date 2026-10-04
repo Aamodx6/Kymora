@@ -817,3 +817,337 @@ pub fn energy_ratio_chunk(
     }
     seg_energy / total_energy
 }
+
+/// Transpose 4 contiguous series of equal length into a time-major SoA layout:
+/// `soa[t * 4 + lane] = rows[lane][t]`.
+#[inline]
+pub fn aos_to_soa_4x(rows: [&[f64]; 4], soa: &mut [f64]) {
+    let n = rows[0].len();
+    let r0 = rows[0];
+    let r1 = rows[1];
+    let r2 = rows[2];
+    let r3 = rows[3];
+
+    for t in 0..n {
+        let base = t * 4;
+        soa[base] = r0[t];
+        soa[base + 1] = r1[t];
+        soa[base + 2] = r2[t];
+        soa[base + 3] = r3[t];
+    }
+}
+
+/// Compute Pass 1 for 4 series in SoA layout across SIMD lanes.
+#[inline]
+pub fn pass1_soa_4x(soa: &[f64], n: usize) -> [Pass1Result; 4] {
+    let mut sum = [0.0f64; 4];
+    let mut abs_energy = [0.0f64; 4];
+    let mut min = [soa[0], soa[1], soa[2], soa[3]];
+    let mut max = [soa[0], soa[1], soa[2], soa[3]];
+    let mut has_nan = [false; 4];
+    let mut constant = [true; 4];
+    let first = [soa[0], soa[1], soa[2], soa[3]];
+
+    for t in 0..n {
+        let base = t * 4;
+        for lane in 0..4 {
+            let v = soa[base + lane];
+            sum[lane] += v;
+            abs_energy[lane] += v * v;
+            if v < min[lane] {
+                min[lane] = v;
+            }
+            if v > max[lane] {
+                max[lane] = v;
+            }
+            if v.is_nan() {
+                has_nan[lane] = true;
+            }
+            if v != first[lane] {
+                constant[lane] = false;
+            }
+        }
+    }
+
+    let nf = n as f64;
+    let mut results = [
+        Pass1Result {
+            sum: 0.0,
+            min: 0.0,
+            max: 0.0,
+            abs_energy: 0.0,
+            constant: true,
+            has_nan: false,
+            mean: 0.0,
+            first_min_idx: 0,
+            last_min_idx: 0,
+            first_max_idx: 0,
+            last_max_idx: 0,
+            min_count: 0,
+            max_count: 0,
+        },
+        Pass1Result {
+            sum: 0.0,
+            min: 0.0,
+            max: 0.0,
+            abs_energy: 0.0,
+            constant: true,
+            has_nan: false,
+            mean: 0.0,
+            first_min_idx: 0,
+            last_min_idx: 0,
+            first_max_idx: 0,
+            last_max_idx: 0,
+            min_count: 0,
+            max_count: 0,
+        },
+        Pass1Result {
+            sum: 0.0,
+            min: 0.0,
+            max: 0.0,
+            abs_energy: 0.0,
+            constant: true,
+            has_nan: false,
+            mean: 0.0,
+            first_min_idx: 0,
+            last_min_idx: 0,
+            first_max_idx: 0,
+            last_max_idx: 0,
+            min_count: 0,
+            max_count: 0,
+        },
+        Pass1Result {
+            sum: 0.0,
+            min: 0.0,
+            max: 0.0,
+            abs_energy: 0.0,
+            constant: true,
+            has_nan: false,
+            mean: 0.0,
+            first_min_idx: 0,
+            last_min_idx: 0,
+            first_max_idx: 0,
+            last_max_idx: 0,
+            min_count: 0,
+            max_count: 0,
+        },
+    ];
+
+    for lane in 0..4 {
+        results[lane].sum = sum[lane];
+        results[lane].min = min[lane];
+        results[lane].max = max[lane];
+        results[lane].abs_energy = abs_energy[lane];
+        results[lane].constant = constant[lane];
+        results[lane].has_nan = has_nan[lane];
+        results[lane].mean = sum[lane] / nf;
+    }
+    results
+}
+
+/// Compute Pass 2 for 4 series in SoA layout across SIMD lanes.
+#[inline]
+pub fn pass2_soa_4x(
+    soa: &[f64],
+    n: usize,
+    means: [f64; 4],
+    constants: [bool; 4],
+    centered_soa: &mut [f64],
+) -> [FusedPass2Result; 4] {
+    let nf = n as f64;
+    let mut m2 = [0.0f64; 4];
+    let mut m3 = [0.0f64; 4];
+    let mut m4 = [0.0f64; 4];
+    let mut zero_crossings = [0usize; 4];
+    let mut mean_crossings = [0usize; 4];
+    let mut above_best = [0usize; 4];
+    let mut above_run = [0usize; 4];
+    let mut below_best = [0usize; 4];
+    let mut below_run = [0usize; 4];
+    let mut count_above = [0usize; 4];
+    let mut count_below = [0usize; 4];
+    let mut prev_above_zero = [false; 4];
+    let mut prev_above_mean = [false; 4];
+
+    for t in 0..n {
+        let base = t * 4;
+        for lane in 0..4 {
+            let v = soa[base + lane];
+            let d = v - means[lane];
+            centered_soa[base + lane] = d;
+
+            let d2 = d * d;
+            m2[lane] += d2;
+            m3[lane] += d2 * d;
+            m4[lane] += d2 * d2;
+
+            let above_zero = v > 0.0;
+            let above_mean = d > 0.0;
+            let below_mean = d < 0.0;
+
+            count_above[lane] += above_mean as usize;
+            count_below[lane] += below_mean as usize;
+
+            if t > 0 {
+                if (above_zero != prev_above_zero[lane]) && v != 0.0 {
+                    zero_crossings[lane] += 1;
+                }
+                if (above_mean != prev_above_mean[lane]) && d != 0.0 {
+                    mean_crossings[lane] += 1;
+                }
+            }
+            prev_above_zero[lane] = above_zero;
+            prev_above_mean[lane] = above_mean;
+
+            if above_mean {
+                above_run[lane] += 1;
+                if above_run[lane] > above_best[lane] {
+                    above_best[lane] = above_run[lane];
+                }
+            } else {
+                above_run[lane] = 0;
+            }
+
+            if below_mean {
+                below_run[lane] += 1;
+                if below_run[lane] > below_best[lane] {
+                    below_best[lane] = below_run[lane];
+                }
+            } else {
+                below_run[lane] = 0;
+            }
+        }
+    }
+
+    let mut out = [
+        FusedPass2Result {
+            m2: 0.0,
+            m3: 0.0,
+            m4: 0.0,
+            var: 0.0,
+            std: 0.0,
+            skewness: 0.0,
+            kurtosis: 0.0,
+            zero_crossings: 0.0,
+            mean_crossings: 0.0,
+            strike_above: 0.0,
+            strike_below: 0.0,
+            count_above_mean: 0.0,
+            count_below_mean: 0.0,
+        },
+        FusedPass2Result {
+            m2: 0.0,
+            m3: 0.0,
+            m4: 0.0,
+            var: 0.0,
+            std: 0.0,
+            skewness: 0.0,
+            kurtosis: 0.0,
+            zero_crossings: 0.0,
+            mean_crossings: 0.0,
+            strike_above: 0.0,
+            strike_below: 0.0,
+            count_above_mean: 0.0,
+            count_below_mean: 0.0,
+        },
+        FusedPass2Result {
+            m2: 0.0,
+            m3: 0.0,
+            m4: 0.0,
+            var: 0.0,
+            std: 0.0,
+            skewness: 0.0,
+            kurtosis: 0.0,
+            zero_crossings: 0.0,
+            mean_crossings: 0.0,
+            strike_above: 0.0,
+            strike_below: 0.0,
+            count_above_mean: 0.0,
+            count_below_mean: 0.0,
+        },
+        FusedPass2Result {
+            m2: 0.0,
+            m3: 0.0,
+            m4: 0.0,
+            var: 0.0,
+            std: 0.0,
+            skewness: 0.0,
+            kurtosis: 0.0,
+            zero_crossings: 0.0,
+            mean_crossings: 0.0,
+            strike_above: 0.0,
+            strike_below: 0.0,
+            count_above_mean: 0.0,
+            count_below_mean: 0.0,
+        },
+    ];
+
+    for lane in 0..4 {
+        let var = m2[lane] / nf;
+        let std = var.sqrt();
+        let (skewness, kurtosis) = if constants[lane] || std < 1e-12 {
+            (0.0, 0.0)
+        } else {
+            let m2_val = m2[lane] / nf;
+            let m3_val = m3[lane] / nf;
+            let m4_val = m4[lane] / nf;
+            let s3 = m2_val * std;
+            let s4 = m2_val * m2_val;
+            let sk = if s3 > 0.0 { m3_val / s3 } else { 0.0 };
+            let kt = if s4 > 0.0 { m4_val / s4 - 3.0 } else { 0.0 };
+            (sk, kt)
+        };
+
+        out[lane] = FusedPass2Result {
+            m2: m2[lane],
+            m3: m3[lane],
+            m4: m4[lane],
+            var,
+            std,
+            skewness,
+            kurtosis,
+            zero_crossings: zero_crossings[lane] as f64,
+            mean_crossings: mean_crossings[lane] as f64,
+            strike_above: above_best[lane] as f64,
+            strike_below: below_best[lane] as f64,
+            count_above_mean: count_above[lane] as f64,
+            count_below_mean: count_below[lane] as f64,
+        };
+    }
+    out
+}
+
+/// Compute ACF for 4 series in SoA layout across SIMD lanes for lag in 1..=4.
+#[inline]
+pub fn autocorr_soa_4x(centered_soa: &[f64], n: usize, var: [f64; 4]) -> [[f64; 4]; 4] {
+    let nf = n as f64;
+    let mut out = [[0.0f64; 4]; 4];
+    let lags = [1, 2, 3, 4];
+
+    for (lag_idx, &lag) in lags.iter().enumerate() {
+        if lag >= n {
+            for lane_out in &mut out {
+                lane_out[lag_idx] = f64::NAN;
+            }
+            continue;
+        }
+        let mut dot = [0.0f64; 4];
+        let n_terms = n - lag;
+        for t in 0..n_terms {
+            let b0 = t * 4;
+            let b1 = (t + lag) * 4;
+            for lane in 0..4 {
+                dot[lane] += centered_soa[b0 + lane] * centered_soa[b1 + lane];
+            }
+        }
+        for lane in 0..4 {
+            let v = var[lane];
+            out[lane][lag_idx] = if v <= 0.0 || v.is_nan() {
+                f64::NAN
+            } else {
+                (dot[lane] / nf) / v
+            };
+        }
+    }
+    out
+}

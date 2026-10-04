@@ -22,6 +22,7 @@ bitflags::bitflags! {
         const C3        = 1 << 10;
         const NONLIN    = 1 << 11;
         const CROSSINGS = 1 << 12;
+        const SELECT    = 1 << 13;
     }
 }
 
@@ -163,6 +164,12 @@ impl<'a> Intermediates<'a> {
                 kernels::sort::quantiles_from_sorted(&scratch.sorted),
                 kernels::sort::deciles_from_sorted(&scratch.sorted),
                 kernels::sort::has_duplicate_sorted(&scratch.sorted),
+            )
+        } else if needs.contains(Needs::SELECT) {
+            (
+                kernels::sort::quantiles_multi_select(x, p1.min, p1.max, &mut scratch.sel_scratch),
+                kernels::sort::deciles_multi_select(x, p1.min, p1.max, &mut scratch.sel_scratch),
+                false,
             )
         } else {
             ([0.0; 5], [0.0; 9], false)

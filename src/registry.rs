@@ -55,6 +55,15 @@ pub enum FeatureCompute {
     Peaks { n: usize },
 }
 
+bitflags::bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct Invariances: u8 {
+        const SHIFT    = 1 << 0;
+        const SCALE    = 1 << 1;
+        const MONOTONE = 1 << 2;
+    }
+}
+
 pub struct FeatureDef {
     pub name: &'static str,
     pub aliases: &'static [&'static str],
@@ -62,6 +71,7 @@ pub struct FeatureDef {
     pub cost: CostClass,
     pub profiles: ProfileMask,
     pub compute: FeatureCompute,
+    pub invariances: Invariances,
 }
 
 impl FeatureDef {
@@ -141,6 +151,40 @@ impl FeatureDef {
     }
 }
 
+pub fn infer_invariances(name: &str) -> Invariances {
+    if name == "permutation_entropy" {
+        return Invariances::SHIFT
+            .union(Invariances::SCALE)
+            .union(Invariances::MONOTONE);
+    }
+    if name.starts_with("autocorr")
+        || name == "skewness"
+        || name == "kurtosis"
+        || name == "mean_crossings"
+        || name == "spectral_entropy"
+        || name == "dominant_frequency"
+    {
+        return Invariances::SHIFT.union(Invariances::SCALE);
+    }
+    if name == "std"
+        || name == "var"
+        || name == "mean_abs_change"
+        || name == "cid_ce"
+        || name == "mean_second_derivative_central"
+        || name.starts_with("pacf")
+    {
+        return Invariances::SHIFT;
+    }
+    if name == "zero_crossings"
+        || name.starts_with("c3")
+        || name.starts_with("time_reversal")
+        || name == "abs_energy"
+    {
+        return Invariances::SCALE;
+    }
+    Invariances::empty()
+}
+
 fn add_feat(
     list: &mut Vec<FeatureDef>,
     name: &'static str,
@@ -150,6 +194,7 @@ fn add_feat(
     profiles: ProfileMask,
     compute: FeatureCompute,
 ) {
+    let invariances = infer_invariances(name);
     list.push(FeatureDef {
         name,
         aliases,
@@ -157,6 +202,7 @@ fn add_feat(
         cost,
         profiles,
         compute,
+        invariances,
     });
 }
 
@@ -221,7 +267,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         &mut list,
         "median",
         &["tsfresh__median"],
-        Needs::SORTED,
+        Needs::SELECT,
         CostClass::B,
         CORE_ALL,
         FeatureCompute::Fn(|_x, inter| inter.quantiles[0]),
@@ -231,7 +277,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         &mut list,
         "quantile_10",
         &["tsfresh__quantile__q_0.1"],
-        Needs::SORTED,
+        Needs::SELECT,
         CostClass::B,
         CORE_ALL,
         FeatureCompute::Fn(|_x, inter| inter.quantiles[1]),
@@ -241,7 +287,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         &mut list,
         "quantile_25",
         &["tsfresh__quantile__q_0.25"],
-        Needs::SORTED,
+        Needs::SELECT,
         CostClass::B,
         CORE_ALL,
         FeatureCompute::Fn(|_x, inter| inter.quantiles[2]),
@@ -251,7 +297,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         &mut list,
         "quantile_75",
         &["tsfresh__quantile__q_0.75"],
-        Needs::SORTED,
+        Needs::SELECT,
         CostClass::B,
         CORE_ALL,
         FeatureCompute::Fn(|_x, inter| inter.quantiles[3]),
@@ -261,7 +307,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
         &mut list,
         "quantile_90",
         &["tsfresh__quantile__q_0.9"],
-        Needs::SORTED,
+        Needs::SELECT,
         CostClass::B,
         CORE_ALL,
         FeatureCompute::Fn(|_x, inter| inter.quantiles[4]),
@@ -957,7 +1003,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
             &mut list,
             name,
             aliases,
-            Needs::SORTED,
+            Needs::SELECT,
             CostClass::B,
             EXT_ALL,
             FeatureCompute::Decile { idx },
@@ -1011,7 +1057,7 @@ pub static FEATURES: LazyLock<Vec<FeatureDef>> = LazyLock::new(|| {
             &mut list,
             name,
             aliases,
-            Needs::PASS1.union(Needs::SORTED),
+            Needs::PASS1.union(Needs::SELECT),
             CostClass::B,
             EXT_ALL,
             FeatureCompute::Symmetry { r },
