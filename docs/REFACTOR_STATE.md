@@ -33,6 +33,9 @@ arch.md is the architecture source of truth.
   confirms otherwise.
 - D0 (Phase 0): `feature_names()` sha256
   `8a1e2794…3e1431af` is the semantic invariance anchor for all phases.
+- D9 (Phase 2): `benchmarks/` is the Python harness dir (arch.md §4.1
+  updated); `mkdocs build --strict` passes (docs CI green); `make` is
+  unavailable on the owner's Windows box — runner consolidation is Phase 7.
 
 ## NEEDS-OWNER
 
