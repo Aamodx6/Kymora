@@ -57,7 +57,10 @@ def test_public_api_surface_is_exactly_what_is_documented():
 def test_deprecated_tsxtractor_shim_warns_and_reexports_identical_objects():
     import importlib
 
-    import tsxtractor
+    # First import must emit the warning; capture it so the suite stays
+    # warning-clean even under `-W error`.
+    with pytest.warns(DeprecationWarning, match="deprecated"):
+        import tsxtractor
 
     assert set(tsxtractor.__all__) == set(tsxtract.__all__)
     for name in tsxtract.__all__:
