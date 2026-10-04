@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Online incremental streaming feature extractor.
 //!
 //! Provides an O(1) incremental update engine for rolling windows over time series.

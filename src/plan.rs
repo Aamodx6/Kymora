@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Feature plan resolution and needs bitmask computation with multi-view invariance pruning.
 
 use crate::error::TsxError;

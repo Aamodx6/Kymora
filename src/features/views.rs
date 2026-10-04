@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Derived series views and invariance pruning.
 //!
 //! Computes views (`raw`, `diff`, `diff2`, `detrend`, `znorm`, `abs`, `logret`, `rank`)

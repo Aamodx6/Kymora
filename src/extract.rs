@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Dispatch and validation, independent of Python.
 //!
 //! Everything here is pure Rust: it takes borrowed `&[f64]` views (already

@@ -394,7 +394,7 @@ pub fn pass2_fused_f32(
     }
 }
 
-/// Count of i where x[i] is strictly greater than all neighbors within `support`.
+/// Count of indices `i` where ``x[i]`` is strictly greater than all neighbors within `support`.
 #[inline]
 pub fn number_of_peaks(x: &[f64], support: usize) -> f64 {
     let n = x.len();
@@ -413,7 +413,7 @@ pub fn number_of_peaks(x: &[f64], support: usize) -> f64 {
     count as f64
 }
 
-/// Count of i where x[i] is strictly greater than all neighbors within `support` (f32).
+/// Count of indices `i` where ``x[i]`` is strictly greater than all neighbors within `support` (f32).
 #[inline]
 pub fn number_of_peaks_f32(x: &[f32], support: usize) -> f64 {
     let n = x.len();
@@ -724,7 +724,7 @@ pub fn linear_trend_full(centered: &[f64], var: f64, mean: f64) -> (f64, f64, f6
     (slope, intercept, rvalue, stderr)
 }
 
-/// c3 nonlinear statistic: mean(x[i] * x[i+lag] * x[i+2*lag]).
+/// c3 nonlinear statistic: ``mean(x[i] * x[i+lag] * x[i+2*lag])``.
 #[inline]
 pub fn c3(x: &[f64], lag: usize) -> f64 {
     let n = x.len();
@@ -739,7 +739,7 @@ pub fn c3(x: &[f64], lag: usize) -> f64 {
     sum / (valid_len as f64)
 }
 
-/// Time reversal asymmetry statistic: mean(x[i+2*lag]^2 * x[i+lag] - x[i+lag] * x[i]^2).
+/// Time reversal asymmetry statistic: ``mean(x[i+2*lag]^2 * x[i+lag] - x[i+lag] * x[i]^2)``.
 #[inline]
 pub fn time_reversal_asymmetry_statistic(x: &[f64], lag: usize) -> f64 {
     let n = x.len();

@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Shannon entropy, shared by the spectral and ordinal-pattern features.
 //!
 //! Both compute the same thing over different weights, so the summation, the

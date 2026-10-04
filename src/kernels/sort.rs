@@ -33,7 +33,7 @@ impl SelScratch {
     }
 }
 
-/// Histogram multi-select: writes x_(rank) into out[i] for sorted ascending ranks.
+/// Histogram multi-select: writes `x_(rank)` into ``out[i]`` for sorted ascending ranks.
 pub fn multi_select(
     x: &[f64],
     min: f64,

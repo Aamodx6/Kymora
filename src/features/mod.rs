@@ -1,3 +1,9 @@
+#![deny(unsafe_code)]
+
+//! Feature catalog: [`NAMES`] (frozen core33 column order, arch I1),
+//! the scalar reference path [`compute_all`], and the feature-group modules.
+//! The hot path does not go through here — see [`crate::pipeline`].
+
 pub mod entropy;
 pub mod multistream;
 pub mod spectral;

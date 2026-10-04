@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Parallel and serial execution schedulers.
 
 use crate::pipeline;

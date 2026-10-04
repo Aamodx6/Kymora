@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Order statistics and shape moments.
 //!
 //! The quantile path is selection-based rather than sort-based: the five

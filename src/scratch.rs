@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Per-thread scratchpad for allocation-free execution in the hot path.
 //!
 //! Reused across every series processed by a worker thread. Grow-only;

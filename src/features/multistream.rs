@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Fleet MultiStreamExtractor for processing thousands of time-series streams concurrently.
 //!
 //! Stores ring buffers in a contiguous time-major SoA layout `(window_size, n_streams)`

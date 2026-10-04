@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Structural error type for the FFI boundary.
 //!
 //! Scope discipline: `TsxError` describes *structural* problems with a call —

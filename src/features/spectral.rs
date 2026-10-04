@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! FFT-based features.
 //!
 //! Two things here are performance decisions, invisible from the outside:

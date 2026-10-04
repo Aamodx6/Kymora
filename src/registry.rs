@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Single source of truth for all feature definitions, aliases, needs, and profiles.
 
 use std::collections::HashMap;

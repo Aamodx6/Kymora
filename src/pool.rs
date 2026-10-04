@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Persistent spin-then-park thread pool for sub-millisecond batch execution.
 //!
 //! Provides dynamic self-scheduling with spin-parking to eliminate worker

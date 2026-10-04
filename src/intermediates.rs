@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Lazy and shared intermediates calculation.
 //!
 //! Shared intermediate structures (Pass1, Pass2, Centered, Sorted, Spectrum, ACF, Diffs)

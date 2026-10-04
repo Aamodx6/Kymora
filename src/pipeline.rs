@@ -1,3 +1,12 @@
+#![deny(unsafe_code)]
+
+//! Per-series execution pipelines: plan dispatch plus the fused core33 paths.
+//!
+//! [`run_plan`] routes a [`crate::plan::FeaturePlan`] through
+//! lazy intermediates (or the fused [`run_core33`]/[`run_core33_f32`] fast
+//! paths for plain raw core33); kernels write directly into the caller's
+//! output row — no per-series allocation here.
+
 use crate::intermediates::{Intermediates, Needs};
 use crate::kernels;
 use crate::plan::FeaturePlan;

@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 //! Temporal features. Several of these are fused into a single traversal of the
 //! series: they read the same values, so walking the series once per feature
 //! wastes memory bandwidth without simplifying anything. Accumulation order is
@@ -99,7 +101,7 @@ pub fn permutation_entropy(x: &[f64]) -> f64 {
     super::entropy::shannon_entropy(&weights, total) / 6f64.ln()
 }
 
-/// Count of i where x[i] is strictly greater than all neighbors within `support`
+/// Count of indices `i` where ``x[i]`` is strictly greater than all neighbors within `support`
 /// on both sides (tsfresh `number_peaks`).
 pub fn number_of_peaks(x: &[f64], support: usize) -> f64 {
     let n = x.len();
