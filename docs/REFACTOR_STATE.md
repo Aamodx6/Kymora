@@ -47,7 +47,15 @@ arch.md is the architecture source of truth.
       16/16. **#2 RESOLVED** (PyPI `tsxtract-rs` owned by `aamoddev11`,
       0.5.0 live). F1 exposure + Footer profile deferred (#1/B-track).
       See `docs/refactor/phase6_VERIFICATION.md`.
-- [ ] Phase 7: CI/CD, tooling, contributor experience
+- [x] Phase 7: CI/CD, tooling, contributor experience (2026-10-04). Gate:
+      setup-venv composite action wired into ci.yml ×3 + benchmark.yml
+      (was untracked dup); docs.yml never-succeeding install replaced with
+      pyproject floors; contributor files created (CODEOWNERS, CoC — was a
+      dead link in CONTRIBUTING — SECURITY, CITATION.cff, issue/PR
+      templates, dependabot, CLAUDE.md); dev-loop hazard + cross-platform
+      benchmark commands documented (D14: raw commands canonical, wrappers
+      kept for arch/Dockerfile refs). All YAML parse; full gates green.
+      See `docs/refactor/phase7_VERIFICATION.md`.
 - [ ] Phase 8: final verification & report
 
 ## Decisions
@@ -71,6 +79,10 @@ arch.md is the architecture source of truth.
 - D13 (Phase 5): `docs/` is the versioned project reference, landing docs
   are product-site content — no mirroring either way (overlap 0.02–0.29);
   new shared facts go in `docs/` first; historical reports stay out of nav.
+- D14 (Phase 7): benchmark runner entry points — the five raw
+  `python benchmarks/...` commands are the canonical portable path
+  (Windows-safe); `Makefile` and `reproduce.sh` remain optional wrappers
+  (referenced by arch.md gates and Dockerfile CMD), not deleted.
 
 ## NEEDS-OWNER
 

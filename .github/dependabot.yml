@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      cargo:
+        patterns: ["*"]
+
+  # pip/PyPI is intentionally absent: dependencies live in pyproject.toml
+  # behind the maturin backend; Renovate/dependabot pip support for that
+  # layout is limited and the runtime dep set is numpy-only.

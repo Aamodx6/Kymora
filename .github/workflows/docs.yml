@@ -23,7 +23,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip && python -m pip install ".[docs]" --no-build-isolation --no-deps || python -m pip install mkdocs mkdocs-material
+      # Docs need only mkdocs itself — the primary path used to install the
+      # project (maturin backend, no Rust here) with --no-deps, which could
+      # never bring mkdocs in; this installs exactly the pyproject docs floors.
+      - run: python -m pip install --upgrade pip && python -m pip install "mkdocs>=1.6" "mkdocs-material>=9.5"
       - run: mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
         with:

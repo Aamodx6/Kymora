@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+links:
+  - name: Security report (private)
+    url: https://github.com/Aamodx6/Tsxtract/security/advisories/new
+    about: Vulnerability reports — never file these as public issues
+  - name: Documentation
+    url: https://aamodx6.github.io/Tsxtract/
+    about: Install, quickstart, API reference

@@ -1,0 +1,50 @@
+name: Bug report
+description: Something produces wrong values, crashes, or fails to install
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For a wrong-value report, the most useful thing
+        you can include is what you expected and how you computed it — a
+        numpy/scipy expression turns the report straight into a test case.
+  - type: input
+    id: version
+    attributes:
+      label: tsxtract version
+      description: "`python -c \"import tsxtract; print(tsxtract.__version__)\"`"
+      placeholder: "0.5.0"
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, install method, architecture
+      placeholder: |
+        Windows 11, Python 3.14.6, pip install tsxtract-rs, x86_64
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Actual behaviour, error message / stack trace
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Expected values and how you computed them (numpy/scipy expression is ideal)
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Smallest runnable snippet that shows the problem
+      render: python
+    validations:
+      required: true

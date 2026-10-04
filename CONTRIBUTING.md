@@ -38,6 +38,31 @@ python scripts/validation_report.py  # exits non-zero if a feature drifts
 at link time; a test binary cannot link without it, so `cargo test` needs the
 flag.
 
+After editing **any** source in `python/` or `src/`, rebuild and reinstall
+before running `pytest` — the interpreter imports the installed package, not
+the working tree, so a stale wheel makes tests silently run old code:
+
+```bash
+maturin develop --release
+```
+
+## Benchmarks
+
+The benchmark suite is plain Python; these commands work on any OS (the
+`Makefile` and `reproduce.sh` are optional wrappers over the same sequence
+for `make`/bash environments):
+
+```bash
+python benchmarks/setup_venvs.py --lib all  # isolated competitor environments
+python benchmarks/smoke.py                  # B0 smoke test (all adapters)
+python benchmarks/suites/agreement.py       # B1 feature agreement / parity
+python benchmarks/reproduce.py --suite all  # full matrix (B1-B5)
+python benchmarks/report/make_report.py     # REPORT.md + results.json
+```
+
+Run outputs under `benchmarks/results/` are artifacts — keep them out of
+commits unless a phase record explicitly says otherwise.
+
 ## Architecture rules
 
 Three constraints keep the correctness story tractable. A PR that breaks one will

@@ -1,0 +1,44 @@
+name: Feature proposal
+description: Propose a change before writing code (required for new features)
+title: "[Proposal]: "
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The 33-feature catalog is **closed on purpose** — the low-redundancy set
+        *is* the product differentiation. PRs that add a feature without an
+        accepted proposal may be closed on scope grounds regardless of quality
+        (see CONTRIBUTING.md → "Adding a feature"). Refactors, docs, and
+        platform fixes do not need a proposal — open a regular issue or PR.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that the library cannot express today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should be added/changed, and the public API shape if any
+    validations:
+      required: true
+  - type: textarea
+    id: redundancy
+    attributes:
+      label: Redundancy assessment
+      description: >
+        For feature proposals: how does this differ from the existing 33
+        (correlation with the closest existing feature, or why it measures
+        something none of them do)?
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for duplicates
+          required: true
+        - label: I read CONTRIBUTING.md (architecture rules, feature policy)
+          required: true

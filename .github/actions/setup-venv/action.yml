@@ -1,0 +1,25 @@
+name: 'Set up virtualenv'
+description: 'Create .venv, put its bin dir on PATH, export VIRTUAL_ENV (maturin requires a venv)'
+
+runs:
+  using: composite
+  steps:
+    - name: Create a virtualenv (maturin requires one)
+      shell: bash
+      run: |
+        python -m venv .venv
+        # Native tools (maturin) cannot read the MSYS-style path bash reports
+        # on Windows, so emit a Windows path there via `pwd -W`.
+        if [ -d .venv/bin ]; then
+          root="$PWD"; bin="$root/.venv/bin"
+        else
+          root="$(pwd -W)"; bin="$root/.venv/Scripts"
+        fi
+        echo "$bin" >> "$GITHUB_PATH"
+        echo "VIRTUAL_ENV=$root/.venv" >> "$GITHUB_ENV"
+    - name: Confirm the venv is the active interpreter
+      shell: bash
+      run: |
+        # A wrong path here would silently install into the runner's Python and
+        # test a different build than the one maturin produced.
+        python -c "import sys; assert sys.prefix.replace(chr(92), '/').endswith('/.venv'), sys.prefix"
