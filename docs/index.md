@@ -5,7 +5,7 @@ High-performance time-series feature extraction for Python, powered by a native 
 Extract curated statistical, temporal, spectral, multichannel, and multi-view features across large batches of time series. The Rust core operates directly on zero-copy NumPy buffers, releases the GIL, and maximizes throughput via SIMD vectorization and persistent low-latency worker pools.
 
 ```bash
-pip install tsxtract-rs
+pip install tsxtract
 ```
 
 ```python

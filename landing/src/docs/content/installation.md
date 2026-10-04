@@ -8,7 +8,7 @@ section: "Start here"
 Install Tsxtract from PyPI as precompiled wheels with no Rust toolchain required, then verify the native extension loads. Standard use needs only Python 3.10+ and NumPy on a 64-bit OS.
 
 ```bash tab="pip"
-pip install tsxtract-rs
+pip install tsxtract
 ```
 
 ```bash tab="uv"

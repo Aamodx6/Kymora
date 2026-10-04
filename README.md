@@ -43,16 +43,7 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 Precompiled binary wheels are available on [PyPI (tsxtract-rs)](https://pypi.org/project/tsxtract-rs/) for **Linux** (`x86_64`, `aarch64`), **macOS** (Apple Silicon `arm64`, Intel `x86_64`), and **Windows** (`x64`). No Rust compiler required!
 
 ```bash
-# Core install (NumPy only)
-pip install tsxtract-rs
-
-# With optional Pandas DataFrame support
-pip install "tsxtract-rs[pandas]"
-```
-
-*Using `uv` or `conda`:*
-```bash
-uv add tsxtract-rs
+pip install tsxtract
 ```
 
 #### From Source (Development)

@@ -1,7 +1,7 @@
 # Install
 
 ```bash
-pip install tsxtract-rs
+pip install tsxtract
 ```
 
 That is the whole story on Linux (x86_64, aarch64), macOS (Intel and Apple

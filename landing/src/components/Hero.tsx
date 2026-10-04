@@ -106,7 +106,7 @@ export const Hero: React.FC = () => {
 
   const copyCommand = async () => {
     try {
-      await navigator.clipboard.writeText('pip install tsxtract-rs');
+      await navigator.clipboard.writeText('pip install tsxtract');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -322,7 +322,7 @@ export const Hero: React.FC = () => {
                 aria-label="Copy pip install command"
               >
                 <span className="text-neutral-400 select-none">$</span>
-                <span>pip install tsxtract-rs</span>
+                <span>pip install tsxtract</span>
                 {copied ? (
                   <span className="text-emerald-400 font-sans font-medium text-[11px] ml-1">Copied!</span>
                 ) : (
