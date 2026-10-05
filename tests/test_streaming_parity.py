@@ -9,7 +9,7 @@ absolute bound instead (batch-center conditioning; see docs/streaming.md and
 
 import numpy as np
 import pytest
-from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 import kymora
@@ -217,20 +217,18 @@ HYP_SETTINGS = settings(
 @HYP_SETTINGS
 @given(
     w=st.integers(min_value=2, max_value=32),
-    extra=st.integers(min_value=0, max_value=40),
     interval=st.integers(min_value=1, max_value=16),
     data=st.lists(
         st.floats(min_value=-10.0, max_value=10.0, allow_nan=False, allow_infinity=False),
-        min_size=2,
+        min_size=32,
         max_size=72,
     ),
 )
-def test_hypothesis_fast_matches_batch(w, extra, interval, data):
+def test_hypothesis_fast_matches_batch(w, interval, data):
     # Bounded magnitudes keep every feature well-conditioned, so rtol 1e-9
     # must hold on every window. Small anchor_interval forces frequent
-    # exact re-anchors mid-stream.
-    assume(len(data) >= w)
-    stream = np.asarray(data[: w + extra], dtype=np.float64)
+    # exact re-anchors mid-stream. len(data) >= w always: no filtering.
+    stream = np.asarray(data, dtype=np.float64)
     ext = kymora.StreamingExtractor(w, anchor_interval=interval)
     for i, v in enumerate(stream):
         ready = ext.push(float(v))

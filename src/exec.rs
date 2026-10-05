@@ -39,7 +39,19 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
 }
 
 /// Extract features into pre-allocated flat slice in row-major order (f32).
-pub fn extract_into_slice_f32(rows: &[&[f32]], out_slice: &mut [f64], n_cols: usize) {
+///
+/// The f32 kernels implement the core33 set only. `gather` selects the plan:
+/// - `None`: direct core33 output (`out` must be 33 wide per row).
+/// - `Some(idxs)`: every index must be < 33; each row runs full core33 into a
+///   stack buffer and gathers the requested columns (covers `minimal` and any
+///   core33 subset with zero copies). Non-core33 plans are rejected at the FFI
+///   boundary before this is reached, never here.
+pub fn extract_into_slice_f32(
+    rows: &[&[f32]],
+    out_slice: &mut [f64],
+    n_cols: usize,
+    gather: Option<&[usize]>,
+) {
     let n_rows = rows.len();
     if n_rows == 0 {
         return;
@@ -49,8 +61,21 @@ pub fn extract_into_slice_f32(rows: &[&[f32]], out_slice: &mut [f64], n_cols: us
 
     if n_rows < SERIAL_THRESHOLD {
         let mut scratch = Scratch::new(max_len);
-        for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
-            pipeline::run_core33_f32(row, &mut scratch, row_out);
+        match gather {
+            None => {
+                for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
+                    pipeline::run_core33_f32(row, &mut scratch, row_out);
+                }
+            }
+            Some(idxs) => {
+                for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
+                    let mut full = [0.0f64; 33];
+                    pipeline::run_core33_f32(row, &mut scratch, &mut full);
+                    for (dst, &src) in row_out.iter_mut().zip(idxs.iter()) {
+                        *dst = full[src];
+                    }
+                }
+            }
         }
     } else {
         out_slice
@@ -60,7 +85,15 @@ pub fn extract_into_slice_f32(rows: &[&[f32]], out_slice: &mut [f64], n_cols: us
             .for_each_init(
                 || Scratch::new(max_len),
                 |scratch, (row_out, row)| {
-                    pipeline::run_core33_f32(row, scratch, row_out);
+                    if let Some(idxs) = gather {
+                        let mut full = [0.0f64; 33];
+                        pipeline::run_core33_f32(row, scratch, &mut full);
+                        for (dst, &src) in row_out.iter_mut().zip(idxs.iter()) {
+                            *dst = full[src];
+                        }
+                    } else {
+                        pipeline::run_core33_f32(row, scratch, row_out);
+                    }
                 },
             );
     }
@@ -136,11 +169,13 @@ pub fn extract_ragged_csr_plan(
 }
 
 /// Extract features from CSR ragged arrays (f32 values).
+/// `gather` follows [`extract_into_slice_f32`].
 pub fn extract_ragged_csr_f32(
     values: &[f32],
     offsets: &[i64],
     out_slice: &mut [f64],
     n_cols: usize,
+    gather: Option<&[usize]>,
 ) -> Result<(), crate::error::KymoraError> {
     if offsets.len() < 2 {
         return Err(crate::error::KymoraError::EmptyInput);
@@ -162,6 +197,6 @@ pub fn extract_ragged_csr_f32(
         rows.push(&values[start_u..end_u]);
     }
 
-    extract_into_slice_f32(&rows, out_slice, n_cols);
+    extract_into_slice_f32(&rows, out_slice, n_cols, gather);
     Ok(())
 }

@@ -127,6 +127,44 @@ fn enforce_nan_policy_f32(rows: &[&[f32]], policy: NanPolicy) -> PyResult<()> {
     Ok(())
 }
 
+/// Restriction for float32 input: the f32 kernels implement the core33 set
+/// only (indices 0..33, which match the core33 column order).
+///
+/// Returns `None` for a direct core33 run, or `Some(indices)` to gather a
+/// core33 subset (`minimal`, explicit feature lists) from a full core33 row.
+/// Anything else — `extended`/`full` profiles, non-core33 features, non-raw
+/// views — is a clear `ValueError` telling the caller to pass float64 input:
+/// silently computing the wrong width would be worse than refusing, and this
+/// path previously panicked across the FFI boundary.
+fn f32_plan_gather(plan: &FeaturePlan) -> PyResult<Option<Vec<usize>>> {
+    if plan.views.len() != 1 || plan.views[0] != "raw" {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "views are not supported for float32 input; pass a float64 array for views",
+        ));
+    }
+    if plan.indices.len() == 33 && plan.indices.iter().enumerate().all(|(j, &i)| i == j) {
+        return Ok(None);
+    }
+    if plan.indices.iter().all(|&i| i < 33) {
+        return Ok(Some(plan.indices.clone()));
+    }
+    Err(pyo3::exceptions::PyValueError::new_err(
+        "this profile/feature set is not implemented for float32 input \
+         (f32 kernels cover core33 only); pass a float64 array instead",
+    ))
+}
+
+/// Validate the advisory `precision` option. Accumulation is always float64;
+/// the input dtype governs the read path, so this only rejects typos.
+fn parse_precision(precision: Option<&str>) -> PyResult<()> {
+    match precision {
+        None | Some("float64") | Some("f64") | Some("float32") | Some("f32") => Ok(()),
+        Some(other) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown precision '{other}'; valid values: 'float64' (default), 'float32'"
+        ))),
+    }
+}
+
 /// extract_features(X, profile="core33", features=None, n_jobs=None, out=None, views=None, precision=None, out_dtype=None, nan_policy=None)
 #[pyfunction]
 #[pyo3(signature = (x, profile = None, features = None, n_jobs = None, out = None, views = None, precision = None, out_dtype = None, nan_policy = None))]
@@ -148,6 +186,7 @@ pub fn extract_features<'py>(
     let n_cols = plan.n_features();
     let nan_policy =
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
+    parse_precision(precision)?;
 
     let wants_f32_out = matches!(out_dtype, Some("float32") | Some("f32"));
     let _wants_f32_precision = matches!(precision, Some("float32") | Some("f32"));
@@ -210,6 +249,7 @@ pub fn extract_features<'py>(
             .ok_or(KymoraError::NotContiguous { index: None })?;
         let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
         enforce_nan_policy_f32(&rows, nan_policy)?;
+        let gather = f32_plan_gather(&plan)?;
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
@@ -217,7 +257,7 @@ pub fn extract_features<'py>(
             py.detach(|| {
                 run_in_pool(n_jobs, || {
                     let mut tmp = vec![0.0f64; nrows * n_cols];
-                    crate::exec::extract_into_slice_f32(&rows, &mut tmp, n_cols);
+                    crate::exec::extract_into_slice_f32(&rows, &mut tmp, n_cols, gather.as_deref());
                     for (dst, &src) in out_slice.iter_mut().zip(tmp.iter()) {
                         *dst = src as f32;
                     }
@@ -230,7 +270,7 @@ pub fn extract_features<'py>(
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
-                crate::exec::extract_into_slice_f32(&rows, out_slice, n_cols);
+                crate::exec::extract_into_slice_f32(&rows, out_slice, n_cols, gather.as_deref());
             })
         });
         return Ok(out_arr.into_any());
@@ -275,12 +315,13 @@ pub fn extract_features<'py>(
             slices.push(s);
         }
         enforce_nan_policy_f32(&slices, nan_policy)?;
+        let gather = f32_plan_gather(&plan)?;
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
-                crate::exec::extract_into_slice_f32(&slices, out_slice, n_cols)
+                crate::exec::extract_into_slice_f32(&slices, out_slice, n_cols, gather.as_deref())
             })
         });
         return Ok(out_arr.into_any());
@@ -630,11 +671,18 @@ pub fn extract_features_ragged<'py>(
                 )));
             }
         }
+        let gather = f32_plan_gather(&plan)?;
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
-                crate::exec::extract_ragged_csr_f32(v_slice, offsets_slice, out_slice, n_cols)
+                crate::exec::extract_ragged_csr_f32(
+                    v_slice,
+                    offsets_slice,
+                    out_slice,
+                    n_cols,
+                    gather.as_deref(),
+                )
             })
         })?;
         return Ok(out_arr);
