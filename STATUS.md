@@ -23,7 +23,7 @@
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
 | 1.1 Equal-feature mapping | ✅ | | `docs/benchmarks/feature_mapping.md` from frozen `benchmarks/agreement/feature_map.json`; parity re-verified 2026-10-05 (`2026-10-05_equal_feature/parity.json`: TSFEL/tsfresh/numba/numpy all EXACT) |
-| 1.2 Benchmark shared features | ⬜ | | |
+| 1.2 Benchmark shared features | ✅ | | `benchmarks/suites/equal_feature.py` (parity + bench modes); 2026-10-05 run: 4 shapes × {tsfel 13, tsfresh 13, numba 33, numpy 33}, interleaved rounds, bootstrap CIs; kymora wins all 16 rows (3.4×–1,693.8×). Artifacts: `2026-10-05_equal_feature/` + `EQUAL_FEATURE_REPORT.md` |
 | 1.3 Re-measure † rows | ⬜ | | |
 | 1.4 Numba baseline + losses | ⬜ | | |
 | 1.5 Rewrite README bench section | ⬜ | | |

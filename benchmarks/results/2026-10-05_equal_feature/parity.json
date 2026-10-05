@@ -1,0 +1,514 @@
+{
+  "generated": "2026-10-05T11:01:47.686379",
+  "mode": "parity",
+  "n_series": 40,
+  "length": 500,
+  "seed": 42,
+  "kymora_version": "0.7.0",
+  "tolerances": {
+    "exact": 1e-09,
+    "close": 1e-05
+  },
+  "results": {
+    "tsfel": {
+      "n_features": 13,
+      "features": [
+        "mean",
+        "std",
+        "var",
+        "min",
+        "max",
+        "median",
+        "skewness",
+        "kurtosis",
+        "abs_energy",
+        "root_mean_square",
+        "mean_abs_change",
+        "mean_change",
+        "zero_crossings"
+      ],
+      "worst_rel_err": 1.1266840609661623e-12,
+      "n_mismatch": 0,
+      "pass": true,
+      "per_feature": {
+        "mean": {
+          "max_rel_err": 6.515042473216668e-14,
+          "status": "EXACT"
+        },
+        "std": {
+          "max_rel_err": 6.496041807451312e-16,
+          "status": "EXACT"
+        },
+        "var": {
+          "max_rel_err": 1.2669694355150777e-15,
+          "status": "EXACT"
+        },
+        "min": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "max": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "median": {
+          "max_rel_err": 5.551056114154085e-15,
+          "status": "EXACT"
+        },
+        "skewness": {
+          "max_rel_err": 3.948852157736847e-14,
+          "status": "EXACT"
+        },
+        "kurtosis": {
+          "max_rel_err": 1.1266840609661623e-12,
+          "status": "EXACT"
+        },
+        "abs_energy": {
+          "max_rel_err": 1.320915605035864e-15,
+          "status": "EXACT"
+        },
+        "root_mean_square": {
+          "max_rel_err": 6.554707244377635e-16,
+          "status": "EXACT"
+        },
+        "mean_abs_change": {
+          "max_rel_err": 9.34989590115953e-16,
+          "status": "EXACT"
+        },
+        "mean_change": {
+          "max_rel_err": 1.5693401355171094e-13,
+          "status": "EXACT"
+        },
+        "zero_crossings": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        }
+      }
+    },
+    "tsfresh": {
+      "n_features": 13,
+      "features": [
+        "median",
+        "quantile_10",
+        "quantile_90",
+        "abs_energy",
+        "root_mean_square",
+        "mean_abs_change",
+        "mean_change",
+        "mean_second_derivative_central",
+        "longest_strike_above_mean",
+        "longest_strike_below_mean",
+        "autocorr_lag_1",
+        "autocorr_lag_2",
+        "autocorr_lag_5"
+      ],
+      "worst_rel_err": 9.3948370746605e-14,
+      "n_mismatch": 0,
+      "pass": true,
+      "per_feature": {
+        "median": {
+          "max_rel_err": 5.551056114154085e-15,
+          "status": "EXACT"
+        },
+        "quantile_10": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_90": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "abs_energy": {
+          "max_rel_err": 1.2686969043158926e-15,
+          "status": "EXACT"
+        },
+        "root_mean_square": {
+          "max_rel_err": 6.554707244377635e-16,
+          "status": "EXACT"
+        },
+        "mean_abs_change": {
+          "max_rel_err": 9.34989590115953e-16,
+          "status": "EXACT"
+        },
+        "mean_change": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "mean_second_derivative_central": {
+          "max_rel_err": 3.3374512944208976e-14,
+          "status": "EXACT"
+        },
+        "longest_strike_above_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "longest_strike_below_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "autocorr_lag_1": {
+          "max_rel_err": 2.845934406748278e-14,
+          "status": "EXACT"
+        },
+        "autocorr_lag_2": {
+          "max_rel_err": 9.3948370746605e-14,
+          "status": "EXACT"
+        },
+        "autocorr_lag_5": {
+          "max_rel_err": 3.753889027925332e-14,
+          "status": "EXACT"
+        }
+      }
+    },
+    "numba": {
+      "n_features": 33,
+      "features": [
+        "mean",
+        "std",
+        "var",
+        "min",
+        "max",
+        "median",
+        "quantile_10",
+        "quantile_25",
+        "quantile_75",
+        "quantile_90",
+        "skewness",
+        "kurtosis",
+        "abs_energy",
+        "root_mean_square",
+        "mean_abs_change",
+        "mean_change",
+        "cid_ce",
+        "mean_second_derivative_central",
+        "zero_crossings",
+        "mean_crossings",
+        "number_of_peaks",
+        "longest_strike_above_mean",
+        "longest_strike_below_mean",
+        "autocorr_lag_1",
+        "autocorr_lag_2",
+        "autocorr_lag_5",
+        "autocorr_lag_10",
+        "trend_slope",
+        "trend_r2",
+        "permutation_entropy",
+        "dominant_frequency",
+        "spectral_centroid",
+        "spectral_entropy"
+      ],
+      "worst_rel_err": 2.5752778536332118e-12,
+      "n_mismatch": 0,
+      "pass": true,
+      "per_feature": {
+        "mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "std": {
+          "max_rel_err": 8.661389076601747e-16,
+          "status": "EXACT"
+        },
+        "var": {
+          "max_rel_err": 1.6892925806867697e-15,
+          "status": "EXACT"
+        },
+        "min": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "max": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "median": {
+          "max_rel_err": 5.551056114154085e-15,
+          "status": "EXACT"
+        },
+        "quantile_10": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_25": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_75": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_90": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "skewness": {
+          "max_rel_err": 2.758944907129656e-14,
+          "status": "EXACT"
+        },
+        "kurtosis": {
+          "max_rel_err": 2.5752778536332118e-12,
+          "status": "EXACT"
+        },
+        "abs_energy": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "root_mean_square": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "mean_abs_change": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "mean_change": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "cid_ce": {
+          "max_rel_err": 1.1451999776752415e-15,
+          "status": "EXACT"
+        },
+        "mean_second_derivative_central": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "zero_crossings": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "mean_crossings": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "number_of_peaks": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "longest_strike_above_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "longest_strike_below_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "autocorr_lag_1": {
+          "max_rel_err": 1.6116083610603074e-15,
+          "status": "EXACT"
+        },
+        "autocorr_lag_2": {
+          "max_rel_err": 1.5851220994701626e-15,
+          "status": "EXACT"
+        },
+        "autocorr_lag_5": {
+          "max_rel_err": 1.6519104897264096e-15,
+          "status": "EXACT"
+        },
+        "autocorr_lag_10": {
+          "max_rel_err": 1.6895308741408616e-15,
+          "status": "EXACT"
+        },
+        "trend_slope": {
+          "max_rel_err": 1.0195437670018696e-14,
+          "status": "EXACT"
+        },
+        "trend_r2": {
+          "max_rel_err": 2.156465638736464e-14,
+          "status": "EXACT"
+        },
+        "permutation_entropy": {
+          "max_rel_err": 3.338909176001982e-16,
+          "status": "EXACT"
+        },
+        "dominant_frequency": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "spectral_centroid": {
+          "max_rel_err": 5.446266529142061e-15,
+          "status": "EXACT"
+        },
+        "spectral_entropy": {
+          "max_rel_err": 1.94910835173954e-15,
+          "status": "EXACT"
+        }
+      }
+    },
+    "numpy": {
+      "n_features": 33,
+      "features": [
+        "mean",
+        "std",
+        "var",
+        "min",
+        "max",
+        "median",
+        "quantile_10",
+        "quantile_25",
+        "quantile_75",
+        "quantile_90",
+        "skewness",
+        "kurtosis",
+        "abs_energy",
+        "root_mean_square",
+        "mean_abs_change",
+        "mean_change",
+        "cid_ce",
+        "mean_second_derivative_central",
+        "zero_crossings",
+        "mean_crossings",
+        "number_of_peaks",
+        "longest_strike_above_mean",
+        "longest_strike_below_mean",
+        "autocorr_lag_1",
+        "autocorr_lag_2",
+        "autocorr_lag_5",
+        "autocorr_lag_10",
+        "trend_slope",
+        "trend_r2",
+        "permutation_entropy",
+        "dominant_frequency",
+        "spectral_centroid",
+        "spectral_entropy"
+      ],
+      "worst_rel_err": 1.1266840609661623e-12,
+      "n_mismatch": 0,
+      "pass": true,
+      "per_feature": {
+        "mean": {
+          "max_rel_err": 6.515042473216668e-14,
+          "status": "EXACT"
+        },
+        "std": {
+          "max_rel_err": 6.496041807451312e-16,
+          "status": "EXACT"
+        },
+        "var": {
+          "max_rel_err": 1.2669694355150777e-15,
+          "status": "EXACT"
+        },
+        "min": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "max": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "median": {
+          "max_rel_err": 5.551056114154085e-15,
+          "status": "EXACT"
+        },
+        "quantile_10": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_25": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_75": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "quantile_90": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "skewness": {
+          "max_rel_err": 3.948852157736847e-14,
+          "status": "EXACT"
+        },
+        "kurtosis": {
+          "max_rel_err": 1.1266840609661623e-12,
+          "status": "EXACT"
+        },
+        "abs_energy": {
+          "max_rel_err": 1.320915605035864e-15,
+          "status": "EXACT"
+        },
+        "root_mean_square": {
+          "max_rel_err": 6.554707244377635e-16,
+          "status": "EXACT"
+        },
+        "mean_abs_change": {
+          "max_rel_err": 9.34989590115953e-16,
+          "status": "EXACT"
+        },
+        "mean_change": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "cid_ce": {
+          "max_rel_err": 9.161599821401933e-16,
+          "status": "EXACT"
+        },
+        "mean_second_derivative_central": {
+          "max_rel_err": 2.3526277634888793e-14,
+          "status": "EXACT"
+        },
+        "zero_crossings": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "mean_crossings": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "number_of_peaks": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "longest_strike_above_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "longest_strike_below_mean": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "autocorr_lag_1": {
+          "max_rel_err": 2.845934406748278e-14,
+          "status": "EXACT"
+        },
+        "autocorr_lag_2": {
+          "max_rel_err": 9.412973825769887e-14,
+          "status": "EXACT"
+        },
+        "autocorr_lag_5": {
+          "max_rel_err": 3.753889027925332e-14,
+          "status": "EXACT"
+        },
+        "autocorr_lag_10": {
+          "max_rel_err": 3.3889062056840895e-15,
+          "status": "EXACT"
+        },
+        "trend_slope": {
+          "max_rel_err": 3.670357561206707e-15,
+          "status": "EXACT"
+        },
+        "trend_r2": {
+          "max_rel_err": 7.36354120544148e-15,
+          "status": "EXACT"
+        },
+        "permutation_entropy": {
+          "max_rel_err": 3.342389208847662e-16,
+          "status": "EXACT"
+        },
+        "dominant_frequency": {
+          "max_rel_err": 0.0,
+          "status": "EXACT"
+        },
+        "spectral_centroid": {
+          "max_rel_err": 1.326711543106936e-15,
+          "status": "EXACT"
+        },
+        "spectral_entropy": {
+          "max_rel_err": 1.675428718923309e-15,
+          "status": "EXACT"
+        }
+      }
+    }
+  }
+}
