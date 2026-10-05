@@ -376,5 +376,5 @@ Microbenchmarks execution variants on current hardware and caches optimal execut
 - `KYMORA_POOL` (`spin`/`rayon`) is currently **read by nothing** — the
   persistent spin-pool prototype was removed from main to
   `experiment/spin-pool` (see `docs/ROADMAP.md`; revival is gated on
-  arch.md Z6). Treat any `tune()` pool recommendation as provisional until
+  docs/internal/arch.md Z6). Treat any `tune()` pool recommendation as provisional until
   the backend lands.

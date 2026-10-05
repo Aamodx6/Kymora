@@ -1,7 +1,7 @@
 # Refactor state (tsxtract standardization)
 
 Branch: `refactor/tsxtract`. Tag: `pre-refactor`. Base: `4c268ca`.
-arch.md is the architecture source of truth.
+docs/internal/arch.md is the architecture source of truth.
 
 ## Phase checklist
 
@@ -10,35 +10,35 @@ arch.md is the architecture source of truth.
 - [x] Phase 1: naming decision & packaging (2026-10-04). Gate: wheel builds
       as `tsxtract-rs 0.5.0`, `import tsxtract` works, `import tsxtractor`
       warns + works, 138 tests pass, feature hash unchanged, clean-venv
-      install verified. See `docs/refactor/naming.md`,
-      `docs/refactor/phase1_VERIFICATION.md`.
+      install verified. See `docs/internal/refactor/naming.md`,
+      `docs/internal/refactor/phase1_VERIFICATION.md`.
 - [x] Phase 2: repository structure & obsolete file removal (2026-10-04).
       Gate: `benchmarks/` move + path updates (53 files, zero residuals),
       `tests/{property,reference}/` subdirs, `insp/` deleted with evidence,
       `.gitignore` fixed, builds/tests green. See
-      `docs/refactor/deleted_files.md`. Contributor files
+      `docs/internal/refactor/deleted_files.md`. Contributor files
       (CODE_OF_CONDUCT, SECURITY, CITATION.cff, templates, dependabot)
       deferred to Phase 7; docs-system dedup deferred to Phase 5.
 - [x] Phase 3: Rust core cleanup (2026-10-04). Gate: legacy dead code
       removed with evidence (−133 net), unsafe centralized into 2 helpers
       with SAFETY contract, `deny(unsafe_code)` in 17 modules
-      (negative-tested), rustdoc warning-free, arch.md I8 + §4.1 aligned,
+      (negative-tested), rustdoc warning-free, docs/internal/arch.md I8 + §4.1 aligned,
       cargo/pytest green, feature hash unchanged, perf no-regression.
       Fresh Zenith experiments kept (pool.rs, soa_4x, out32) pending owner
-      wire-or-delete. See `docs/refactor/phase3_VERIFICATION.md`.
+      wire-or-delete. See `docs/internal/refactor/phase3_VERIFICATION.md`.
 - [x] Phase 4: Python package cleanup (2026-10-04). Gate: mypy clean
       (was 10 errors; stubs completed from `ffi.rs` signatures, select.py
       typing fixed, scipy import made hermetic), 138 tests pass, feature
       hash unchanged. Dev-loop hazard found: tests import site-packages,
       so the wheel must be rebuilt+reinstalled before pytest means
       anything (done this phase; Phase 7 tooling candidate). See
-      `docs/refactor/phase4_VERIFICATION.md`.
+      `docs/internal/refactor/phase4_VERIFICATION.md`.
 - [x] Phase 5: documentation architecture (2026-10-04). Gate: false
       SIMD/spin-pool/O(1)/sub-microsecond claims corrected in `docs/` +
       README (measured 1.8 µs fast-tier), 2 anchors fixed by adding the
       missing sections, `site_url` aligned (closes #6), mkdocs strict
       INFO-free, roles decision (no landing merge). PRD/patent untouched
-      (#4/#5). See `docs/refactor/phase5_VERIFICATION.md`.
+      (#4/#5). See `docs/internal/refactor/phase5_VERIFICATION.md`.
 - [x] Phase 6: website (2026-10-04). Gate: landing build clean; removed
       4 false conda-forge blocks (Anaconda API 404 on both names) and
       fixed 9 wrong `tsxtract` dist names in install commands (would hit
@@ -46,7 +46,7 @@ arch.md is the architecture source of truth.
       dead `TSXTRACT_VERSION` removed; nav/links/figures integrity
       16/16. **#2 RESOLVED** (PyPI `tsxtract-rs` owned by `aamoddev11`,
       0.5.0 live). F1 exposure + Footer profile deferred (#1/B-track).
-      See `docs/refactor/phase6_VERIFICATION.md`.
+      See `docs/internal/refactor/phase6_VERIFICATION.md`.
 - [x] Phase 7: CI/CD, tooling, contributor experience (2026-10-04). Gate:
       setup-venv composite action wired into ci.yml ×3 + benchmark.yml
       (was untracked dup); docs.yml never-succeeding install replaced with
@@ -55,13 +55,13 @@ arch.md is the architecture source of truth.
       templates, dependabot, CLAUDE.md); dev-loop hazard + cross-platform
       benchmark commands documented (D14: raw commands canonical, wrappers
       kept for arch/Dockerfile refs). All YAML parse; full gates green.
-      See `docs/refactor/phase7_VERIFICATION.md`.
+      See `docs/internal/refactor/phase7_VERIFICATION.md`.
 - [x] Phase 8: final verification & report (2026-10-04). All 11 gates
       green on the final tree (cargo 16/16, clippy/fmt/doc clean, pytest
       138 under `-W error`, hash MATCH, validation within tolerance,
       mkdocs strict, mypy clean, landing builds, residual scan clean,
       phase records complete). 17 commits from `pre-refactor`. Not
-      pushed — owner's call. See `docs/refactor/phase8_VERIFICATION.md`.
+      pushed — owner's call. See `docs/internal/refactor/phase8_VERIFICATION.md`.
 
 ## Decisions
 
@@ -69,7 +69,7 @@ arch.md is the architecture source of truth.
   confirms otherwise.
 - D0 (Phase 0): `feature_names()` sha256
   `8a1e2794…3e1431af` is the semantic invariance anchor for all phases.
-- D9 (Phase 2): `benchmarks/` is the Python harness dir (arch.md §4.1
+- D9 (Phase 2): `benchmarks/` is the Python harness dir (docs/internal/arch.md §4.1
   updated); `mkdocs build --strict` passes (docs CI green); `make` is
   unavailable on the owner's Windows box — runner consolidation is Phase 7.
 - D10 (Phase 3): unsafe lives only in `ffi.rs` (numpy boundary, centralized
@@ -87,7 +87,7 @@ arch.md is the architecture source of truth.
 - D14 (Phase 7): benchmark runner entry points — the five raw
   `python benchmarks/...` commands are the canonical portable path
   (Windows-safe); `Makefile` and `reproduce.sh` remain optional wrappers
-  (referenced by arch.md gates and Dockerfile CMD), not deleted.
+  (referenced by docs/internal/arch.md gates and Dockerfile CMD), not deleted.
 
 ## Follow-up — post-Phase-8 steps (owner-directed, in order, gate each)
 
@@ -137,7 +137,7 @@ arch.md is the architecture source of truth.
       (`readme = "README.md"` — self-corrects on next release, no edit);
       landing data + 3 docs tables + meta + mermaid + captions rewritten
       from the 10-round artifact; `docs/benchmarks.md` measured-run
-      refreshed; arch.md F1 closed + §9.1 rebaselined; stale single-series
+      refreshed; docs/internal/arch.md F1 closed + §9.1 rebaselined; stale single-series
       + scaling/memory rows marked †/pending. All laptop numbers labeled
       exploratory. Final sweep: only new values + intentional historical
       references remain.
@@ -179,17 +179,17 @@ arch.md is the architecture source of truth.
    (`aamodx6.github.io`, per D0).
 7. ~~`pool.rs` / `TSXTRACT_POOL`~~ — resolved: `src/pool.rs` moved to
    `experiment/spin-pool`, deleted from main (0 callers); revival gated on
-   arch.md Z6, recorded in `docs/ROADMAP.md`. `tune.py` pool dimension
+   docs/internal/arch.md Z6, recorded in `docs/ROADMAP.md`. `tune.py` pool dimension
    stays void until then.
 8. ~~`soa_4x` kernels + `run_core33_f32_out32`~~ — resolved: soa_4x
    quartet (`reduce.rs:821-1153`) + `run_core33_f32_out32`
    (`pipeline.rs:252-260`) moved to `experiment/soa-4x`, deleted from
    main (0 callers, 0 parity tests, no ≥10% benchmark — exception clause
-   failed on evidence); revival gated on arch.md Z2 + ≥10% end-to-end,
+   failed on evidence); revival gated on docs/internal/arch.md Z2 + ≥10% end-to-end,
    recorded in `docs/ROADMAP.md`.
 
 ## Stash register
 
 - `wip-arch-consolidation`: pre-existing uncommitted changes found on
-  2026-10-04 (arch.md rewrite, arch_max.md/arch_zenith.md deletions,
+  2026-10-04 (docs/internal/arch.md rewrite, arch_max.md/arch_zenith.md deletions,
   benchmarks/STATE.md + adapters + harness edits, LOSS_LEDGER.md).

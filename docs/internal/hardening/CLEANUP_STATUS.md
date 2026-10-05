@@ -41,7 +41,7 @@ Phase 2 will establish which is true on this tree.
 | patent/ | DIR (tracked, FROZEN) | 0.0 MB |
 | .pytest_cache/ | DIR (ignored) | 0.0 MB |
 | proptest-regressions/ | DIR (untracked) | 0.0 MB |
-| root files (arch.md, CHANGELOG.md, README.md, Cargo.lock, …) | FILEs | <0.1 MB total |
+| root files (docs/internal/arch.md, CHANGELOG.md, README.md, Cargo.lock, …) | FILEs | <0.1 MB total |
 
 Working-dir total ≈ **6178 MB (~6.0 GiB)**: untracked/ignored **6172.7 MB**
 (42555 files, includes `.git/`) + tracked **5.7 MB** (357 files).
@@ -161,7 +161,7 @@ are tracked build outputs of `paper/main.tex` — owner decision needed
 ### 7. UNSURE (owner decides) — nothing deleted, sizes recorded
 
 1. `benchmarks/suites/concurrency.py` + `_conc_spawn_child.py` (untracked,
-   new B3 suite, docstring cites `arch.md §11.5`). Keep-or-commit decision —
+   new B3 suite, docstring cites `docs/internal/arch.md §11.5`). Keep-or-commit decision —
    looks like in-progress work, not scratch. Not deleted.
 2. `benchmarks/results/` root-level untracked `env.json`, `latency.jsonl`,
    `memory.jsonl`, `scaling.jsonl`, `sliding.jsonl`, `startup.jsonl`,
@@ -234,7 +234,7 @@ branch needs no workflow edits for these moves, only a post-rebase
 re-verification. Notable corrections to the brief: `release.yml` does NOT
 reference RELEASE_NOTES.md (nothing to update); `tools/name_check.py:137`
 default out path and `tools/rename_to_kymora.py` skip-lists MUST move with
-`docs/refactor/` or they recreate/bypass it; `check_snippets.py` exclusion
+`docs/internal/refactor/` or they recreate/bypass it; `check_snippets.py` exclusion
 logic must follow. `mkdir` for `docs/internal/hardening/` +
 `docs/internal/refactor/{baseline,rename-kymora}/` precedes `git mv`.
 STOPPED before any move, per orders.
@@ -259,7 +259,7 @@ caches — deliberately excluded):
 
 Gate-expectation conflict resolved: brief was right, CLAUDE.md was stale
 (fixed to `279 passed, 1 skipped` + cargo `30 passed` + `sklearn.py`
-listing; `arch.md` reference left for the Phase 4 move).
+listing; `docs/internal/arch.md` reference left for the Phase 4 move).
 
 | Gate | Result |
 |---|---|

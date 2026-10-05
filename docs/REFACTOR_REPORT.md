@@ -20,7 +20,7 @@ suffix) and **delete `tsxtractor` outright**.
 | `PRD.md` removed (§15 items → `docs/ROADMAP.md`) | v1.0 task list fully shipped; launch plan dated |
 | `landing/src/docs/**` retired (33 files) | Duplicate of `docs/`; mkdocs site is the single source (deploys via docs.yml). Nav Docs links → canonical docs URL; `/docs/*` redirects added |
 | `benchmarks/adapters/tsxtract.{py,md}` → `kymora.*`, `requirements-tsxtract.txt` → `requirements-kymora.txt` | Same library, new name; new runs record lib id `kymora` |
-| Untouched | `patent/`, `paper/`, `tests/golden/`, fixtures, `benchmarks/results/*`, `benchmarks/report/*`, B-track evidence files, CHANGELOG history, frozen `docs/refactor/*` |
+| Untouched | `patent/`, `paper/`, `tests/golden/`, fixtures, `benchmarks/results/*`, `benchmarks/report/*`, B-track evidence files, CHANGELOG history, frozen `docs/internal/refactor/*` |
 
 ## Decisions
 

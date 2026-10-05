@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 Guidance for AI coding agents working in this repository. The architecture
-source of truth is `arch.md` — read it before changing `src/`. Human
+source of truth is `docs/internal/arch.md` — read it before changing `src/`. Human
 contributor rules are in `CONTRIBUTING.md`.
 
 ## Dev loop (critical)
@@ -63,5 +63,5 @@ Feature-order invariant: `feature_names()` must keep sha256
 
 ## State tracking
 
-Ongoing work is tracked in `docs/REFACTOR_STATE.md` (phases, decisions,
-NEEDS-OWNER items). Phase records live in `docs/refactor/phaseN_VERIFICATION.md`.
+Ongoing work is tracked in `docs/internal/refactor/REFACTOR_STATE.md` (phases, decisions,
+NEEDS-OWNER items). Phase records live in `docs/internal/refactor/phaseN_VERIFICATION.md`.
