@@ -25,8 +25,8 @@
 | 1.1 Equal-feature mapping | ✅ | | `docs/benchmarks/feature_mapping.md` from frozen `benchmarks/agreement/feature_map.json`; parity re-verified 2026-10-05 (`2026-10-05_equal_feature/parity.json`: TSFEL/tsfresh/numba/numpy all EXACT) |
 | 1.2 Benchmark shared features | ✅ | | `benchmarks/suites/equal_feature.py` (parity + bench modes); 2026-10-05 run: 4 shapes × {tsfel 13, tsfresh 13, numba 33, numpy 33}, interleaved rounds, bootstrap CIs; kymora wins all 16 rows (3.4×–1,693.8×). Artifacts: `2026-10-05_equal_feature/` + `EQUAL_FEATURE_REPORT.md` |
 | 1.3 Re-measure † rows | ✅ | | `benchmarks/suites/remeasure_readme.py`; 2026-10-05 run: profiles (minimal 1.20 ms / core33 2.88 / extended 10.10 / full 11.10), scaling (peak 4.25× @ 16T), memory (kymora 100k×500 +417.7 MiB peak, extraction +32.3; tsfresh +289.8/+449.5 @1k/10k); tsfresh 100k cell still PENDING (multi-hour). Fixed `default_fc_parameters` string bug |
-| 1.4 Numba baseline + losses | ⬜ | | |
-| 1.5 Rewrite README bench section | ⬜ | | |
+| 1.4 Numba baseline + losses | ✅ | 7ec0f66, with 1.5 | Evidence committed (B3/COMPETITOR/L1 reports + raw json); "Where Kymora is slower" README section + numba/equal-feature rows delivered with task 1.5 |
+| 1.5 Rewrite README bench section | ✅ | | Median-first: equal-feature table (like-for-like), raw-time F1 table, honest losses section; fresh profile/scaling/memory tables (2026-10-05); stale † rows removed; phantom feature list corrected to actual 33-name catalog; CLAIMS.md rows extended so check_claims passes |
 | 1.6 bench.yml CI workflow | ✅ | | Manual dispatch + weekly cron; ubuntu + macos-14; parity gate + reduced equal-feature bench + re-measure; results uploaded as artifacts, never auto-copied into README/CLAIMS |
 | 1.7 Propagate figures + check_claims.py | ⬜ | | |
 
