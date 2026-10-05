@@ -27,7 +27,7 @@
 | 1.3 Re-measure † rows | ⬜ | | |
 | 1.4 Numba baseline + losses | ⬜ | | |
 | 1.5 Rewrite README bench section | ⬜ | | |
-| 1.6 bench.yml CI workflow | ⬜ | | |
+| 1.6 bench.yml CI workflow | ✅ | | Manual dispatch + weekly cron; ubuntu + macos-14; parity gate + reduced equal-feature bench + re-measure; results uploaded as artifacts, never auto-copied into README/CLAIMS |
 | 1.7 Propagate figures + check_claims.py | ⬜ | | |
 
 ## Phase 2: Streaming Correctness + Performance
