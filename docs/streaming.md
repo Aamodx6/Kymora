@@ -76,12 +76,25 @@ Streaming-vs-batch agreement on the same window (float64):
 
 ## Measured latencies
 
-See `benchmarks/suites/streaming.py` (capacities 64…65536, parity-gated before
-timing) and its results artifact. Indicative exploratory numbers on
-i7-13620H / Windows 11 (single machine, not fleet evidence): `push` ≈ 0.2 µs
-flat across window sizes; `compute(kind="fast")` ≈ 0.4–0.6 µs flat;
-`compute(kind="all")` linear in W. Re-run the suite on your hardware before
-quoting numbers.
+Artifact: `benchmarks/results/2026-10-05_streaming/` (suite
+`benchmarks/suites/streaming.py`, B3; every capacity parity-gated before
+timing). Exploratory single-machine numbers (i7-13620H, Windows 11, single
+thread), not fleet evidence:
+
+| W | push (µs) | compute fast p50 (µs) | compute all p50 (µs) | naive recompute p50 (µs) |
+| --- | --- | --- | --- | --- |
+| 64 | 0.205 | 0.60 | 3.6 | 438.1 |
+| 256 | 0.218 | 0.70 | 11.6 | 300.9 |
+| 4096 | 0.195 | 0.40 | 138.5 | 494.1 |
+| 65536 | 0.314 | 0.40 | 2350.0 | 6076.8 |
+
+End-to-end (W=256, 99,744 points, fast compute every 64): streaming 0.030 s
+vs naive full recompute 0.432 s = 14.4×. `push` and `compute(fast)` are flat
+across 64…65536 (O(1)); `compute(all)` grows linearly (O(W)).
+
+![per-push and compute cost vs window size](img/streaming_push_cost.png)
+
+Re-run the suite on your hardware before quoting numbers.
 
 ## Example
 
