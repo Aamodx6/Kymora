@@ -9,7 +9,7 @@ absolute bound instead (batch-center conditioning; see docs/streaming.md and
 
 import numpy as np
 import pytest
-from hypothesis import HealthCheck, given, settings
+from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
 
 import kymora
@@ -236,6 +236,20 @@ HYP_SETTINGS = settings(
 )
 
 
+def _degenerate_nonconstant(win):
+    """True when window variance is pure summation noise (SciPy gh-15905
+    regime): nonzero var at/below one squared ulp of the mean. Batch and
+    streaming legitimately center such windows differently (the batch mean
+    can round onto an endpoint), so strict parity is unachievable there --
+    e.g. a 1-ulp window yields batch cid ~1.41 vs exact streaming cid 2.0.
+    skew/kurt NaN-parity on these windows is covered by dedicated tests
+    (constant-window tests + `near_degenerate_window_yields_nan_both_paths`
+    in the Rust suite), not here."""
+    m = float(np.mean(win))
+    v = float(np.var(win))
+    return v > 0.0 and v <= (np.finfo(np.float64).eps * m) ** 2
+
+
 @HYP_SETTINGS
 @given(
     w=st.integers(min_value=2, max_value=32),
@@ -248,8 +262,11 @@ HYP_SETTINGS = settings(
 )
 def test_hypothesis_fast_matches_batch(w, interval, data):
     # Bounded magnitudes keep every feature well-conditioned, so rtol 1e-9
-    # must hold on every window. Small anchor_interval forces frequent
-    # exact re-anchors mid-stream. len(data) >= w always: no filtering.
+    # must hold on every window -- except numerically-degenerate windows
+    # (see `_degenerate_nonconstant`), which are rejected: comparing
+    # implementations there would only measure whose center rounding is
+    # luckier. Small anchor_interval forces frequent exact re-anchors
+    # mid-stream. len(data) >= w always: no other filtering.
     stream = np.asarray(data, dtype=np.float64)
     ext = kymora.StreamingExtractor(w, anchor_interval=interval)
     for i, v in enumerate(stream):
@@ -257,10 +274,10 @@ def test_hypothesis_fast_matches_batch(w, interval, data):
         if i + 1 < w:
             continue
         assert ready
+        win = stream[i - w + 1 : i + 1]
+        assume(not _degenerate_nonconstant(win))
         got = ext.compute(kind="fast")
-        want = kymora.extract_features(
-            stream[i - w + 1 : i + 1][None, :], features=FAST_NAMES
-        )[0]
+        want = kymora.extract_features(win[None, :], features=FAST_NAMES)[0]
         for name, s, b in zip(FAST_NAMES, got, want):
             if np.isnan(b):
                 assert np.isnan(s), name

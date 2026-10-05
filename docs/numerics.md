@@ -46,6 +46,7 @@ streaming agree element-wise by test:
 | Input | Result |
 |---|---|
 | Constant series (incl. all-zero) | `var`/`std` exactly `0.0`; `skewness`, `kurtosis`, all autocorrelations, `trend_r2`, and all three spectral features NaN; `cid_ce` exactly `0.0`; `trend_slope` exactly `0.0`. |
+| Numerically-degenerate series (non-constant, but `var <= (eps·mean)²`, e.g. a 1-ulp window) | `skewness`/`kurtosis` NaN in batch and streaming alike (mirrors `scipy.stats.skew/kurtosis`, gh-15905: the variance is summation noise, so the ratios are unreliable). `var`/`std` stay finite and agree within absolute tolerance; `cid_ce` is well-defined but batch and streaming may disagree there (different center rounding) — strict parity is only contracted on well-conditioned windows. |
 | Length-1 series | Change features (`mean_abs_change`, `mean_change`, `cid_ce`), `mean_second_derivative_central`, `trend_slope`, `trend_r2`, `permutation_entropy`, autocorrelations, and spectral features NaN; the rest compute. |
 | Length-2 series | `mean_second_derivative_central`, `autocorr_lag_2/5/10`, `permutation_entropy` NaN; skew/kurt are defined. |
 | All-zero series | Same as constant: 10 NaN features, the rest finite (`mean` 0, `abs_energy` 0, crossings 0). |

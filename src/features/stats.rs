@@ -102,18 +102,23 @@ fn select_ranks(buf: &mut [f64], offset: usize, ranks: &[usize], values: &mut [f
 }
 
 /// Population skewness (`scipy.stats.skew`, `bias=True`) from the second and
-/// third central moment sums. `std == 0` -> NaN.
-pub fn skewness(m3: f64, n: f64, var: f64, std: f64) -> f64 {
-    if std == 0.0 {
+/// third central moment sums. NaN when the window is exactly constant
+/// (`std == 0`) or numerically degenerate: mirroring SciPy (`m2 <=
+/// (eps*mean)^2`, gh-15905), a variance at/below the square of one ulp of
+/// the mean is pure summation rounding noise, so the ratio is unreliable
+/// (e.g. a 1-ulp window otherwise yields ~sqrt(2) from rounding alone).
+pub fn skewness(m3: f64, n: f64, var: f64, std: f64, mean: f64) -> f64 {
+    if std == 0.0 || var <= (f64::EPSILON * mean) * (f64::EPSILON * mean) {
         return f64::NAN;
     }
     (m3 / n) / (var * std)
 }
 
 /// Population excess kurtosis (`scipy.stats.kurtosis`, `fisher=True`,
-/// `bias=True`) from the second and fourth central moment sums.
-pub fn kurtosis(m4: f64, n: f64, var: f64, std: f64) -> f64 {
-    if std == 0.0 {
+/// `bias=True`) from the second and fourth central moment sums. Same
+/// degenerate-window NaN rule as [`skewness`].
+pub fn kurtosis(m4: f64, n: f64, var: f64, std: f64, mean: f64) -> f64 {
+    if std == 0.0 || var <= (f64::EPSILON * mean) * (f64::EPSILON * mean) {
         return f64::NAN;
     }
     (m4 / n) / (var * var) - 3.0
@@ -170,5 +175,51 @@ mod tests {
             let mut buf = x.clone();
             assert_eq!(quantiles(&mut buf), sorted_reference(&x));
         }
+    }
+
+    /// Sums a slice exactly the way batch pass 1 does (sequential `+=`).
+    fn batch_moments(x: &[f64]) -> (f64, f64, f64, f64, f64, f64) {
+        let n = x.len() as f64;
+        let mut sum = 0.0;
+        for &v in x {
+            sum += v;
+        }
+        let mean = sum / n;
+        let (mut m2, mut m3, mut m4) = (0.0, 0.0, 0.0);
+        for &v in x {
+            let d = v - mean;
+            let d2 = d * d;
+            m2 += d2;
+            m3 += d2 * d;
+            m4 += d2 * d2;
+        }
+        let var = m2 / n;
+        (mean, m2, m3, m4, var, var.sqrt())
+    }
+
+    #[test]
+    fn degenerate_window_yields_nan_like_scipy() {
+        // 1-ulp window: the variance is pure summation rounding noise, so the
+        // naive skew/kurt ratios are rounding garbage (~sqrt(2) for skew).
+        // scipy.stats.skew/kurtosis return NaN here (catastrophic-
+        // cancellation guard, gh-15905); we must match.
+        let x = [-10.0f64, -9.999999999999998];
+        let (mean, _m2, m3, m4, var, std) = batch_moments(&x);
+        assert!(var > 0.0, "test setup: window must not be exactly constant");
+        assert!(skewness(m3, 2.0, var, std, mean).is_nan());
+        assert!(kurtosis(m4, 2.0, var, std, mean).is_nan());
+    }
+
+    #[test]
+    fn healthy_window_unaffected_by_degenerate_guard() {
+        // Well-conditioned data must take the plain-ratio path bit-identically.
+        let x = [1.0f64, 2.0, 3.0, 4.0, 5.0];
+        let (mean, _m2, m3, m4, var, std) = batch_moments(&x);
+        let n = x.len() as f64;
+        assert_eq!(skewness(m3, n, var, std, mean), (m3 / n) / (var * std));
+        assert_eq!(
+            kurtosis(m4, n, var, std, mean),
+            (m4 / n) / (var * var) - 3.0
+        );
     }
 }
