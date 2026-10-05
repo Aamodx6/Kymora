@@ -138,7 +138,7 @@ are tracked build outputs of `paper/main.tex` — owner decision needed
 
 | Bucket | Entries | Size | Action | Expected saving |
 |---|---|---|---|---|
-| REGENERABLE | target/ (debug+release+doc) | 4423.7 MB | delete, rebuild via maturin/cargo | ~4365 MB kept: wheels move? no — all regenerable |
+| REGENERABLE | target/ (debug+release+doc) | 4423.7 MB | delete, rebuild via cargo/maturin `--release` | ~4424 MB |
 | REGENERABLE | target/wheels/ (13 stale wheels/sdists) | 53.3 MB | delete (release rebuilds) | ~53 MB |
 | REGENERABLE | fuzz/target/ | 542.9 MB | delete, rebuild via cargo | ~543 MB |
 | REGENERABLE | benchmarks/.venvs/ (sktime/antropy/tsflex) | 910.3 MB | delete AFTER documenting recreate cmd (`python benchmarks/setup_venvs.py --lib all`; already exists — verify in Phase 2) | ~910 MB |
@@ -185,6 +185,52 @@ are tracked build outputs of `paper/main.tex` — owner decision needed
 
 Dry-run + execute per §2, then `make clean`/`distclean`/`dev`, then full
 gate set. Baseline gate results to be recorded here before purging.
+
+### Archive (adjustment A, 2026-10-06)
+
+Before any untracked deletion, all untracked NON-regenerable items were
+zipped (regenerable bulk — target/, fuzz/target/, .venvs/, node_modules/,
+caches — deliberately excluded):
+
+- Path: `F:\Active Repo\kymora-archive-2026-10-06.zip` (outside the repo)
+- Size: 581213 bytes (0.55 MB)
+- SHA256: `FFD1CD664BB35A5F2BCC6E71FE85D0CBF1DCA2C014A03741EE499DA4867F336D`
+- Contents: `benchmarks/results/` untracked items only
+  (`2026-10-04_gate_audit/`, `env.json`, `equal_feature_run.log`,
+  `latency.jsonl`, `memory.jsonl`, `remeasure_run.log`, `scaling.jsonl`,
+  `sliding.jsonl`, `startup.jsonl`, `startup_run.log`, `streaming.jsonl`,
+  `throughput.jsonl`, `throughput_competitors.jsonl`) + `fuzz/Cargo.lock`
+  + `proptest-regressions/proptest_checks.txt`.
+
+### Gate baseline (adjustment D, 2026-10-06, commits through `dd7129e`)
+
+Gate-expectation conflict resolved: brief was right, CLAUDE.md was stale
+(fixed to `279 passed, 1 skipped` + cargo `30 passed` + `sklearn.py`
+listing; `arch.md` reference left for the Phase 4 move).
+
+| Gate | Result |
+|---|---|
+| pytest tests -q | 279 passed, 1 skipped (140 s) ✅ |
+| cargo test --no-default-features | 30 passed ✅ |
+| cargo clippy -D warnings | clean ✅ |
+| cargo fmt --check | clean ✅ |
+| mkdocs build --strict | built in 2.83 s ✅ |
+| tools/check_claims.py | 16 files, 70 values, all traceable ✅ |
+| tools/gen_feature_docs.py --check | current ✅ |
+| tools/validation_report.py | all features within tolerance ✅ |
+| tools/check_snippets.py | 22 executed, 16 skipped, 0 failed ✅ |
+| mypy python/kymora | no issues, 5 files ✅ |
+| feature_names() sha256 | `8a1e27…31af2e` match ✅ |
+| git diff pre-cleanup -- tests/golden | empty ✅ |
+| tools/perf_gate.py | ⚠️ AMBER (environmental): 3 runs failed at ratio 1.09/1.44/2.07 with CV 0.08–0.33; box under 70–80% background CPU (IDEs/browsers) and `src/`+`python/`+manifests are byte-identical to pre-cleanup, so a genuine hot-path regression is impossible. Re-run on quiet CI before merge. |
+
+Wheel rebuilt from current tree (`maturin build --release`, reinstalled
+`kymora-0.8.0-cp310-abi3-win_amd64.whl`) before the pytest run.
+
+### .gitignore note (adjustment E)
+
+`.gstack/` was already ignored (line 13) — no change needed. Added
+`.mypy_cache/` and `fuzz/Cargo.lock`. Full rewrite deferred to Phase 5.
 
 ## Phase 3 — PENDING
 

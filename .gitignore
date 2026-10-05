@@ -7,6 +7,8 @@ dist/
 .pytest_cache/
 *.pdb
 .hypothesis/
+.mypy_cache/
+fuzz/Cargo.lock
 site/
 node_modules/
 landing/dist/
