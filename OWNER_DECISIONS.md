@@ -93,6 +93,13 @@ hardening pass.
 3. `git push origin v0.8.0`
 4. Monitor release workflow
 
+### Cleanup note (2026-10-06, repo-cleanup branch)
+A local `v0.8.0` tag already exists pointing at `9b9e104` (pre-cleanup tree).
+It was NOT pushed and must NOT be pushed as-is: after the cleanup branch is
+merged, delete it locally (`git tag -d v0.8.0`) and recreate it on the final
+merged commit before publishing, otherwise the release would ship
+pre-cleanup tree state.
+
 ---
 
 ## 5. Benchmark Hardware
