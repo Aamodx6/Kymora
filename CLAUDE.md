@@ -22,8 +22,8 @@ anything measured or benchmarked.
 ## Gates (run before claiming done)
 
 ```bash
-pytest tests -q                              # must be 138 passed, 0 warnings
-cargo test --no-default-features
+pytest tests -q                              # must be 279 passed, 1 skipped
+cargo test --no-default-features            # 30 passed
 cargo fmt --all -- --check
 cargo clippy --no-default-features --all-targets -- -D warnings
 python tools/validation_report.py          # feature-drift check
@@ -52,8 +52,8 @@ Feature-order invariant: `feature_names()` must keep sha256
 
 - `src/` Rust core; unsafe only in `ffi.rs` (helpers + SAFETY contract) and
   `kernels/` by convention (`#![deny(unsafe_code)]` elsewhere).
-- `python/kymora/` real package (`__init__.py`, `select.py`, `tune.py`,
-  `_core.pyi`); no other top-level packages.
+- `python/kymora/` real package (`__init__.py`, `select.py`, `sklearn.py`,
+  `tune.py`, `_core.pyi`); no other top-level packages.
 - `tests/` goldens in `tests/golden/` — never regenerate to "fix" a failure
   without understanding the drift first.
 - `docs/` mkdocs site (deployed by `.github/workflows/docs.yml`);
