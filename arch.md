@@ -45,7 +45,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | Build | Catalog expansion & parity matrix (P4) | 🟡 verify counts vs 777 target |
 | Build | Sliding/streaming fast paths, numerical anchor guards (P5) | ✅ reported (4096-step re-anchoring, block-parallel windows) |
 | Zenith | Z-items (§10) | ⬜ not started (gated on re-baseline) |
-| Bench | B0 environment & harness (10 adapters, runner, schema, smoke) | ✅ complete |
+| Bench | B0 environment & harness (9 adapters + retired JAX-collision marker, runner, schema, smoke) | ✅ complete |
 | Bench | Amendments A1–A9 (§11.9) | 🟡 applying |
 | Bench | B1 correctness & agreement → B8 report | ⬜ |
 
@@ -56,7 +56,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 | F1 | **Throughput claims disagreed:** README 1.25 ms / 800,256 series/s; v0.4.0 release notes cited ~1.80 ms / 555k series/s for `core33` | README vs release notes | ✅ RESOLVED 2026-10-04: interleaved `suites/reproduce_readme.py` (+0.3.2/0.4.0 bisect) shows BOTH old figures irreproducible on this machine at every version — README+`CLAIMS.md` rewritten from artifact (3.18 ms med / 314,450 s/s; raw 262×/799×/6,570×, per-feature 393×/169×/279×). Artifact: `benchmarks/results/F1_REPORT.md` |
 | F2 | Small-call overhead: 2×32 smoke = 0.07–0.11 ms (kymora) vs 0.02 ms (numba) | B0 smoke | Fixed-overhead decomposition (A7); ledger `HIGH-LATENCY-SMALL-CALL` |
 | F3 | Feature-name lists differ between README and old `arch.md` | audit | `feature_names()` is truth; list mismatches in `docs/arch_audit.md` |
-| F4 | Naming: PyPI `kymora`, import `kymora`, crate `kymora`; old names `tsxtract`/`tsxtractor`/`tsxtract-rs` deleted outright, no shims (unrelated JAX PyPI project `tsxtract` keeps the bare name); two GitHub accounts/repos | repos, PyPI | Decision D3 (decided 2026-10-04: rename to Kymora, 0.7.0; shims removed same day per owner) |
+| F4 | Naming: PyPI `kymora`, import `kymora`, crate `kymora`; all old names deleted outright, no shims | repos, PyPI | Decision D3 (decided 2026-10-04: rename to Kymora, 0.7.0; shims removed same day per owner) |
 | F5 | Hardware wording: i7-13620H = 10 cores (6P+4E) / 16 threads, not "16 cores" | env.json | Reword all claims (§14) |
 | F6 | Streaming claim "O(1)" does not hold for quantile/spectral/entropy features | code | O(1) vs O(n) tiers documented (§8) |
 | F7 | Landing site is a client-rendered SPA (empty HTML to crawlers), default Vercel domain | fetch | Prerender, OG tags, domain (§14.4) |
@@ -86,7 +86,7 @@ Status legend: ✅ reported done (verify) · 🟡 in progress · ⬜ planned · 
 |---|---|---|
 | D1 | `feature_names()` from the built library is the single source of truth for feature names; README/docs generated from it | ✅ |
 | D2 | **Non-contiguous input:** default `contiguous="error"` (preserves documented `ValueError`); `contiguous="copy"` opt-in performs one explicit copy with a one-time warning stating the cost. Never copy silently | ✅ |
-| D3 | **Canonical import/package name (decided 2026-10-04).** PyPI `kymora`, import `kymora` only, crate `kymora`; every old name deleted outright, no shims — never `pip install tsxtract` (an unrelated PyPI `tsxtract` (JAX) holds the bare name) | ✅ |
+| D3 | **Canonical import/package name (decided 2026-10-04).** PyPI `kymora`, import `kymora` only, crate `kymora`; every old name deleted outright, no shims | ✅ |
 | D4 | `compute()` of `StreamingExtractor` is **not** O(1) for all features; API exposes `compute(kind="fast"\|"all")` | ✅ |
 | D5 | Exact (unpadded) FFT is default; padded `fft_mode="fast"` is opt-in and documented non-identical | ✅ |
 | D6 | `precision="f32"` is opt-in; default stays f64 | ✅ |
@@ -350,7 +350,7 @@ Correctness before timing · no cherry-picking (losses reported) · equal tuning
 `benchmarks/{harness,adapters,datasets,suites,agreement,results,report}`. One isolated `uv` venv per competitor with pinned versions (`requirements-<lib>.txt`). Runner: fresh subprocess per measurement (pyperf-style), warmup, GC disabled during timing, ≥15 runs or ≥2 s budget (documented), record min/median/IQR/mean/p95/CV, bootstrap 95% CI for ratios, auto-rerun once if CV>5%, report best-of and median **separately**. Peak RSS via subprocess sampling. If a competitor lacks support for the benchmark Python (e.g., 3.14), run the main matrix on the newest common version and a secondary run on 3.14.
 
 ### 11.3 Competitors
-tsfresh (README 777-feature config primary; Efficient/Minimal secondary; "extract-only" and "end-to-end incl. long-format construction"), TSFEL (README 156-feature config), pycatch22 (serial loop + multiprocessing Pool), antropy, tsflex, sktime (Catch22/TSFresh transformers), **honest baselines**: vectorized numpy/scipy implementation of the 33 features and a numba hand-rolled version (real FFT via `rocket-fft` or a proper iterative/mixed-radix/Bluestein FFT — never an O(n²) DFT; `fastmath=False` for agreement/robustness, `fastmath=True` only for throughput and labeled), plus the unrelated JAX `tsxtract` only to document the name collision (excluded from win/loss counts).
+tsfresh (README 777-feature config primary; Efficient/Minimal secondary; "extract-only" and "end-to-end incl. long-format construction"), TSFEL (README 156-feature config), pycatch22 (serial loop + multiprocessing Pool), antropy, tsflex, sktime (Catch22/TSFresh transformers), **honest baselines**: vectorized numpy/scipy implementation of the 33 features and a numba hand-rolled version (real FFT via `rocket-fft` or a proper iterative/mixed-radix/Bluestein FFT — never an O(n²) DFT; `fastmath=False` for agreement/robustness, `fastmath=True` only for throughput and labeled).
 
 ### 11.4 Datasets
 Synthetic (seeded; sha256 manifest): white noise, random walk, sinusoid+noise (several SNR), AR(1) φ∈{0.1,0.9,0.99}, trend+seasonality, heavy-tailed (t3, Cauchy), spikes, step changes, piecewise constant, quantized 8/16-bit ADC (many ties), sparse, bimodal, constant, `1e9+noise`, tiny (1e-150) and huge (1e150) scale. Real (hashed, licenses documented): ≥12 UCR/UEA datasets spanning lengths 60–2000 (+ ≥20 for downstream), M4 hourly+daily sample, one physiological/vibration set.
@@ -424,7 +424,7 @@ Every README/landing/PyPI/release-note claim → `CLAIMS.md` row: claim → arti
 - [ ] I1–I10 enforced in CI; zero crash/hang/silent-wrong in robustness matrix; fuzz clean
 - [ ] Output-only allocation verified (core33 100k×500 ≈ 26.4 MB; `extended` ≈120 MB; `full` ≈622 MB — use chunked API / f32 output beyond RAM)
 - [ ] All wheel targets pass tests; baseline-CPU job green
-- [x] Naming decision D3 executed (0.7.0: dist `kymora`, `pip install kymora`, `import kymora`, repo `Aamodx6/Kymora`); one install line, one import line, one repo URL everywhere (residual `tsxtract` hits allowlisted in the Phase 4 record: history, frozen evidence, JAX-collision markers)
+- [x] Naming decision D3 executed (0.7.0: dist `kymora`, `pip install kymora`, `import kymora`, repo `Aamodx6/Kymora`); one install line, one import line, one repo URL everywhere (residual `tsxtract` hits allowlisted in the Phase 4 record: history, frozen evidence, retired-collision notes)
 - [ ] `make bench-all && make report` reproduces the report from a clean checkout; `CLAIMS.md` complete
 
 ### 14.3 Memory budget table (100k series, float64)
@@ -455,7 +455,7 @@ Z0 re-baseline (stage table, η, IPC, LLC-miss) → Z1 select → Z2 runtime (Z6
 ### 15.3 Benchmark track (B)
 | Phase | Scope | Gate | Status |
 |---|---|---|---|
-| B0 | Environment & harness, 10 adapters + tuning notes, runner/stats/schema, datasets/manifest, reproduce pipeline, smoke | `make bench-smoke` valid JSONL on all adapters | ✅ |
+| B0 | Environment & harness, 9 adapters + tuning notes (10th adapter was a JAX-collision marker, removed with the rename), runner/stats/schema, datasets/manifest, reproduce pipeline, smoke | `make bench-smoke` valid JSONL on all adapters | ✅ |
 | B0+ | Amendments A1–A9 (§11.9) | applied, STATE.md updated | 🟡 |
 | B1 | Correctness & agreement; determinism; matched sets frozen | no WRONG open; `feature_map.json` frozen | ⬜ |
 | B2 | Datasets (generators deterministic; real data hashed) | manifest complete | ⬜ (code exists) |
