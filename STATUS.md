@@ -66,8 +66,8 @@
 ## Phase 6: Correctness Assurance
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 6.1 Parity test suite | ⬜ | | |
-| 6.2 Feature catalog docs | ⬜ | | |
+| 6.1 Parity test suite | ✅ | | tests/parity/test_external_parity.py (tsfresh 13 + TSFEL 13 matched sets, rtol 1e-6) + intentional_differences.md; [dev-parity] extra; skips cleanly without libs |
+| 6.2 Feature catalog docs | ✅ | | CORE33_META in registry.rs → describe_feature → tools/gen_feature_docs.py → docs/features.md; tests/test_feature_docs.py (meta↔behavior); CI feature-docs --check job |
 | 6.3 Fuzz/proptest + unsafe audit | ⬜ | | |
 | 6.4 Cross-platform CI | ⬜ | | |
 
