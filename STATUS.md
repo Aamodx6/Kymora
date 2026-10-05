@@ -22,7 +22,7 @@
 ## Phase 1: Benchmark Credibility
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 1.1 Equal-feature mapping | ⬜ | | |
+| 1.1 Equal-feature mapping | ✅ | | `docs/benchmarks/feature_mapping.md` from frozen `benchmarks/agreement/feature_map.json`; parity re-verified 2026-10-05 (`2026-10-05_equal_feature/parity.json`: TSFEL/tsfresh/numba/numpy all EXACT) |
 | 1.2 Benchmark shared features | ⬜ | | |
 | 1.3 Re-measure † rows | ⬜ | | |
 | 1.4 Numba baseline + losses | ⬜ | | |
