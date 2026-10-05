@@ -33,7 +33,10 @@ test, frozen benchmark evidence, refactor records).
 - JOSS submission needs a valid ORCID for the author (the old paper draft
   carried placeholder `0009-0000-0000-0000`, removed in the 8.2 rewrite).
   Owner to provide or drop.
-- Is `Kymora` the final product name? (Trademark/domain check recommended)
+- Is `Kymora` the final product name? (Trademark check recommended before
+  launch: USPTO/TMView search for "Kymora" in software classes + `kymora.dev`
+  / `kymora.ai` domain availability. Do not print merch, file, or announce
+  until cleared.)
 - Domain: currently on default Vercel domain — acquire `kymora.dev` or similar?
 
 ---

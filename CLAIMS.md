@@ -71,5 +71,8 @@ Artifacts: `benchmarks/results/2026-10-05_streaming/` (frozen `streaming.jsonl`
 
 - tsfresh 100,000 × 500 memory cell (multi-hour run; README marks it PENDING).
 - Single-series latency figures in `docs/benchmarks.md` (marked † there).
-- Landing + docs benchmark figures, `index.html` meta description,
-  PyPI long_description (self-corrects on next release build).
+- Landing hero demo latencies were replaced with real catalog values in
+  8.4; `index.html` meta description (314k series/s) traces to the F1 pool
+  above. No landing figure is pending.
+- PyPI long_description syncs automatically (single-sourced from README at
+  build time).
