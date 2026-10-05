@@ -426,8 +426,8 @@ impl StreamingExtractor {
         let var = if constant { 0.0 } else { (m2 / w).max(0.0) };
         let std = var.sqrt();
 
-        let skewness = stats::skewness(m3, w, var, std);
-        let kurtosis = stats::kurtosis(m4, w, var, std);
+        let skewness = stats::skewness(m3, w, var, std, mean);
+        let kurtosis = stats::kurtosis(m4, w, var, std, mean);
 
         // Σx²: constant windows use W·first² exactly. The anchored expansion
         // would cancel catastrophically here whenever the anchor is stale
@@ -593,6 +593,48 @@ mod tests {
             .map(|i| (i as f64 * 0.3).sin() * 5.0 + 2.0)
             .collect();
         check_window_matches_batch(&data, w, None);
+    }
+
+    #[test]
+    fn near_degenerate_window_yields_nan_both_paths() {
+        // Found by hypothesis exploration after the .hypothesis/ cache purge:
+        // a 1-ulp window. Batch summation rounds the mean onto an endpoint,
+        // so the naive skew/kurt ratios are rounding garbage (~sqrt(2));
+        // both paths must return NaN like scipy (gh-15905 guard).
+        let mut data = vec![0.0; 30];
+        data.push(-10.0);
+        data.push(-9.999999999999998);
+        let w = 2;
+        let mut extractor = StreamingExtractor::new(w);
+        extractor.set_anchor_interval(1);
+        for (i, &val) in data.iter().enumerate() {
+            let ready = extractor.push(val);
+            assert_eq!(ready, i + 1 >= w);
+        }
+        let mut fast = [0.0; 12];
+        extractor.compute_fast(&mut fast);
+        assert!(
+            fast[3].is_nan(),
+            "stream skew should be NaN, got {}",
+            fast[3]
+        );
+        assert!(
+            fast[4].is_nan(),
+            "stream kurt should be NaN, got {}",
+            fast[4]
+        );
+        let mut batch = [0.0; 33];
+        compute_all(&data[data.len() - w..], &mut batch);
+        assert!(
+            batch[10].is_nan(),
+            "batch skew should be NaN, got {}",
+            batch[10]
+        );
+        assert!(
+            batch[11].is_nan(),
+            "batch kurt should be NaN, got {}",
+            batch[11]
+        );
     }
 
     #[test]
