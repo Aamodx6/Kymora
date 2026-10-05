@@ -32,6 +32,7 @@ nav:
   - Reference:
     - API reference: api.md
     - Feature reference: features.md
+    - Streaming guide: streaming.md
     - NaN policy: nan-policy.md
     - Validation report: validation.md
     - Parity matrix: parity_matrix.md

@@ -155,9 +155,11 @@ incoming_data_feed = iter(np.random.default_rng(1).standard_normal(600))
 for tick in incoming_data_feed:
     stream.push(tick)
     
-    # 1. Fast 12-feature tier (no sorting, no FFT — two linear passes over the window):
+    # 1. Fast 12-feature tier (O(1) accumulator reads — no scan, no sorting, no FFT):
     # Returns 12 features: mean, std, var, skew, kurt, abs_energy, rms,
-    # mean_abs_change, mean_change, cid_ce, zero_crossings, trend_slope
+    # mean_abs_change, mean_change, cid_ce, zero_crossings, trend_slope.
+    # Accuracy matches batch within rtol 1e-9 (see docs/streaming.md for the
+    # large-offset skew/kurt conditioning note).
     fast_features = stream.compute(kind="fast")
     
     # 2. Complete 33-feature set evaluated over the current rolling window:
