@@ -83,7 +83,7 @@ export const Nav: React.FC = () => {
             type="button"
             onClick={copyCommand}
             className="group relative inline-flex h-9 items-center gap-2 rounded-md border border-borderLine bg-card px-3 text-xs font-mono text-ink shadow-btn transition hover:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-            aria-label="Copy install command"
+            aria-label="Copy pip install kymora"
           >
             <span className="text-muted select-none">$</span>
             <span className="font-semibold">pip install kymora</span>

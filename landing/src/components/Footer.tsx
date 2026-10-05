@@ -29,9 +29,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Column 1: Library */}
           <div className="md:col-span-2 space-y-3">
-            <h4 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
+            <h3 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
               Library
-            </h4>
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a href="#features" className="hover:text-ink transition-colors">
@@ -63,9 +63,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Column 2: Ecosystem */}
           <div className="md:col-span-2 space-y-3">
-            <h4 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
+            <h3 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
               Ecosystem
-            </h4>
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a href="https://pyo3.rs" target="_blank" rel="noopener noreferrer" className="hover:text-ink transition-colors">
@@ -92,9 +92,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Column 3: Community */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
+            <h3 className="font-mono text-xs font-semibold text-ink uppercase tracking-wider">
               Project
-            </h4>
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a

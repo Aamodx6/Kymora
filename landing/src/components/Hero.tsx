@@ -319,7 +319,7 @@ export const Hero: React.FC = () => {
                 type="button"
                 onClick={copyCommand}
                 className="inline-flex h-[36px] items-center justify-center gap-2 rounded-md bg-black px-3.5 text-xs font-semibold text-white shadow-btn transition hover:bg-neutral-800"
-                aria-label="Copy pip install command"
+                aria-label="Copy pip install kymora"
               >
                 <span className="text-neutral-400 select-none">$</span>
                 <span>pip install kymora</span>

@@ -45,7 +45,7 @@ export const CTA: React.FC = () => {
                 type="button"
                 onClick={copyCommand}
                 className="flex items-center gap-1.5 rounded bg-card px-2.5 py-1 text-xs font-sans font-medium text-ink border border-borderDim shadow-btn hover:border-ink transition"
-                aria-label="Copy install command"
+                aria-label="Copy pip install kymora"
               >
                 {copied ? (
                   <span className="text-emerald-600 font-semibold">Copied!</span>
