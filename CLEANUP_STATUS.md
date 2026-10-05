@@ -244,3 +244,27 @@ Remaining work: paper-PDF decision, root-file moves (Phase 4), `git gc`.
 ---
 *Phase 1 complete. No file deleted, no tracked file modified. Next: commit
 this report, then Phase 2 dry-run.*
+
+## Incident 2026-10-06 — shared-tree collision (REPAIRED, work PAUSED)
+
+While committing adjustments A–E, the working tree was found checked out on
+a new branch `chore/ci-restructure` (cut from this branch at `dd7129e` by a
+concurrent process restructuring CI: unstaged edits to 7 workflow/README
+files + new `nightly.yml`/`wheels.yml`/`deny.toml`/`docs/internal/hardening/`/
+`tools/check_repo_hygiene.py`). One commit (`d2a84a5`) accidentally swept in
+that process's staged deletion of `.github/workflows/benchmark.yml`.
+
+Repair (no foreign work touched, nothing pushed):
+- Switched back to `chore/repo-cleanup` (foreign unstaged/untracked work
+  preserved in tree).
+- Replayed docs commit as `c7c9774` (same 3 files, deletion excluded) and
+  hygiene commit as `20ffdad` (clean cherry-pick of `b8c8537`).
+- `git diff chore/repo-cleanup chore/ci-restructure` is now exactly the
+  foreign `benchmark.yml` deletion — nothing else crossed branches.
+- Contaminated commits `d2a84a5`/`b8c8537` remain on `chore/ci-restructure`
+  only; do not merge that branch without dropping them.
+
+WORK PAUSED by owner pending coordination. On resume: re-run full gates
+(fast gates re-verified at pause; full pytest re-run pending), then continue
+with F (gc), G (paper trace), I (hygiene hash check), Phase 2 purge,
+Phase 4 moves.
