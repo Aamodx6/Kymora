@@ -77,7 +77,7 @@
 | 7.1 URL/name grep | ✅ | | Full-tree audit in OWNER_DECISIONS (canonical identity table); CHANGELOG repo links fixed; bylines + paper deferred to owner/8.2; records frozen |
 | 7.2 CITATION.cff + metadata | ✅ | | pyproject authors added (matches CITATION.cff); repo URLs/universe already Aamodx6/Kymora; bylines stay per owner (7.1); CITATION version bump rides with 7.3 |
 | 7.3 Release prep | ✅ | | 0.8.0 bump (Cargo+CITATION+SECURITY), full CHANGELOG entry, RELEASE_NOTES.md draft, release.yml: wheel tests + SBOM + GH Release attach (OIDC, no tokens); no tags pushed |
-| 7.4 README sync + badges | ⬜ | | |
+| 7.4 README sync + badges | ✅ | | CI + docs badges added (version/python/license existed); long_description already single-sourced from README |
 | 7.5 Security infrastructure | ⬜ | | |
 | 7.6 patent/ documentation | ⬜ | | |
 
