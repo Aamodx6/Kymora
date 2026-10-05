@@ -23,16 +23,25 @@ theme:
     - search.highlight
 
 nav:
-  - Home: index.md
-  - Install: install.md
-  - Quickstart: quickstart.md
-  - Feature reference: features.md
-  - NaN policy: nan-policy.md
-  - API reference: api.md
-  - Benchmarks: benchmarks.md
-  - Validation report: validation.md
-  - Migrating from tsfresh: migrating.md
-  - Contributing: contributing.md
+  - Getting started:
+    - Home: index.md
+    - Install: install.md
+    - Quickstart: quickstart.md
+    - Migrating: migrating.md
+    - FAQ: faq.md
+  - Reference:
+    - API reference: api.md
+    - Feature reference: features.md
+    - NaN policy: nan-policy.md
+    - Validation report: validation.md
+    - Parity matrix: parity_matrix.md
+  - Benchmarks:
+    - Benchmarks: benchmarks.md
+  - Project:
+    - Contributing: contributing.md
+    - Roadmap: ROADMAP.md
+    - Changelog: https://github.com/Aamodx6/Kymora/blob/main/CHANGELOG.md
+    - Architecture: https://github.com/Aamodx6/Kymora/blob/main/arch.md
 
 markdown_extensions:
   - admonition

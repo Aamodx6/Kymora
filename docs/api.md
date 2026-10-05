@@ -16,7 +16,7 @@ The package ships full type annotations and a `py.typed` marker for mypy and lan
 
 ### extract_features
 
-```python
+```python skip
 extract_features(
     X: np.ndarray | Sequence[np.ndarray],
     profile: str | None = None,
@@ -59,7 +59,7 @@ feats_views = kymora.extract_features(X, views=["raw", "diff", "znorm"])
 
 ### extract_features_df
 
-```python
+```python skip
 extract_features_df(
     X: np.ndarray | Sequence[np.ndarray],
     profile: str | None = None,
@@ -78,7 +78,7 @@ Requires `pandas` (`pip install "kymora[pandas]"`).
 
 ### sliding_features
 
-```python
+```python skip
 sliding_features(x: np.ndarray, window: int, stride: int = 1) -> np.ndarray
 ```
 
@@ -100,7 +100,7 @@ A 2D `float64` array of shape `(n_windows, 33)` where `n_windows = (len(x) - win
 
 ### extract_features_mc
 
-```python
+```python skip
 extract_features_mc(
     X: np.ndarray | Sequence[np.ndarray],
     profile: str | None = None,
@@ -132,7 +132,7 @@ A 2D `float64` array of shape `(n_samples, total_features)`.
 
 ### extract_features_mc_df
 
-```python
+```python skip
 extract_features_mc_df(
     X: np.ndarray | Sequence[np.ndarray],
     profile: str | None = None,
@@ -152,7 +152,7 @@ Same computation as `extract_features_mc`, returned as a labeled `pandas.DataFra
 
 ### StreamingExtractor
 
-```python
+```python skip
 class StreamingExtractor:
     def __init__(self, window_size: int) -> None: ...
     def push(self, value: float) -> bool: ...
@@ -176,7 +176,7 @@ Single-stream sliding-window extractor maintaining an internal circular buffer a
 
 ### MultiStreamExtractor
 
-```python
+```python skip
 class MultiStreamExtractor:
     def __init__(self, n_streams: int, window_size: int) -> None: ...
     def push_many(self, values: np.ndarray) -> bool: ...
@@ -205,7 +205,7 @@ Fleet streaming engine for processing thousands of time-series streams concurren
 
 ### select_features
 
-```python
+```python skip
 select_features(
     F: np.ndarray | pd.DataFrame,
     y: Sequence[Any] | np.ndarray,
@@ -233,7 +233,7 @@ Select significant, non-redundant time-series features using hypothesis testing,
 
 ### KymoraSelector
 
-```python
+```python skip
 class KymoraSelector:
     def __init__(self, task: str = "auto", fdr: float = 0.05, max_corr: float = 0.90) -> None: ...
     def fit(self, X: np.ndarray | pd.DataFrame, y: Sequence[Any] | np.ndarray) -> KymoraSelector: ...
@@ -250,7 +250,7 @@ Scikit-learn compatible transformer implementing FDR-controlled supervised featu
 
 ### feature_names
 
-```python
+```python skip
 feature_names(
     profile: str | None = None,
     features: Sequence[str] | None = None,
@@ -264,7 +264,7 @@ Returns output feature names in exact column order. Features 0..32 are frozen ac
 
 ### feature_names_mc
 
-```python
+```python skip
 feature_names_mc(
     n_channels: int,
     profile: str | None = None,
@@ -281,7 +281,7 @@ Returns output column names for multichannel extraction including channel prefix
 
 ### list_profiles
 
-```python
+```python skip
 list_profiles() -> dict[str, int]
 ```
 
@@ -291,7 +291,7 @@ Returns available feature profile names mapped to their respective feature count
 
 ### describe_feature
 
-```python
+```python skip
 describe_feature(name: str) -> dict[str, str]
 ```
 
@@ -303,7 +303,7 @@ Returns metadata for a given feature name, including its cost class, dependencie
 
 ### tune
 
-```python
+```python skip
 tune(
     shapes: Sequence[tuple[int, int]] = ((1000, 500),),
     budget_s: float = 10.0,

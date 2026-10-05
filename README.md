@@ -137,6 +137,12 @@ pipeline = Pipeline([
     ("classifier", RandomForestClassifier(n_estimators=100))
 ])
 
+# Synthetic training data (n_samples, time_steps) — replace with your series
+rng = np.random.default_rng(0)
+X_train = rng.standard_normal((40, 128))
+y_train = (X_train.sum(axis=1) > 0).astype(int)
+X_test = rng.standard_normal((10, 128))
+
 # Fit on raw time-series training data (n_samples, time_steps)
 pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
@@ -147,10 +153,12 @@ y_pred = pipeline.predict(X_test)
 Maintain running statistical features in real-time embedded systems or trading loops without recomputing from scratch:
 
 ```python
+import numpy as np
 from kymora import StreamingExtractor
 
 # Initialize streaming extractor with window capacity
-stream = StreamingExtractor(capacity=500)
+stream = StreamingExtractor(window_size=500)
+incoming_data_feed = iter(np.random.default_rng(1).standard_normal(600))
 
 for tick in incoming_data_feed:
     stream.push(tick)
@@ -183,7 +191,7 @@ print(kymora.list_profiles())
 # {'minimal': 10, 'core33': 33, 'extended': 143, 'full': 543}
 
 # Inspect individual features and their computational prerequisites
-print(kymora.describe_feature("autocorrelation__lag_1"))
+print(kymora.describe_feature("autocorr_lag_1"))
 ```
 
 ---

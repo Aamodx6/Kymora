@@ -27,8 +27,9 @@ a bug; new runs record `kymora`.
 `tsfresh` takes a long-format DataFrame and returns a wide one. This library
 takes a numpy matrix (or a list of arrays) and returns a matrix.
 
-```python
-# tsfresh
+```python skip
+# tsfresh (requires the tsfresh package and your own long-format data —
+# not executed by tools/check_snippets.py)
 from tsfresh import extract_features
 from tsfresh.feature_extraction import EfficientFCParameters
 
@@ -47,6 +48,17 @@ features = kymora.extract_features_df(X)   # DataFrame, 33 columns
 If your data is already long-format and you want to keep it that way:
 
 ```python
+import numpy as np
+import pandas as pd
+import kymora
+
+rng = np.random.default_rng(0)
+n_series, n_steps = 4, 50
+long_df = pd.DataFrame({
+    "id": np.repeat(np.arange(n_series), n_steps),
+    "time": np.tile(np.arange(n_steps), n_series),
+    "value": rng.standard_normal(n_series * n_steps),
+})
 groups = long_df.sort_values("time").groupby("id")["value"]
 series = [g.to_numpy(dtype="float64") for _, g in groups]
 features = kymora.extract_features_df(series)   # ragged input is fine

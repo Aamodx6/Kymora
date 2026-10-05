@@ -46,9 +46,15 @@ immediately rather than after burning a thread pool:
 | Wrong dtype (not float64) or wrong shape | `TypeError` |
 
 ```python
+>>> import numpy as np
+>>> import kymora
 >>> kymora.extract_features(np.zeros((0, 10)))
+Traceback (most recent call last):
+...
 ValueError: input contains no series; expected at least one series of length >= 1
 >>> kymora.sliding_features(np.zeros(10), window=20)
+Traceback (most recent call last):
+...
 ValueError: window (20) is larger than the series length (10)
 ```
 

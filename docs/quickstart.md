@@ -82,11 +82,14 @@ Select statistically significant, non-redundant features using FDR control and c
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import HistGradientBoostingClassifier
 
-# Seamless scikit-learn transformer
+# scikit-learn transformer
 pipe = Pipeline([
     ("select", kymora.KymoraSelector(task="classification", fdr=0.05)),
     ("clf", HistGradientBoostingClassifier())
 ])
+
+# Labels for the batch extracted above
+y = (feats[:, 0] > feats[:, 0].mean()).astype(int)
 
 # Fits FDR hypothesis tests and correlation clusters on X_feats, y
 pipe.fit(feats, y)

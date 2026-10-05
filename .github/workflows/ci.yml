@@ -96,3 +96,20 @@ jobs:
           python -m pip install -e ".[pandas]"
           maturin develop --release
       - run: mypy python/kymora
+
+  snippets:
+    name: README + docs snippets execute
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin scikit-learn
+          python -m pip install -e ".[test]"
+          maturin develop --release
+      - run: python tools/check_snippets.py
