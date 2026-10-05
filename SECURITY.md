@@ -8,7 +8,7 @@ not backported; upgrading is the recommended mitigation.
 
 | Version | Supported |
 | ------- | --------- |
-| latest release (0.5.x) | yes |
+| latest release (0.7.x) | yes |
 | older | no |
 
 ## Reporting a Vulnerability
