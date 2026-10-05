@@ -1,7 +1,7 @@
 # CLAIMS.md
 
 Every public performance claim → artifact path → code state → conditions
-(arch.md §14.1). No evidence ⇒ remove or soften. Hardware + thread count
+(docs/internal/arch.md §14.1). No evidence ⇒ remove or soften. Hardware + thread count
 beside every headline number; laptop wording is "10 cores (6P+4E) /
 16 threads".
 

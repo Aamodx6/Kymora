@@ -21,7 +21,7 @@ test, frozen benchmark evidence, refactor records).
 | `CHANGELOG.md` link targets (10) | `Aamodx6/Tsxtract/compare/...` | `Aamodx6/Kymora/compare/...` | FIXED automatically (task 7.1) |
 | `README.md:282` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
 | `landing/.../Footer.tsx:165` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
-| `paper/paper.md`, `paper/main.tex` | old name + `Aamodx6/Tsxtract` URLs + stale numbers | full rewrite | DEFERRED to task 8.2 (JOSS restructure) |
+| `paper/paper.md`, `paper/legacy/main.tex` (was `paper/main.tex` at the time) | old name + `Aamodx6/Tsxtract` URLs + stale numbers | full rewrite | DEFERRED to task 8.2 (JOSS restructure) |
 | `docs/internal/refactor/**`, `benchmarks/results/**` | historical records | none (frozen evidence) | LEFT AS IS |
 | `CHANGELOG.md` prose (§0.5.0–0.7.0) | rename history narrative | none (history) | LEFT AS IS |
 
