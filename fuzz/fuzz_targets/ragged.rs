@@ -1,4 +1,4 @@
-#![no_main"
+#![no_main]
 
 //! Fuzz ragged CSR extraction and plan building: arbitrary offsets, values,
 //! and feature/profile strings must return Ok/Err, never panic or go out of
