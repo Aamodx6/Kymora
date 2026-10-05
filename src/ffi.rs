@@ -1121,7 +1121,8 @@ pub fn list_profiles() -> HashMap<&'static str, usize> {
     map
 }
 
-/// describe_feature(name) -> dict with description, cost, aliases, and needs.
+/// describe_feature(name) -> dict with description, cost, aliases, needs, and
+/// core33 documentation metadata (definition, min_length, nan_when).
 #[pyfunction]
 pub fn describe_feature(name: &str) -> PyResult<HashMap<&'static str, String>> {
     let idx = registry::find_feature(name).ok_or_else(|| KymoraError::UnknownFeature {
@@ -1133,6 +1134,11 @@ pub fn describe_feature(name: &str) -> PyResult<HashMap<&'static str, String>> {
     map.insert("cost", format!("{:?}", def.cost));
     map.insert("aliases", def.aliases.join(", "));
     map.insert("needs", format!("{:?}", def.needs));
+    if let Some(meta) = registry::core_meta(def.name) {
+        map.insert("definition", meta.definition.to_string());
+        map.insert("min_length", meta.min_len.to_string());
+        map.insert("nan_when", meta.nan_when.to_string());
+    }
     Ok(map)
 }
 
