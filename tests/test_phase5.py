@@ -85,7 +85,16 @@ def test_streaming_all_vs_batch():
 def test_streaming_large_series_numerical_stability():
     """
     Gate test: incremental == recompute on 1e5-point random-walk and 1e9 + noise series.
-    Verifies that periodic accumulator anchoring prevents catastrophic floating point drift.
+    Verifies that anchored accumulators (periodic + drift-guard re-anchoring)
+    prevent floating point drift.
+
+    Measured 2026-10-05 on the anchored implementation (i7-13620H, W=50):
+    random-walk max rel diff 9.7e-13, 1e9-offset max rel diff 7.0e-13 for all
+    features except skewness/kurtosis, whose max abs diff is 2.5e-6.
+    Skew/kurt on large-offset windows are limited by the batch center itself:
+    the batch mean carries ~1e-8 absolute error at 1e9 offset and m3/m4
+    amplify center error ~60-100x (see src/features/streaming.rs), so the
+    bound below is quantization-justified, not arbitrary.
     """
     w = 50
     # Test 1: Random walk
@@ -105,7 +114,7 @@ def test_streaming_large_series_numerical_stability():
 
     for name, s, b in zip(fast_names, s_feats, b_feats):
         rel_diff = abs(s - b) / (abs(b) + 1e-12)
-        assert rel_diff < 1e-6, f"RW stability failed for {name}: stream={s}, batch={b}, rel_diff={rel_diff}"
+        assert rel_diff < 1e-9, f"RW stability failed for {name}: stream={s}, batch={b}, rel_diff={rel_diff}"
 
     # Test 2: Large offset 1e9 + noise
     base = 1e9
@@ -120,14 +129,13 @@ def test_streaming_large_series_numerical_stability():
     b_offset = kymora.extract_features(last_offset_win[None, :], features=fast_names)[0]
 
     for name, s, b in zip(fast_names, s_offset, b_offset):
-        if name in ["var", "std", "cid_ce", "trend_slope"]:
-            # Ill-conditioned variance/slope on 1e9 offset without full double centering
-            # Bound absolute difference
+        if name in ["skewness", "kurtosis"]:
+            # Ill-conditioned in batch itself (see docstring): absolute bound.
             diff = abs(s - b)
-            assert diff < 1e-3, f"Offset stability for {name}: stream={s}, batch={b}, diff={diff}"
+            assert diff < 1e-5, f"Offset stability for {name}: stream={s}, batch={b}, diff={diff}"
         else:
             rel_diff = abs(s - b) / (abs(b) + 1e-12)
-            assert rel_diff < 1e-5, f"Offset stability for {name}: stream={s}, batch={b}, rel_diff={rel_diff}"
+            assert rel_diff < 1e-9, f"Offset stability for {name}: stream={s}, batch={b}, rel_diff={rel_diff}"
 
 
 def test_sliding_features_basic():
