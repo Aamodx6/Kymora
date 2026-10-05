@@ -4,7 +4,7 @@
 //! panic, go out of bounds, or break the NaN contract. A fuzzer-found panic
 //! becomes a `proptest_checks` regression test (which runs on stable).
 
-use kymora::features::{compute_all, NAMES};
+use _core::features::{compute_all, NAMES};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {

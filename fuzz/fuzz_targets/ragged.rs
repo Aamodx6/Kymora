@@ -4,8 +4,8 @@
 //! and feature/profile strings must return Ok/Err, never panic or go out of
 //! bounds.
 
-use kymora::exec;
-use kymora::plan::FeaturePlan;
+use _core::exec;
+use _core::plan::FeaturePlan;
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
