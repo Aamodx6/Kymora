@@ -7,16 +7,16 @@ interface FeatureFamilyData {
   prev: number;
   subtitle: string;
   filter: string;
-  headers: [string, string, string, string];
-  rows: [string, string, string, string][];
+  headers: [string, string, string];
+  rows: [string, string, string][];
 }
 
 export const Hero: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'chart' | 'query'>('chart');
   const [isRunning, setIsRunning] = useState(false);
-  const [pickedRegion, setPickedRegion] = useState<string | null>('Nonlinear');
-  const [shownRegion, setShownRegion] = useState<string>('Nonlinear');
+  const [pickedRegion, setPickedRegion] = useState<string | null>('Statistical');
+  const [shownRegion, setShownRegion] = useState<string>('Statistical');
   const [stepStates, setStepStates] = useState<number[]>([2, 2, 2, 2]); // 0=wait, 1=on, 2=done
   const [ansIn, setAnsIn] = useState(true);
   const [chartIn, setChartIn] = useState(true);
@@ -29,70 +29,86 @@ export const Hero: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
   const timersRef = useRef<number[]>([]);
 
+  // Real core33 feature groups (frozen column order) with measured sample
+  // values (3 gaussian series x 500, seed 7). `now`/`prev` are both the
+  // group size: the catalog is frozen, so there is no fake delta.
   const featureFamilies: FeatureFamilyData[] = [
     {
-      name: 'Spectral',
-      now: 1284,
-      prev: 1191,
-      subtitle: 'Spectral entropy & dominant FFT frequency bins',
-      filter: "where family = 'spectral' and dominant_freq > 120Hz",
-      headers: ['Series ID', 'Window', 'Peak Freq', 'Latency'],
-      rows: [
-        ['TS-10214', 'W-0241', '142 Hz', '1.4 ms'],
-        ['TS-10332', 'W-0819', '185 Hz', '1.3 ms'],
-        ['TS-10490', 'W-1102', '210 Hz', '1.5 ms'],
-      ],
-    },
-    {
-      name: 'Temporal',
-      now: 1106,
-      prev: 1062,
-      subtitle: 'Autocorrelation & zero-crossing rate across windows',
-      filter: "where family = 'temporal' and autocorr_lag1 > 0.7",
-      headers: ['Series ID', 'Window', 'Autocorr', 'Latency'],
-      rows: [
-        ['TS-14201', 'W-0312', '0.78', '0.6 ms'],
-        ['TS-14355', 'W-0720', '0.82', '0.6 ms'],
-        ['TS-14418', 'W-1250', '0.75', '0.5 ms'],
-      ],
-    },
-    {
       name: 'Statistical',
-      now: 968,
-      prev: 911,
-      subtitle: 'Kurtosis, skewness, and quantile dispersion metrics',
-      filter: "where family = 'statistical' and kurtosis > 3.2",
-      headers: ['Series ID', 'Window', 'Kurtosis', 'Latency'],
+      now: 14,
+      prev: 14,
+      subtitle: 'Moments, quantiles, energy — population ddof=0',
+      filter: 'kymora.extract_features(X, features=["mean", "std"])',
+      headers: ['Series', 'Feature', 'Value'],
       rows: [
-        ['TS-18902', 'W-0419', '3.42', '0.4 ms'],
-        ['TS-18944', 'W-0883', '3.65', '0.5 ms'],
-        ['TS-19012', 'W-1390', '3.81', '0.4 ms'],
+        ['TS-01', 'mean', '-0.1283'],
+        ['TS-02', 'mean', '1.9838'],
+        ['TS-03', 'mean', '-1.5228'],
+      ],
+    },
+    {
+      name: 'Change',
+      now: 4,
+      prev: 4,
+      subtitle: 'Successive differences and complexity estimate',
+      filter: 'kymora.extract_features(X, features=["mean_abs_change"])',
+      headers: ['Series', 'Feature', 'Value'],
+      rows: [
+        ['TS-01', 'mean_abs_change', '1.0812'],
+        ['TS-02', 'mean_abs_change', '1.0326'],
+        ['TS-03', 'mean_abs_change', '1.1482'],
+      ],
+    },
+    {
+      name: 'Counts',
+      now: 5,
+      prev: 5,
+      subtitle: 'Zero/mean crossings, peaks, strikes',
+      filter: 'kymora.extract_features(X, features=["zero_crossings"])',
+      headers: ['Series', 'Feature', 'Value'],
+      rows: [
+        ['TS-01', 'zero_crossings', '263.0'],
+        ['TS-02', 'zero_crossings', '22.0'],
+        ['TS-03', 'zero_crossings', '74.0'],
+      ],
+    },
+    {
+      name: 'Correlation',
+      now: 6,
+      prev: 6,
+      subtitle: 'Autocorrelation lags 1/2/5/10, trend slope and r2',
+      filter: 'kymora.extract_features(X, features=["autocorr_lag_1"])',
+      headers: ['Series', 'Feature', 'Value'],
+      rows: [
+        ['TS-01', 'autocorr_lag_1', '-0.0282'],
+        ['TS-02', 'autocorr_lag_1', '0.0852'],
+        ['TS-03', 'autocorr_lag_1', '0.0637'],
       ],
     },
     {
       name: 'Entropy',
-      now: 742,
-      prev: 816,
-      subtitle: 'Sample entropy & permutation entropy across batch_04',
-      filter: "where family = 'entropy' and sample_ent < 0.45",
-      headers: ['Series ID', 'Window', 'Samp_Ent', 'Latency'],
+      now: 1,
+      prev: 1,
+      subtitle: 'Order-3 permutation entropy, normalized to [0, 1]',
+      filter: 'kymora.extract_features(X, features=["permutation_entropy"])',
+      headers: ['Series', 'Feature', 'Value'],
       rows: [
-        ['TS-20418', 'W-1182', '0.384', '0.8 ms'],
-        ['TS-20533', 'W-0947', '0.412', '0.7 ms'],
-        ['TS-20611', 'W-1310', '0.395', '1.0 ms'],
+        ['TS-01', 'permutation_entropy', '0.9983'],
+        ['TS-02', 'permutation_entropy', '0.9996'],
+        ['TS-03', 'permutation_entropy', '0.9986'],
       ],
     },
     {
-      name: 'Nonlinear',
-      now: 418,
-      prev: 463,
-      subtitle: 'Hurst exponent & fractal dimension across batch_04',
-      filter: "where family = 'nonlinear' and hurst > 0.85",
-      headers: ['Series ID', 'Window', 'Hurst', 'Latency'],
+      name: 'Spectral',
+      now: 3,
+      prev: 3,
+      subtitle: 'Exact-spectrum dominant frequency, centroid, entropy',
+      filter: 'kymora.extract_features(X, features=["dominant_frequency"])',
+      headers: ['Series', 'Feature', 'Value'],
       rows: [
-        ['TS-20426', 'W-0733', '0.892', '1.1 ms'],
-        ['TS-20589', 'W-1402', '0.914', '0.9 ms'],
-        ['TS-20644', 'W-0861', '0.878', '1.2 ms'],
+        ['TS-01', 'dominant_frequency', '0.146'],
+        ['TS-02', 'dominant_frequency', '0.468'],
+        ['TS-03', 'dominant_frequency', '0.128'],
       ],
     },
   ];
@@ -100,7 +116,7 @@ export const Hero: React.FC = () => {
   const steps = [
     'Mapping NumPy buffer',
     'Releasing Python GIL',
-    'Dispatching Rayon SIMD cores',
+    'Dispatching Rayon worker threads',
     'Validating feature matrix',
   ];
 
@@ -127,7 +143,7 @@ export const Hero: React.FC = () => {
     setPickedRegion(name);
   };
 
-  // Authentic Framer entrance sequence + 1-time sequence: Spectral -> Temporal -> Statistical -> Entropy (742) -> Nonlinear (418)
+    // Authentic Framer entrance sequence + 1-time sequence across the 6 core33 groups
   useEffect(() => {
     const el = heroGridRef.current;
     if (!el) return;
@@ -143,7 +159,7 @@ export const Hero: React.FC = () => {
       setAnsIn(false);
       setChartIn(false);
       setPickedRegion(null);
-      setShownRegion('Spectral');
+        setShownRegion('Statistical');
 
       // Steps sequence matching framer.md
       const stepTimes = [350, 1000, 1700, 2450, 3150];
@@ -166,9 +182,10 @@ export const Hero: React.FC = () => {
       // Chart bars reveal at 3450ms
       timersRef.current.push(window.setTimeout(() => setChartIn(true), 3450));
 
-      // 1-time sequential sweep through all 5 feature families:
-      // Spectral (1,284) -> Temporal (1,106) -> Statistical (968) -> Entropy (742) -> Nonlinear (418)
-      const sequence = ['Spectral', 'Temporal', 'Statistical', 'Entropy', 'Nonlinear'];
+      // 1-time sequential sweep through all 6 core33 feature groups.
+      // Deltas read "frozen": the catalog is frozen, both bars are the
+      // group size by design — no fabricated change.
+      const sequence = ['Statistical', 'Change', 'Counts', 'Correlation', 'Entropy', 'Spectral'];
       let baseTime = 4100;
 
       sequence.forEach((familyName, idx) => {
@@ -364,7 +381,7 @@ export const Hero: React.FC = () => {
                 <mark>
                   {currentPopover.now.toLocaleString()}
                 </mark>
-                <span>rows behind this number</span>
+                <span>features in this frozen group</span>
               </p>
               <p className="lgad-ps">
                 {currentPopover.subtitle}
@@ -380,7 +397,6 @@ export const Hero: React.FC = () => {
                     <th>{currentPopover.headers[0]}</th>
                     <th>{currentPopover.headers[1]}</th>
                     <th>{currentPopover.headers[2]}</th>
-                    <th>{currentPopover.headers[3]}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -389,7 +405,6 @@ export const Hero: React.FC = () => {
                       <td>{row[0]}</td>
                       <td>{row[1]}</td>
                       <td>{row[2]}</td>
-                      <td>{row[3]}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -408,7 +423,7 @@ export const Hero: React.FC = () => {
               <figure
                 ref={chartRef}
                 className="lgad-app"
-                aria-label="Kymora Engine analyzing 100k series"
+                aria-label="Kymora Engine feature-group demo"
               >
                 {/* Window Top Bar */}
                 <div className="lgad-top">
@@ -442,7 +457,7 @@ export const Hero: React.FC = () => {
                 <div className="lgad-body">
                   {/* Question */}
                   <p className="lgad-q text-black">
-                    Which feature extractors detected anomalies in batch_04, and why?
+                    What does the core33 feature catalog contain?
                   </p>
 
                   {/* 4 Steps Checklist */}
@@ -467,9 +482,10 @@ export const Hero: React.FC = () => {
                   {/* Answer with dotted underline */}
                   <p className={`lgad-a ${ansIn ? 'is-in' : ''} text-[#50524B]`}>
                     <span className="lgad-ref font-semibold text-black">
-                      Entropy and Nonlinear features
+                      33 frozen features in 6 groups.
                     </span>{' '}
-                    detected regime shifts. Baseline mean held steady. Autocorrelation fell.
+                    Every value above was computed by the calls shown — same
+                    column order as `kymora.feature_names()`.
                   </p>
 
                   {/* Chart Section */}
@@ -526,8 +542,14 @@ export const Hero: React.FC = () => {
                             <span className="lgad-val">
                               <b>{region.now.toLocaleString()}</b>
                               <i>
-                                {pct > 0 ? '+' : '−'}
-                                {Math.abs(pct).toFixed(1)}%
+                                {pct === 0 ? (
+                                  <>frozen</>
+                                ) : (
+                                  <>
+                                    {pct > 0 ? '+' : '−'}
+                                    {Math.abs(pct).toFixed(1)}%
+                                  </>
+                                )}
                               </i>
                             </span>
                           </div>
@@ -565,10 +587,11 @@ export const Hero: React.FC = () => {
                       <pre>
                         <code>
                           <span className="py-kw">import</span> kymora <span className="py-kw">as</span> km{'\n'}
-                          <span className="py-com"># Zero-copy view into 100k series buffers</span>{'\n'}
+                          <span className="py-com"># One FFI crossing for the whole batch</span>{'\n'}
                           features = km.extract_features({'\n'}
-                          {'    '}buffer, features=[<span className="py-str">"sample_entropy"</span>, <span className="py-str">"hurst"</span>, <span className="py-str">"fft_energy"</span>],{'\n'}
-                          {'    '}n_jobs=-<span className="py-num">1</span>{'\n'}
+                          {'    '}X, <span className="py-com"># (n_series, length), C-contiguous f64</span>{'\n'}
+                          {'    '}features=[<span className="py-str">"mean"</span>, <span className="py-str">"std"</span>, <span className="py-str">"autocorr_lag_1"</span>],{'\n'}
+                          {'    '}n_jobs=<span className="py-num">8</span>{'\n'}
                           )
                         </code>
                       </pre>
@@ -578,7 +601,7 @@ export const Hero: React.FC = () => {
                   {/* Follow-up Interactive input */}
                   <div className="lgad-follow">
                     <span className="lgad-field">
-                      Extract another feature or slice (e.g. hurst_exponent, c3)...
+                      Extract another feature or slice (e.g. permutation_entropy, trend_slope)...
                     </span>
                     <span
                       onClick={handleRun}

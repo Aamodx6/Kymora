@@ -26,7 +26,7 @@ export const Features: React.FC = () => {
       title: 'Parallel Extraction',
       tag: 'Series-dimension scaling',
       description:
-        'The GIL is released immediately upon entering Rust. Extraction parallelises across the series dimension using Rayon, scaling linearly with available CPU cores.',
+        'The GIL is released immediately upon entering Rust. Extraction parallelises across the series dimension using Rayon, scaling up to the physical core count (plateaus near it on hybrid laptops — see Benchmarks).',
       codeSnippet: '# GIL released, 16 cores fully saturated\nX = np.random.randn(100_000, 500)\nfeats = kymora.extract_features(X)',
       badge: 'GIL-free Rayon scaling',
     },
@@ -36,7 +36,7 @@ export const Features: React.FC = () => {
       tag: 'Statistical & Spectral',
       description:
         'Carefully selected feature set covering statistical moments (mean, variance, skewness, kurtosis), temporal dynamics (autocorrelation, zero-crossings), and FFT spectral energy.',
-      codeSnippet: 'features = [\n  "mean", "variance", "skewness",\n  "sample_entropy", "spectral_centroid"\n]',
+      codeSnippet: 'features = [\n  "mean", "var", "skewness",\n  "permutation_entropy", "spectral_centroid"\n]',
       badge: 'Documented NaN contract',
     },
     {
@@ -45,7 +45,7 @@ export const Features: React.FC = () => {
       tag: 'DataFrame interop',
       description:
         'Return results directly as typed Polars or Pandas DataFrames with human-readable column headers via extract_features_df(X). Keeps index and metadata intact.',
-      codeSnippet: 'df = kymora.extract_features_df(X)\nprint(df.columns)  # [mean, std, autokurt, ...]',
+      codeSnippet: 'df = kymora.extract_features_df(X)\nprint(df.columns)  # [mean, std, var, ...]',
       badge: 'Zero serialization overhead',
     },
     {
@@ -63,7 +63,7 @@ export const Features: React.FC = () => {
       tag: 'Drop-in Transformer',
       description:
         'Includes a standard Scikit-learn transformer class. Plug time-series feature extraction directly into Pipeline, GridSearchCV, and ColumnTransformer workflows.',
-      codeSnippet: 'pipe = Pipeline([\n  ("extract", TimeSeriesFeatureExtractor()),\n  ("clf", HistGradientBoostingClassifier())\n])',
+      codeSnippet: 'from kymora.sklearn import KymoraTransformer\npipe = Pipeline([\n  ("extract", KymoraTransformer()),\n  ("clf", HistGradientBoostingClassifier())\n])',
       badge: 'Estimator compliant',
     },
   ];
