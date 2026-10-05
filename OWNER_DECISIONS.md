@@ -37,9 +37,13 @@ test, frozen benchmark evidence, refactor records).
 
 ## 2. Patent Folder
 
-### Status
-The `patent/` directory exists in the public repository.
-*(File listing to be added in Task 7.6 — file names only, no content)*
+### Status (Task 7.6 — file names only, content untouched and unread)
+The `patent/` directory exists in the public repository and contains one file:
+
+- `patent/patent_disclosure.md`
+
+No file in `patent/` was read, modified, moved, or deleted during this
+hardening pass.
 
 ### Decision needed
 - Keep patent/ in the public repo?
