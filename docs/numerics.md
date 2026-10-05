@@ -61,6 +61,14 @@ The `precision` argument is validated but currently informational — accepted
 values are `"float64"`/`"f64"`/`"float32"`/`"f32"` (anything else raises
 `ValueError`); the input dtype governs the read path either way.
 
+Float32 coverage: the f32 kernels implement the core33 set, so float32 input
+supports the default profile, `minimal`, and any core33 feature subset
+(gathered from a full core33 row, still zero-copy). `extended`/`full`
+profiles, non-core33 features, and non-raw views raise `ValueError` telling
+the caller to pass float64 — this path previously panicked across the FFI
+boundary. Results match the float64 pipeline on the same values within
+f32-arithmetic tolerance (rtol 1e-4; measured max 8.8e-6).
+
 ## Stability
 
 These rules are part of the public contract. Changing which conditions
