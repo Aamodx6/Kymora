@@ -1,0 +1,36 @@
+# cargo-deny configuration for the nightly `cargo deny` job.
+# All crates come from crates.io (see Cargo.lock); no git/vendored sources.
+# License allowlist covers the permissive licenses in the current tree
+# (MIT/Apache-2.0 dual-license world plus Unicode/ISC/BSD stragglers).
+# If a new dependency introduces another license, this check fails in
+# nightly (non-gating) and the owner decides here, not in a PR thread.
+
+[advisories]
+db-urls = ["https://github.com/RustSec/advisory-db"]
+db-path = "~/.cargo/advisory-db"
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+highlight = "all"
+
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-DFS-2016",
+  "Unicode-3.0",
+  "CC0-1.0",
+  "OpenSSL",
+  "MPL-2.0",
+]
+confidence-threshold = 0.8
+exceptions = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
