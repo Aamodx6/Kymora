@@ -193,6 +193,9 @@ jobs:
     # Tests the built wheels (not dev builds): abi3 wheels are the shipping
     # config, so this is what users install. Covers linux x64 + windows x64
     # here; the release workflow builds the full platform matrix.
+    # NOTE: `shell: bash` everywhere below — the default pwsh on Windows
+    # neither glob-expands the wheel path nor fails fast, which once shipped
+    # a green step with no kymora installed at all.
     name: wheel install + tests on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -209,12 +212,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: ./.github/actions/setup-venv
       - name: Build release wheel
+        shell: bash
         run: |
           python -m pip install --upgrade pip maturin
           python -m maturin build --release
       - name: Install wheel + test deps (no editable install)
+        shell: bash
         run: |
           python -m pip install "target/wheels/kymora-"*.whl
           python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
       - name: Run tests against the installed wheel
+        shell: bash
         run: python -m pytest tests/ -q

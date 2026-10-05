@@ -3,7 +3,7 @@
 //! Fuzz the streaming extractor: arbitrary window sizes, anchor intervals,
 //! and push sequences must never panic on push or either compute kind.
 
-use kymora::features::StreamingExtractor;
+use _core::features::StreamingExtractor;
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
