@@ -23,9 +23,9 @@ for all rounds, 1,000 series × 500 steps, f64 C-contiguous gaussian,
 | `core33` median 3.18 ms / 314,450 series/s (1k×500) | pooled HEAD median, 4 rounds (n=400), 95% CI [3.15, 3.22] ms | as above |
 | `core33` best 2.29 ms / 436,719 series/s | pooled HEAD best (n=400) | as above |
 | 0.0964 µs per series-feature | 3.1802 ms ÷ (1000 × 33) | as above |
-| 262× vs catch22 raw (393× per-feature) | 833.08 ms pooled median, 10 rounds (n=53), CI [798.29, 850.81] ÷ 3.1802 ms; per-feature 37.8671 ÷ 0.0964 µs | same machine/env; pycatch22, versions in round env.json |
-| 799× vs TSFEL raw (169× per-feature) | 2541.61 ms pooled median, 10 rounds (n=83), CI [2463.14, 2672.21] ÷ 3.1802 ms; per-feature 16.2924 ÷ 0.0964 µs | same |
-| 6,570× vs tsfresh raw (279× per-feature) | 20891.23 ms pooled median, 10 rounds (n=64), CI [20062.15, 21530.14] ÷ 3.1802 ms; per-feature 26.8870 ÷ 0.0964 µs | tsfresh 0.21.2; same |
+| 262× vs catch22 raw (393× per-feature) | 833.08 ms pooled median, 10 rounds (n=53), CI [798.29, 850.81] ÷ 3.1802 ms; per-feature 37.87 µs (raw 37.8671 ÷ 0.0964 µs); series/s: catch22 1,200 | same machine/env; pycatch22, versions in round env.json |
+| 799× vs TSFEL raw (169× per-feature) | 2541.61 ms pooled median, 10 rounds (n=83), CI [2463.14, 2672.21] ÷ 3.1802 ms; per-feature 16.29 µs (raw 16.2924 ÷ 0.0964 µs); series/s: TSFEL 393 | same |
+| 6,570× vs tsfresh raw (279× per-feature) | 20891.23 ms pooled median, 10 rounds (n=64), CI [20062.15, 21530.14] ÷ 3.1802 ms; per-feature 26.89 µs (raw 26.8870 ÷ 0.0964 µs); series/s: tsfresh 48 | tsfresh 0.21.2; same |
 | refactor is perf-neutral | suite CIs overlap pre/HEAD in step 2; 3b probe CIs overlap 0.4.0/pre/HEAD | interleaved + rotated |
 | ~15% step 0.3.2→0.4.0, then flat | probe medians 2.00 [1.97,2.02] vs 2.41 / 2.44 / 2.47 (CIs overlap for the latter three), identical 33-name catalog | direct-probe methodology; dispatch-overhead hypothesis unprofiled |
 
@@ -36,10 +36,25 @@ competitor rows — all predate the 2026-10-04 re-baseline (different
 hardware/software). Step-2 interim values (307,366 s/s; 261×/829×/
 7,038× from 4 rounds) superseded by the 10-round pools above.
 
-## Pending re-baseline (no artifact — marked † in README)
+## Measured — 2026-10-05 hardening re-baseline (same laptop, same conditions; artifacts committed)
 
-- Profile rows `minimal` / `extended` / `full` (0.51 / 7.12 / 8.36 ms…).
-- Multi-core scaling table (11.31 → 2.60 ms…).
-- Memory footprint rows (25.18 MiB own / +1,250 MiB tsfresh).
+Suites: `benchmarks/suites/equal_feature.py`, `benchmarks/suites/remeasure_readme.py`.
+Artifacts: `benchmarks/results/2026-10-05_equal_feature/` + `EQUAL_FEATURE_REPORT.md`,
+`benchmarks/results/2026-10-05_remeasure/`. Parity gate (EXACT ≤ 1e-9 per
+feature pair) re-verified before any equal-feature timing.
+
+| Claim (README) | Artifact value | Conditions |
+|---|---|---|
+| Equal-feature: kymora fastest on all 16 rows, ratios 3.4×–11.1× vs numba, 61.0×–122.2× vs numpy, 19.1×–1,150.6× vs TSFEL, 249.9×–1,693.8× vs tsfresh | `equal_feature.jsonl`, ratio + 95% CI per row (4 shapes × 4 competitors) | 1,000×500 headline: kymora med 4.72 / 4.68 / 3.92 / 4.94 ms vs numba 16.05 / numpy 285.50 / TSFEL 2,213.69 / tsfresh 8,359.45 ms → 3.4× [3.1,3.9] / 61.0× [60.0,62.0] / 564.6× [509.7,781.4] / 1,693.8× [1,645.5,1,900.1] |
+| Profiles: minimal 1.20 ms / core33 2.88 / extended 10.10 / full 11.10 (best 0.93 / 2.44 / 8.96 / 9.84); per-feature 0.120 / 0.0873 / 0.0706 / 0.0204 µs; throughput 833,333 series/s (minimal), 346,963 series/s (core33), 99,028 series/s (extended), 90,052 series/s (full) | `remeasure_summary.json` profiles[] | 1,000×500, 16 threads, gaussian, seed 42 |
+| Scaling: 1T 12.47 / 2T 7.01 / 4T 4.11 / 8T 3.03 / 16T 2.93 / 32T 3.51 ms; speedups 1.78× / 3.03× / 4.12× / 4.25× / 3.56×; η 89.0 / 75.7 / 51.5 / 26.6 / 11.1% | `remeasure_summary.json` scaling[] | core33, 1,000×500 |
+| Memory: kymora 100k×500 core33 peak +417.7 MiB (input 385.4, extraction +32.3, output 25.2) | `remeasure_summary.json` memory[] | fresh-process peak RSS delta |
+| tsfresh memory: extraction +281.9 MiB @1k×500, +407.5 MiB @10,000 × 500 (totals +289.8 / +449.5) | same | EfficientFCParameters, n_jobs=16 |
+| Where-slower: numba losses 1×100 ratios 17.9×–40.2×, 10×500 3.1×–5.7×; per-call floor ~0.6–0.7 ms; 100×100 16T +27% vs 1T (~12 µs/series compute); len-10 single-series p50 345.8 µs (win) vs numpy 1,317.6 µs, p99 15.4 ms / max 29.1 ms (loss); 100×500 parity 0.94×–0.99× | `L1_ROOT_CAUSE.md` + `l1_root_cause.json` (loss table + stage timings), `B3_REPORT.md` §3.1 | 16 threads unless noted; CIs exclude 1.0 for robust losses |
+
+## Pending re-baseline (no artifact — still stale)
+
+- tsfresh 100,000 × 500 memory cell (multi-hour run; README marks it PENDING).
+- Single-series latency figures in `docs/benchmarks.md` (marked † there).
 - Landing + docs benchmark figures, `index.html` meta description,
   PyPI long_description (self-corrects on next release build).

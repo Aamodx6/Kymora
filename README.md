@@ -170,8 +170,8 @@ for tick in incoming_data_feed:
 
 Choose the performance-to-breadth profile that fits your pipeline:
 
-* **`minimal` (10 features):** Centered moments, extrema, energy, zero crossings. Zero sorting and zero FFT overhead (~0.51 ms per 1,000 series; **~2,000,000 series/sec**).
-* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~3.18 ms median per 1,000 series on i7-13620H / 16 threads; **314,450 series/sec**, best 436,719; 0.0964 µs per series-feature).
+* **`minimal` (10 features):** Centered moments, extrema, energy, zero crossings. Zero sorting and zero FFT overhead (~1.20 ms per 1,000 series; **833,333 series/s**, re-measured 2026-10-05).
+* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~2.88 ms median per 1,000 series on i7-13620H / 16 threads, re-measured 2026-10-05; the 2026-10-04 F1 pool measured 3.18 ms / 314,450 series/s — run-to-run spread, both artifacts committed; 0.0964 µs per series-feature).
 * **`extended` (143 features):** Adds distribution statistics, crossings, nonlinear stats, PACF (Levinson-Durbin), full linear regression trend, and spectral aggregations.
 * **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
 
@@ -190,28 +190,46 @@ print(kymora.describe_feature("autocorr_lag_1"))
 
 ### Benchmarks
 
-Re-measured 2026-10-04 across **1,000 series of 500 steps** (500,000 data points total) — i7-13620H laptop, 10 cores (6P+4E) / 16 threads, Performance plan, AC online, interleaved pre-refactor vs HEAD (see `benchmarks/results/F1_REPORT.md`). Exploratory single-machine numbers, not fleet evidence. The `core33` and competitor rows below are from that run; all other rows predate it (†) and are pending re-baseline (tracked in `CLAIMS.md`):
+All numbers below are pooled medians from interleaved rounds with 95% bootstrap CIs, subprocess-isolated, GC disabled — from one laptop (i7-13620H, 10 cores (6P+4E) / 16 threads, Windows 11, Performance plan, AC online). **Exploratory single-machine numbers, not fleet evidence.** Claim→artifact map: [`CLAIMS.md`](CLAIMS.md). Artifacts: `benchmarks/results/F1_REPORT.md` (raw-time + competitor rounds, 2026-10-04), `benchmarks/results/EQUAL_FEATURE_REPORT.md` + `2026-10-05_equal_feature/` (equal-feature, 2026-10-05), `benchmarks/results/2026-10-05_remeasure/` (profiles / scaling / memory, 2026-10-05):
 
-#### Profile Throughput (1,000 × 500):
+#### Equal-feature comparison — the like-for-like table (1,000 × 500)
+
+Both sides compute **exactly the same features**: each library is restricted to the subset whose definitions match kymora's, and every feature pair is numerically verified before timing (parity gate: max rel err ≤ 1e-9; artifact `2026-10-05_equal_feature/parity.json`). 16 threads:
+
+| Library | Equal features | Kymora med (ms) | Library med (ms) | Ratio (95% CI) |
+| :--- | :---: | :---: | :---: | :--- |
+| numba baseline | 33 | 4.72 | 16.05 | **3.4× slower** [3.1, 3.9] |
+| numpy baseline | 33 | 4.68 | 285.50 | **61.0× slower** [60.0, 62.0] |
+| TSFEL | 13 | 3.92 | 2,213.69 | **564.6× slower** [509.7, 781.4] |
+| tsfresh | 13 | 4.94 | 8,359.45 | **1,693.8× slower** [1,645.5, 1,900.1] |
+
+Kymora is fastest on **all 16 equal-feature rows** measured across 4 shapes (ratios 3.4×–1,693.8×; full tables: `benchmarks/results/EQUAL_FEATURE_REPORT.md`). `catch22` has no row here by design: none of its 22 features is definition-identical to a core33 feature (mapping and near-miss analysis: [`docs/benchmarks/feature_mapping.md`](docs/benchmarks/feature_mapping.md)).
+
+#### Profile throughput (1,000 × 500, 16 threads — re-measured 2026-10-05):
 | Profile | Features | Latency (1k) | Per-Series | Per-Feature Cost | Throughput |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| `minimal`† | 10 | **0.51 ms** | **0.51 µs** | 0.0507 µs | **1,972,776 series/s** |
-| `core33` | 33 | **3.18 ms** | **3.18 µs** | 0.0964 µs | **314,450 series/s** |
-| `extended`† | 143 | **7.12 ms** | **7.12 µs** | 0.0498 µs | **140,395 series/s** |
-| `full`† | 543 | **8.36 ms** | **8.36 µs** | 0.0154 µs | **119,654 series/s** |
+| `minimal` | 10 | **1.20 ms** | **1.20 µs** | 0.120 µs | **833,333 series/s** |
+| `core33` | 33 | **2.88 ms** | **2.88 µs** | 0.0873 µs | **346,963 series/s** |
+| `extended` | 143 | **10.10 ms** | **10.10 µs** | 0.0706 µs | **99,028 series/s** |
+| `full` | 543 | **11.10 ms** | **11.10 µs** | 0.0204 µs | **90,052 series/s** |
 
-† predates the 2026-10-04 re-baseline; pending re-measurement.
+Artifact: `benchmarks/results/2026-10-05_remeasure/profiles.jsonl` (medians of subprocess-isolated runs per profile).
 
-#### Multi-Core Scaling (`core33`, 1,000 × 500) †:
+#### Multi-core scaling (`core33`, 1,000 × 500 — re-measured 2026-10-05):
 | Worker Threads | Latency | Per-Series Cost | Speedup vs 1 Thread | Scaling Efficiency |
 | :---: | :---: | :---: | :---: | :---: |
-| 1 Thread | 11.31 ms | 11.31 µs | 1.00× | 100.0% |
-| 2 Threads | 6.03 ms | 6.03 µs | 1.88× | 93.8% |
-| 4 Threads | 3.58 ms | 3.58 µs | 3.16× | 78.9% |
-| 8 Threads | 2.52 ms | 2.52 µs | 4.49× | 56.1% |
-| 16 Threads | 2.60 ms | 2.60 µs | 4.34× | 27.1% |
+| 1 Thread | 12.47 ms | 12.47 µs | 1.00× | 100.0% |
+| 2 Threads | 7.01 ms | 7.01 µs | 1.78× | 89.0% |
+| 4 Threads | 4.11 ms | 4.11 µs | 3.03× | 75.7% |
+| 8 Threads | 3.03 ms | 3.03 µs | 4.12× | 51.5% |
+| 16 Threads | 2.93 ms | 2.93 µs | 4.25× | 26.6% |
+| 32 Threads | 3.51 ms | 3.51 µs | 3.56× | 11.1% |
 
-#### Competitive Landscape (1,000 × 500):
+Efficiency drops past ~4–8 threads on this hybrid P+E-core laptop (oversubscription past 10 physical cores); treat the shape of this table as hardware-bound. Artifact: `benchmarks/results/2026-10-05_remeasure/scaling.jsonl`.
+
+#### Raw-time comparison — full default catalogs (1,000 × 500)
+
+Each library times its **full default catalog** end to end, including the input reshaping it requires (tsfresh's long-format DataFrame, catch22/TSFEL's per-series loop):
 | Library | Features | Runtime (1k × 500) | Series / sec | Speedup (raw time) | Per-feature | Speedup (per-feature) |
 | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
 | **Kymora (`core33`)** | **33** | **3.18 ms** | **314,450** | **Baseline (1.0×)** | **0.0964 µs** | **Baseline (1.0×)** |
@@ -219,25 +237,40 @@ Re-measured 2026-10-04 across **1,000 series of 500 steps** (500,000 data points
 | `TSFEL` | 156 | 2,541.6 ms | 393 | **799× slower** | 16.29 µs | **169×** |
 | `tsfresh` | 777 | 20,891.2 ms | 48 | **6,570× slower** | 26.89 µs | **279×** |
 
-Pooled medians: kymora over 4 HEAD rounds (n=400 runs), competitors over 10 rounds (n=53/83/64); 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is".
+Pooled medians: kymora over 4 HEAD rounds (n=400 runs), competitors over 10 rounds (n=53/83/64); 95% bootstrap CIs in `benchmarks/results/F1_REPORT.md`. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is". Different feature counts mean different work — read both columns, and prefer the equal-feature table above for a like-for-like claim.
 
-#### Memory Footprint (100,000 series × 500 steps) †:
-* **Kymora:** **25.18 MiB** allocated memory (strictly the output matrix: $100,000 \times 33 \times 8\text{ B}$, with **+0.00 MiB intermediate overhead**).
-* **tsfresh / Pandas:** **+1,250 MiB** memory ballooning due to melted DataFrame indices.
+#### Where Kymora is slower
+
+Honest losses, with evidence (`benchmarks/results/L1_ROOT_CAUSE.md`, `B3_REPORT.md`):
+
+- **Tiny single-shot calls.** A fixed per-call floor (~0.6–0.7 ms measured: FFI entry + rayon pool wake) dominates when the whole call is smaller than that. Against a hand-written numba baseline on the same 33 features, kymora was 17.9×–40.2× slower at 1 × 100 and 3.1×–5.7× slower at 10 × 500 (95% CIs exclude 1.0). Per-series compute is competitive at these shapes — the floor and the pool wake are the cost.
+- **Thread wake at small n.** At 100 × 100, 16 threads made kymora ~27% *slower* than 1 thread (pool wake/join swamps ~12 µs/series of compute). Scaling efficiency at small batches is poor regardless of core count.
+- **Single-series tail latency at very short lengths.** At length 10, kymora wins the median (345.8 µs vs numpy's 1,317.6 µs) but loses the tail (p99 15.4 ms, max 29.1 ms) to wake jitter.
+- **Not a robust loss:** the 100 × 500 rows against the numba baseline are parity within noise (0.94×–0.99×, CI crosses 1.0).
+
+Guidance: batch many series into one call, or use `StreamingExtractor` for one-series-at-a-time ingest. At ≥1,000 series the picture inverts — kymora beats the numba baseline 3.4×–11.1× on identical features (equal-feature table above).
+
+#### Memory footprint (re-measured 2026-10-05, fresh-process peak RSS):
+* **Kymora (`core33`, 100,000 × 500):** +417.7 MiB peak over a bare interpreter — input 385.4 MiB, extraction overhead **+32.3 MiB**, output matrix 25.2 MiB (= 100,000 × 33 × 8 B).
+* **tsfresh (EfficientFCParameters, 777 features):** extraction peak **+281.9 MiB** at 1,000 × 500 and **+407.5 MiB** at 10,000 × 500 (long-format DataFrame plus intermediate frames).
+* The tsfresh 100,000 × 500 cell is a multi-hour run — **PENDING**, tracked in `CLAIMS.md`.
+
+Artifact: `benchmarks/results/2026-10-05_remeasure/memory.jsonl`.
 
 
 ---
 
 ### The 33 Curated Features
 
-Kymora deliberately computes 33 high-signal, non-redundant features spanning all temporal domains:
-* **Distribution Moments:** Mean, Standard Deviation, Variance, Skewness, Kurtosis.
-* **Extrema & Spans:** Min, Max, Peak-to-Peak Range, Quantiles (q05, q25, median, q75, q95), Interquartile Range (IQR).
-* **Dynamics & Crossing:** Zero Crossing Rate, Mean Crossing Rate, Root Mean Square (RMS), Crest Factor, Median Absolute Deviation (MAD).
-* **Temporal Differences:** Mean Absolute Change, Mean Consecutive Change, Number of Local Peaks.
-* **Autocorrelation Structure:** Lag-1, Lag-2, Lag-5, Lag-10 Autocorrelation.
-* **Spectral Domain:** Energy, Spectral Energy, Dominant Frequency, Spectral Centroid, Spectral Spread, Spectral Roll-off.
-* **Complexity:** Permutation Entropy (order 3, delay 1).
+Kymora deliberately computes 33 high-signal, non-redundant features spanning all temporal domains (exact catalog: `kymora.feature_names()`):
+* **Moments:** mean, std, var, skewness, kurtosis.
+* **Extrema & quantiles:** min, max, median, quantile_10, quantile_25, quantile_75, quantile_90.
+* **Energy & shape:** abs_energy, root_mean_square, number_of_peaks.
+* **Differences & trend:** mean_abs_change, mean_change, cid_ce, mean_second_derivative_central, trend_slope, trend_r2.
+* **Crossings & runs:** zero_crossings, mean_crossings, longest_strike_above_mean, longest_strike_below_mean.
+* **Autocorrelation:** autocorr_lag_1, autocorr_lag_2, autocorr_lag_5, autocorr_lag_10.
+* **Spectral:** dominant_frequency, spectral_centroid, spectral_entropy.
+* **Complexity:** permutation_entropy (order 3, delay 1).
 
 ---
 
