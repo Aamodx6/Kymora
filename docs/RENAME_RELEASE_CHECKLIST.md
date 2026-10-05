@@ -23,15 +23,14 @@ project needs its own entry:
    `release.yml`, environment `pypi`.
 3. Publish a GitHub Release `v0.7.0` → workflow builds the matrix and
    uploads `kymora 0.7.0` wheels. Verify:
-   fresh venv → `pip install kymora` → `import kymora` works,
-   `import tsxtract` warns and works.
+   fresh venv → `pip install kymora` → `import kymora` works.
 
 ## 3. `tsxtract-rs` finale — CANCELLED (owner deleted the PyPI project)
 
 PyPI never allows re-registering a deleted project name, so no 0.6.1
 deprecation release is possible. `pip install tsxtract-rs` now fails with
-"not found". The migration path is docs-only: CHANGELOG 0.7.0, the
-`import tsxtract` shim inside `kymora`, and `docs/migrating.md`.
+"not found". The migration path is docs-only: CHANGELOG 0.7.0 and
+`docs/migrating.md`.
 
 ## 4. Removal schedule (already recorded in CHANGELOG)
 

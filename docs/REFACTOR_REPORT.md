@@ -28,7 +28,11 @@ suffix) and **delete `tsxtractor` outright**.
 - D-R1: Kymora ranked #1 of 3 (all registries FREE; `.io` free); owner-confirmed.
 - D-R2: thin Phase 2 — prior refactor had already cleared `insp/`, dead code, arch dupes; only PRD.md deleted, rest evidenced as keep.
 - D-R3: `landing/` NOT renamed to `site/` (Vercel root setting needs owner); no `justfile`/`noxfile` (D14 raw commands stay canonical); `tests/` already matched target.
-- D-R4: data keys frozen (`tsxtract_matched_*`, `tsxtractor_version`, `vs_tsx_core33`, old lib ids) — readers accept old+new; localStorage keys kept stable; `tsxtract-rs 0.6.1` finale sketch kept for both old imports.
+- D-R4: benchmark row/case ids frozen (`tsxtract_matched_*`,
+  `tsxtract_core33`, `vs_tsx_core33`, old lib ids, `tsxtractor_version` in
+  frozen rows and the legacy phase-0 tool) — readers accept old+new;
+  `bench_matrix` meta key renamed to `kymora_version` for new rows;
+  localStorage keys kept stable.
 - D-R5: docs/ = single source; API reference stays hand-written (stub surface test-enforced); signature fences marked `skip`, real programs execute in CI.
 
 ## Verification output (gates)

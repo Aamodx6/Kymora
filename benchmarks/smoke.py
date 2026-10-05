@@ -27,7 +27,6 @@ ADAPTERS = [
     ("antropy_", "default"),
     ("tsflex_", "default"),
     ("sktime_", "default"),
-    ("tsxtract_jax", "default"),
 ]
 
 
@@ -77,7 +76,6 @@ def run_smoke(results_dir: Path | None = None) -> Path:
                 print(f"OK (runs={len(record.runs)}, median={record.stats['median']*1e3:.2f}ms)")
                 success_count += 1
             else:
-                # E.g. expected placeholder error for tsxtract_jax
                 print(f"{record.status.upper()} ({record.error_msg or 'No error message'})")
                 success_count += 1
         except Exception as e:

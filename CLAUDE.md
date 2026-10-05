@@ -43,9 +43,8 @@ Feature-order invariant: `feature_names()` must keep sha256
   on user-reachable paths in `src/ffi.rs`.
 - **Structural errors vs NaN values stay separate**: `KymoraError` never describes
   values; NaN has its own documented propagation contract (`docs/nan-policy.md`).
-- Naming: import `kymora`, PyPI dist `kymora` (bare `tsxtract` on PyPI is an
-  unrelated JAX project — never `pip install tsxtract`), crate `kymora`,
-  `KymoraSelector`. No shims, no aliases — `tsxtract`/`tsxtractor` are gone.
+- Naming: import `kymora`, PyPI dist `kymora`, crate `kymora`,
+  `KymoraSelector`. No shims, no aliases.
 - Never edit `benchmarks/results/` artifacts in place; never `git add -A`
   (bench run outputs must stay untracked).
 

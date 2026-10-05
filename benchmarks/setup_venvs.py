@@ -14,7 +14,6 @@ COMPETITORS = {
     "antropy": BENCHES_DIR / "requirements-antropy.txt",
     "tsflex": BENCHES_DIR / "requirements-tsflex.txt",
     "sktime": BENCHES_DIR / "requirements-sktime.txt",
-    "jax_collision": BENCHES_DIR / "requirements-jax-collision.txt",
 }
 
 

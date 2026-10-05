@@ -6,8 +6,7 @@
 The distribution, import, crate, and repo are all one name now.
 
 **What about `tsxtract` / `tsxtractor`?** Deleted old names — no shims, no
-aliases. `import kymora` is the only spelling. (The bare `tsxtract` name on
-PyPI is an unrelated JAX project; never install it expecting this library.)
+aliases. `import kymora` is the only spelling.
 
 **Which Python versions?** 3.10–3.13, via prebuilt wheels (no Rust needed).
 See [Install](install.md).
