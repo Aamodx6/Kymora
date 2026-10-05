@@ -237,9 +237,9 @@ Pooled medians: kymora over 4 HEAD rounds (n=400 runs), competitors over 10 roun
 
 #### Where Kymora is slower
 
-Honest losses, with evidence (`benchmarks/results/L1_ROOT_CAUSE.md`, `B3_REPORT.md`):
+Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_cause.json`, `benchmarks/results/L1_ROOT_CAUSE.md`, `B3_REPORT.md`):
 
-- **Tiny single-shot calls.** A fixed per-call floor (~0.6–0.7 ms measured: FFI entry + rayon pool wake) dominates when the whole call is smaller than that. Against a hand-written numba baseline on the same 33 features, kymora was 17.9×–40.2× slower at 1 × 100 and 3.1×–5.7× slower at 10 × 500 (95% CIs exclude 1.0). Per-series compute is competitive at these shapes — the floor and the pool wake are the cost.
+- **Tiny single-shot calls.** Against a hand-written numba baseline on the same 33 features (HEAD rerun 2026-10-05), kymora loses only at 1 × 100 — gaussian 1.78× [1.76,1.80], heavy_tailed 1.75× [1.74,1.76], random_walk 1.43× [1.42,1.45] (95% CIs exclude 1.0; classified call-overhead + quantile-stage). At 10 × 500 the rows are parity/noise (0.85×–1.08×). Absolute medians at 1 × 100 are ~0.029 ms vs numba 0.016–0.020 ms.
 - **Thread wake at small n.** At 100 × 100, 16 threads made kymora ~27% *slower* than 1 thread (pool wake/join swamps ~12 µs/series of compute). Scaling efficiency at small batches is poor regardless of core count.
 - **Single-series tail latency at very short lengths.** At length 10, kymora wins the median (345.8 µs vs numpy's 1,317.6 µs) but loses the tail (p99 15.4 ms, max 29.1 ms) to wake jitter.
 - **Not a robust loss:** the 100 × 500 rows against the numba baseline are parity within noise (0.94×–0.99×, CI crosses 1.0).
