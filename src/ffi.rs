@@ -674,20 +674,42 @@ pub struct PyStreamingExtractor {
 #[pymethods]
 impl PyStreamingExtractor {
     #[new]
-    pub fn new(window_size: usize) -> PyResult<Self> {
-        if window_size < 2 {
+    #[pyo3(signature = (window_size, anchor_interval = None))]
+    pub fn new(window_size: usize, anchor_interval: Option<usize>) -> PyResult<Self> {
+        if window_size < 1 {
             return Err(pyo3::exceptions::PyValueError::new_err(
-                "window_size must be at least 2",
+                "window_size must be at least 1",
+            ));
+        }
+        let interval = anchor_interval.unwrap_or(features::streaming::DEFAULT_ANCHOR_INTERVAL);
+        if interval < 1 {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "anchor_interval must be at least 1",
             ));
         }
         Ok(Self {
-            inner: features::StreamingExtractor::new(window_size),
+            inner: features::StreamingExtractor::new(window_size).with_anchor_interval(interval),
         })
     }
 
     #[getter]
     pub fn window_size(&self) -> usize {
         self.inner.window_size()
+    }
+
+    #[getter]
+    pub fn anchor_interval(&self) -> usize {
+        self.inner.anchor_interval()
+    }
+
+    pub fn set_anchor_interval(&mut self, anchor_interval: usize) -> PyResult<()> {
+        if anchor_interval < 1 {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "anchor_interval must be at least 1",
+            ));
+        }
+        self.inner.set_anchor_interval(anchor_interval);
+        Ok(())
     }
 
     #[getter]

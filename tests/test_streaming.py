@@ -55,4 +55,22 @@ def test_streaming_extractor_reset():
 
 def test_streaming_extractor_invalid():
     with pytest.raises(ValueError):
-        kymora.StreamingExtractor(1)
+        kymora.StreamingExtractor(0)
+
+
+def test_streaming_window_size_one_matches_batch():
+    # Window size 1 is valid: diff-based features are NaN exactly where the
+    # batch pipeline leaves them undefined on length-1 input.
+    extractor = kymora.StreamingExtractor(1)
+    assert extractor.window_size == 1
+    assert extractor.push(2.5)
+    fast = extractor.compute(kind="fast")
+    batch = kymora.extract_features(
+        np.array([[2.5]]),
+        features=kymora.StreamingExtractor.fast_feature_names(),
+    )[0]
+    for s, b in zip(fast, batch):
+        if np.isnan(b):
+            assert np.isnan(s)
+        else:
+            assert s == b
