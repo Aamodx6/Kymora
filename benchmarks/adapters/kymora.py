@@ -35,13 +35,8 @@ class Adapter(BaseAdapter):
             self.lib = kymora
             self.version = getattr(kymora, "__version__", "0.7.0")
         except ImportError:
-            try:
-                import tsxtract
-                self.lib = tsxtract
-                self.version = getattr(tsxtract, "__version__", "0.7.0")
-            except ImportError:
-                self.lib = None
-                self.version = "not_installed"
+            self.lib = None
+            self.version = "not_installed"
 
     def feature_names(self, feature_set: str = "default") -> list[str]:
         if self.lib is None:
@@ -62,7 +57,7 @@ class Adapter(BaseAdapter):
         **kwargs: Any,
     ) -> np.ndarray:
         if self.lib is None:
-            raise RuntimeError("kymora / tsxtract is not installed.")
+            raise RuntimeError("kymora is not installed.")
 
         prof = "core33" if feature_set in ("default", "core33") else feature_set
         precision = kwargs.get("precision", "f64")

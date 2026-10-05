@@ -52,7 +52,7 @@ def main():
             "platform": platform.platform(),
             "cpu_count": os.cpu_count(),
             "python": platform.python_version(),
-            "tsxtractor_version": kymora.__version__,
+            "kymora_version": kymora.__version__,
         },
         "shapes": {},
     }

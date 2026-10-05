@@ -46,12 +46,8 @@ Precompiled binary wheels are available on [PyPI (kymora)](https://pypi.org/proj
 pip install kymora
 ```
 
-> **Name collision warning:** the bare PyPI name `tsxtract` belongs to an
-> unrelated JAX-based project. Do not install `tsxtract` and `kymora`
-> in the same environment — both provide a top-level `tsxtract` import
-> (ours only as a deprecated shim) and they will shadow each other.
-> This package is always installed as `pip install kymora` and
-> imported as `import kymora`.
+> **Name note:** the bare PyPI name `tsxtract` is an unrelated JAX project —
+> always `pip install kymora`, never the bare name.
 
 #### From Source (Development)
 ```bash

@@ -24,10 +24,8 @@ Usage:
 
 .. note::
     The PyPI distribution name is ``kymora`` (``pip install kymora``).
-    The old distribution ``tsxtract-rs`` and the old import name ``tsxtract``
-    remain as a deprecated shim (removal no earlier than 0.8.0). The bare
-    ``tsxtract`` name on PyPI belongs to an unrelated JAX project and must
-    not be installed in the same environment.
+    There are no alternate import names: ``import kymora`` is the only
+    supported spelling.
 """
 
 from __future__ import annotations
@@ -46,7 +44,7 @@ from ._core import (
     list_profiles,
     sliding_features,
 )
-from .select import KymoraSelector, TsxSelector, select_features
+from .select import KymoraSelector, select_features
 from .tune import tune
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -68,7 +66,6 @@ __all__ = [
     "describe_feature",
     "select_features",
     "KymoraSelector",
-    "TsxSelector",
     "tune",
     "__version__",
 ]
@@ -77,16 +74,10 @@ __all__ = [
 def _resolve_version() -> str:
     from importlib.metadata import PackageNotFoundError, version
 
-    # Distribution is `kymora` (`tsxtract-rs` is the deprecated predecessor
-    # that depends on it). Bare `tsxtract` is deliberately NOT probed:
-    # that PyPI name belongs to an unrelated JAX project whose version string
-    # must never leak into this package's __version__.
-    for dist_name in ("kymora", "tsxtract-rs"):
-        try:
-            return version(dist_name)
-        except PackageNotFoundError:
-            continue
-    return "0.0.0+unknown"
+    try:
+        return version("kymora")
+    except PackageNotFoundError:
+        return "0.0.0+unknown"
 
 
 #: Package version, read from the installed distribution metadata.

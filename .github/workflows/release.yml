@@ -134,11 +134,6 @@ jobs:
           f = kymora.extract_features(X)
           assert f.shape == (64, len(kymora.feature_names())), f.shape
           assert np.isfinite(f).all()
-          import warnings
-          with warnings.catch_warnings():
-              warnings.simplefilter('ignore', DeprecationWarning)
-              import tsxtract
-          assert tsxtract.extract_features is kymora.extract_features
           print('ok', kymora.__version__, f.shape)
           "
 
