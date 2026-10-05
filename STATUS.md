@@ -50,10 +50,10 @@
 ## Phase 4: sklearn / Ecosystem
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 4.1 KymoraTransformer | ⬜ | | |
-| 4.2 Optional extras | ⬜ | | |
-| 4.3 sktime/aeon adapter | ⬜ | | |
-| 4.4 py.typed + stubs + mypy | ⬜ | | |
+| 4.1 KymoraTransformer | ✅ | | python/kymora/sklearn.py (numpy-only core import preserved); 50/50 estimator checks pass; clone/pickle/pandas/polars output |
+| 4.2 Optional extras | ✅ | | [pandas]/[polars]/[sklearn]/[all] in pyproject; core stays numpy-only |
+| 4.3 sktime/aeon adapter | ✅ | | docs/examples/sktime_adapter.py verified vs sktime 1.2.0 (3 tests incl. sklearn pipeline on primitives output); aeon untested, marked in example |
+| 4.4 py.typed + stubs + mypy | ✅ | | README quickstart uses in-package transformer; _core.pyi covers new params; mypy clean (5 files); CI typecheck installs .[all]; snippet gate green |
 
 ## Phase 5: Thread Scaling + Perf Regression
 | Task | Status | Commit | Notes |
