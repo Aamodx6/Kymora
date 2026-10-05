@@ -1,0 +1,24 @@
+[package]
+name = "kymora-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+kymora = { path = ".." }
+
+[[bin]]
+name = "compute_all"
+path = "fuzz_targets/compute_all.rs"
+
+[[bin]]
+name = "streaming"
+path = "fuzz_targets/streaming.rs"
+
+[[bin]]
+name = "ragged"
+path = "fuzz_targets/ragged.rs"

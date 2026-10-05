@@ -13,6 +13,9 @@ pub mod plan;
 pub mod registry;
 pub mod scratch;
 
+#[cfg(test)]
+mod proptest_checks;
+
 use pyo3::prelude::*;
 
 #[pymodule]
