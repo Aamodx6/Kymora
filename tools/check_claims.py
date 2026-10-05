@@ -51,12 +51,9 @@ SKIP_PATTERNS = [
 # Claims that exist in sources but are ALREADY tracked as pending in
 # CLAIMS.md ("Pending re-baseline" section). Reported, but do not fail the
 # gate — the tracking entry is the fix commitment, not silent acceptance.
-KNOWN_PENDING = {
-    ("landing/src/components/Hero.tsx", "1.3 ms"):
-        "stale landing demo table — redo with measured figures in task 8.4",
-    ("landing/src/components/Hero.tsx", "0.5 ms"):
-        "stale landing demo table — redo with measured figures in task 8.4",
-}
+# (Empty since 8.4 removed the last stale landing demo figures; kept as a
+# hook for future pending items.)
+KNOWN_PENDING: dict[tuple[str, str], str] = {}
 
 
 def load_claims():

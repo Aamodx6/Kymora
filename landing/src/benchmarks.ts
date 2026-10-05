@@ -41,12 +41,13 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
 };
 
-/* Measured 2026-10-04, pooled medians; artifact benchmarks/results/F1_REPORT.md */
+/* Measured 2026-10-04, pooled medians; artifact benchmarks/results/F1_REPORT.md.
+   Kymora version label matches the artifact-era code (0.7.0). */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
     name: "Kymora",
-    version: "0.5.0",
+    version: "0.7.0",
     language: "Rust + PyO3",
     featuresCount: 33,
     totalTimeMs: 3.18,

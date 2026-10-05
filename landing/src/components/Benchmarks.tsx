@@ -210,6 +210,20 @@ export const Benchmarks: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Benchmarks and limitations */}
+          <div className="border-t border-borderDim px-5 py-5 sm:px-7 font-sans text-sm text-body leading-relaxed">
+            <p className="font-semibold text-ink">Benchmarks and limitations</p>
+            <p className="mt-1.5">
+              Raw totals compare 33 features against up to 777 — read the
+              per-feature column, and the like-for-like equal-feature table in
+              the README (TSFEL 13: 564.6×, tsfresh 13: 1,693.8×, numba 33:
+              3.4×, all parity-gated). Kymora loses small-batch cases to numba
+              (up to ~40× at 1×100: fixed dispatch overhead), scaling stops near
+              physical cores, and these are single-machine exploratory numbers.
+              Full claim→artifact map: CLAIMS.md in the repo.
+            </p>
+          </div>
         </div>
       </div>
     </section>
