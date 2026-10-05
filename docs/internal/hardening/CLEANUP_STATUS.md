@@ -322,3 +322,78 @@ WORK PAUSED by owner pending coordination. On resume: re-run full gates
 (fast gates re-verified at pause; full pytest re-run pending), then continue
 with F (gc), G (paper trace), I (hygiene hash check), Phase 2 purge,
 Phase 4 moves.
+
+## Phase 4 — DONE (2026-10-06; moves `278d4b9`, docs refs `e3a658f`, code refs `838e5b6` + stragglers)
+
+Owner decisions applied: Dockerfile/reproduce.sh/CODE_OF_CONDUCT.md KEEP at
+root; `vercel.json` KEEP (project config builds `landing/`, project root =
+repo root — moving breaks deploys); `docs/REFACTOR_STATE.md` moved to
+`docs/internal/refactor/` (map updated accordingly).
+
+40 files moved with `git mv` (history preserved); ~35 mechanical rewrites
+(`arch.md` → `docs/internal/arch.md`, `docs/refactor/` →
+`docs/internal/refactor/`; §-numbers unchanged); zero `.github/` references
+to any moved path on this branch (workflow-refs column all `(none)`), so no
+workflow edits here — CI branch checklist is OWNER_DECISIONS.md §7.
+Corrections found en route: `release.yml` never referenced RELEASE_NOTES.md;
+`tools/name_check.py:137` default out path and `rename_to_kymora.py`
+skip-lists moved with `docs/refactor/` (else they recreate/bypass it).
+
+Root now holds exactly the allowlist (plus `vercel.json`, rationale above;
+no `.gitattributes`/`deny.toml` exist): README, CHANGELOG, CLAIMS, CLAUDE,
+OWNER_DECISIONS, CITATION.cff, LICENSE, SECURITY, CONTRIBUTING,
+CODE_OF_CONDUCT, Cargo.toml, Cargo.lock, pyproject.toml, Makefile,
+mkdocs.yml, Dockerfile, reproduce.sh, vercel.json, .gitignore.
+`proptest-regressions/` stays at crate root (functional: proptest seed
+replay path). `.freebuff/project-id` is external-tool state (ignored via
+`.git/info/exclude`), left alone.
+
+sdist (`maturin sdist` + `tar -tzf`): before (pre-cleanup tree)
+2,927,130 bytes / 354 files incl. `.github/`, `benchmarks/results/`,
+`landing/`, `paper/`, `patent/`; after (exclude list in pyproject.toml)
+531,713 bytes with none of `landing/`, `benchmarks/results/`, `paper/`,
+`patent/`, `fuzz/`, `site/`, `.git*`. Wheel: 712,561 → 712,704 bytes
+(rebuild noise; wheels never contained the junk).
+
+### Scope note (latent numerical bug found by the purge, fixed `86cde1f`)
+
+Purging `.hypothesis/` forced fresh property-test exploration, which found
+a real bug: on numerically-degenerate windows (nonzero `var <=
+(eps·mean)²`, e.g. 1-ulp pairs) batch skew/kurt emitted rounding garbage
+(~√2) while streaming gave exact 0.0. Fix mirrors `scipy.stats.skew/
+kurtosis` (`m2 <= (eps·mean)² → NaN`, gh-15905) in `stats.rs`, both
+`reduce.rs` pass-2 variants, batch + streaming callers, with Rust
+regression tests; `test_hypothesis_fast_matches_batch` now assumes away
+degenerate windows (its premise is well-conditioned parity) and
+`docs/numerics.md` documents the rule. `cid_ce` on such windows stays
+defined-but-path-divergent (batch centers differently than the exact
+streaming expansion); also documented. Goldens, validation, and all gates
+unaffected (no degenerate inputs in fixtures).
+
+### Final tree (depth 2; ignored build/cache dirs omitted)
+
+- `.github/` actions/, CODEOWNERS, dependabot.yml, ISSUE_TEMPLATE/,
+  PULL_REQUEST_TEMPLATE.md, workflows/
+- `benchmarks/` adapters/, agreement/, baseline/, datasets/, harness/,
+  report/, results/ (frozen), suites/, *.py suites, requirements-*.txt,
+  README.md, STATE.md, LINUX_16VCPU_PLAN.md, zenith_baseline.md, smoke.py,
+  reproduce.py, setup_venvs.py
+- `docs/` user guides + `img/`, `benchmarks/`, `examples/`, `launch/`,
+  `naming/` + `internal/` (arch.md, experiments.md, thread_scaling.md,
+  unsafe_audit.md, hardening/, refactor/)
+- `fuzz/` Cargo.toml, fuzz_targets/
+- `landing/` src/, public/, config (own vercel.json for routing)
+- `paper/` paper.md, paper.bib, figures/ (PNG), README.md, legacy/
+- `patent/` patent_disclosure.md
+- `proptest-regressions/` proptest_checks.txt
+- `python/kymora/` package
+- `src/` core rs files + features/, kernels/
+- `tests/` test_*.py + fixtures/, golden/, parity/, property/, reference/
+- `tools/` *.py scripts
+
+Working dir: ~6178 MB → ~10 MB excl. `.git` (6.0 MB packed).
+Tracked: 357 files / 5.7 MB → 364 files / 5.8 MB (net +7: +benchmarks/README,
++proptest seeds, +concurrency suite ×2, +paper/legacy/README, +CLEANUP_MOVES;
+moves preserve history).
+All gates green at every commit; golden files unchanged; nothing pushed,
+merged, or tagged.
