@@ -88,15 +88,27 @@ try:
         times.append(time.perf_counter() - t0)
         break  # one import per process; repeats are spawned by the parent
 
-    # first call: cold extraction through the adapter on a tiny input
-    import numpy as np
+    # adapter import + construction, each timed separately.
+    # NOTE: construction can trigger lazy JIT compilation (e.g. numba @njit on
+    # first dummy call in Adapter.__init__) — it must be reported as its own
+    # number, not silently folded into import or first-call time.
+    first_call_s = None
+    warm_call_s = None
+    first_call_err = None
     try:
         import importlib
+        import time as _t
+        t0 = _t.perf_counter()
         try:
             mod = importlib.import_module(f"benchmarks.adapters.{adapter_name}")
         except ModuleNotFoundError:
             mod = importlib.import_module(f"benchmarks.adapters.{adapter_name}_")
+        adapter_import_s = _t.perf_counter() - t0
+        t0 = _t.perf_counter()
         adapter = mod.Adapter() if hasattr(mod, "Adapter") else mod.adapter
+        construct_s = _t.perf_counter() - t0  # includes lazy JIT compile when present
+
+        import numpy as np
         X = np.ascontiguousarray(np.random.default_rng(42).standard_normal((1, 64)))
         fs = cfg.get("feature_set", "default")
         t0 = time.perf_counter()
@@ -109,11 +121,13 @@ try:
     except Exception as e:
         warm_call_s = None
         first_call_err = f"{type(e).__name__}: {e}"
-    else:
-        first_call_err = None
+        adapter_import_s = None
+        construct_s = None
 
     sys.stdout.write(json.dumps({
         "status": "ok", "import_s": times[0],
+        "adapter_import_s": adapter_import_s,
+        "adapter_construct_s": construct_s,
         "first_call_s": first_call_s, "warm_call_s": warm_call_s,
         "first_call_err": first_call_err,
     }))
@@ -265,6 +279,8 @@ def run_case(label: str, adapter: str, module: str, tmo: float, threads: int,
             first_call_s = raw.get("first_call_s")
             warm_call_s = raw.get("warm_call_s")
             first_call_err = raw.get("first_call_err")
+            extra["adapter_import_s"] = raw.get("adapter_import_s")
+            extra["adapter_construct_s"] = raw.get("adapter_construct_s")
 
     # 2. -X importtime (top cumulative modules)
     it_rows = run_importtime(py, module, repo_root)
