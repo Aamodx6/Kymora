@@ -150,6 +150,24 @@ def test_batch_order_permutes_rows_but_not_values(batch):
     np.testing.assert_array_equal(straight, reversed_[::-1])
 
 
+@SETTINGS
+@given(
+    batch=hnp.arrays(
+        dtype=np.float64,
+        shape=st.tuples(st.integers(1, 12), st.integers(1, 48)),
+        elements=elements,
+    )
+)
+def test_results_bitwise_identical_across_thread_counts(batch):
+    """arch I7: per-series independence => bitwise identical whatever the
+    thread count or scheduling (also covers the cached-pool path)."""
+    ref = kymora.extract_features(batch, n_jobs=1)
+    for n_jobs in (2, 8, None):
+        np.testing.assert_array_equal(
+            kymora.extract_features(batch, n_jobs=n_jobs), ref
+        )
+
+
 # ---------------------------------------------------------------------------
 # sliding_features: geometry is a hard contract
 # ---------------------------------------------------------------------------
