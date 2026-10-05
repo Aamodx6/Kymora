@@ -27,7 +27,7 @@ df = kymora.extract_features_df(X)       # pandas DataFrame with labeled columns
 - **$O(n)$ multi-select quantiles**: histogram/selection multi-quantile evaluation avoids full sorting overhead on the core33 and minimal profiles.
 - **Multi-View Transform Engine**: Multiply feature coverage across 8 mathematical domain views (`raw`, `diff`, `diff2`, `detrend`, `znorm`, `abs`, `logret`, `rank`) with automatic invariance pruning.
 - **Multichannel & Cross-Channel Dynamics**: Full support for 3D time-series batches `(samples, channels, length)`, evaluating per-channel baselines and pairwise cross-correlation / covariance interactions.
-- **Fleet Real-Time Streaming**: `MultiStreamExtractor` monitors thousands of live time-series streams simultaneously with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$, and a fast 12-feature tier avoids sorting and FFT.
+- **Fleet Real-Time Streaming**: `MultiStreamExtractor` monitors thousands of live time-series streams simultaneously with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$, and a fast 6-feature tier avoids sorting and FFT.
 - **Supervised Feature Selection**: `select_features` and `KymoraSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
 
 ---
@@ -53,13 +53,13 @@ Three compounding effects, in order of contribution:
 2. **Fused per-series passes.** Feature groups share traversals and shared intermediates are computed at most once per series, so catalog breadth does not multiply cost.
 3. **Zero-copy buffers.** Inputs are borrowed views of the caller's NumPy memory and the output array is allocated once and written in place — no defensive copies, no per-series allocation in the hot path.
 
-What does *not* contribute (despite older wording that suggested otherwise): explicit SIMD intrinsics (there are none — only compiler auto-vectorization) and a custom spin-pool scheduler (the prototype in `src/pool.rs` is not wired up; scheduling is Rayon).
+What does *not* contribute (despite older wording that suggested otherwise): explicit SIMD intrinsics (there are none — only compiler auto-vectorization) and a custom spin-pool scheduler (the prototype lives on `experiment/spin-pool`, measured at ±1% — see `docs/internal/experiments.md`; scheduling is Rayon).
 
 ---
 
 ## When not to use this
 
-- **Parameterized feature families.** The catalog is closed by design: no `fft_coefficient` at arbitrary indices, no `cwt_coefficients`, no `agg_linear_trend` grids. If your model depends on those, `tsfresh` is the right tool.
+- **Parameterized feature families.** The catalog is closed by design: no user-defined features and no parameter grids beyond the shipped profiles (no `cwt_coefficients`, no `agg_linear_trend` grids; FFT coefficients ship fixed at k=0..99 in `full`). If your model depends on custom grids, `tsfresh` is the right tool.
 - **Non-CPU execution.** GPU and distributed backends are out of scope.
 - **Single-series latency.** Fixed overhead per call is ~0.1 ms; for one short series a Numba loop can be faster. The advantage appears across batches.
-- **Non-float or strided input.** Only contiguous `float64`/`float32` is accepted — anything else raises instead of copying silently, so cast with `X.astype(np.float64)` first.
+- **Non-float or strided input.** Only contiguous `float64`/`float32` is accepted — anything else raises instead of copying silently (or pass `contiguous="copy"` for one explicit copy), so cast with `X.astype(np.float64)` first.

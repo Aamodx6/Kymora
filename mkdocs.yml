@@ -33,8 +33,11 @@ nav:
     - API reference: api.md
     - Feature reference: features.md
     - Streaming guide: streaming.md
+    - Multichannel: multivariate.md
+    - Float32: float32.md
     - Numerics and NaN policy: numerics.md
     - NaN policy: nan-policy.md
+    - Performance: performance.md
     - Validation report: validation.md
     - Parity matrix: parity_matrix.md
   - Benchmarks:

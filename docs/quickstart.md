@@ -15,7 +15,7 @@ feats = kymora.extract_features(X)          # (10_000, 33) float64
 names = kymora.feature_names()              # canonical column names
 ```
 
-Input arrays must be **float64 and C-contiguous**. A wrong dtype or non-contiguous layout will raise `TypeError` or `ValueError` rather than silently copying.
+Input arrays must be **float64 or float32, C-contiguous**. Any other dtype raises `TypeError` (cast explicitly — kymora never upcasts silently); non-contiguous layouts raise `ValueError` unless `contiguous="copy"`. See [Numerics](numerics.md).
 
 ---
 
@@ -54,7 +54,8 @@ print(df_mc.shape)  # 100 rows x combined channel features
 
 ## Real-Time Fleet Streaming
 
-Stream thousands of live signals concurrently with $O(1)$ updates:
+Stream thousands of live signals concurrently with incremental per-stream
+state updates:
 
 ```python
 n_streams = 1000
@@ -68,8 +69,33 @@ new_tick = rng.standard_normal(n_streams)
 is_ready = extractor.push_many(new_tick)
 
 if is_ready:
-    # Fast 12-feature tier (mean, std, RMS, etc.) — no sorting, no FFT
+    # Fast 6-feature tier (mean, std, var, energy, RMS, crossings) —
+    # no sorting, no FFT
     fast_matrix = extractor.compute(kind="fast")
+```
+
+---
+
+## Feature Extraction in Scikit-Learn
+
+The in-package transformer turns a panel into a feature matrix inside any
+pipeline (`pip install "kymora[sklearn]"`):
+
+```python
+from kymora.sklearn import KymoraTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+X = rng.standard_normal((200, 128))
+y = (X.sum(axis=1) > 0).astype(int)
+
+pipe = Pipeline([
+    ("features", KymoraTransformer(profile="minimal")),
+    ("scaler", StandardScaler()),
+    ("clf", LogisticRegression()),
+])
+pipe.fit(X, y)
 ```
 
 ---
