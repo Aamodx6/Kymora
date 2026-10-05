@@ -18,6 +18,7 @@ def extract_features(
     views: Sequence[str] | None = None,
     precision: str | None = None,
     out_dtype: str | None = None,
+    nan_policy: str | None = None,
 ) -> _F64Array | _F32Array:
     """Extract features per series according to profile or feature list.
 
@@ -32,6 +33,8 @@ def extract_features(
         views: Optional sequence of data views ("raw", "diff", "znorm", ...).
         precision: Optional compute precision ("float64" or "float32").
         out_dtype: Optional output dtype ("float64" or "float32").
+        nan_policy: "propagate" (default: NaN rows propagate) or "raise"
+            (fail fast naming the first NaN series). "omit" is rejected.
 
     Returns:
         Array of shape ``(n_series, n_features)``; float32 when
@@ -46,6 +49,7 @@ def extract_features_ragged(
     features: Sequence[str] | None = None,
     n_jobs: int | None = None,
     out: _F64Array | None = None,
+    nan_policy: str | None = None,
 ) -> _F64Array:
     """Extract features from CSR-style ragged arrays with zero per-element Python overhead.
 
@@ -58,6 +62,7 @@ def extract_features_ragged(
         n_jobs: Optional number of worker threads to use. None uses all available cores.
         out: Optional pre-allocated C-contiguous float64 array of shape
             ``(len(offsets) - 1, n_features)`` for in-place writing.
+        nan_policy: "propagate" (default) or "raise".
 
     Returns:
         Float64 array of shape ``(len(offsets) - 1, n_features)``.
@@ -72,6 +77,7 @@ def sliding_features(
     features: Sequence[str] | None = None,
     n_jobs: int | None = None,
     out: _F64Array | None = None,
+    nan_policy: str | None = None,
 ) -> _F64Array:
     """Extract features over rolling windows of a single series.
 
@@ -116,7 +122,7 @@ class StreamingExtractor:
     pipeline on the current window.
     """
 
-    def __init__(self, window_size: int, anchor_interval: int | None = None) -> None: ...
+    def __init__(self, window_size: int, anchor_interval: int | None = None, nan_policy: str | None = None) -> None: ...
     @property
     def window_size(self) -> int: ...
     @property
@@ -139,6 +145,7 @@ def extract_features_mc(
     max_pairs: int = 8,
     n_jobs: int | None = None,
     views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
 ) -> _F64Array:
     """Extract per-channel and cross-channel features from multichannel series.
 

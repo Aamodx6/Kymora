@@ -41,7 +41,7 @@
 ## Phase 3: Input Surface + Robustness
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 3.1 NaN/Inf policy doc | ⬜ | | |
+| 3.1 NaN/Inf policy doc | ✅ | | docs/numerics.md canonical (nan-policy.md → pointer); `nan_policy` propagate(default)/raise on batch/ragged/sliding/mc/streaming; omit + unknown rejected with guidance; NaN errors bypass KymoraError (values≠structure) |
 | 3.2 float32 support | ⬜ | | |
 | 3.3 Multivariate input | ⬜ | | |
 | 3.4 Non-contiguous handling | ⬜ | | |
