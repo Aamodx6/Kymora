@@ -1,18 +1,59 @@
+# Kymora .gitignore — every entry below is regenerable via documented commands
+# (`make dev`, `mkdocs build`, per-dir READMEs). See CLEANUP_STATUS.md Phase 2.
+#
+# FROZEN EVIDENCE (never ignore — must stay tracked):
+#   tests/golden/, patent/, benchmarks/results/ (tracked runs cited by CLAIMS.md),
+#   benchmarks/agreement/, benchmarks/report/, Cargo.lock.
+# Do NOT add patterns matching those paths. `*.svg` is deliberately absent:
+# benchmarks/report/charts/*.svg is tracked evidence.
+
+# --- Rust build outputs (cargo rebuilds; `make distclean` purges) ---
 /target
-/.venv
-__pycache__/
+fuzz/target/
+# fuzz/Cargo.lock is cargo-generated (root Cargo.lock stays tracked).
+fuzz/Cargo.lock
+*.pdb
 *.pyd
 *.so
-dist/
+
+# --- Python (interpreter/pytest/mypy caches; pip rebuilds) ---
+/.venv
+.venv*/
+venv*/
+__pycache__/
+*.egg-info/
+*.whl
 .pytest_cache/
-*.pdb
 .hypothesis/
 .mypy_cache/
-fuzz/Cargo.lock
-site/
-node_modules/
-landing/dist/
-.gstack/
+.ruff_cache/
+
+# --- Benchmark scratch (regenerable; `make dev` / `setup_venvs.py` rebuild) ---
 benchmarks/.venvs/
 benchmarks/datasets/cache/
+dist/
+
+# --- Docs build output (mkdocs rebuilds) ---
+site/
+
+# --- Node / landing (npm ci / npm run build rebuild; Vercel needs root config) ---
+node_modules/
+landing/dist/
+landing/.vercel/
+.next/
+
+# --- Profiler outputs (never committed; rerun the profiler) ---
+perf.data*
+*.prof
+*.etl
+
+# --- Local tool state (not repo content) ---
+.gstack/
+
+# --- IDE files ---
+.vscode/
+.idea/
+
+# --- OS junk ---
 .DS_Store
+Thumbs.db
