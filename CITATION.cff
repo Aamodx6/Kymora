@@ -6,8 +6,8 @@ authors:
   - family-names: Kumar
     given-names: Aamod
     affiliation: "Independent Researcher, Uttar Pradesh, India"
-version: 0.7.0
-date-released: 2026-10-04
+version: 0.8.0
+date-released: 2026-10-06
 license: MIT
 repository-code: "https://github.com/Aamodx6/Kymora"
 url: "https://pypi.org/project/kymora/"
