@@ -60,7 +60,7 @@
 |------|--------|--------|-------|
 | 5.1 Scaling plateau investigation | ✅ | | Plateau = P-core count (6) + E/SMT drag, not a bug; fixed per-call pool-build overhead (~200µs) with cached pools (small-call n_jobs 2.3×); bitwise thread-invariance test; analysis in docs/internal/thread_scaling.md |
 | 5.2 Thread default | ✅ | | Keep default (None/global pool): capping would trade ~5% peak for platform-specific behavior; fresh scaling (12.16→2.78ms, peak 4.37×) consistent with 2026-10-05 artifact, no CLAIMS change; guidance in stubs + thread_scaling.md |
-| 5.3 Bisect 0.3.2→0.4.0 | ⬜ | | |
+| 5.3 Bisect 0.3.2→0.4.0 | ✅ | | tools/perf_gate.py (median+Q1 rule, CV rerun, per-platform baselines) + CI perf-gate job + laptop baseline committed; per-commit bisect documented as deferred (F1 evidence + cross-day noise justification in thread_scaling.md appendix) |
 | 5.4 Benchmark experiments | ⬜ | | |
 
 ## Phase 6: Correctness Assurance

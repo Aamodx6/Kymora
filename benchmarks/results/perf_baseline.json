@@ -1,0 +1,16 @@
+{
+  "win32-Intel64 Family 6 Model 186 Stepping 2, GenuineIntel-py314": {
+    "runs": 30,
+    "median_ms": 2.110749999701511,
+    "q1_ms": 1.9508999976096675,
+    "q3_ms": 2.206399993156083,
+    "cv": 0.08317844435467615,
+    "shape": [
+      1000,
+      500
+    ],
+    "profile": "core33",
+    "n_jobs": null,
+    "platform": "Windows-11-10.0.26300-SP0"
+  }
+}

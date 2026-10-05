@@ -55,3 +55,23 @@ Leave the default (`n_jobs=None`, global pool, all threads): capping at
 behavior. Pass an explicit `n_jobs` for oversubscription control (now
 free); expect scaling to stop near the physical P-core count on hybrid
 laptops and near the core count on servers.
+
+## Appendix: the 0.3.2 → 0.4.0 step (5.3 note)
+
+F1 Appendix 3b measured ~15–20% on the direct-call probe (0.3.2: 2.00 ms
+vs 0.4.0/pre/HEAD: 2.41/2.44/2.47 ms, overlapping CIs among the latter)
+and attributed it to dispatch overhead without profiling. A per-commit
+bisect of the 0.4.0 P1 rewrite span is deferred as low value:
+
+- The span rewrote the whole hot path (realfft, selection quantiles,
+  fused passes, thread-local scratch); re-litigating it commit by commit
+  rebuilds superseded code for a verdict that would not change anything
+  shipped.
+- Cross-day laptop comparisons carry ±30% machine-state noise (this
+  laptop: F1 pool 3.18 ms on 2026-10-04 vs 2.11 ms gate baseline on
+  2026-10-06, same config). A 15% cross-session delta is weak evidence of
+  a code regression at all; same-session interleaved runs (F1 step 2)
+  show pre-refactor ≈ HEAD.
+- The durable protection is `tools/perf_gate.py` + the CI gate (same
+  runner, same session, 7% + lower-quartile rule): any future regression
+  fails loudly instead of becoming archaeology.
