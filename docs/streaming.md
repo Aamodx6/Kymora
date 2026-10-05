@@ -99,12 +99,13 @@ Re-run the suite on your hardware before quoting numbers.
 ## Example
 
 ```python
+import numpy as np
 from kymora import StreamingExtractor
 
+rng = np.random.default_rng(0)
 stream = StreamingExtractor(window_size=500)
-for tick in sensor_feed():
-    if stream.push(tick):
+for tick in rng.standard_normal(600):
+    if stream.push(float(tick)):
         fast = stream.compute(kind="fast")  # 12 features, O(1)
-        if needs_full_window():
-            full = stream.compute(kind="all")  # 33 features, O(W)
+full = stream.compute(kind="all")  # 33 features, O(W) exact
 ```

@@ -104,27 +104,19 @@ windowed_features = km.sliding_features(signal, window=256, stride=64)
 
 ### Scikit-Learn Pipeline
 
-Integrate directly into standard classification, regression, or clustering pipelines:
+Integrate directly into standard classification, regression, or clustering pipelines
+(`pip install "kymora[sklearn]"` for the optional dependency):
 
 ```python
 import numpy as np
-import kymora as km
-from sklearn.base import BaseEstimator, TransformerMixin
+from kymora.sklearn import KymoraTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
-class KymoraTransformer(BaseEstimator, TransformerMixin):
-    """Extract 33 Kymora features per input row (one series per row)."""
-    def fit(self, X, y=None):
-        return self
-    def transform(self, X):
-        X_contig = np.ascontiguousarray(X, dtype=np.float64)
-        return km.extract_features(X_contig)
-
 # Assemble end-to-end reproducible pipeline
 pipeline = Pipeline([
-    ("features", KymoraTransformer()),
+    ("features", KymoraTransformer()),  # (n_series, length) -> (n_series, 33)
     ("scaler", StandardScaler()),
     ("classifier", RandomForestClassifier(n_estimators=100))
 ])
