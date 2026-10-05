@@ -28,7 +28,10 @@ def extract_features(
             or a sequence of 1D arrays for ragged series.
         profile: Optional profile name ("minimal", "core33", "extended", "full").
         features: Optional sequence of feature names or aliases.
-        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        n_jobs: Optional number of worker threads to use. None uses the shared
+            global pool (all threads). Scaling stops near the physical core
+            count; on hybrid laptops expect the peak around the P-core count
+            (see docs/internal/thread_scaling.md).
         out: Optional pre-allocated C-contiguous float64 array of shape
             ``(n_series, n_features)`` for in-place writing.
         views: Optional sequence of data views ("raw", "diff", "znorm", ...).
@@ -61,7 +64,10 @@ def extract_features_ragged(
             Series ``i`` spans ``values[offsets[i] : offsets[i + 1]]``.
         profile: Optional profile name ("minimal", "core33", "extended", "full").
         features: Optional sequence of feature names or aliases.
-        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        n_jobs: Optional number of worker threads to use. None uses the shared
+            global pool (all threads). Scaling stops near the physical core
+            count; on hybrid laptops expect the peak around the P-core count
+            (see docs/internal/thread_scaling.md).
         out: Optional pre-allocated C-contiguous float64 array of shape
             ``(len(offsets) - 1, n_features)`` for in-place writing.
         nan_policy: "propagate" (default) or "raise".
@@ -90,7 +96,10 @@ def sliding_features(
         stride: Step between window starts; must be >= 1.
         profile: Optional profile name ("minimal", "core33", "extended", "full").
         features: Optional sequence of feature names or aliases.
-        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        n_jobs: Optional number of worker threads to use. None uses the shared
+            global pool (all threads). Scaling stops near the physical core
+            count; on hybrid laptops expect the peak around the P-core count
+            (see docs/internal/thread_scaling.md).
         out: Optional pre-allocated C-contiguous float64 array of shape
             ``(n_windows, n_features)`` for in-place writing.
 
@@ -160,7 +169,10 @@ def extract_features_mc(
         features: Optional sequence of feature names or aliases.
         cross: Whether to compute pairwise cross-channel features.
         max_pairs: Maximum number of channel pairs for cross features.
-        n_jobs: Optional number of worker threads to use. None uses all available cores.
+        n_jobs: Optional number of worker threads to use. None uses the shared
+            global pool (all threads). Scaling stops near the physical core
+            count; on hybrid laptops expect the peak around the P-core count
+            (see docs/internal/thread_scaling.md).
         views: Optional sequence of data views ("raw", "diff", "znorm", ...).
 
     Returns:

@@ -59,7 +59,7 @@
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
 | 5.1 Scaling plateau investigation | ✅ | | Plateau = P-core count (6) + E/SMT drag, not a bug; fixed per-call pool-build overhead (~200µs) with cached pools (small-call n_jobs 2.3×); bitwise thread-invariance test; analysis in docs/internal/thread_scaling.md |
-| 5.2 Thread default | ⬜ | | |
+| 5.2 Thread default | ✅ | | Keep default (None/global pool): capping would trade ~5% peak for platform-specific behavior; fresh scaling (12.16→2.78ms, peak 4.37×) consistent with 2026-10-05 artifact, no CLAIMS change; guidance in stubs + thread_scaling.md |
 | 5.3 Bisect 0.3.2→0.4.0 | ⬜ | | |
 | 5.4 Benchmark experiments | ⬜ | | |
 
