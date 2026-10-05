@@ -185,6 +185,28 @@ def test_window_sizes_one_and_two():
         check_fast_matches_batch(data, w)
 
 
+def test_sparse_spike_then_zeros():
+    # Regression (found by hypothesis): after a lone spike slides out, the
+    # window is constant-zero while the anchor is still stale (1/3 here).
+    # The anchored abs_energy expansion then cancels catastrophically
+    # (0.333-0.667+0.333 -> ~1e-16 instead of 0, rms ~6e-9 vs batch 0.0).
+    # Constant windows must use the exact W*first^2 shortcut.
+    data = np.array([0.0] * 28 + [1.0] + [0.0] * 3)
+    for interval in (1, 2, 4096):
+        ext = kymora.StreamingExtractor(3, anchor_interval=interval)
+        for i, v in enumerate(data):
+            if ext.push(float(v)):
+                got = ext.compute(kind="fast")
+                want = kymora.extract_features(
+                    data[i - 2 : i + 1][None, :], features=FAST_NAMES
+                )[0]
+                for name, s, b in zip(FAST_NAMES, got, want):
+                    if np.isnan(b):
+                        assert np.isnan(s), name
+                    else:
+                        assert abs(s - b) <= ATOL + RTOL * abs(b), f"{name}: {s} vs {b}"
+
+
 def test_anchor_interval_configurable():
     ext = kymora.StreamingExtractor(16, anchor_interval=7)
     assert ext.anchor_interval == 7

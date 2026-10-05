@@ -429,10 +429,22 @@ impl StreamingExtractor {
         let skewness = stats::skewness(m3, w, var, std);
         let kurtosis = stats::kurtosis(m4, w, var, std);
 
-        // Σx² from the anchored sums: exact expansion, no cancellation issue
-        // since the result itself is the largest-magnitude term.
-        let abs_energy = self.s2 + 2.0 * self.anchor * self.s1 + w * self.anchor * self.anchor;
-        let rms = (abs_energy / w).sqrt();
+        // Σx²: constant windows use W·first² exactly. The anchored expansion
+        // would cancel catastrophically here whenever the anchor is stale
+        // (e.g. an all-zero window with a pre-zero anchor: s2 + 2a·s1 + W·a²
+        // = 0.333… − 0.667… + 0.333… leaves ~1e-16 residue instead of true 0,
+        // and rms turns it into ~6e-9 vs batch 0.0). The drift guard skips
+        // constant windows (their moments need no anchor), so this shortcut
+        // is also what keeps them anchor-independent. Non-constant windows
+        // use the exact expansion (result large ⇒ relatively accurate).
+        let (abs_energy, rms) = if constant {
+            let first = self.buffer[self.head];
+            let e = w * first * first;
+            (e, (e / w).sqrt())
+        } else {
+            let e = self.s2 + 2.0 * self.anchor * self.s1 + w * self.anchor * self.anchor;
+            (e, (e / w).sqrt())
+        };
         let mean_abs_change = self.abs_diff_sum / (w - 1.0);
         let last_idx = (self.head + self.window_size - 1) % self.window_size;
         let mean_change = (self.buffer[last_idx] - self.buffer[self.head]) / (w - 1.0);
