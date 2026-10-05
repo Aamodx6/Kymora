@@ -450,9 +450,13 @@ impl StreamingExtractor {
 
         // Least-squares slope vs t = 0..W-1, same closed form as batch
         // `linear_trend` but accumulated anchor-relative: cov = t1 - t_mean*s1
-        // never subtracts offset-scale terms. Constant series: exactly 0 like
-        // batch; length-1: 0/0 = NaN like batch.
-        let slope = if w_len >= 2 && constant {
+        // never subtracts offset-scale terms. Length-1: NaN like batch
+        // (batch returns NaN for n < 2; the incremental trend_dev carries
+        // ~1e-16 rounding residue, so this must be explicit, not 0/0).
+        // Constant series: exactly 0 like batch.
+        let slope = if w_len < 2 {
+            f64::NAN
+        } else if constant {
             0.0
         } else {
             let t_mean = (w - 1.0) * 0.5;
