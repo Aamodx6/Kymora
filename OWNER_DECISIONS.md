@@ -7,11 +7,29 @@ Actions in this file require the repository owner's explicit decision.
 
 ## 1. Canonical Identity
 
-### Findings (Task 7.1)
-*(To be populated during Phase 7)*
+### Findings (Task 7.1, 2026-10-06 full-tree grep)
+
+Remote `origin` is `https://github.com/Aamodx6/Kymora.git` (rename done).
+Live code (`src/`, `python/`, `landing/src/`, `tools/` minus the rename
+script itself, `.github/`, `mkdocs.yml`, `pyproject.toml`) is clean: no
+`tsxtract`/`tsxtractor`/`TsxSelector`/`TSXTRACT` outside intentional spots
+(the rename tool `tools/rename_to_kymora.py`, the gone-names assertion
+test, frozen benchmark evidence, refactor records).
+
+| Location | Occurrence | Proposed replacement | Action |
+|---|---|---|---|
+| `CHANGELOG.md` link targets (10) | `Aamodx6/Tsxtract/compare/...` | `Aamodx6/Kymora/compare/...` | FIXED automatically (task 7.1) |
+| `README.md:282` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
+| `landing/.../Footer.tsx:165` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
+| `paper/paper.md`, `paper/main.tex` | old name + `Aamodx6/Tsxtract` URLs + stale numbers | full rewrite | DEFERRED to task 8.2 (JOSS restructure) |
+| `docs/refactor/**`, `benchmarks/results/**` | historical records | none (frozen evidence) | LEFT AS IS |
+| `CHANGELOG.md` prose (§0.5.0–0.7.0) | rename history narrative | none (history) | LEFT AS IS |
 
 ### Decision needed
 - Which GitHub account is canonical: `Aamodx6` or `Aamod007`?
+  (`Aamodx6` owns the repo + all repo URLs; `Aamod007` appears only in two
+  personal bylines. Proposed: keep `Aamodx6` for repo identity; owner
+  confirms whether bylines move.)
 - Is `Kymora` the final product name? (Trademark/domain check recommended)
 - Domain: currently on default Vercel domain — acquire `kymora.dev` or similar?
 

@@ -74,7 +74,7 @@
 ## Phase 7: Identity, Packaging, Release
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 7.1 URL/name grep | ⬜ | | |
+| 7.1 URL/name grep | ✅ | | Full-tree audit in OWNER_DECISIONS (canonical identity table); CHANGELOG repo links fixed; bylines + paper deferred to owner/8.2; records frozen |
 | 7.2 CITATION.cff + metadata | ⬜ | | |
 | 7.3 Release prep | ⬜ | | |
 | 7.4 README sync + badges | ⬜ | | |
