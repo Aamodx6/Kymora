@@ -147,6 +147,10 @@ jobs:
     name: SBOM (SPDX) for release artifacts
     needs: [linux, macos, windows, sdist]
     runs-on: ubuntu-latest
+    permissions:
+      # Uploading the SBOM to the release needs write; the file itself is
+      # attached exactly once by the github-release job below.
+      contents: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -159,6 +163,7 @@ jobs:
           path: dist
           format: spdx-json
           output-file: kymora-sbom.spdx.json
+          upload-release-assets: false
       - uses: actions/upload-artifact@v7
         with:
           name: sbom
