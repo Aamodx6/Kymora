@@ -449,7 +449,56 @@ pub fn compute_cross_features(channels: &[&[f64]], max_pairs: usize, out: &mut [
     out[out_idx + 3] = coherence_mean;
 }
 
+/// Number of channel pairs used for cross features (capped by `max_pairs`).
+fn mc_pair_count(n_channels: usize, cross: bool, max_pairs: usize) -> usize {
+    if !cross || n_channels < 2 {
+        return 0;
+    }
+    let mut count = 0usize;
+    for i in 0..n_channels {
+        for _ in (i + 1)..n_channels {
+            count += 1;
+            if count >= max_pairs {
+                break;
+            }
+        }
+        if count >= max_pairs {
+            break;
+        }
+    }
+    count
+}
+
+/// Per-sample multichannel extraction shared by the 3D and list-of-2D paths:
+/// per-channel plan features in `ch{c}` blocks, then cross-channel features.
+fn mc_extract_sample(
+    channel_slices: &[&[f64]],
+    plan: &FeaturePlan,
+    scratch: &mut Scratch,
+    max_pairs: usize,
+    n_plan_cols: usize,
+    n_cross_cols: usize,
+    total_cols: usize,
+    row_out: &mut [f64],
+) {
+    let n_channels = channel_slices.len();
+    for (c, ch_data) in channel_slices.iter().enumerate() {
+        let ch_out = &mut row_out[c * n_plan_cols..(c + 1) * n_plan_cols];
+        pipeline::run_plan(ch_data, plan, scratch, ch_out);
+    }
+    if n_cross_cols > 0 {
+        let cross_out = &mut row_out[n_channels * n_plan_cols..total_cols];
+        compute_cross_features(channel_slices, max_pairs, cross_out);
+    }
+}
+
 /// extract_features_mc(x, profile="core33", features=None, cross=True, max_pairs=8, n_jobs=None, views=None, nan_policy=None)
+///
+/// `x` is a 3D float64 array `(n_samples, n_channels, length)`, or a list of
+/// 2D float64 arrays `(n_channels, length_i)` for ragged lengths across
+/// samples (channel count must agree; each sample is processed independently).
+/// Output is `(n_samples, n_channels * n_plan + n_cross)` with per-channel
+/// `ch{c}__{feature}` blocks followed by cross columns (see `feature_names_mc`).
 #[pyfunction]
 #[pyo3(signature = (x, profile = None, features = None, cross = true, max_pairs = 8, n_jobs = None, views = None, nan_policy = None))]
 #[allow(clippy::too_many_arguments)]
@@ -467,99 +516,173 @@ pub fn extract_features_mc<'py>(
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build_with_views(profile, feat_refs, views.as_deref())?;
     let n_plan_cols = plan.n_features();
-
-    let arr = x.extract::<PyReadonlyArrayDyn<f64>>().map_err(|_| {
-        pyo3::exceptions::PyTypeError::new_err(
-            "extract_features_mc expects a 3D float64 array of shape (n_samples, n_channels, length)",
-        )
-    })?;
-
-    let shape = arr.shape();
-    if shape.len() != 3 {
-        return Err(pyo3::exceptions::PyValueError::new_err(format!(
-            "extract_features_mc expects a 3D array of shape (n_samples, n_channels, length), got shape {shape:?}"
-        )));
-    }
-    let n_samples = shape[0];
-    let n_channels = shape[1];
-    let length = shape[2];
-
-    if n_samples == 0 || n_channels == 0 || length == 0 {
-        return Err(KymoraError::EmptyInput.into());
-    }
-
-    let slice = arr
-        .as_slice()
-        .map_err(|_| KymoraError::NotContiguous { index: None })?;
     let nan_policy =
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
-    if nan_policy == NanPolicy::Raise {
-        if let Some(pos) = nan_policy::first_nan_sample_f64(slice) {
-            let per_sample = n_channels * length;
-            let sample = pos / per_sample;
-            let channel = (pos % per_sample) / length;
+
+    // 1. 3D float64 array path.
+    if let Ok(arr) = x.extract::<PyReadonlyArrayDyn<f64>>() {
+        let shape = arr.shape();
+        if shape.len() != 3 {
             return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                "sample {sample} channel {channel} contains NaN (nan_policy='raise')"
+                "extract_features_mc expects a 3D array of shape (n_samples, n_channels, length), got shape {shape:?}"
             )));
         }
-    }
+        let n_samples = shape[0];
+        let n_channels = shape[1];
+        let length = shape[2];
 
-    let pair_count = if cross && n_channels >= 2 {
-        let mut count = 0usize;
-        for i in 0..n_channels {
-            for _ in (i + 1)..n_channels {
-                count += 1;
-                if count >= max_pairs {
-                    break;
-                }
-            }
-            if count >= max_pairs {
-                break;
+        if n_samples == 0 || n_channels == 0 || length == 0 {
+            return Err(KymoraError::EmptyInput.into());
+        }
+
+        let slice = arr
+            .as_slice()
+            .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        if nan_policy == NanPolicy::Raise {
+            if let Some(pos) = nan_policy::first_nan_sample_f64(slice) {
+                let per_sample = n_channels * length;
+                let sample = pos / per_sample;
+                let channel = (pos % per_sample) / length;
+                return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                    "sample {sample} channel {channel} contains NaN (nan_policy='raise')"
+                )));
             }
         }
-        count
-    } else {
-        0
-    };
 
-    let n_cross_cols = if pair_count > 0 {
-        pair_count * 4 + 4
-    } else {
-        0
-    };
-    let total_cols = n_channels * n_plan_cols + n_cross_cols;
+        let pair_count = mc_pair_count(n_channels, cross, max_pairs);
+        let n_cross_cols = if pair_count > 0 {
+            pair_count * 4 + 4
+        } else {
+            0
+        };
+        let total_cols = n_channels * n_plan_cols + n_cross_cols;
 
-    let out_arr = PyArray2::<f64>::zeros(py, [n_samples, total_cols], false);
-    let out_slice = out_slice_mut(&out_arr)?;
+        let out_arr = PyArray2::<f64>::zeros(py, [n_samples, total_cols], false);
+        let out_slice = out_slice_mut(&out_arr)?;
 
-    py.detach(|| {
-        run_in_pool(n_jobs, || {
-            let sample_stride = n_channels * length;
-            let mut scratch = Scratch::new(length);
+        py.detach(|| {
+            run_in_pool(n_jobs, || {
+                let sample_stride = n_channels * length;
+                let mut scratch = Scratch::new(length);
 
-            for s in 0..n_samples {
-                let sample_data = &slice[s * sample_stride..(s + 1) * sample_stride];
-                let row_out = &mut out_slice[s * total_cols..(s + 1) * total_cols];
+                for s in 0..n_samples {
+                    let sample_data = &slice[s * sample_stride..(s + 1) * sample_stride];
+                    let row_out = &mut out_slice[s * total_cols..(s + 1) * total_cols];
 
-                // 1. Per-channel features
-                let mut channel_slices = Vec::with_capacity(n_channels);
-                for c in 0..n_channels {
-                    let ch_data = &sample_data[c * length..(c + 1) * length];
-                    channel_slices.push(ch_data);
-                    let ch_out = &mut row_out[c * n_plan_cols..(c + 1) * n_plan_cols];
-                    pipeline::run_plan(ch_data, &plan, &mut scratch, ch_out);
+                    let mut channel_slices = Vec::with_capacity(n_channels);
+                    for c in 0..n_channels {
+                        channel_slices.push(&sample_data[c * length..(c + 1) * length]);
+                    }
+                    mc_extract_sample(
+                        &channel_slices,
+                        &plan,
+                        &mut scratch,
+                        max_pairs,
+                        n_plan_cols,
+                        n_cross_cols,
+                        total_cols,
+                        row_out,
+                    );
                 }
+            })
+        });
 
-                // 2. Cross-channel features
-                if n_cross_cols > 0 {
-                    let cross_out = &mut row_out[n_channels * n_plan_cols..total_cols];
-                    compute_cross_features(&channel_slices, max_pairs, cross_out);
+        return Ok(out_arr);
+    }
+
+    // 2. List of 2D float64 arrays: ragged lengths across samples.
+    if let Ok(list) = x.extract::<Vec<PyReadonlyArray2<f64>>>() {
+        if list.is_empty() {
+            return Err(KymoraError::EmptyInput.into());
+        }
+        let mut samples: Vec<(usize, &[f64])> = Vec::with_capacity(list.len());
+        let mut n_channels = None;
+        for (index, a) in list.iter().enumerate() {
+            let view = a.as_array();
+            let shape = view.shape();
+            if shape.len() != 2 {
+                return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                    "multichannel list element {index} must be 2D (n_channels, length)"
+                )));
+            }
+            let (c, len) = (shape[0], shape[1]);
+            if c == 0 || len == 0 {
+                return Err(KymoraError::EmptyInput.into());
+            }
+            match n_channels {
+                None => n_channels = Some(c),
+                Some(first) if first != c => {
+                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                        "multichannel list element {index} has {c} channels, expected {first}"
+                    )));
+                }
+                _ => {}
+            }
+            let s = a
+                .as_slice()
+                .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?;
+            samples.push((len, s));
+        }
+        let n_channels = n_channels.unwrap_or(0);
+        let n_samples = samples.len();
+        if nan_policy == NanPolicy::Raise {
+            for (s, (len, data)) in samples.iter().enumerate() {
+                if let Some(pos) = nan_policy::first_nan_sample_f64(data) {
+                    let len = data.len() / n_channels;
+                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                        "sample {s} channel {} contains NaN (nan_policy='raise')",
+                        pos / len
+                    )));
                 }
             }
-        })
-    });
+        }
 
-    Ok(out_arr)
+        let pair_count = mc_pair_count(n_channels, cross, max_pairs);
+        let n_cross_cols = if pair_count > 0 {
+            pair_count * 4 + 4
+        } else {
+            0
+        };
+        let total_cols = n_channels * n_plan_cols + n_cross_cols;
+        let max_len = samples
+            .iter()
+            .map(|(_, data)| data.len() / n_channels)
+            .max()
+            .unwrap_or(0);
+
+        let out_arr = PyArray2::<f64>::zeros(py, [n_samples, total_cols], false);
+        let out_slice = out_slice_mut(&out_arr)?;
+
+        py.detach(|| {
+            run_in_pool(n_jobs, || {
+                let mut scratch = Scratch::new(max_len);
+                for (s, (len, data)) in samples.iter().enumerate() {
+                    let row_out = &mut out_slice[s * total_cols..(s + 1) * total_cols];
+                    let mut channel_slices = Vec::with_capacity(n_channels);
+                    for c in 0..n_channels {
+                        channel_slices.push(&data[c * len..(c + 1) * len]);
+                    }
+                    mc_extract_sample(
+                        &channel_slices,
+                        &plan,
+                        &mut scratch,
+                        max_pairs,
+                        n_plan_cols,
+                        n_cross_cols,
+                        total_cols,
+                        row_out,
+                    );
+                }
+            })
+        });
+
+        return Ok(out_arr);
+    }
+
+    Err(pyo3::exceptions::PyTypeError::new_err(
+        "extract_features_mc expects a 3D float64 array of shape (n_samples, n_channels, length), \
+         or a list of 2D float64 arrays (n_channels, length_i) for ragged lengths",
+    ))
 }
 
 /// feature_names_mc(n_channels, profile=None, features=None, cross=True, max_pairs=8, views=None) -> list[str]
