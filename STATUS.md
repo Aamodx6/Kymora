@@ -69,7 +69,7 @@
 | 6.1 Parity test suite | ✅ | | tests/parity/test_external_parity.py (tsfresh 13 + TSFEL 13 matched sets, rtol 1e-6) + intentional_differences.md; [dev-parity] extra; skips cleanly without libs |
 | 6.2 Feature catalog docs | ✅ | | CORE33_META in registry.rs → describe_feature → tools/gen_feature_docs.py → docs/features.md; tests/test_feature_docs.py (meta↔behavior); CI feature-docs --check job |
 | 6.3 Fuzz/proptest + unsafe audit | ✅ | | proptest in-process fuzz (5 targets, stable, all green) + cargo-fuzz scaffolding (nightly/Linux CI smoke) + rlib linkage; unsafe audit: 2 blocks (both SAFETY-documented), pedantic triaged; docs/internal/unsafe_audit.md |
-| 6.4 Cross-platform CI | ⬜ | | |
+| 6.4 Cross-platform CI | ✅ | | Matrix now linux x64/aarch64 + macos arm64 + windows x64 × py3.10–3.14 (3.9 EOL-skipped; no Intel-mac runner exists); new wheel-smoke job tests built abi3 wheels (the shipping config — all published numbers are abi3, no perf question); release workflow builds full matrix (7.3) |
 
 ## Phase 7: Identity, Packaging, Release
 | Task | Status | Commit | Notes |
