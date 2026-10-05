@@ -7,6 +7,7 @@ pub mod features;
 mod ffi;
 pub mod intermediates;
 pub mod kernels;
+pub mod nan_policy;
 pub mod pipeline;
 pub mod plan;
 pub mod registry;

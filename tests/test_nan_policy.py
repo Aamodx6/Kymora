@@ -215,3 +215,82 @@ def test_infinite_input_is_a_value_not_an_error_and_not_nan_row():
     assert row.shape == (N_FEATURES,)
     assert not np.isnan(row).all()
     assert np.isinf(dict(zip(NAMES, row))["max"])
+
+
+# ---------------------------------------------------------------------------
+# nan_policy option: propagate (default) vs raise; omit/unknown rejected
+# ---------------------------------------------------------------------------
+
+
+def test_nan_policy_default_is_propagate():
+    x = np.array([[1.0, np.nan, 2.0]])
+    assert np.isnan(kymora.extract_features(x)).all()
+    assert np.isnan(kymora.extract_features(x, nan_policy="propagate")).all()
+
+
+def test_nan_policy_raise_batch():
+    X = np.array([[1.0, 2.0, 3.0], [1.0, np.nan, 2.0], [4.0, 5.0, 6.0]])
+    with pytest.raises(ValueError, match="batch index 1"):
+        kymora.extract_features(X, nan_policy="raise")
+    # clean batch passes under raise and matches propagate output
+    clean = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    np.testing.assert_array_equal(
+        kymora.extract_features(clean, nan_policy="raise"),
+        kymora.extract_features(clean),
+    )
+
+
+def test_nan_policy_raise_ragged_list():
+    batch = [np.array([1.0, 2.0]), np.array([np.nan, 1.0])]
+    with pytest.raises(ValueError, match="batch index 1"):
+        kymora.extract_features(batch, nan_policy="raise")
+
+
+def test_nan_policy_raise_ragged_csr():
+    values = np.array([1.0, 2.0, np.nan, 4.0])
+    offsets = np.array([0, 2, 4], dtype=np.int64)
+    with pytest.raises(ValueError, match="batch index 1"):
+        kymora.extract_features_ragged(values, offsets, nan_policy="raise")
+    clean_values = np.array([1.0, 2.0, 3.0, 4.0])
+    out = kymora.extract_features_ragged(clean_values, offsets, nan_policy="raise")
+    assert out.shape == (2, N_FEATURES)
+
+
+def test_nan_policy_raise_sliding():
+    x = np.arange(20.0)
+    x[7] = np.nan
+    with pytest.raises(ValueError, match="sample index 7"):
+        kymora.sliding_features(x, window=4, nan_policy="raise")
+
+
+def test_nan_policy_raise_multichannel():
+    X = np.zeros((2, 3, 10))
+    X[1, 2, 5] = np.nan
+    with pytest.raises(ValueError, match="sample 1 channel 2"):
+        kymora.extract_features_mc(X, nan_policy="raise")
+
+
+def test_nan_policy_raise_streaming():
+    ext = kymora.StreamingExtractor(4, nan_policy="raise")
+    assert ext.push(1.0) is False
+    with pytest.raises(ValueError, match="nan_policy='raise'"):
+        ext.push(np.nan)
+    # propagate (default) still accepts NaN and yields an all-NaN row
+    ext2 = kymora.StreamingExtractor(4)
+    ext2.push(1.0)
+    ext2.push(np.nan)
+    ext2.push(3.0)
+    ext2.push(4.0)
+    assert np.isnan(ext2.compute(kind="fast")).all()
+
+
+def test_nan_policy_omit_and_unknown_rejected():
+    X = np.array([[1.0, 2.0, 3.0]])
+    with pytest.raises(ValueError, match="omit"):
+        kymora.extract_features(X, nan_policy="omit")
+    with pytest.raises(ValueError, match="unknown nan_policy"):
+        kymora.extract_features(X, nan_policy="drop")
+    with pytest.raises(ValueError, match="unknown nan_policy"):
+        kymora.sliding_features(np.arange(5.0), window=2, nan_policy="drop")
+    with pytest.raises(ValueError, match="omit"):
+        kymora.StreamingExtractor(4, nan_policy="omit")

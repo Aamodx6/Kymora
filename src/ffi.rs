@@ -20,6 +20,7 @@ use std::collections::HashMap;
 use crate::error::KymoraError;
 use crate::extract;
 use crate::features;
+use crate::nan_policy::{self, NanPolicy};
 use crate::pipeline;
 use crate::plan::FeaturePlan;
 use crate::registry;
@@ -98,9 +99,37 @@ where
     }
 }
 
-/// extract_features(X, profile="core33", features=None, n_jobs=None, out=None, views=None, precision=None, out_dtype=None)
+/// Enforce `nan_policy="raise"` on validated row views.
+///
+/// Returns `Ok(())` under propagate, or a `ValueError` naming the first
+/// NaN-containing series. Deliberately NOT a `KymoraError`: NaN describes
+/// values, not structure (see the `nan_policy` module docs).
+fn enforce_nan_policy_f64(rows: &[&[f64]], policy: NanPolicy) -> PyResult<()> {
+    if policy == NanPolicy::Raise {
+        if let Some(i) = nan_policy::first_nan_series_f64(rows) {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "series at batch index {i} contains NaN (nan_policy='raise')"
+            )));
+        }
+    }
+    Ok(())
+}
+
+/// f32-input variant of [`enforce_nan_policy_f64`].
+fn enforce_nan_policy_f32(rows: &[&[f32]], policy: NanPolicy) -> PyResult<()> {
+    if policy == NanPolicy::Raise {
+        if let Some(i) = nan_policy::first_nan_series_f32(rows) {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "series at batch index {i} contains NaN (nan_policy='raise')"
+            )));
+        }
+    }
+    Ok(())
+}
+
+/// extract_features(X, profile="core33", features=None, n_jobs=None, out=None, views=None, precision=None, out_dtype=None, nan_policy=None)
 #[pyfunction]
-#[pyo3(signature = (x, profile = None, features = None, n_jobs = None, out = None, views = None, precision = None, out_dtype = None))]
+#[pyo3(signature = (x, profile = None, features = None, n_jobs = None, out = None, views = None, precision = None, out_dtype = None, nan_policy = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn extract_features<'py>(
     py: Python<'py>,
@@ -112,10 +141,13 @@ pub fn extract_features<'py>(
     views: Option<Vec<String>>,
     precision: Option<&str>,
     out_dtype: Option<&str>,
+    nan_policy: Option<&str>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build_with_views(profile, feat_refs, views.as_deref())?;
     let n_cols = plan.n_features();
+    let nan_policy =
+        nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
 
     let wants_f32_out = matches!(out_dtype, Some("float32") | Some("f32"));
     let _wants_f32_precision = matches!(precision, Some("float32") | Some("f32"));
@@ -134,6 +166,8 @@ pub fn extract_features<'py>(
         let slice = view
             .as_slice()
             .ok_or(KymoraError::NotContiguous { index: None })?;
+        let rows: Vec<&[f64]> = slice.chunks_exact(ncols).collect();
+        enforce_nan_policy_f64(&rows, nan_policy)?;
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
@@ -141,7 +175,6 @@ pub fn extract_features<'py>(
             py.detach(|| {
                 run_in_pool(n_jobs, || {
                     let mut tmp = vec![0.0f64; nrows * n_cols];
-                    let rows: Vec<&[f64]> = slice.chunks_exact(ncols).collect();
                     crate::exec::extract_plan_into_slice(&rows, &plan, &mut tmp);
                     for (dst, &src) in out_slice.iter_mut().zip(tmp.iter()) {
                         *dst = src as f32;
@@ -155,7 +188,6 @@ pub fn extract_features<'py>(
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
-                let rows: Vec<&[f64]> = slice.chunks_exact(ncols).collect();
                 crate::exec::extract_plan_into_slice(&rows, &plan, out_slice);
             })
         });
@@ -176,6 +208,8 @@ pub fn extract_features<'py>(
         let slice = view
             .as_slice()
             .ok_or(KymoraError::NotContiguous { index: None })?;
+        let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
+        enforce_nan_policy_f32(&rows, nan_policy)?;
 
         if wants_f32_out {
             let out_arr = PyArray2::<f32>::zeros(py, [nrows, n_cols], false);
@@ -183,7 +217,6 @@ pub fn extract_features<'py>(
             py.detach(|| {
                 run_in_pool(n_jobs, || {
                     let mut tmp = vec![0.0f64; nrows * n_cols];
-                    let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
                     crate::exec::extract_into_slice_f32(&rows, &mut tmp, n_cols);
                     for (dst, &src) in out_slice.iter_mut().zip(tmp.iter()) {
                         *dst = src as f32;
@@ -197,7 +230,6 @@ pub fn extract_features<'py>(
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
             run_in_pool(n_jobs, || {
-                let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
                 crate::exec::extract_into_slice_f32(&rows, out_slice, n_cols);
             })
         });
@@ -215,6 +247,7 @@ pub fn extract_features<'py>(
             })
             .collect::<Result<_, KymoraError>>()?;
         extract::validate_batch(&slices)?;
+        enforce_nan_policy_f64(&slices, nan_policy)?;
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
@@ -241,6 +274,7 @@ pub fn extract_features<'py>(
             }
             slices.push(s);
         }
+        enforce_nan_policy_f32(&slices, nan_policy)?;
         let nrows = slices.len();
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
@@ -374,9 +408,9 @@ pub fn compute_cross_features(channels: &[&[f64]], max_pairs: usize, out: &mut [
     out[out_idx + 3] = coherence_mean;
 }
 
-/// extract_features_mc(x, profile="core33", features=None, cross=True, max_pairs=8, n_jobs=None, views=None)
+/// extract_features_mc(x, profile="core33", features=None, cross=True, max_pairs=8, n_jobs=None, views=None, nan_policy=None)
 #[pyfunction]
-#[pyo3(signature = (x, profile = None, features = None, cross = true, max_pairs = 8, n_jobs = None, views = None))]
+#[pyo3(signature = (x, profile = None, features = None, cross = true, max_pairs = 8, n_jobs = None, views = None, nan_policy = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn extract_features_mc<'py>(
     py: Python<'py>,
@@ -387,6 +421,7 @@ pub fn extract_features_mc<'py>(
     max_pairs: usize,
     n_jobs: Option<usize>,
     views: Option<Vec<String>>,
+    nan_policy: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build_with_views(profile, feat_refs, views.as_deref())?;
@@ -415,6 +450,18 @@ pub fn extract_features_mc<'py>(
     let slice = arr
         .as_slice()
         .map_err(|_| KymoraError::NotContiguous { index: None })?;
+    let nan_policy =
+        nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
+    if nan_policy == NanPolicy::Raise {
+        if let Some(pos) = nan_policy::first_nan_sample_f64(slice) {
+            let per_sample = n_channels * length;
+            let sample = pos / per_sample;
+            let channel = (pos % per_sample) / length;
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "sample {sample} channel {channel} contains NaN (nan_policy='raise')"
+            )));
+        }
+    }
 
     let pair_count = if cross && n_channels >= 2 {
         let mut count = 0usize;
@@ -521,9 +568,10 @@ pub fn feature_names_mc(
     Ok(names)
 }
 
-/// extract_features_ragged(values, offsets, profile="core33", features=None, n_jobs=None, out=None)
+/// extract_features_ragged(values, offsets, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None)
 #[pyfunction]
-#[pyo3(signature = (values, offsets, profile = None, features = None, n_jobs = None, out = None))]
+#[pyo3(signature = (values, offsets, profile = None, features = None, n_jobs = None, out = None, nan_policy = None))]
+#[allow(clippy::too_many_arguments)]
 pub fn extract_features_ragged<'py>(
     py: Python<'py>,
     values: &Bound<'py, PyAny>,
@@ -532,6 +580,7 @@ pub fn extract_features_ragged<'py>(
     features: Option<Vec<String>>,
     n_jobs: Option<usize>,
     out: Option<&Bound<'py, PyArray2<f64>>>,
+    nan_policy: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let offsets_slice = offsets
         .as_slice()
@@ -544,11 +593,21 @@ pub fn extract_features_ragged<'py>(
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build(profile, feat_refs)?;
     let n_cols = plan.n_features();
+    let nan_policy =
+        nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
 
     if let Ok(v64) = values.extract::<PyReadonlyArray1<f64>>() {
         let v_slice = v64
             .as_slice()
             .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        if nan_policy == NanPolicy::Raise {
+            if let Some(pos) = nan_policy::first_nan_sample_f64(v_slice) {
+                let series = nan_policy::series_for_offset(offsets_slice, pos);
+                return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                    "series at batch index {series} contains NaN (nan_policy='raise')"
+                )));
+            }
+        }
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
@@ -563,6 +622,14 @@ pub fn extract_features_ragged<'py>(
         let v_slice = v32
             .as_slice()
             .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        if nan_policy == NanPolicy::Raise {
+            if let Some(pos) = v_slice.iter().position(|v| v.is_nan()) {
+                let series = nan_policy::series_for_offset(offsets_slice, pos);
+                return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                    "series at batch index {series} contains NaN (nan_policy='raise')"
+                )));
+            }
+        }
         let out_arr = get_out_array(py, nrows, n_cols, out)?;
         let out_slice = out_slice_mut(&out_arr)?;
         py.detach(|| {
@@ -578,9 +645,9 @@ pub fn extract_features_ragged<'py>(
     ))
 }
 
-/// sliding_features(x, window, stride=1, profile="core33", features=None, n_jobs=None, out=None)
+/// sliding_features(x, window, stride=1, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None)
 #[pyfunction]
-#[pyo3(signature = (x, window, stride = 1, profile = None, features = None, n_jobs = None, out = None))]
+#[pyo3(signature = (x, window, stride = 1, profile = None, features = None, n_jobs = None, out = None, nan_policy = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn sliding_features<'py>(
     py: Python<'py>,
@@ -591,11 +658,21 @@ pub fn sliding_features<'py>(
     features: Option<Vec<String>>,
     n_jobs: Option<usize>,
     out: Option<&Bound<'py, PyArray2<f64>>>,
+    nan_policy: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let slice = x
         .as_slice()
         .map_err(|_| KymoraError::NotContiguous { index: None })?;
     let (window, stride, n_windows) = extract::window_geometry(slice.len(), window, stride)?;
+    let nan_policy =
+        nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
+    if nan_policy == NanPolicy::Raise {
+        if let Some(pos) = nan_policy::first_nan_sample_f64(slice) {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "series contains NaN at sample index {pos} (nan_policy='raise')"
+            )));
+        }
+    }
 
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build(profile, feat_refs)?;
@@ -669,13 +746,18 @@ pub fn describe_feature(name: &str) -> PyResult<HashMap<&'static str, String>> {
 #[pyclass(name = "StreamingExtractor")]
 pub struct PyStreamingExtractor {
     inner: features::StreamingExtractor,
+    nan_policy_raise: bool,
 }
 
 #[pymethods]
 impl PyStreamingExtractor {
     #[new]
-    #[pyo3(signature = (window_size, anchor_interval = None))]
-    pub fn new(window_size: usize, anchor_interval: Option<usize>) -> PyResult<Self> {
+    #[pyo3(signature = (window_size, anchor_interval = None, nan_policy = None))]
+    pub fn new(
+        window_size: usize,
+        anchor_interval: Option<usize>,
+        nan_policy: Option<&str>,
+    ) -> PyResult<Self> {
         if window_size < 1 {
             return Err(pyo3::exceptions::PyValueError::new_err(
                 "window_size must be at least 1",
@@ -687,8 +769,11 @@ impl PyStreamingExtractor {
                 "anchor_interval must be at least 1",
             ));
         }
+        let policy =
+            nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
         Ok(Self {
             inner: features::StreamingExtractor::new(window_size).with_anchor_interval(interval),
+            nan_policy_raise: policy == NanPolicy::Raise,
         })
     }
 
@@ -717,8 +802,13 @@ impl PyStreamingExtractor {
         self.inner.is_full()
     }
 
-    pub fn push(&mut self, val: f64) -> bool {
-        self.inner.push(val)
+    pub fn push(&mut self, val: f64) -> PyResult<bool> {
+        if self.nan_policy_raise && val.is_nan() {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "pushed value is NaN (nan_policy='raise')",
+            ));
+        }
+        Ok(self.inner.push(val))
     }
 
     pub fn reset(&mut self) {
