@@ -256,13 +256,13 @@
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.8590621210729004e-16,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -310,13 +310,13 @@
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 1.650169913793303e-15,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -346,7 +346,7 @@
           "rel_err": 1.310717667382726e-16,
           "abs_err": 1.7763568394002505e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -388,25 +388,25 @@
           "rel_err": 1.8450732241719483e-16,
           "abs_err": 1.3877787807814457e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.2394287451240857e-16,
           "abs_err": 3.469446951953614e-18,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 1.9421440812409547e-16,
           "abs_err": 6.938893903907228e-18,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 1.6171849074528607e-16,
           "abs_err": 1.3877787807814457e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 2.0467939430953676e-16,
@@ -418,7 +418,7 @@
           "rel_err": 2.7693572160779625e-16,
           "abs_err": 6.938893903907228e-18,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -465,13 +465,13 @@
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.8122662097199184e-16,
           "abs_err": 8.881784197001252e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -519,13 +519,13 @@
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 1.3585940902636006e-14,
           "abs_err": 3.1086244689504383e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -555,7 +555,7 @@
           "rel_err": 1.2704884141916898e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -597,25 +597,25 @@
           "rel_err": 2.4385285293301027e-16,
           "abs_err": 2.220446049250313e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.3559432424965341e-16,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 2.2013999122235222e-16,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 1.3315740170118e-15,
@@ -627,7 +627,7 @@
           "rel_err": 2.5049094336384987e-15,
           "abs_err": 1.0408340855860843e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -674,13 +674,13 @@
           "rel_err": 4.07662713161984e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 7.484482127305019e-16,
           "abs_err": 8.881784197001252e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -728,13 +728,13 @@
           "rel_err": 1.5103416091102114e-15,
           "abs_err": 7.771561172376096e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 1.5296503354110485e-14,
           "abs_err": 5.329070518200751e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -764,7 +764,7 @@
           "rel_err": 5.837170254356409e-16,
           "abs_err": 4.440892098500626e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -806,25 +806,25 @@
           "rel_err": 7.948662146802101e-16,
           "abs_err": 5.551115123125783e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 6.263300062173892e-16,
           "abs_err": 2.7755575615628914e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 6.464033804925902e-16,
           "abs_err": 2.7755575615628914e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 6.659536010305923e-16,
           "abs_err": 8.326672684688674e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 1.5316060252433983e-16,
@@ -836,7 +836,7 @@
           "rel_err": 1.5406961677454388e-15,
           "abs_err": 1.3877787807814457e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -883,13 +883,13 @@
           "rel_err": 2.781146975246666e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 3.4834345561042404e-16,
           "abs_err": 8.881784197001252e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -937,13 +937,13 @@
           "rel_err": 1.1707078197167966e-15,
           "abs_err": 5.551115123125783e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 1.6872487173463228e-15,
           "abs_err": 6.217248937900877e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -973,7 +973,7 @@
           "rel_err": 4.926730508186352e-16,
           "abs_err": 7.105427357601002e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -1015,25 +1015,25 @@
           "rel_err": 2.948354260010035e-16,
           "abs_err": 2.7755575615628914e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 2.9363016747150355e-16,
           "abs_err": 2.7755575615628914e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 2.078800986929061e-16,
           "abs_err": 1.3877787807814457e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 1.8498627892260363e-16,
           "abs_err": 8.673617379884035e-19,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 0.0,
@@ -1045,7 +1045,7 @@
           "rel_err": 4.260492888855001e-16,
           "abs_err": 3.469446951953614e-18,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -1092,13 +1092,13 @@
           "rel_err": 1.5672799334045172e-16,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 4.4249963028497054e-16,
           "abs_err": 2.220446049250313e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -1146,13 +1146,13 @@
           "rel_err": 1.5790303834917095e-15,
           "abs_err": 3.8163916471489756e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 9.287491060715793e-16,
           "abs_err": 1.3322676295501878e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -1182,7 +1182,7 @@
           "rel_err": 3.0647375895985607e-16,
           "abs_err": 8.881784197001252e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -1224,25 +1224,25 @@
           "rel_err": 4.589609850440161e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 5.028480226100296e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 4.945848192297993e-16,
           "abs_err": 1.6653345369377348e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 4.26508941856469e-16,
           "abs_err": 3.3306690738754696e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 1.7078405174718782e-16,
@@ -1254,7 +1254,7 @@
           "rel_err": 0.0,
           "abs_err": 0.0,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -1301,13 +1301,13 @@
           "rel_err": 6.528912997919821e-16,
           "abs_err": 6.661338147750939e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.2798240830574977e-15,
           "abs_err": 1.3322676295501878e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -1355,13 +1355,13 @@
           "rel_err": 1.2931022481642424e-15,
           "abs_err": 2.498001805406602e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 2.935760678274151e-14,
           "abs_err": 7.993605777301127e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -1391,7 +1391,7 @@
           "rel_err": 4.3300720956087073e-16,
           "abs_err": 1.4210854715202004e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -1433,25 +1433,25 @@
           "rel_err": 1.1176625658863241e-15,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.1287332680028358e-15,
           "abs_err": 6.938893903907228e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 2.675767625365639e-16,
           "abs_err": 2.7755575615628914e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 6.323877130976472e-16,
           "abs_err": 5.551115123125783e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 7.609998353008589e-16,
@@ -1463,7 +1463,7 @@
           "rel_err": 1.677029863212734e-15,
           "abs_err": 1.734723475976807e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 1.1105224567113144e-16,
@@ -1510,13 +1510,13 @@
           "rel_err": 2.0093164784496808e-15,
           "abs_err": 4.440892098500626e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.06186501751241e-15,
           "abs_err": 5.186961971048731e-13,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -1564,13 +1564,13 @@
           "rel_err": 2.0963584878513194e-14,
           "abs_err": 1.7208456881689926e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 9.729894649992993e-14,
           "abs_err": 1.1857181902996672e-13,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -1600,7 +1600,7 @@
           "rel_err": 5.931202250419818e-15,
           "abs_err": 2.7977620220553945e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -1642,25 +1642,25 @@
           "rel_err": 1.461157486954015e-14,
           "abs_err": 1.454392162258955e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.434469380279627e-14,
           "abs_err": 1.4210854715202004e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 1.3288965729530507e-14,
           "abs_err": 1.2989609388114332e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 1.1984581663857296e-14,
           "abs_err": 1.1435297153639112e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 2.792215770928716e-16,
@@ -1672,7 +1672,7 @@
           "rel_err": 7.317991969109957e-15,
           "abs_err": 6.938893903907228e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 2.2848287536152577e-16,
@@ -1719,13 +1719,13 @@
           "rel_err": 8.884404082258047e-16,
           "abs_err": 1.3322676295501878e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.6786602287251997e-15,
           "abs_err": 3.774758283725532e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -1773,13 +1773,13 @@
           "rel_err": 1.554746856706511e-15,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 2.070995580628008e-14,
           "abs_err": 8.881784197001252e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -1809,7 +1809,7 @@
           "rel_err": 3.744740116729573e-16,
           "abs_err": 7.105427357601002e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -1851,25 +1851,25 @@
           "rel_err": 1.9563659578678985e-15,
           "abs_err": 1.4432899320127035e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.7641467266607024e-15,
           "abs_err": 9.43689570931383e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 1.890918610295694e-15,
           "abs_err": 3.608224830031759e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 3.77139965314462e-16,
           "abs_err": 2.7755575615628914e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 7.792592784693836e-16,
@@ -1881,7 +1881,7 @@
           "rel_err": 1.587445929420882e-15,
           "abs_err": 9.020562075079397e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 0.0,
@@ -1928,13 +1928,13 @@
           "rel_err": 7.282116444055382e-16,
           "abs_err": 1.3322676295501878e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.592149166686156e-15,
           "abs_err": 5.329070518200751e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -1982,13 +1982,13 @@
           "rel_err": 1.8043372899203903e-15,
           "abs_err": 1.7763568394002505e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 3.1527199218643084e-15,
           "abs_err": 3.730349362740526e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -2018,7 +2018,7 @@
           "rel_err": 1.1923956314522428e-15,
           "abs_err": 3.907985046680551e-14,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -2060,25 +2060,25 @@
           "rel_err": 5.076437921019694e-16,
           "abs_err": 3.8163916471489756e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 7.249875721240371e-16,
           "abs_err": 6.938893903907228e-17,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 1.6890127011203552e-15,
           "abs_err": 1.3877787807814457e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 1.2038627209872976e-15,
           "abs_err": 1.1102230246251565e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 1.3322416578921065e-15,
@@ -2090,7 +2090,7 @@
           "rel_err": 1.7486563476187468e-15,
           "abs_err": 4.9873299934333204e-18,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 2.220777026254913e-16,
@@ -2137,13 +2137,13 @@
           "rel_err": 6.188264396277077e-16,
           "abs_err": 4.440892098500626e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "var": {
           "rel_err": 1.2934771456559329e-15,
           "abs_err": 6.661338147750939e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "min": {
           "rel_err": 0.0,
@@ -2191,13 +2191,13 @@
           "rel_err": 1.7548375933480703e-14,
           "abs_err": 2.2724877535296173e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "kurtosis": {
           "rel_err": 5.0089536433117576e-15,
           "abs_err": 7.327471962526033e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "abs_energy": {
           "rel_err": 0.0,
@@ -2227,7 +2227,7 @@
           "rel_err": 7.465218135441008e-16,
           "abs_err": 3.552713678800501e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "mean_second_derivative_central": {
           "rel_err": 0.0,
@@ -2269,25 +2269,25 @@
           "rel_err": 1.3532519881006005e-15,
           "abs_err": 1.3322676295501878e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_2": {
           "rel_err": 1.2448141872210062e-15,
           "abs_err": 1.2212453270876722e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_5": {
           "rel_err": 1.2710104257455168e-15,
           "abs_err": 1.2212453270876722e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "autocorr_lag_10": {
           "rel_err": 1.3882972782134699e-15,
           "abs_err": 1.2212453270876722e-15,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "trend_slope": {
           "rel_err": 1.806346635763147e-15,
@@ -2299,7 +2299,7 @@
           "rel_err": 4.003343091909467e-15,
           "abs_err": 1.734723475976807e-16,
           "status": "EXACT",
-          "matched": false
+          "matched": true
         },
         "permutation_entropy": {
           "rel_err": 2.2208973979761505e-16,
