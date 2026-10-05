@@ -91,6 +91,8 @@ def extract_features_df(
     n_jobs: int | None = None,
     out: "np.ndarray | None" = None,
     views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> "pd.DataFrame":
     """Same as :func:`extract_features`, returned as a labeled DataFrame.
 
@@ -112,6 +114,8 @@ def extract_features_df(
         n_jobs=n_jobs,
         out=out,
         views=views,
+        nan_policy=nan_policy,
+        contiguous=contiguous,
     )
     cols = feature_names(profile=profile, features=features, views=views)
     return pd.DataFrame(values, columns=cols)
@@ -125,6 +129,8 @@ def extract_features_mc_df(
     max_pairs: int = 8,
     n_jobs: int | None = None,
     views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> "pd.DataFrame":
     """Extract multichannel and cross-channel features returned as a labeled DataFrame."""
     try:
@@ -143,6 +149,8 @@ def extract_features_mc_df(
         max_pairs=max_pairs,
         n_jobs=n_jobs,
         views=views,
+        nan_policy=nan_policy,
+        contiguous=contiguous,
     )
     if hasattr(X, "shape") and len(X.shape) == 3:
         n_channels = X.shape[1]

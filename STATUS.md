@@ -84,7 +84,7 @@
 ## Phase 8: Docs, Paper, Launch Assets
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 8.1 Documentation refresh | ⬜ | | |
+| 8.1 Documentation refresh | ✅ | | New multivariate/float32/performance guides + benchmarks methodology rewrite; api.md v0.8.0 + all params; quickstart f32/multistream/transformer fixes; df nan_policy/contiguous passthrough; mkdocs strict + snippets + claims green |
 | 8.2 JOSS paper | ⬜ | | |
 | 8.3 Launch kit | ⬜ | | |
 | 8.4 Landing page | ⬜ | | |

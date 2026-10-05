@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `kymora` v0.6.0.
+Complete Python API specification for `kymora` v0.8.0.
 
 ```python
 import kymora
 
-kymora.__version__  # "0.6.0"
+kymora.__version__  # "0.8.0"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.
@@ -24,6 +24,10 @@ extract_features(
     n_jobs: int | None = None,
     out: np.ndarray | None = None,
     views: Sequence[str] | None = None,
+    precision: str | None = None,
+    out_dtype: str | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> np.ndarray
 ```
 
@@ -31,16 +35,20 @@ Extract features for every series in a batch.
 
 **Parameters**
 
-- `X` — 2D C-contiguous `float64` array of shape `(n_series, length)`, or a sequence of 1D C-contiguous `float64` arrays with variable lengths.
-- `profile` — Execution profile: `"minimal"` (12 features), `"core33"` (default 33 features), `"extended"`, or `"full"`.
+- `X` — 2D C-contiguous `float64` or `float32` array of shape `(n_series, length)`, or a sequence of 1D C-contiguous arrays with variable lengths. See [Numerics](numerics.md) for layout rules.
+- `profile` — Execution profile: `"minimal"` (10 features), `"core33"` (default 33 features), `"extended"`, or `"full"`.
 - `features` — Explicit list of feature names to extract, overriding profile selection.
-- `n_jobs` — Thread count override. Defaults to logical CPU core count.
-- `out` — Optional pre-allocated 2D array of shape `(n_series, n_features)` to receive results in place without allocation.
-- `views` — Optional sequence of time-series transform views to compute: `"raw"`, `"diff"`, `"diff2"`, `"detrend"`, `"znorm"`, `"abs"`, `"logret"`, `"rank"`. Features invariant to transforms are automatically pruned.
+- `n_jobs` — Worker-thread count for this call. `None` uses the shared global pool (all threads); scaling stops near the physical core count (see [Performance](performance.md)).
+- `out` — Optional pre-allocated C-contiguous `float64` array of shape `(n_series, n_features)` to receive results in place without allocation.
+- `views` — Optional sequence of time-series transform views to compute: `"raw"`, `"diff"`, `"diff2"`, `"detrend"`, `"znorm"`, `"abs"`, `"logret"`, `"rank"`. Features invariant to transforms are automatically pruned. Requires `float64` input.
+- `precision` — Validated but informational: `"float64"`/`"float32"` accepted; accumulation is always `float64` and the input dtype governs the read path.
+- `out_dtype` — `"float64"` (default) or `"float32"` (casts on write).
+- `nan_policy` — `"propagate"` (default) or `"raise"`; see [Numerics](numerics.md).
+- `contiguous` — `"error"` (default, reject non-C input) or `"copy"` (one explicit copy plus a `UserWarning`).
 
 **Returns**
 
-A 2D `float64` array of shape `(n_series, n_features)`.
+A 2D array of shape `(n_series, n_features)`; `float32` when `out_dtype="float32"`, otherwise `float64`.
 
 ```python
 import numpy as np
@@ -79,7 +87,17 @@ Requires `pandas` (`pip install "kymora[pandas]"`).
 ### sliding_features
 
 ```python skip
-sliding_features(x: np.ndarray, window: int, stride: int = 1) -> np.ndarray
+sliding_features(
+    x: np.ndarray,
+    window: int,
+    stride: int = 1,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: np.ndarray | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
+) -> np.ndarray
 ```
 
 Extracts rolling-window feature matrices across a single long 1D series without copying window data.
@@ -89,6 +107,7 @@ Extracts rolling-window feature matrices across a single long 1D series without 
 - `x` — 1D C-contiguous `float64` array.
 - `window` — Window length in samples (`1 <= window <= len(x)`).
 - `stride` — Step between consecutive windows (`>= 1`, defaults to 1).
+- `profile`, `features`, `n_jobs`, `out`, `nan_policy`, `contiguous` — as in `extract_features`.
 
 **Returns**
 
@@ -109,14 +128,16 @@ extract_features_mc(
     max_pairs: int = 8,
     n_jobs: int | None = None,
     views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> np.ndarray
 ```
 
-Extract per-channel features and cross-channel interaction metrics from multichannel time-series data.
+Extract per-channel features and cross-channel interaction metrics from multichannel time-series data. See [Multichannel](multivariate.md).
 
 **Parameters**
 
-- `X` — 3D array of shape `(n_samples, n_channels, length)`.
+- `X` — 3D C-contiguous `float64` array of shape `(n_samples, n_channels, length)`, or a list of 2D `(n_channels, length_i)` arrays for ragged lengths (channel count must agree).
 - `profile` — Profile applied to each channel.
 - `features` — Specific feature subset applied to each channel.
 - `cross` — When `True`, computes cross-channel interaction metrics (pairwise cross-correlation peaks, lag offsets, cross-covariance, Pearson correlation, and global spectral coherence / eigenvalue spread).
@@ -154,7 +175,7 @@ Same computation as `extract_features_mc`, returned as a labeled `pandas.DataFra
 
 ```python skip
 class StreamingExtractor:
-    def __init__(self, window_size: int, anchor_interval: int | None = None) -> None: ...
+    def __init__(self, window_size: int, anchor_interval: int | None = None, nan_policy: str | None = None) -> None: ...
     def push(self, value: float) -> bool: ...
     def compute(self, kind: str = "fast") -> np.ndarray: ...
     def reset(self) -> None: ...
@@ -183,7 +204,7 @@ Single-stream sliding-window extractor maintaining an internal circular buffer a
 ```python skip
 class MultiStreamExtractor:
     def __init__(self, n_streams: int, window_size: int) -> None: ...
-    def push_many(self, values: np.ndarray) -> bool: ...
+    def push_many(self, values: np.ndarray, contiguous: str | None = None) -> bool: ...
     def compute(self, streams: list[int] | None = None, kind: str = "all") -> np.ndarray: ...
     def reset(self, stream_idx: int | None = None) -> None: ...
     @property
@@ -250,6 +271,29 @@ Scikit-learn compatible transformer implementing FDR-controlled supervised featu
 
 ---
 
+### KymoraTransformer
+
+```python skip
+from kymora.sklearn import KymoraTransformer  # pip install "kymora[sklearn]"
+
+KymoraTransformer(
+    profile: str = "core33",
+    features: Sequence[str] | None = None,
+    views: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    nan_policy: str | None = None,
+    output_dtype: str | None = None,
+)
+```
+
+Scikit-learn compatible panel transformer: `(n_series, length)` in,
+`(n_series, n_features)` out. Stateless `fit`, `get_feature_names_out`,
+`set_output(transform="pandas" | "polars")`, clone- and pickle-safe,
+passing the full `parametrize_with_checks` suite. See
+[Quickstart](quickstart.md) for a pipeline example.
+
+---
+
 ## Metadata & Introspection
 
 ### feature_names
@@ -299,7 +343,10 @@ Returns available feature profile names mapped to their respective feature count
 describe_feature(name: str) -> dict[str, str]
 ```
 
-Returns metadata for a given feature name, including its cost class, dependencies, and registered aliases.
+Returns metadata for a given feature name: cost class, needs, registered
+aliases, plus core33 documentation fields (`definition`, `min_length`,
+`nan_when`) — the same source `tools/gen_feature_docs.py` builds
+[Feature reference](features.md) from.
 
 ---
 
@@ -320,7 +367,12 @@ Microbenchmarks execution variants on current hardware and caches optimal execut
 
 ## Threading & Runtime Controls
 
-- Scheduling is Rayon today: `n_jobs` builds a dedicated pool for the call, otherwise the global pool is used (honors `RAYON_NUM_THREADS=N`).
+- Scheduling is Rayon: `n_jobs=None` uses the shared global pool
+  (honors `RAYON_NUM_THREADS=N`); an explicit `n_jobs` selects a cached
+  per-count pool (no per-call construction cost since 0.8.0).
+- Expect scaling to stop near the physical core count (P-cores on hybrid
+  laptops); see [Performance](performance.md) and
+  `docs/internal/thread_scaling.md` for the analysis.
 - `KYMORA_POOL` (`spin`/`rayon`) is currently **read by nothing** — the
   persistent spin-pool prototype was removed from main to
   `experiment/spin-pool` (see `docs/ROADMAP.md`; revival is gated on
