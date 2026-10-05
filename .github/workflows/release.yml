@@ -95,7 +95,7 @@ jobs:
           path: dist
 
   smoke-test:
-    name: install wheel and import (${{ matrix.os }}, py${{ matrix.python }})
+    name: install wheel and test (${{ matrix.os }}, py${{ matrix.python }})
     needs: [linux, macos, windows]
     runs-on: ${{ matrix.os }}
     strategy:
@@ -116,6 +116,7 @@ jobs:
           path: dist
       # Installs from the built wheel only — no Rust toolchain on this runner,
       # so a missing/incompatible wheel fails here instead of at a user's pip.
+      # Then runs the test suite against the installed wheel (not a dev build).
       - name: Install from wheel
         shell: bash
         run: |
@@ -124,7 +125,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install "numpy>=1.24"
           python -m pip install --no-index --no-deps --find-links dist kymora
-      - name: Import and extract outside the source tree
+          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
+      - name: Smoke import outside the source tree
         shell: bash
         run: |
           cd "$(mktemp -d)"
@@ -136,6 +138,31 @@ jobs:
           assert np.isfinite(f).all()
           print('ok', kymora.__version__, f.shape)
           "
+      - name: Full test suite against the wheel
+        shell: bash
+        run: |
+          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q
+
+  sbom:
+    name: SBOM (SPDX) for release artifacts
+    needs: [linux, macos, windows, sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: dist
+          format: spdx-json
+          output-file: kymora-sbom.spdx.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: kymora-sbom.spdx.json
 
   publish:
     name: publish to PyPI
@@ -154,3 +181,25 @@ jobs:
           path: dist
       - run: ls -l dist
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    name: attach artifacts to the GitHub Release
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: [linux, macos, windows, sdist, smoke-test, sbom, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: sbom
+          path: dist
+      - name: Attach wheels, sdist, and SBOM to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

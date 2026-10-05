@@ -10,6 +10,58 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
+## [0.8.0] - Unreleased
+
+New extraction options, ecosystem integration, and correctness hardening.
+Numerics, feature names/order, and the NaN/error contracts are unchanged
+(`feature_names()` sha256 `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`).
+
+### Added
+- `StreamingExtractor` fast tier is now truly O(1): anchored shifted power
+  sums with a drift guard (re-anchor past 0.25σ) plus periodic re-anchoring
+  every `anchor_interval` pushes (default 4096, configurable). `compute(kind="fast")`
+  reads accumulators with no window scan; windows containing ±inf take an
+  exact O(W) fallback. Window size 1 is now accepted.
+- `nan_policy="propagate"` (default, unchanged) / `"raise"` (fail fast naming
+  the series) on `extract_features`, `extract_features_ragged`,
+  `sliding_features`, `extract_features_mc`, and `StreamingExtractor`.
+  `"omit"` and unknown policies raise with guidance.
+- `contiguous="error"` (default) / `"copy"` (one explicit C-order copy plus
+  a `UserWarning`) on all batch entry points and `push_many`.
+- `extract_features_mc` accepts a list of 2D arrays for ragged channel
+  lengths (uniform channel count), bit-identical to stacked 3D input.
+- `kymora.sklearn.KymoraTransformer` (optional `kymora[sklearn]`): fit/
+  transform, `get_feature_names_out`, `set_output` pandas/polars,
+  clone/pickle-safe, 50/50 sklearn estimator checks.
+- Optional extras `[polars]`, `[sklearn]`, `[all]`, `[dev-parity]`;
+  verified sktime adapter example in `docs/examples/`.
+- `tools/perf_gate.py` + CI perf gate (7% median + lower-quartile rule),
+  `tools/gen_feature_docs.py` (generates `docs/features.md` from registry
+  metadata, CI-checked), `tools/streaming_report.py`.
+- `tests/parity/` external parity suite (tsfresh/TSFEL matched sets) and
+  `tests/property/test_invariances.py`.
+- In-process proptest fuzz targets plus `fuzz/` cargo-fuzz scaffolding;
+  `docs/internal/` audits (unsafe, thread scaling, experiments).
+
+### Changed
+- Thread pools are cached per thread count (explicit `n_jobs` no longer
+  pays ~200 µs pool construction per call).
+- `precision` is validated (`float64`/`float32`, else `ValueError`).
+- CI: arch matrix (linux x64/aarch64, macos arm64, windows x64) ×
+  Python 3.10–3.14, built-wheel smoke tests, fuzz smoke, perf gate.
+
+### Fixed
+- float32 input with non-core33 plans/profiles/views raised
+  `PanicException` across the FFI boundary; now a `ValueError` (core33,
+  `minimal`, and core33 subsets work zero-copy via gather).
+- Fortran-ordered multichannel input and Fortran `out=` buffers produced
+  silently wrong results; all borrows are now strict C-order (error or
+  explicit copy).
+- Constant-window `abs_energy` could cancel to ~1e-16 residue (rms ~6e-9
+  vs batch 0.0) under a stale anchor; constant windows use exact
+  `W·first²`.
+- Length-1 `trend_slope` returned ±inf instead of NaN.
+
 ## [0.7.0] - 2026-10-04
 
 ### Changed
@@ -242,7 +294,9 @@ an sdist build; that is fixed here.
   `sliding_features()`.
 - Windows x86_64 wheel and sdist only — see 0.2.0 for the full platform matrix.
 
-[Unreleased]: https://github.com/Aamodx6/Kymora/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/Aamodx6/Kymora/compare/v0.7.0...HEAD
+[0.8.0]: https://github.com/Aamodx6/Kymora/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/Aamodx6/Kymora/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/Aamodx6/Kymora/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Aamodx6/Kymora/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Aamodx6/Kymora/compare/v0.3.2...v0.4.0
