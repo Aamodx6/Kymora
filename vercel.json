@@ -1,0 +1,19 @@
+{
+  "buildCommand": "cd landing && npm install && npm run build",
+  "outputDirectory": "landing/dist",
+  "installCommand": "cd landing && npm install",
+  "framework": "vite",
+  "redirects": [
+    {
+      "source": "/docs/:path*",
+      "destination": "https://aamodx6.github.io/Kymora/",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
