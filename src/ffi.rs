@@ -152,11 +152,38 @@ where
 {
     match n_jobs {
         Some(n) if n > 0 => {
-            let pool = match rayon::ThreadPoolBuilder::new().num_threads(n).build() {
-                Ok(p) => p,
-                Err(_) => return f(),
-            };
-            pool.install(f)
+            // Cached per-thread-count pools: building a rayon ThreadPool per
+            // call cost ~200 us (measured 2026-10-06, 32x500 batch), which
+            // dominated small calls outright (arch F2). The global pool
+            // (None) was already free of this; now explicit counts are too.
+            // Build failure falls back to inline execution, never an error.
+            static POOL_CACHE: std::sync::OnceLock<
+                std::sync::Mutex<
+                    std::collections::HashMap<usize, std::sync::Arc<rayon::ThreadPool>>,
+                >,
+            > = std::sync::OnceLock::new();
+            let pool = POOL_CACHE
+                .get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
+                .lock()
+                .ok()
+                .and_then(|mut cache| {
+                    if let Some(p) = cache.get(&n) {
+                        return Some(std::sync::Arc::clone(p));
+                    }
+                    rayon::ThreadPoolBuilder::new()
+                        .num_threads(n)
+                        .build()
+                        .ok()
+                        .map(|p| {
+                            let p = std::sync::Arc::new(p);
+                            cache.insert(n, std::sync::Arc::clone(&p));
+                            p
+                        })
+                });
+            match pool {
+                Some(p) => p.install(f),
+                None => f(),
+            }
         }
         _ => f(),
     }

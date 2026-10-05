@@ -58,7 +58,7 @@
 ## Phase 5: Thread Scaling + Perf Regression
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
-| 5.1 Scaling plateau investigation | ⬜ | | |
+| 5.1 Scaling plateau investigation | ✅ | | Plateau = P-core count (6) + E/SMT drag, not a bug; fixed per-call pool-build overhead (~200µs) with cached pools (small-call n_jobs 2.3×); bitwise thread-invariance test; analysis in docs/internal/thread_scaling.md |
 | 5.2 Thread default | ⬜ | | |
 | 5.3 Bisect 0.3.2→0.4.0 | ⬜ | | |
 | 5.4 Benchmark experiments | ⬜ | | |
