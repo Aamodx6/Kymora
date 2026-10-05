@@ -53,7 +53,7 @@ SKIP_FILES = {
     "CHANGELOG.md", "Cargo.lock", "landing/package-lock.json",
     "benchmarks/adapters/tsxtract_jax.py", "benchmarks/adapters/tsxtract_jax.md",
     # B-track evidence / audit trail: lib id `tsxtract` in these rows is data.
-    "docs/REFACTOR_STATE.md", "benchmarks/STATE.md",
+    "docs/internal/refactor/REFACTOR_STATE.md", "benchmarks/STATE.md",
     "benchmarks/agreement/AGREEMENT_REPORT.md", "benchmarks/zenith_baseline.md",
     "benchmarks/requirements-jax-collision.txt",
 }
