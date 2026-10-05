@@ -1,210 +1,135 @@
 name: Release
 
-# Wheels are built on every push to main (so a broken build surfaces before a
-# tag), and published to PyPI only when a GitHub Release is published.
+# Tag-only publisher. Wheels are verified on every code PR via the ci.yml
+# call to wheels.yml, so this workflow builds them once more from the tag
+# and publishes. Manual dispatch builds without publishing (dry run).
+# No concurrency group: a release must never cancel another run.
 on:
   push:
-    branches: [main]
     tags: ["v*"]
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  linux:
-    name: wheel ${{ matrix.target }} (manylinux)
+  version-check:
+    # Tag vX.Y.Z must equal Cargo.toml [package] version; pyproject must keep
+    # its version dynamic (maturin injects it from Cargo.toml at build time).
+    # Branch dispatches are dry runs: the check passes trivially without a tag.
+    name: version check (tag matches Cargo.toml)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [x86_64, aarch64]
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - name: Build wheel
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.target }}
-          args: --release --out dist
-          manylinux: "2014"
-          # aarch64 needs emulation/cross; x86_64 builds natively.
-          sccache: "true"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: wheels-linux-${{ matrix.target }}
-          path: dist
-
-  macos:
-    name: wheel ${{ matrix.target }} (macOS)
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target: [x86_64, aarch64]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.target }}
-          args: --release --out dist
-          sccache: "true"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: wheels-macos-${{ matrix.target }}
-          path: dist
-
-  windows:
-    name: wheel x64 (Windows)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-          architecture: x64
-      - uses: PyO3/maturin-action@v1
-        with:
-          target: x64
-          args: --release --out dist
-          sccache: "true"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: wheels-windows-x64
-          path: dist
-
-  sdist:
-    name: sdist
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: sdist
-          args: --out dist
-      - uses: actions/upload-artifact@v7
-        with:
-          name: wheels-sdist
-          path: dist
-
-  smoke-test:
-    name: install wheel and test (${{ matrix.os }}, py${{ matrix.python }})
-    needs: [linux, macos, windows]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {os: ubuntu-latest, python: "3.13", artifact: wheels-linux-x86_64}
-          - {os: macos-latest, python: "3.13", artifact: wheels-macos-aarch64}
-          - {os: windows-latest, python: "3.13", artifact: wheels-windows-x64}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.python }}
-      - uses: actions/download-artifact@v8
-        with:
-          name: ${{ matrix.artifact }}
-          path: dist
-      # Installs from the built wheel only — no Rust toolchain on this runner,
-      # so a missing/incompatible wheel fails here instead of at a user's pip.
-      # Then runs the test suite against the installed wheel (not a dev build).
-      - name: Install from wheel
-        shell: bash
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Tag vX.Y.Z must equal Cargo.toml version
+        env:
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          # Dependencies come from PyPI; kymora itself must come from the
-          # freshly built wheel, so install it with --no-index --no-deps.
-          python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.24"
-          python -m pip install --no-index --no-deps --find-links dist kymora
-          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
-      - name: Smoke import outside the source tree
-        shell: bash
-        run: |
-          cd "$(mktemp -d)"
-          python -c "
-          import numpy as np, kymora
-          X = np.random.default_rng(0).standard_normal((64, 128))
-          f = kymora.extract_features(X)
-          assert f.shape == (64, len(kymora.feature_names())), f.shape
-          assert np.isfinite(f).all()
-          print('ok', kymora.__version__, f.shape)
-          "
-      - name: Full test suite against the wheel
-        shell: bash
-        run: |
-          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q
+          python - <<'EOF'
+          import os, re, sys, tomllib
+          ref, name = os.environ["REF"], os.environ["REF_NAME"]
+          if not ref.startswith("refs/tags/v"):
+              print(f"dry run on {ref}; version check passes trivially")
+              sys.exit(0)
+          tag = name[1:]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", tag):
+              print(f"tag {name} is not vX.Y.Z")
+              sys.exit(1)
+          cargo = tomllib.load(open("Cargo.toml", "rb"))["package"]["version"]
+          project = tomllib.load(open("pyproject.toml", "rb"))["project"]
+          static = project.get("version")
+          dynamic = project.get("dynamic", [])
+          print(f"tag={tag} cargo={cargo} pyproject-dynamic={dynamic} static={static}")
+          if static is not None:
+              print("pyproject must keep a dynamic version (maturin injects it from Cargo.toml)")
+              sys.exit(1)
+          if "version" not in dynamic:
+              print("pyproject must declare dynamic = ['version']")
+              sys.exit(1)
+          if cargo != tag:
+              print(f"MISMATCH: tag v{tag} != Cargo.toml {cargo}")
+              sys.exit(1)
+          print("version check OK")
+          EOF
+
+  wheels:
+    name: "wheels (reusable: build + install-test)"
+    needs: [version-check]
+    uses: ./.github/workflows/wheels.yml
+    with:
+      full: true
 
   sbom:
-    name: SBOM (SPDX) for release artifacts
-    needs: [linux, macos, windows, sdist]
+    name: SBOM SPDX (ubuntu-latest)
+    needs: [version-check, wheels]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       # Uploading the SBOM to the release needs write; the file itself is
       # attached exactly once by the github-release job below.
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: wheels-*
           merge-multiple: true
           path: dist
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
           path: dist
           format: spdx-json
           output-file: kymora-sbom.spdx.json
           upload-release-assets: false
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: sbom
           path: kymora-sbom.spdx.json
 
-  publish:
-    name: publish to PyPI
-    if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [linux, macos, windows, sdist, smoke-test]
+  pypi-publish:
+    name: PyPI publish (ubuntu-latest)
+    # Tag-only: unreachable on workflow_dispatch from a branch (dry run builds
+    # wheels + SBOM but publishes nothing). OIDC semantics unchanged from the
+    # old `publish` job: Trusted Publishing, no stored API token.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version-check, wheels]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: pypi
     permissions:
       # Trusted Publishing (OIDC) — no PyPI API token is stored in this repo.
       id-token: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: wheels-*
           merge-multiple: true
           path: dist
       - run: ls -l dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
 
   github-release:
-    name: attach artifacts to the GitHub Release
-    if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [linux, macos, windows, sdist, smoke-test, sbom, publish]
+    name: GitHub release attach (ubuntu-latest)
+    # Tag-only, same gate as pypi-publish.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version-check, wheels, sbom, pypi-publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: wheels-*
           merge-multiple: true
           path: dist
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: sbom
           path: dist
       - name: Attach wheels, sdist, and SBOM to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: dist/*
