@@ -120,8 +120,8 @@ Largest tracked files — **none exceeds 1 MB, no tracked dir exceeds 5 MB**
 Duplicate-image note: all 5 paper figures are byte-identical in
 `landing/public/figures/` (verified `architecture.png` hash
 `EE29385A…7383C2` both sides). Paper PDFs (`architecture.pdf` 72 KB etc.)
-are tracked build outputs of `paper/main.tex` — owner decision needed
-(Phase 3).
+are tracked build outputs of the legacy draft (now `paper/legacy/main.tex`) — resolved
+in Phase 4 task G (moved to `paper/legacy/` with its PDFs).
 
 ### 5. `.git` analysis (no history rewrite; gc only)
 
@@ -173,9 +173,10 @@ are tracked build outputs of `paper/main.tex` — owner decision needed
    protected one). Proposed: leave untracked + gitignore it.
 4. `proptest-regressions/proptest_checks.txt` (387 B, untracked). Proposed:
    commit or ignore — defers to owner.
-5. `paper/figures/*.pdf` (tracked, ~178 KB total, build outputs of
-   `main.tex` via `generate_figures.py`). Proposed: keep (paper builds need
-   them) — owner confirms.
+5. `paper/figures/*.pdf` (tracked, ~178 KB total, build outputs of the legacy
+   draft). Resolved in Phase 4 task G: moved to `paper/legacy/` with
+   `main.tex` + `generate_figures.py`; PNGs kept in place (duplicates in
+   `landing/` kept per owner decision).
 6. `landing/public/figures/*.png` duplicates of `paper/figures/*.png`
    (~1 MB). Proposed: keep both (different deploy targets) — owner confirms.
 7. `Makefile` advertises `clean` in `.PHONY` but defines no `clean` target.
