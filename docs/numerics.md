@@ -52,6 +52,27 @@ streaming agree element-wise by test:
 | Empty batch / zero-length series | `ValueError` (structural, before compute). |
 | `window`/`stride` < 1, `window` > length | `ValueError`. |
 
+## Input layout and copies
+
+All inputs are borrowed zero-copy (`as_slice` views; see `src/ffi.rs`
+"Strict C-contiguity rule"). Consequences, tested in
+`tests/test_input_surface.py`:
+
+- C-contiguous float64/float32 arrays work everywhere, including read-only
+  and memory-mapped buffers. Contiguous input is never copied: the
+  non-contiguous cases below are *rejected* by default, which proves no
+  silent copy (a copying implementation would accept them).
+- Fortran-ordered, strided, and negative-stride inputs raise `ValueError`
+  by default (`contiguous="error"`). So do Fortran-ordered `out=` buffers
+  (row-major writes into column-major memory would silently transpose).
+- `contiguous="copy"` performs one explicit C-order copy first (in logical
+  element order, so results are bit-identical to contiguous input) and emits
+  a `UserWarning` naming the copy; pass `np.ascontiguousarray` input to avoid
+  it. Unknown values raise `ValueError`.
+- Wrong dtype (anything but float64/float32) raises `TypeError` with a cast
+  hint; kymora never upcasts silently. Wrong shapes raise `TypeError`;
+  zero-size inputs and bad window geometry raise `ValueError`.
+
 ## Precision
 
 Accumulation is always float64: float32 input is read natively (zero-copy, no
