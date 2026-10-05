@@ -46,7 +46,7 @@ nav:
     - Contributing: contributing.md
     - Roadmap: ROADMAP.md
     - Changelog: https://github.com/Aamodx6/Kymora/blob/main/CHANGELOG.md
-    - Architecture: https://github.com/Aamodx6/Kymora/blob/main/arch.md
+    - Architecture: https://github.com/Aamodx6/Kymora/blob/main/docs/internal/arch.md
 
 markdown_extensions:
   - admonition

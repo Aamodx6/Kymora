@@ -2,7 +2,7 @@
 
 **Generated:** 2026-10-04 11:02:33  
 **Distributions tested:** 25 (synthetic + UCR real)  
-**Scope:** 33 authoritative `core33` features evaluated against pure NumPy/SciPy reference math, strict Numba baseline (`fastmath=False`), and competitor implementations across all distributions specified in `arch.md` §11.4.  
+**Scope:** 33 authoritative `core33` features evaluated against pure NumPy/SciPy reference math, strict Numba baseline (`fastmath=False`), and competitor implementations across all distributions specified in `docs/internal/arch.md` §11.4.  
 
 ---
 

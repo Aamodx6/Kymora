@@ -121,7 +121,7 @@ Once agreed:
 
 If a PR's version impact is unclear, say so in the description rather than
 guessing — see `docs/nan-policy.md#stability` and the compatibility table in
-`arch.md`.
+`docs/internal/arch.md`.
 
 ## Pull requests
 

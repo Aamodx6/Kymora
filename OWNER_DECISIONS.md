@@ -22,7 +22,7 @@ test, frozen benchmark evidence, refactor records).
 | `README.md:282` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
 | `landing/.../Footer.tsx:165` byline | `github.com/Aamod007` | owner to decide | NEEDS OWNER |
 | `paper/paper.md`, `paper/main.tex` | old name + `Aamodx6/Tsxtract` URLs + stale numbers | full rewrite | DEFERRED to task 8.2 (JOSS restructure) |
-| `docs/refactor/**`, `benchmarks/results/**` | historical records | none (frozen evidence) | LEFT AS IS |
+| `docs/internal/refactor/**`, `benchmarks/results/**` | historical records | none (frozen evidence) | LEFT AS IS |
 | `CHANGELOG.md` prose (§0.5.0–0.7.0) | rename history narrative | none (history) | LEFT AS IS |
 
 ### Decision needed
@@ -106,7 +106,7 @@ pre-cleanup tree state.
 
 ### Current state
 All benchmark numbers are from a single Windows laptop (i7-13620H), marked
-"exploratory" per arch.md §11.7. Authoritative numbers require:
+"exploratory" per docs/internal/arch.md §11.7. Authoritative numbers require:
 - Dedicated Linux machine with performance governor
 - macOS arm64 (Apple Silicon) for aarch64 numbers
 

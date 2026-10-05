@@ -30,7 +30,7 @@ bench-all:
 report:
 	$(PYTHON) benchmarks/report/make_report.py
 
-# Repo hygiene (see CLEANUP_STATUS.md Phase 2). Every path removed below is
+# Repo hygiene (see docs/internal/hardening/CLEANUP_STATUS.md Phase 2). Every path removed below is
 # regenerable via `make dev`. Windows: run under Git Bash (rm is required).
 clean:  ## build outputs + caches (keeps target/, venvs, node_modules)
 	rm -rf site/ dist/ target/wheels/ target/test_wheel/

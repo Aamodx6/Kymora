@@ -16,9 +16,9 @@
 - [x] **Rule 1 — Correctness before speed:** Never time a feature until outputs are verified equal (within tolerance) to a reference, or the definition mismatch is documented.
 - [x] **Rule 2 — No cherry-picking:** Report every case, including losses. No number without its conditions (hardware, threads, shape, dtype, versions, commit).
 - [x] **Rule 3 — Equal competitor tuning:** Competitors get equal tuning effort and their recommended fast configuration. Document tuning in `benchmarks/adapters/<lib>.md`.
-- [x] **Rule 4 — Preserve semantics & contracts:** Do not change feature semantics or the `core33` contract. Parity tests must stay green (`arch.md` §12).
+- [x] **Rule 4 — Preserve semantics & contracts:** Do not change feature semantics or the `core33` contract. Parity tests must stay green (`docs/internal/arch.md` §12).
 - [x] **Rule 5 — Traceable fixes:** Every fix: separate commit, references a Loss-Ledger ID, adds a regression benchmark + test, and records before/after in `benchmarks/results/PERF_CHANGELOG.md`.
-- [x] **Rule 6 — Stop rule:** Honor `arch.md` §9.4: stop optimizing a stage within 1.3x of its reference bound or after two <3% attempts.
+- [x] **Rule 6 — Stop rule:** Honor `docs/internal/arch.md` §9.4: stop optimizing a stage within 1.3x of its reference bound or after two <3% attempts.
 
 ---
 
@@ -55,7 +55,7 @@
 - [x] **A6 — Competitor Config Pinning:** Pinned tsfresh to 777-feature set (`EfficientFCParameters()`) and TSFEL to 156-feature set (`get_features_by_domain()`) as primary configs. Recorded `n_features` in every record.
 - [x] **A7 — Latency Decomposition:** Implemented `benchmarks/suites/latency_overhead.py` decomposing fixed overhead for $n=1, \text{len}=10$ and $n=2, \text{len}=32$ across PyO3 wrapper, contiguity/dtype checks, plan building, output allocation, GIL release/acquire, and math kernel. Logged `HIGH-LATENCY-SMALL-CALL` in `LOSS_LEDGER.md`.
 - [x] **A8 — JAX Collision Exclusion:** Excluded `tsxtract_jax` from win/loss counts and loss ledgers in `make_report.py`, isolating it in a dedicated name-collision diagnostic note.
-- [x] **A9 — Authoritative Feature Names:** Used `tsxtract.feature_names()` from built library as single source of truth for the 33 names in `benchmarks/agreement/feature_map.json`. Documented all discrepancies with `README.md` and `arch.md` in `docs/arch_audit.md`.
+- [x] **A9 — Authoritative Feature Names:** Used `tsxtract.feature_names()` from built library as single source of truth for the 33 names in `benchmarks/agreement/feature_map.json`. Documented all discrepancies with `README.md` and `docs/internal/arch.md` in `docs/arch_audit.md`.
 
 ### Phase B1: Correctness & Agreement
 - [x] Feature mapping table `benchmarks/agreement/feature_map.json`: tsxtract_name -> {tsfresh, tsfel, catch22, antropy, numpy_reference} + definition diffs
