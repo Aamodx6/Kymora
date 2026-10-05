@@ -30,6 +30,9 @@ test, frozen benchmark evidence, refactor records).
   (`Aamodx6` owns the repo + all repo URLs; `Aamod007` appears only in two
   personal bylines. Proposed: keep `Aamodx6` for repo identity; owner
   confirms whether bylines move.)
+- JOSS submission needs a valid ORCID for the author (the old paper draft
+  carried placeholder `0009-0000-0000-0000`, removed in the 8.2 rewrite).
+  Owner to provide or drop.
 - Is `Kymora` the final product name? (Trademark/domain check recommended)
 - Domain: currently on default Vercel domain — acquire `kymora.dev` or similar?
 

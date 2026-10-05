@@ -85,6 +85,6 @@
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
 | 8.1 Documentation refresh | ✅ | | New multivariate/float32/performance guides + benchmarks methodology rewrite; api.md v0.8.0 + all params; quickstart f32/multistream/transformer fixes; df nan_policy/contiguous passthrough; mkdocs strict + snippets + claims green |
-| 8.2 JOSS paper | ⬜ | | |
+| 8.2 JOSS paper | ✅ | | paper.md rewritten (Kymora, sourced numbers only, limitations section); ORCID placeholder removed → owner provides; main.tex/figures untouched (long-form draft, stale — owner decides update vs drop) |
 | 8.3 Launch kit | ⬜ | | |
 | 8.4 Landing page | ⬜ | | |
