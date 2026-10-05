@@ -75,7 +75,7 @@
 | Task | Status | Commit | Notes |
 |------|--------|--------|-------|
 | 7.1 URL/name grep | ✅ | | Full-tree audit in OWNER_DECISIONS (canonical identity table); CHANGELOG repo links fixed; bylines + paper deferred to owner/8.2; records frozen |
-| 7.2 CITATION.cff + metadata | ⬜ | | |
+| 7.2 CITATION.cff + metadata | ✅ | | pyproject authors added (matches CITATION.cff); repo URLs/universe already Aamodx6/Kymora; bylines stay per owner (7.1); CITATION version bump rides with 7.3 |
 | 7.3 Release prep | ⬜ | | |
 | 7.4 README sync + badges | ⬜ | | |
 | 7.5 Security infrastructure | ⬜ | | |
