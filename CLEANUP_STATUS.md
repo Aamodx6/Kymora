@@ -181,10 +181,63 @@ are tracked build outputs of `paper/main.tex` — owner decision needed
 7. `Makefile` advertises `clean` in `.PHONY` but defines no `clean` target.
    Phase 5 will add real `clean`/`distclean`/`dev`.
 
-## Phase 2 — PENDING (no deletions yet)
+## Phase 2 — DONE (2026-10-06, commit `87320ea` + purge below)
 
-Dry-run + execute per §2, then `make clean`/`distclean`/`dev`, then full
-gate set. Baseline gate results to be recorded here before purging.
+`make clean` / `distclean` / `dev` added to Makefile (bulk paths only;
+`benchmarks/results/` deliberately excluded to protect frozen evidence).
+`make` binary is absent on this Windows box, so every recipe was executed
+by hand in order: distclean-equivalent → dev-equivalent → full gates.
+
+Dry-run (all untracked/ignored, zero tracked — `git clean -ndx` preview +
+per-path `git ls-files` check; `.benchmarks/` + `tools/__pycache__` absent):
+site/ 4.7, dist/ 0.6, target/wheels/ 53.3, target/test_wheel/ 3.8,
+.pytest_cache/ ~0, .hypothesis/ 1.2, .mypy_cache/ 99.0, 5×__pycache__ ~0.7,
+target/ 4530.9, fuzz/target/ 542.9, benchmarks/.venvs/ 910.3,
+landing/node_modules/ 74.4, landing/dist/ 1.3, 13 results strays ~49.2
+(`equal_feature_run.log` 47.1 dominates; all archived per §A).
+Executed via `git clean -fdx -- <explicit paths>` (≈6215 MB unique).
+
+`make dev` equivalent: `setup_venvs.py --lib all` recreated antropy/sktime/
+tsflex (uv), `npm ci` restored landing/node_modules, `maturin build
+--release` + reinstall → `kymora 0.8.0, 33 features`. Full gates re-run
+after dev: pytest 279 passed 1 skipped (one flaky warning on first
+post-rebuild run, clean on the next two — timing artifact, not code),
+cargo 30, clippy/fmt/mkdocs/claims/feature-docs/validation/snippets/mypy
+green, golden sha `8a1e27…31af2e`, golden diff empty.
+
+Working dir: ~6178 MB → ~10 MB excl. `.git` (tracked 5.7 MB + live
+`.gstack/` + rebuilt `site/`? no — site/ only on mkdocs build; current
+10 MB is tracked + `.gstack/` + fresh build outputs pending next build).
+`.git`: 63.8 MB loose → plain `git gc --prune=now` → 6.0 MB packed
+(no reflog expire, no --aggressive, per orders; before/after from
+`git count-objects -vH`: 63.76 MiB/3298 loose → 5.85 MiB packed).
+
+### Deferred (not on this branch)
+
+- perf_gate: never green on this box (70–80% background CPU; ratios
+  1.09–2.07, CV up to 0.33; `src/`+`python/` byte-identical to pre-cleanup).
+  Deferred to quiet CI. The CI branch's nightly.yml runs the gate 3× with
+  issue-filing — that is the authoritative check before merge.
+- Task I (figure hash-equality assertion) + Phase 5.2 (check_repo_hygiene +
+  CI job): `tools/check_repo_hygiene.py` lives on chore/ci-restructure.
+  Both deferred to the CI branch after rebase (incl. root-file allowlist
+  update for the Phase 4 moves).
+- Phase 5.3 READMEs (tools/, docs/internal/) + CONTRIBUTING map: pending,
+  post-Phase-4.
+
+## Phase 4 — PROPOSED (moves NOT executed; owner review required)
+
+Full old→new map: `CLEANUP_MOVES.tsv` (43 MOVEs via `git mv`, ~30 REWRITEs,
+KEEP list with rationale). Workflow-refs column: **zero** `.github/`
+references to any moved path on this branch (verified by grep) — the CI
+branch needs no workflow edits for these moves, only a post-rebase
+re-verification. Notable corrections to the brief: `release.yml` does NOT
+reference RELEASE_NOTES.md (nothing to update); `tools/name_check.py:137`
+default out path and `tools/rename_to_kymora.py` skip-lists MUST move with
+`docs/refactor/` or they recreate/bypass it; `check_snippets.py` exclusion
+logic must follow. `mkdir` for `docs/internal/hardening/` +
+`docs/internal/refactor/{baseline,rename-kymora}/` precedes `git mv`.
+STOPPED before any move, per orders.
 
 ### Archive (adjustment A, 2026-10-06)
 
