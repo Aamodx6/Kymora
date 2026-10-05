@@ -38,33 +38,12 @@ project needs its own entry:
    fresh venv → `pip install kymora` → `import kymora` works,
    `import tsxtract` warns and works.
 
-## 3. `tsxtract-rs` final deprecation release (0.6.1, owner)
+## 3. `tsxtract-rs` finale — CANCELLED (owner deleted the PyPI project)
 
-One last release under the OLD dist name so existing users get a guided
-path instead of a dead end. Layout (separate throwaway packaging dir,
-not this repo tree):
-
-```toml
-# pyproject.toml (tsxtract-rs 0.6.1)
-[project]
-name = "tsxtract-rs"
-version = "0.6.1"
-dependencies = ["kymora>=0.7.0"]
-```
-
-```python
-# tsxtract/__init__.py + tsxtractor/__init__.py (in the 0.6.1 sdist)
-import warnings
-warnings.warn(
-    "tsxtract-rs is renamed to kymora; pip install kymora "
-    "and use `import kymora`. This shim will not be updated further.",
-    DeprecationWarning, stacklevel=2,
-)
-from kymora import *  # noqa
-```
-
-Publish with the EXISTING `tsxtract-rs` trusted publisher (unchanged).
-No further `tsxtract-rs` releases after 0.6.1.
+PyPI never allows re-registering a deleted project name, so no 0.6.1
+deprecation release is possible. `pip install tsxtract-rs` now fails with
+"not found". The migration path is docs-only: CHANGELOG 0.7.0, the
+`import tsxtract` shim inside `kymora`, and `docs/migrating.md`.
 
 ## 4. Removal schedule (already recorded in CHANGELOG)
 

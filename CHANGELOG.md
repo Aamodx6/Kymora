@@ -31,9 +31,9 @@ feature is a **major** version change; appending a new feature at the end is a
   `DeprecationWarning` on first import. Removal no earlier than **0.8.0**
   (the older `tsxtractor` alias was deleted outright). Migrate with:
   `pip install kymora` + `import kymora as km` (was `import tsxtract as tsx`).
-- `tsxtract-rs` will receive one final deprecation release that depends on
-  `kymora` and re-exports it with a warning. Not yet published — see
-  `docs/RENAME_RELEASE_CHECKLIST.md`.
+- `tsxtract-rs` was deleted from PyPI (deleted names can never be
+  re-registered, so there will be no deprecation release under that name).
+  `pip install tsxtract-rs` no longer resolves — install `kymora` instead.
 
 ## [0.6.0] - 2026-10-04
 

@@ -54,7 +54,9 @@ suffix) and **delete `tsxtractor` outright**.
 1. Canonical account (`Aamodx6` vs `Aamod007` bylines) + GitHub repo rename
    to `Kymora` (runbook: `docs/RENAME_RELEASE_CHECKLIST.md`; Pages/Vercel
    follow-ups listed there).
-2. PyPI trusted publishing for **`kymora`** + `tsxtract-rs` 0.6.1 finale.
+2. PyPI trusted publishing for **`kymora`** (owner; `kymora` verified FREE).
+   `tsxtract-rs` was deleted by the owner — deleted PyPI names can never be
+   re-registered, so the planned 0.6.1 deprecation finale is impossible.
    Nothing published by this work.
 3. `patent/` + `paper/` fate (IP/publication).
 4. Trademark (WIPO/IP India/USPTO 9+42), web-search, meaning check for Kymora.
