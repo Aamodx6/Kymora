@@ -150,3 +150,17 @@ jobs:
           python -m pip install -e "."
           maturin develop --release
       - run: python tools/gen_feature_docs.py --check
+
+  fuzz-smoke:
+    name: fuzz smoke (nightly, linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install cargo-fuzz --locked
+      - run: |
+          cd fuzz
+          for target in compute_all streaming ragged; do
+            cargo fuzz run "$target" -- -max_total_time=30 -print_final_stats=1
+          done
