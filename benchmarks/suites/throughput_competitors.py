@@ -1,7 +1,7 @@
 """Phase B3 (step 2): Competitor throughput suite.
 
 Extends the B3 throughput matrix with the full competitor set, per the user's
-gate-audit instruction and arch.md §11.5/§11.6:
+gate-audit instruction and docs/internal/arch.md §11.5/§11.6:
 
   * catch22      (pycatch22, mp.Pool when threads > 1)
   * tsfel        (README 156-feature config: get_features_by_domain())
@@ -15,7 +15,7 @@ gate-audit instruction and arch.md §11.5/§11.6:
 Same shape matrix as the baseline throughput suite (THROUGHPUT_SHAPES), same
 harness protocol (fresh subprocess, warmup, GC disabled, stats + CV guard),
 with per-case wall-clock timeouts recorded as EXPLICIT timeout rows so the
-matrix is never silently incomplete (arch.md §11.1: no cherry-picking).
+matrix is never silently incomplete (docs/internal/arch.md §11.1: no cherry-picking).
 
 Every row uses the §11.8 BenchmarkRecord schema (runs[], stats, env_ref,
 guarded, variant) and is appended to the JSONL incrementally as a checkpoint.

@@ -6,7 +6,7 @@ Measures single-series and small-batch call latency:
   - Cold vs warm call timing
   - Plan creation overhead
 
-Per arch.md §11.5 (latency suite):
+Per docs/internal/arch.md §11.5 (latency suite):
 - Fixed-overhead decomposition (wrapper, validation, plan build, dispatch, output alloc, GIL)
 """
 

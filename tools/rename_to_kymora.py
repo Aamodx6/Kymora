@@ -13,7 +13,7 @@ Rules (ordered, specific-first, word-boundary, case-sensitive):
     TSXTRACT    -> KYMORA
 
 Skipped (frozen evidence / history / foreign IP / generated lock data):
-    docs/refactor/**, benchmarks/results/**, benchmarks/report/**,
+    docs/internal/refactor/**, benchmarks/results/**, benchmarks/report/**,
     paper/**, patent/**, CHANGELOG.md, tests/golden/**, tests/fixtures/**,
     benchmarks/adapters/tsxtract_jax.py/.md (JAX-collision docs, hand-edited),
     Cargo.lock (cargo regenerates), landing/package-lock.json,
@@ -45,7 +45,7 @@ RULES = [
 RXS = [(re.compile(r"(?<![A-Za-z0-9_])" + re.escape(a) + r"(?![A-Za-z0-9_])"), b) for a, b in RULES]
 
 SKIP_PREFIXES = (
-    "docs/refactor/", "benchmarks/results/", "benchmarks/report/",
+    "docs/internal/refactor/", "benchmarks/results/", "benchmarks/report/",
     "paper/", "patent/", "tests/golden/", "tests/fixtures/",
     "target/", "dist/", "node_modules/", "site/",
 )
@@ -62,7 +62,7 @@ SKIP_FILES = {
 # (files, compiled-regex, replacement). The `tsx` pattern excludes a
 # preceding dot so `Hero.tsx`-style filenames never match.
 PASS2 = [
-    (["python/kymora/tune.py", "arch.md", "docs/api.md", "docs/quickstart.md",
+    (["python/kymora/tune.py", "docs/internal/arch.md", "docs/api.md", "docs/quickstart.md",
       "landing/src/docs/content/api-reference.md",
       "landing/src/docs/content/configuration.md"],
      r"(?<![A-Za-z0-9_])TSXTRACT_", "KYMORA_"),
@@ -78,7 +78,7 @@ PASS2 = [
     (["README.md", "landing/src/docs/content/sklearn-pipelines.md"],
      r"(?<![A-Za-z0-9_])TsxtractTransformer(?![A-Za-z0-9_])", "KymoraTransformer"),
     # Conventional snippet alias tsx -> km (user-facing docs + site + arch API).
-    (["README.md", "arch.md", "landing/src/components/Hero.tsx",
+    (["README.md", "docs/internal/arch.md", "landing/src/components/Hero.tsx",
       "landing/src/components/HowItWorks.tsx"],
      r"(?<![A-Za-z0-9_.])tsx(?![A-Za-z0-9_])", "km"),
     # Benchmark-local tsx vars/params/labels -> km (internal only).

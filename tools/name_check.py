@@ -2,7 +2,7 @@
 
 Usage:
     python tools/name_check.py Kymora Tachyra Aevra
-    python tools/name_check.py --out docs/refactor/rename-kymora/NAME_CHECK_RAW.json Kymora
+    python tools/name_check.py --out docs/internal/refactor/rename-kymora/NAME_CHECK_RAW.json Kymora
 
 For each candidate and its variants (name, name-rs, py<name>, <name>-py,
 plus PEP 503 hyphen/underscore/dot normalizations) checks:
@@ -134,7 +134,7 @@ def check_import(name):
 
 def main(argv):
     argv = list(argv)
-    out = "docs/refactor/rename-kymora/NAME_CHECK_RAW.json" if "--out" in argv else None
+    out = "docs/internal/refactor/rename-kymora/NAME_CHECK_RAW.json" if "--out" in argv else None
     if "--out" in argv:
         idx = argv.index("--out")
         if idx + 1 < len(argv) and not argv[idx + 1].startswith("--"):

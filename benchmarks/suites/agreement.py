@@ -8,7 +8,7 @@ Evaluates:
    - tsfel (mapped features)
    - catch22 (mapped features)
    - antropy (mapped features)
-2. All test distributions per arch.md §11.4:
+2. All test distributions per docs/internal/arch.md §11.4:
    - Gaussian normal, Random walk, Sinusoid+noise, AR(1) phi=0.1/0.7/0.9/0.99
    - Trend+seasonality, Heavy-tailed (Student-t3), Cauchy, Spikes
    - Step changes, Piecewise constant, Quantized 8-bit ADC
@@ -100,7 +100,7 @@ def classify_error(abs_err: float, rel_err: float, diff_def: bool = False) -> st
 
 
 # ────────────────────────────────────────────────────────────
-#  2. Determinism checks (arch.md §I7)
+#  2. Determinism checks (docs/internal/arch.md §I7)
 # ────────────────────────────────────────────────────────────
 
 def check_determinism(km: KymoraAdapter, X: np.ndarray) -> dict[str, Any]:
@@ -141,7 +141,7 @@ def check_determinism(km: KymoraAdapter, X: np.ndarray) -> dict[str, Any]:
 #  3. Distribution & dataset setup
 # ────────────────────────────────────────────────────────────
 
-# All synthetic distributions from arch.md §11.4 + generators.py
+# All synthetic distributions from docs/internal/arch.md §11.4 + generators.py
 SYNTHETIC_DISTS = [
     "gaussian",
     "random_walk",
@@ -474,7 +474,7 @@ def generate_agreement_markdown(
         f"**Distributions tested:** {n_distributions} (synthetic + UCR real)  ",
         "**Scope:** 33 authoritative `core33` features evaluated against pure NumPy/SciPy "
         "reference math, strict Numba baseline (`fastmath=False`), and competitor implementations "
-        "across all distributions specified in `arch.md` §11.4.  ",
+        "across all distributions specified in `docs/internal/arch.md` §11.4.  ",
         "",
         "---",
         "",

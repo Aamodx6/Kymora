@@ -3,7 +3,7 @@
 Measures raw throughput (wall-clock, µs/series-feature) across:
   shapes × distributions × libraries × feature_sets
 
-Per arch.md §11.5 (throughput suite) and §11.2 (harness protocol):
+Per docs/internal/arch.md §11.5 (throughput suite) and §11.2 (harness protocol):
 - Warmup runs, GC disabled during timing
 - ≥15 runs or ≥2s budget (whichever is larger)
 - Records min/median/IQR/mean/p95/CV
@@ -36,7 +36,7 @@ RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
 # ── Configuration ──
 
-# Default throughput shapes (subset of arch.md §11.4 for practical runtime)
+# Default throughput shapes (subset of docs/internal/arch.md §11.4 for practical runtime)
 THROUGHPUT_SHAPES = [
     (10, 500),
     (100, 500),

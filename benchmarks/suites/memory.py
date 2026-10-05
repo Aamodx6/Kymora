@@ -1,6 +1,6 @@
 """Phase B3: Memory benchmark suite.
 
-Per arch.md §11.5 (memory suite):
+Per docs/internal/arch.md §11.5 (memory suite):
   - steady-state peak RSS delta (fresh subprocess per case)
   - separate "first call incl. imports" (cold path)
   - output size + overhead (delta minus output bytes)
