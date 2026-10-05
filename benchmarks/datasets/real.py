@@ -1,6 +1,6 @@
 """Real-world time-series datasets loader and downloader (UCR/UEA, M4, physiological).
 
-Provides standardized univariate time-series benchmarks per arch.md §11.4:
+Provides standardized univariate time-series benchmarks per docs/internal/arch.md §11.4:
 - 13 UCR univariate classification datasets spanning lengths 24–1024
 - M4 Sample (Daily and Hourly subsets)
 - Physiological ECG placeholder

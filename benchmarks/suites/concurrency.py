@@ -1,6 +1,6 @@
 """Phase B3: Concurrency benchmark suite.
 
-Per arch.md §11.5 (concurrency suite), on a Windows host (spawn-only, no fork):
+Per docs/internal/arch.md §11.5 (concurrency suite), on a Windows host (spawn-only, no fork):
 
   1. threads_scaling  — Kymora extract_features across n_jobs ∈ {1,2,4,8,16}
                         with N Python threads each driving extraction; verifies

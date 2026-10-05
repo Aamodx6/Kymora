@@ -4,7 +4,7 @@ Usage:
     python tools/check_snippets.py [--timeout 120]
 
 Rules:
-  - Sources: README.md and top-level docs/*.md (docs/refactor/** and
+  - Sources: README.md and top-level docs/*.md (docs/internal/refactor/** and
     docs/naming/** excluded — records and raw evidence, not guides).
   - A fence opens with ```python plus optional space-separated flags:
       skip        do not execute (with reason printed)

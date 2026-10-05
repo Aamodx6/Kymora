@@ -25,7 +25,7 @@ class Adapter(BaseAdapter):
 
     # The 13 tsfresh features whose definitions agree with kymora core33
     # (frozen in benchmarks/agreement/feature_map.json, Phase B1). Used for the
-    # matched-feature view (arch.md §11.6): time ONLY the agreed definitions.
+    # matched-feature view (docs/internal/arch.md §11.6): time ONLY the agreed definitions.
     MATCHED_FC_PARAMS = {
         "median": None,
         "quantile": [{"q": 0.1}, {"q": 0.9}],
