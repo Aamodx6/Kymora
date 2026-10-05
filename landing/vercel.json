@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/docs/:path*",
+      "destination": "https://aamodx6.github.io/Kymora/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

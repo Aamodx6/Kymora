@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+
+const DOCS_URL = 'https://aamodx6.github.io/Kymora/';
 
 export const Nav: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -58,12 +59,14 @@ export const Nav: React.FC = () => {
           >
             How it works
           </a>
-          <Link
-            to="/docs/introduction"
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="transition-colors hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           >
             Docs
-          </Link>
+          </a>
           <a
             href="https://github.com/Aamodx6/Kymora"
             target="_blank"
@@ -156,13 +159,15 @@ export const Nav: React.FC = () => {
             >
               How it works
             </a>
-            <Link
-              to="/docs/introduction"
+            <a
+              href={DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}
               className="py-1 hover:text-ink"
             >
               Documentation
-            </Link>
+            </a>
             <a
               href="https://github.com/Aamodx6/Kymora"
               target="_blank"

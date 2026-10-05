@@ -17,13 +17,9 @@ export const CTA: React.FC = () => {
     <section className="py-20 md:py-28 bg-canvas">
       <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl border border-black/10 bg-card p-8 sm:p-12 md:p-16 shadow-card text-center">
-          {/* Subtle highlighter mark in background */}
-          <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-highlight/30 blur-3xl" />
-          <div className="pointer-events-none absolute -left-24 -bottom-24 h-64 w-64 rounded-full bg-borderDim/50 blur-3xl" />
-
           <div className="relative z-10 mx-auto max-w-2xl">
             {/* Tag */}
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-borderLine bg-canvas px-3 py-1 font-mono text-xs font-semibold text-ink">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-md border border-borderLine bg-canvas px-3 py-1 font-mono text-xs font-semibold text-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-highlight" />
               <span>PRODUCTION-READY TIME SERIES</span>
             </div>

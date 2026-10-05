@@ -11,11 +11,8 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
-    "marked": "^18.0.14",
-    "mermaid": "^12.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.18.4",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
