@@ -19,6 +19,7 @@ def extract_features(
     precision: str | None = None,
     out_dtype: str | None = None,
     nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> _F64Array | _F32Array:
     """Extract features per series according to profile or feature list.
 
@@ -50,6 +51,7 @@ def extract_features_ragged(
     n_jobs: int | None = None,
     out: _F64Array | None = None,
     nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> _F64Array:
     """Extract features from CSR-style ragged arrays with zero per-element Python overhead.
 
@@ -78,6 +80,7 @@ def sliding_features(
     n_jobs: int | None = None,
     out: _F64Array | None = None,
     nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> _F64Array:
     """Extract features over rolling windows of a single series.
 
@@ -146,6 +149,7 @@ def extract_features_mc(
     n_jobs: int | None = None,
     views: Sequence[str] | None = None,
     nan_policy: str | None = None,
+    contiguous: str | None = None,
 ) -> _F64Array:
     """Extract per-channel and cross-channel features from multichannel series.
 
@@ -187,7 +191,7 @@ class MultiStreamExtractor:
     def is_full(self) -> bool: ...
     @property
     def count(self) -> int: ...
-    def push_many(self, values: _F64Array) -> bool: ...
+    def push_many(self, values: _F64Array, contiguous: str | None = None) -> bool: ...
     def reset(self, stream_idx: int | None = None) -> None: ...
     def compute(
         self, streams: Sequence[int] | None = None, kind: str = "all"

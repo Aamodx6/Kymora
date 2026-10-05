@@ -44,9 +44,72 @@ fn get_out_array<'py>(
                 "out array shape mismatch: expected ({nrows}, {ncols}), got {shape:?}"
             )));
         }
+        // A Fortran-ordered out= buffer would silently receive row-major
+        // writes into column-major memory (transposed garbage on read-back),
+        // so require C order exactly like the inputs.
+        if !user_out.readonly().as_array().is_standard_layout() {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        }
         Ok(user_out.clone())
     } else {
         Ok(PyArray2::<f64>::zeros(py, [nrows, ncols], false))
+    }
+}
+
+/// Strict C-contiguity rule (one place, documented once).
+///
+/// numpy's `PyReadonlyArray::as_slice` accepts Fortran-ordered buffers and
+/// hands back *memory* order, which would silently transpose every row. Every
+/// input borrow below is therefore gated on ndarray's standard-layout
+/// (C-order) check first, so non-C input always surfaces as `NotContiguous`
+/// and never as wrong numbers. 1D behavior is unchanged (strided 1D was
+/// already rejected); the 2D/3D Fortran cases previously returned wrong
+/// values silently. `out=` buffers are gated the same way in
+/// [`get_out_array`].
+///
+/// Lifetime note: the gate is a plain `bool` check on a temporary view. The
+/// borrow itself always comes straight from the source array
+/// (`a.as_slice()`, `view.as_slice()` on a function-body view) with no
+/// intermediate binding, which is the only shape the borrow checker extends
+/// across loop iterations.
+fn require_c_layout<T, D>(
+    arr: &numpy::PyReadonlyArray<T, D>,
+    index: Option<usize>,
+) -> Result<(), KymoraError>
+where
+    T: numpy::Element,
+    D: numpy::ndarray::Dimension,
+{
+    if arr.as_array().is_standard_layout() {
+        Ok(())
+    } else {
+        Err(KymoraError::NotContiguous { index })
+    }
+}
+
+/// Parse the `contiguous` option (arch D2): `"error"` (default) rejects
+/// non-C input; `"copy"` performs one explicit C-order copy first.
+fn parse_contiguous(contiguous: Option<&str>) -> PyResult<bool> {
+    match contiguous {
+        None | Some("error") => Ok(false),
+        Some("copy") => Ok(true),
+        Some(other) => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown contiguous '{other}'; valid values: 'error' (default), 'copy'"
+        ))),
+    }
+}
+
+/// Best-effort one-time-per-callsite `UserWarning` when `contiguous="copy"`
+/// materializes a copy. A failure to warn must never fail the call itself.
+fn warn_copy(py: Python, what: &str) {
+    let msg = format!(
+        "kymora copied {what} to C-contiguous layout (contiguous='copy'); \
+         pass np.ascontiguousarray input to avoid the copy"
+    );
+    if let Ok(warnings) = py.import("warnings") {
+        if let Ok(warn_fn) = warnings.getattr("warn") {
+            let _ = warn_fn.call1((msg,));
+        }
     }
 }
 
@@ -165,9 +228,9 @@ fn parse_precision(precision: Option<&str>) -> PyResult<()> {
     }
 }
 
-/// extract_features(X, profile="core33", features=None, n_jobs=None, out=None, views=None, precision=None, out_dtype=None, nan_policy=None)
+/// extract_features(X, profile="core33", features=None, n_jobs=None, out=None, views=None, precision=None, out_dtype=None, nan_policy=None, contiguous=None)
 #[pyfunction]
-#[pyo3(signature = (x, profile = None, features = None, n_jobs = None, out = None, views = None, precision = None, out_dtype = None, nan_policy = None))]
+#[pyo3(signature = (x, profile = None, features = None, n_jobs = None, out = None, views = None, precision = None, out_dtype = None, nan_policy = None, contiguous = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn extract_features<'py>(
     py: Python<'py>,
@@ -180,6 +243,7 @@ pub fn extract_features<'py>(
     precision: Option<&str>,
     out_dtype: Option<&str>,
     nan_policy: Option<&str>,
+    contiguous: Option<&str>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build_with_views(profile, feat_refs, views.as_deref())?;
@@ -187,6 +251,7 @@ pub fn extract_features<'py>(
     let nan_policy =
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
     parse_precision(precision)?;
+    let copy_on_demand = parse_contiguous(contiguous)?;
 
     let wants_f32_out = matches!(out_dtype, Some("float32") | Some("f32"));
     let _wants_f32_precision = matches!(precision, Some("float32") | Some("f32"));
@@ -202,9 +267,17 @@ pub fn extract_features<'py>(
         if ncols == 0 {
             return Err(KymoraError::ZeroLengthColumns.into());
         }
-        let slice = view
-            .as_slice()
-            .ok_or(KymoraError::NotContiguous { index: None })?;
+        let owned: Vec<f64>;
+        let slice: &[f64] = if view.is_standard_layout() {
+            view.as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "input array");
+            owned = view.iter().copied().collect();
+            &owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         let rows: Vec<&[f64]> = slice.chunks_exact(ncols).collect();
         enforce_nan_policy_f64(&rows, nan_policy)?;
 
@@ -244,9 +317,17 @@ pub fn extract_features<'py>(
         if ncols == 0 {
             return Err(KymoraError::ZeroLengthColumns.into());
         }
-        let slice = view
-            .as_slice()
-            .ok_or(KymoraError::NotContiguous { index: None })?;
+        let owned: Vec<f32>;
+        let slice: &[f32] = if view.is_standard_layout() {
+            view.as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "input array");
+            owned = view.iter().copied().collect();
+            &owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         let rows: Vec<&[f32]> = slice.chunks_exact(ncols).collect();
         enforce_nan_policy_f32(&rows, nan_policy)?;
         let gather = f32_plan_gather(&plan)?;
@@ -278,14 +359,33 @@ pub fn extract_features<'py>(
 
     // 3. List of 1D float64 arrays
     if let Ok(list) = x.extract::<Vec<PyReadonlyArray1<f64>>>() {
-        let slices: Vec<&[f64]> = list
-            .iter()
-            .enumerate()
-            .map(|(index, a)| {
-                a.as_slice()
-                    .map_err(|_| KymoraError::NotContiguous { index: Some(index) })
-            })
-            .collect::<Result<_, KymoraError>>()?;
+        // Two phases: copy non-contiguous elements up front (borrows below
+        // must stay stable while `owned` grows), then borrow everything.
+        let mut owned: Vec<Vec<f64>> = Vec::new();
+        let mut owned_pos: Vec<Option<usize>> = vec![None; list.len()];
+        for (index, a) in list.iter().enumerate() {
+            if !a.as_array().is_standard_layout() {
+                if !copy_on_demand {
+                    return Err(KymoraError::NotContiguous { index: Some(index) }.into());
+                }
+                warn_copy(py, &format!("list element {index}"));
+                owned_pos[index] = Some(owned.len());
+                owned.push(a.as_array().iter().copied().collect());
+            }
+        }
+        let mut slices: Vec<&[f64]> = Vec::with_capacity(list.len());
+        for (index, a) in list.iter().enumerate() {
+            match owned_pos[index] {
+                Some(k) => slices.push(&owned[k][..]),
+                None => {
+                    require_c_layout(a, Some(index))?;
+                    slices.push(
+                        a.as_slice()
+                            .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?,
+                    );
+                }
+            }
+        }
         extract::validate_batch(&slices)?;
         enforce_nan_policy_f64(&slices, nan_policy)?;
         let nrows = slices.len();
@@ -304,11 +404,28 @@ pub fn extract_features<'py>(
         if list.is_empty() {
             return Err(KymoraError::EmptyInput.into());
         }
+        let mut owned: Vec<Vec<f32>> = Vec::new();
+        let mut owned_pos: Vec<Option<usize>> = vec![None; list.len()];
+        for (index, a) in list.iter().enumerate() {
+            if !a.as_array().is_standard_layout() {
+                if !copy_on_demand {
+                    return Err(KymoraError::NotContiguous { index: Some(index) }.into());
+                }
+                warn_copy(py, &format!("list element {index}"));
+                owned_pos[index] = Some(owned.len());
+                owned.push(a.as_array().iter().copied().collect());
+            }
+        }
         let mut slices = Vec::with_capacity(list.len());
         for (index, a) in list.iter().enumerate() {
-            let s = a
-                .as_slice()
-                .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?;
+            let s: &[f32] = match owned_pos[index] {
+                Some(k) => &owned[k][..],
+                None => {
+                    require_c_layout(a, Some(index))?;
+                    a.as_slice()
+                        .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?
+                }
+            };
             if s.is_empty() {
                 return Err(KymoraError::EmptySeries { index }.into());
             }
@@ -471,6 +588,7 @@ fn mc_pair_count(n_channels: usize, cross: bool, max_pairs: usize) -> usize {
 
 /// Per-sample multichannel extraction shared by the 3D and list-of-2D paths:
 /// per-channel plan features in `ch{c}` blocks, then cross-channel features.
+#[allow(clippy::too_many_arguments)]
 fn mc_extract_sample(
     channel_slices: &[&[f64]],
     plan: &FeaturePlan,
@@ -492,7 +610,7 @@ fn mc_extract_sample(
     }
 }
 
-/// extract_features_mc(x, profile="core33", features=None, cross=True, max_pairs=8, n_jobs=None, views=None, nan_policy=None)
+/// extract_features_mc(x, profile="core33", features=None, cross=True, max_pairs=8, n_jobs=None, views=None, nan_policy=None, contiguous=None)
 ///
 /// `x` is a 3D float64 array `(n_samples, n_channels, length)`, or a list of
 /// 2D float64 arrays `(n_channels, length_i)` for ragged lengths across
@@ -500,7 +618,7 @@ fn mc_extract_sample(
 /// Output is `(n_samples, n_channels * n_plan + n_cross)` with per-channel
 /// `ch{c}__{feature}` blocks followed by cross columns (see `feature_names_mc`).
 #[pyfunction]
-#[pyo3(signature = (x, profile = None, features = None, cross = true, max_pairs = 8, n_jobs = None, views = None, nan_policy = None))]
+#[pyo3(signature = (x, profile = None, features = None, cross = true, max_pairs = 8, n_jobs = None, views = None, nan_policy = None, contiguous = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn extract_features_mc<'py>(
     py: Python<'py>,
@@ -512,12 +630,14 @@ pub fn extract_features_mc<'py>(
     n_jobs: Option<usize>,
     views: Option<Vec<String>>,
     nan_policy: Option<&str>,
+    contiguous: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let feat_refs = features.as_deref();
     let plan = FeaturePlan::build_with_views(profile, feat_refs, views.as_deref())?;
     let n_plan_cols = plan.n_features();
     let nan_policy =
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
+    let copy_on_demand = parse_contiguous(contiguous)?;
 
     // 1. 3D float64 array path.
     if let Ok(arr) = x.extract::<PyReadonlyArrayDyn<f64>>() {
@@ -535,9 +655,19 @@ pub fn extract_features_mc<'py>(
             return Err(KymoraError::EmptyInput.into());
         }
 
-        let slice = arr
-            .as_slice()
-            .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        let mc_view = arr.as_array();
+        let mc_owned: Vec<f64>;
+        let slice: &[f64] = if mc_view.is_standard_layout() {
+            mc_view
+                .as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "input array");
+            mc_owned = mc_view.iter().copied().collect();
+            &mc_owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         if nan_policy == NanPolicy::Raise {
             if let Some(pos) = nan_policy::first_nan_sample_f64(slice) {
                 let per_sample = n_channels * length;
@@ -595,7 +725,11 @@ pub fn extract_features_mc<'py>(
         if list.is_empty() {
             return Err(KymoraError::EmptyInput.into());
         }
-        let mut samples: Vec<(usize, &[f64])> = Vec::with_capacity(list.len());
+        // Two phases (see the batch list paths): copy non-contiguous elements
+        // up front so the borrows below stay stable.
+        let mut owned: Vec<Vec<f64>> = Vec::new();
+        let mut owned_pos: Vec<Option<usize>> = vec![None; list.len()];
+        let mut lengths: Vec<usize> = vec![0; list.len()];
         let mut n_channels = None;
         for (index, a) in list.iter().enumerate() {
             let view = a.as_array();
@@ -618,15 +752,33 @@ pub fn extract_features_mc<'py>(
                 }
                 _ => {}
             }
-            let s = a
-                .as_slice()
-                .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?;
-            samples.push((len, s));
+            lengths[index] = len;
+            let el_view = a.as_array();
+            if !el_view.is_standard_layout() {
+                if !copy_on_demand {
+                    return Err(KymoraError::NotContiguous { index: Some(index) }.into());
+                }
+                warn_copy(py, &format!("list element {index}"));
+                owned_pos[index] = Some(owned.len());
+                owned.push(el_view.iter().copied().collect());
+            }
+        }
+        let mut samples: Vec<(usize, &[f64])> = Vec::with_capacity(list.len());
+        for (index, a) in list.iter().enumerate() {
+            let s: &[f64] = match owned_pos[index] {
+                Some(k) => &owned[k][..],
+                None => {
+                    require_c_layout(a, Some(index))?;
+                    a.as_slice()
+                        .map_err(|_| KymoraError::NotContiguous { index: Some(index) })?
+                }
+            };
+            samples.push((lengths[index], s));
         }
         let n_channels = n_channels.unwrap_or(0);
         let n_samples = samples.len();
         if nan_policy == NanPolicy::Raise {
-            for (s, (len, data)) in samples.iter().enumerate() {
+            for (s, (_, data)) in samples.iter().enumerate() {
                 if let Some(pos) = nan_policy::first_nan_sample_f64(data) {
                     let len = data.len() / n_channels;
                     return Err(pyo3::exceptions::PyValueError::new_err(format!(
@@ -732,9 +884,9 @@ pub fn feature_names_mc(
     Ok(names)
 }
 
-/// extract_features_ragged(values, offsets, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None)
+/// extract_features_ragged(values, offsets, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None, contiguous=None)
 #[pyfunction]
-#[pyo3(signature = (values, offsets, profile = None, features = None, n_jobs = None, out = None, nan_policy = None))]
+#[pyo3(signature = (values, offsets, profile = None, features = None, n_jobs = None, out = None, nan_policy = None, contiguous = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn extract_features_ragged<'py>(
     py: Python<'py>,
@@ -745,10 +897,22 @@ pub fn extract_features_ragged<'py>(
     n_jobs: Option<usize>,
     out: Option<&Bound<'py, PyArray2<f64>>>,
     nan_policy: Option<&str>,
+    contiguous: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
-    let offsets_slice = offsets
-        .as_slice()
-        .map_err(|_| KymoraError::NotContiguous { index: None })?;
+    let copy_on_demand = parse_contiguous(contiguous)?;
+    let offsets_view = offsets.as_array();
+    let offsets_owned: Vec<i64>;
+    let offsets_slice: &[i64] = if offsets_view.is_standard_layout() {
+        offsets_view
+            .as_slice()
+            .ok_or(KymoraError::NotContiguous { index: None })?
+    } else if copy_on_demand {
+        warn_copy(py, "offsets array");
+        offsets_owned = offsets_view.iter().copied().collect();
+        &offsets_owned
+    } else {
+        return Err(KymoraError::NotContiguous { index: None }.into());
+    };
     if offsets_slice.len() < 2 {
         return Err(KymoraError::EmptyInput.into());
     }
@@ -761,9 +925,19 @@ pub fn extract_features_ragged<'py>(
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
 
     if let Ok(v64) = values.extract::<PyReadonlyArray1<f64>>() {
-        let v_slice = v64
-            .as_slice()
-            .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        let v_view = v64.as_array();
+        let v_owned: Vec<f64>;
+        let v_slice: &[f64] = if v_view.is_standard_layout() {
+            v_view
+                .as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "values array");
+            v_owned = v_view.iter().copied().collect();
+            &v_owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         if nan_policy == NanPolicy::Raise {
             if let Some(pos) = nan_policy::first_nan_sample_f64(v_slice) {
                 let series = nan_policy::series_for_offset(offsets_slice, pos);
@@ -783,9 +957,19 @@ pub fn extract_features_ragged<'py>(
     }
 
     if let Ok(v32) = values.extract::<PyReadonlyArray1<f32>>() {
-        let v_slice = v32
-            .as_slice()
-            .map_err(|_| KymoraError::NotContiguous { index: None })?;
+        let v_view = v32.as_array();
+        let v_owned: Vec<f32>;
+        let v_slice: &[f32] = if v_view.is_standard_layout() {
+            v_view
+                .as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "values array");
+            v_owned = v_view.iter().copied().collect();
+            &v_owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         if nan_policy == NanPolicy::Raise {
             if let Some(pos) = v_slice.iter().position(|v| v.is_nan()) {
                 let series = nan_policy::series_for_offset(offsets_slice, pos);
@@ -816,9 +1000,9 @@ pub fn extract_features_ragged<'py>(
     ))
 }
 
-/// sliding_features(x, window, stride=1, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None)
+/// sliding_features(x, window, stride=1, profile="core33", features=None, n_jobs=None, out=None, nan_policy=None, contiguous=None)
 #[pyfunction]
-#[pyo3(signature = (x, window, stride = 1, profile = None, features = None, n_jobs = None, out = None, nan_policy = None))]
+#[pyo3(signature = (x, window, stride = 1, profile = None, features = None, n_jobs = None, out = None, nan_policy = None, contiguous = None))]
 #[allow(clippy::too_many_arguments)]
 pub fn sliding_features<'py>(
     py: Python<'py>,
@@ -830,10 +1014,22 @@ pub fn sliding_features<'py>(
     n_jobs: Option<usize>,
     out: Option<&Bound<'py, PyArray2<f64>>>,
     nan_policy: Option<&str>,
+    contiguous: Option<&str>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
-    let slice = x
-        .as_slice()
-        .map_err(|_| KymoraError::NotContiguous { index: None })?;
+    let copy_on_demand = parse_contiguous(contiguous)?;
+    let x_view = x.as_array();
+    let x_owned: Vec<f64>;
+    let slice: &[f64] = if x_view.is_standard_layout() {
+        x_view
+            .as_slice()
+            .ok_or(KymoraError::NotContiguous { index: None })?
+    } else if copy_on_demand {
+        warn_copy(py, "input series");
+        x_owned = x_view.iter().copied().collect();
+        &x_owned
+    } else {
+        return Err(KymoraError::NotContiguous { index: None }.into());
+    };
     let (window, stride, n_windows) = extract::window_geometry(slice.len(), window, stride)?;
     let nan_policy =
         nan_policy::parse(nan_policy).map_err(pyo3::exceptions::PyValueError::new_err)?;
@@ -1065,10 +1261,27 @@ impl PyMultiStreamExtractor {
         self.inner.count()
     }
 
-    pub fn push_many(&mut self, values: PyReadonlyArray1<f64>) -> PyResult<bool> {
-        let slice = values
-            .as_slice()
-            .map_err(|_| KymoraError::NotContiguous { index: None })?;
+    #[pyo3(signature = (values, contiguous = None))]
+    pub fn push_many(
+        &mut self,
+        py: Python,
+        values: PyReadonlyArray1<f64>,
+        contiguous: Option<&str>,
+    ) -> PyResult<bool> {
+        let copy_on_demand = parse_contiguous(contiguous)?;
+        let v_view = values.as_array();
+        let owned: Vec<f64>;
+        let slice: &[f64] = if v_view.is_standard_layout() {
+            v_view
+                .as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?
+        } else if copy_on_demand {
+            warn_copy(py, "values array");
+            owned = v_view.iter().copied().collect();
+            &owned
+        } else {
+            return Err(KymoraError::NotContiguous { index: None }.into());
+        };
         if slice.len() != self.inner.n_streams() {
             return Err(pyo3::exceptions::PyValueError::new_err(format!(
                 "expected {} values, got {}",
