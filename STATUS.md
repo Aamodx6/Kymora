@@ -36,7 +36,7 @@
 | 2.1 Audit StreamingExtractor O(1) | ✅ | | Anchored shifted power sums + drift guard (0.25σ) + K=4096 re-anchor; `compute_fast` O(1), inf-window exact fallback; `anchor_interval` ctor param (additive); W=1 now valid; 8 Rust tests incl. quantized-exact proof on 1e9-offset |
 | 2.2 Document O(1) vs O(W) | ✅ | | New docs/streaming.md (complexity + accuracy contract); README stale "two passes" fixed; api.md "100ns" replaced + anchor_interval signature |
 | 2.3 Streaming vs batch tests | ✅ | | New tests/test_streaming_parity.py (43 tests): distributions × W, NaN/inf, W=1/2, anchor_interval, hypothesis; W=1 slope NaN fix in Rust |
-| 2.4 Per-push cost benchmark | ⬜ | | |
+| 2.4 Per-push cost benchmark | ✅ | | B3 suite run (gates 6.5e-16..3e-14); artifact 2026-10-05_streaming/ + plot docs/img/; docs/streaming.md table; CLAIMS.md streaming section |
 
 ## Phase 3: Input Surface + Robustness
 | Task | Status | Commit | Notes |

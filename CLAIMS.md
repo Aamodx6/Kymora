@@ -52,6 +52,21 @@ feature pair) re-verified before any equal-feature timing.
 | tsfresh memory: extraction +281.9 MiB @1k×500, +407.5 MiB @10,000 × 500 (totals +289.8 / +449.5) | same | EfficientFCParameters, n_jobs=16 |
 | Where-slower: numba losses 1×100 ratios 17.9×–40.2×, 10×500 3.1×–5.7×; per-call floor ~0.6–0.7 ms; 100×100 16T +27% vs 1T (~12 µs/series compute); len-10 single-series p50 345.8 µs (win) vs numpy 1,317.6 µs, p99 15.4 ms / max 29.1 ms (loss); 100×500 parity 0.94×–0.99× | `L1_ROOT_CAUSE.md` + `l1_root_cause.json` (loss table + stage timings), `B3_REPORT.md` §3.1 | 16 threads unless noted; CIs exclude 1.0 for robust losses |
 
+## Measured — 2026-10-05 streaming per-push cost (same laptop; artifacts committed)
+
+Suite: `benchmarks/suites/streaming.py` (B3), single thread, capacities
+64 / 256 / 4096 / 65536, parity-gated before timing (gate max rel err
+7.7e-16 / 6.5e-16 / 3.8e-14 / 3.0e-14).
+Artifacts: `benchmarks/results/2026-10-05_streaming/` (frozen `streaming.jsonl`
++ `env.json` + `STREAMING_PUSH_REPORT.md`), plot `docs/img/streaming_push_cost.png`.
+
+| Claim (docs/streaming.md) | Artifact value | Conditions |
+|---|---|---|
+| `push` ≈ 0.2 µs flat across W | 0.205 / 0.218 / 0.195 / 0.314 µs per push (50k pushes per capacity) | as above |
+| `compute(kind="fast")` ≈ 0.4–0.7 µs flat across W | p50 0.60 / 0.70 / 0.40 / 0.40 µs (2k calls per capacity) | as above |
+| `compute(kind="all")` linear in W | p50 3.6 / 11.6 / 138.5 / 2350.0 µs | as above |
+| end-to-end 14.4× vs naive recompute | stream 0.030 s vs naive 0.432 s (W=256, 99,744 points, fast compute every 64) | as above |
+
 ## Pending re-baseline (no artifact — still stale)
 
 - tsfresh 100,000 × 500 memory cell (multi-hour run; README marks it PENDING).
