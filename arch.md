@@ -424,7 +424,7 @@ Every README/landing/PyPI/release-note claim → `CLAIMS.md` row: claim → arti
 - [ ] I1–I10 enforced in CI; zero crash/hang/silent-wrong in robustness matrix; fuzz clean
 - [ ] Output-only allocation verified (core33 100k×500 ≈ 26.4 MB; `extended` ≈120 MB; `full` ≈622 MB — use chunked API / f32 output beyond RAM)
 - [ ] All wheel targets pass tests; baseline-CPU job green
-- [ ] Naming decision D3 executed; one install line, one import line, one repo URL everywhere
+- [x] Naming decision D3 executed (0.7.0: dist `kymora`, `pip install kymora`, `import kymora`, repo `Aamodx6/Kymora` pending the GitHub rename); one install line, one import line, one repo URL everywhere (residual `tsxtract` hits allowlisted in the Phase 4 record: shims, history, frozen evidence, JAX-collision markers)
 - [ ] `make bench-all && make report` reproduces the report from a clean checkout; `CLAIMS.md` complete
 
 ### 14.3 Memory budget table (100k series, float64)
