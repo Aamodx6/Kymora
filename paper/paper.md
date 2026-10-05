@@ -1,5 +1,5 @@
 ---
-title: 'tsxtract: High-Throughput Batch and Streaming Time-Series Feature Extraction with a Rust Core'
+title: 'Kymora: High-Throughput Batch and Streaming Time-Series Feature Extraction with a Rust Core'
 tags:
   - Python
   - Rust
@@ -9,68 +9,115 @@ tags:
   - signal-processing
 authors:
   - name: Aamod Kumar
-    orcid: 0009-0000-0000-0000
     affiliation: 1
 affiliations:
   - name: Independent Researcher, India
     index: 1
-date: 05 September 2026
+date: 06 October 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
-Time-series feature extraction is a foundational step in machine learning workflows spanning industrial IoT, predictive maintenance, medical biosignal analysis, and algorithmic trading. Existing state-of-the-art Python toolkits—such as `tsfresh` [@christ2018tsfresh], `catch22` [@lubba2019catch22], and `TSFEL` [@barandas2020tsfel]—extract extensive sets of descriptive features, but frequently become the primary computational bottleneck when applied to massive batches of series (e.g., $10^5$ to $10^6$ series). 
+Time-series feature extraction is a foundational step in machine learning
+workflows spanning industrial IoT, biosignal analysis, and quantitative
+finance. Established Python toolkits — `tsfresh` [@christ2018tsfresh],
+`catch22` [@lubba2019catch22], `TSFEL` [@barandas2020tsfel] — compute rich
+feature banks but become the pipeline bottleneck on large batches: a
+thousand series can cost minutes, mostly in per-series Python dispatch and
+repeated data reshaping.
 
-`tsxtract` is an open-source, high-performance library engineered to resolve this batch throughput barrier. Built with a pure Rust computational core exposed via PyO3, `tsxtract` takes zero-copy views of NumPy buffers, releases the Python Global Interpreter Lock (GIL), and parallelizes execution across the series dimension using work-stealing multithreading (`rayon`). It computes a curated set of 33 statistical, temporal, and spectral features that maximize downstream classification performance while eliminating intra-feature redundancy. Furthermore, `tsxtract` introduces a stateful, incremental $O(1)$ streaming engine (`StreamingExtractor`) for rolling windows, eliminating the redundant $O(W)$ window rescans common in existing sliding-window processors.
+`Kymora` is a batch-oriented feature extractor with a Rust core (PyO3) that
+takes zero-copy views of NumPy buffers, releases the GIL, and parallelizes
+across the series dimension with Rayon. It ships 33 curated statistical,
+temporal, and spectral features (frozen column order), wider `extended` and
+`full` profiles, an O(1)-amortized streaming engine for rolling windows, a
+scikit-learn transformer, and a documented NaN contract. Every performance
+figure in this paper traces to a committed artifact via `CLAIMS.md`.
 
 # Statement of Need
 
-Data scientists engineering features from large collections of time series face a difficult trade-off between coverage, redundancy, and throughput:
+Practitioners choosing a feature library face three coupled costs:
+redundant thousand-column banks that slow downstream models, serial
+per-series FFI dispatch, and full recomputation for every sliding window.
+`Kymora` addresses the throughput side: one FFI crossing per batch, fused
+per-series traversals with shared intermediates, and anchored incremental
+accumulators for streams. It does not aim to replace `tsfresh` for
+exploratory screening or `catch22` where those exact estimators are needed —
+the honest comparison tables below include the cases where `Kymora` loses.
 
-1. **Exhaustive Redundancy**: Libraries like `tsfresh` compute up to 1,558 features per series, while `TSFEL` computes ~390 features. Dimensionality reduction studies show severe collinearity; in `TSFEL`, just four principal components explain over 90% of the total variance across its 390-feature bank [@barandas2020tsfel].
-2. **Serial Python Loop Overhead**: While `catch22` provides 22 curated features written in C, its Python interface requires calling the C function once per series inside a Python-level serial loop, incurring severe FFI marshalling and interpreter overhead on large batches.
-3. **Sliding-Window Inefficiency**: When extracting features over rolling windows of length $W$, existing toolkits recompute features from scratch for every window ($O(W)$ cost per window), causing latency explosions in real-time telemetry.
+# State of the Field
 
-`tsxtract` addresses these gaps through five micro-architectural and algorithmic design principles:
+`tsfresh` [@christ2018tsfresh] offers the widest bank (777 features in its
+efficient config) with hypothesis-test-based selection; `TSFEL`
+[@barandas2020tsfel] covers statistical, temporal, and spectral domains
+(156 features); `catch22` [@lubba2019catch22] distills 22 canonical
+characteristics implemented in C but dispatched per series from Python;
+`sktime` provides pipeline transformers around several of these. `Kymora`
+occupies the batch-throughput niche: a small curated bank computed with
+minimal memory traffic, plus streaming and selection tooling around it.
 
-- **Batch Parallelism Across Series**: By passing the entire 2D matrix across the FFI boundary once and releasing the GIL, parallelization scales near-linearly with CPU core count.
-- **Five Fused Memory Traversals**: Rather than scanning the time series once per feature, the series is traversed only five times: Pass 1 (moments, min, max, NaN detection), Pass 2 (central moments 2, 3, 4), Pass 3 (successive differences & CID_CE [@batista2014cid]), Pass 4 (threshold crossings & strikes), and Pass 5 (autocorrelation across all four lags simultaneously).
-- **$O(n)$ Quantile Selection**: Instead of sorting the full array ($O(n \log n)$), `tsxtract` targets the 10 necessary order statistics using Quickselect (`select_nth_unstable_by`), reducing sorting overhead by over 2.1×.
-- **Real-to-Complex Transform**: Exploiting the Hermitian symmetry of real signals via `realfft` [@frigo2005design], halving FFT work and thread-local scratch allocation.
-- **Branchless Primitives**: Evaluating permutation entropy [@bandt2002permutation] and peak counts using lookup tables and non-short-circuiting bitwise register comparisons, eliminating CPU branch mispredictions on erratic data.
-- **Stateful Incremental Streaming**: Maintaining running accumulators for rolling windows, allowing online updates in $O(1)$ time for moments, differences, and linear trend covariance.
+# Software Design
 
-# Feature Architecture & Complexity
+The Rust core (`src/`) owns all numerics; Python (`python/kymora/`) is a
+pass-through. Per series: one fused pass for sums/extrema/NaN checks, one
+centered pass for moments 2–4, shared selection-based quantiles, one real
+FFT with a shared power spectrum, and fused lag/autocorrelation,
+difference, threshold, and ordinal-pattern traversals. Intermediates are
+computed at most once per series; unrequested features cost nothing.
+`StreamingExtractor` maintains anchored shifted power sums with a drift
+guard (exact re-anchor past 0.25σ drift), giving O(1)-amortized pushes and
+O(1) fast-tier reads verified against batch output within rtol 1e-9.
+Inputs are borrowed, never copied (non-contiguous layouts raise unless the
+caller opts into one explicit copy); `KymoraError` covers structure while
+NaN follows a tested propagation contract.
 
-The 33 features are organized into six cohesive groups, all adhering to worst-case $O(n)$ or $O(n \log n)$ complexity:
+# Performance
 
-| Group | Features | Mathematical Reference | Time Complexity |
-|---|---|---|:---:|
-| **Stats (14)** | mean, std, var, min, max, median, quantile_10/25/75/90, skewness, kurtosis, abs_energy, root_mean_square | Population moments ($\text{ddof}=0$), linear quantile interpolation | $O(n)$ |
-| **Change (4)** | mean_abs_change, mean_change, cid_ce (z-normalized), mean_second_derivative_central | Batista et al. [-@batista2014cid] | $O(n)$ |
-| **Counts (5)** | zero_crossings, mean_crossings, number_of_peaks (support 3), longest_strike_above/below_mean | Level crossing counts & peak support | $O(n)$ |
-| **Correlation (6)** | autocorrelation at lags 1, 2, 5, 10; linear trend slope and $r^2$ | Covariance & Pearson $r^2$ | $O(n)$ |
-| **Entropy (1)** | permutation_entropy (order 3, delay 1, normalized to $[0, 1]$) | Bandt & Pompe [-@bandt2002permutation] | $O(n)$ |
-| **Spectral (3)** | dominant_frequency, spectral_centroid, spectral_entropy | FFT positive bins (DC excluded) [@frigo2005design] | $O(n \log n)$ |
+Method: fresh subprocess per measurement, warmup, GC disabled, interleaved
+rounds, pooled medians with 95% bootstrap CIs. Machine: i7-13620H laptop
+(10 cores/16 threads), Windows 11, 1,000 series × 500 steps, 16 threads —
+exploratory single-machine numbers, not fleet evidence.
 
-# Empirical Validation & Benchmarks
+Like-for-like (each library restricted to definition-matched features,
+parity-gated at ≤1e-9 before timing):
 
-## Downstream Classification Performance
-To verify that `tsxtract`'s 33 features retain critical dynamical signals, we evaluated downstream classification utility on standard dynamic benchmarks (5-fold stratified cross-validation). Evaluating both Random Forest and Ridge Classifiers on `tsxtract` features yields 96.5% to 100.0% accuracy across control, ECG, gesture, and power demand waveforms, matching or exceeding `catch22` while extracting in under 0.65~ms (252×--631× faster).
+| Library | Equal features | Kymora (ms) | Library (ms) | Ratio |
+|---|---:|---:|---:|---|
+| numba baseline | 33 | 4.72 | 16.05 | 3.4× |
+| numpy baseline | 33 | 4.68 | 285.50 | 61.0× |
+| TSFEL | 13 | 3.92 | 2,213.69 | 564.6× |
+| tsfresh | 13 | 4.94 | 8,359.45 | 1,693.8× |
 
-## Feature Orthogonality & Redundancy
-An empirical collinearity evaluation over 2,000 diverse time series (periodic, random walk, AR(1), non-stationary, chaotic, pulse) demonstrated that **83.3% of feature pairs exhibit low collinearity ($|r| < 0.70$)**. Principal Component Analysis confirmed that `tsxtract` spans a high-dimensional feature subspace, avoiding the severe multi-collinearity of larger libraries.
+As-is configs (33 vs up to 777 features): kymora 3.18 ms (314,450
+series/s, 0.0964 µs/series-feature) vs catch22 833.1 ms, TSFEL 2,541.6 ms,
+tsfresh 20,891.2 ms. The raw ratio compares different amounts of work;
+per-feature ratios are 393×/169×/279× respectively.
 
-## Throughput Comparison
-On an end-to-end batch benchmark (1,000 series $\times$ 500 steps, 16 worker threads on a 10-core CPU, Windows 11):
-- **`tsxtract`**: **1.25 ms** median (800,256 series/sec; 0.038 ms/feature)
-- **`catch22`**: 1,024.8 ms (976 series/sec; 820× slower)
-- **`TSFEL`**: 7,154.0 ms (140 series/sec; 5,725× slower)
-- **`tsfresh`**: 17,683.3 ms (57 series/sec; 14,151× slower)
+Downstream utility (`benchmarks/results/downstream_report.md`): on four
+synthetic classification tasks, RandomForest over the 33 features reaches
+96.5–100.0% accuracy, matching catch22 at a fraction of the extraction
+time. Feature redundancy (`docs/redundancy_report.md`): mean pairwise
+|r| 0.37 across dynamical archetypes.
 
-# Availability & Software Quality
+# Limitations
 
-`tsxtract` is licensed under the MIT License. The code is hosted at [https://github.com/Aamodx6/Tsxtract](https://github.com/Aamodx6/Tsxtract) and published on PyPI. Pre-built binary wheels are distributed for Linux (x86_64, aarch64), macOS (Intel, Apple Silicon), and Windows (x86_64). The library includes comprehensive documentation, property-based fuzz tests with `hypothesis`, and 100% reference validation against NumPy and SciPy implementations.
+- All timings are single-machine and exploratory until multi-platform CI
+  artifacts land; laptop thermals and hybrid P/E cores add run-to-run
+  spread, and thread scaling plateaus near the physical core count.
+- `Kymora` loses small-batch throughput cases to a hand-tuned numba
+  baseline (up to ~40× at 1×100 series: fixed ~70 µs dispatch floor
+  dominates), documented per case in the README.
+- Skewness/kurtosis on large-offset series (e.g. 1e9 + noise) are
+  conditioning-limited in any implementation; the streaming contract bounds
+  them absolutely rather than relatively.
+- Float32 input covers core33/minimal/subsets only; `extended`/`full` and
+  views need float64. Heavy O(n²)+ estimators are not shipped.
+
+# Acknowledgments
+
+Built on PyO3, NumPy, Rayon, realfft, scikit-learn, and the sktime
+ecosystem it integrates with. Benchmark competitors: tsfresh, TSFEL,
+pycatch22, sktime, antropy, and the authors' numpy/numba baselines.
 
 # References
