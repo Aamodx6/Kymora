@@ -117,6 +117,27 @@ jobs:
           maturin develop --release
       - run: python tools/check_snippets.py
 
+  audit:
+    name: dependency audit (Rust + Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo-audit (RustSec advisory DB)
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: ./.github/actions/setup-venv
+      - name: pip-audit (PyPI advisory DB)
+        run: |
+          python -m pip install --upgrade pip pip-audit
+          python -m pip install -e ".[all]"
+          python -m pip_audit --desc
+
   perf-gate:
     name: core33 perf regression gate
     runs-on: ubuntu-latest
