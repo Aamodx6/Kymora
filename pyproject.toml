@@ -50,6 +50,19 @@ python-source = "python"
 module-name = "kymora._core"
 python-packages = ["kymora"]
 features = ["pyo3/extension-module"]
+# Keep the sdist to what a downstream builder needs: no landing site,
+# benchmark evidence, papers, patent material, fuzz corpora, workflows,
+# or docs build output (verified via `maturin sdist` + `tar -tzf`).
+exclude = [
+  ".github/**",
+  ".gitignore",
+  "benchmarks/results/**",
+  "landing/**",
+  "paper/**",
+  "patent/**",
+  "fuzz/**",
+  "site/**",
+]
 
 [tool.pytest.ini_options]
 # Collection-time deprecation from sklearn's generator-based
