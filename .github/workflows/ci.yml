@@ -133,3 +133,20 @@ jobs:
       # notice; maintainers record baselines via
       # `python tools/perf_gate.py --runs 30 --update-baseline`.
       - run: python tools/perf_gate.py --runs 30 --ci
+
+  feature-docs:
+    name: generated feature catalog is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e "."
+          maturin develop --release
+      - run: python tools/gen_feature_docs.py --check
