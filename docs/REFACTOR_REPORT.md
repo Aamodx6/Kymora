@@ -10,8 +10,8 @@ suffix) and **delete `tsxtractor` outright**.
 
 | Change | Justification |
 |---|---|
-| `python/tsxtract/` → `python/kymora/` (+ new `python/tsxtract/` warning shim) | Canonical import `kymora`; old import kept as deprecation shim (removal ≥ 0.8.0) |
-| `python/tsxtractor/` deleted | Owner: drop the legacy alias now instead of shimming it; enforced by `test_tsxtractor_shim_is_gone` |
+| `python/tsxtract/` → `python/kymora/`; shims removed entirely | Canonical import `kymora` only — `tsxtract` shim added in 0.7.0 then deleted same day per owner ("everything kymora"); `tsxtractor` likewise deleted, no aliases remain |
+| `python/tsxtractor/` deleted; `TsxSelector` alias deleted | Owner: drop all legacy names now instead of shimming them; enforced by gone-contract tests |
 | PyPI dist `tsxtract-rs` → **`kymora`** (0.7.0), `module-name kymora._core`, crate `kymora` | Bare `kymora` FREE on PyPI/crates.io/npm (Phase 1 evidence); `-rs` only ever existed because bare `tsxtract` was taken |
 | `TsxError` → `KymoraError`, `TsxSelector` → `KymoraSelector` (+`TsxSelector` alias) | Name-derived public symbols; Rust error stays `ValueError` in Python |
 | `TSXTRACT_*` → `KYMORA_*`, wisdom cache → `~/.cache/kymora` | Documented breaking change (CHANGELOG 0.7.0) |

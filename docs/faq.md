@@ -5,10 +5,9 @@
 **What do I install?** `pip install kymora`, then `import kymora`.
 The distribution, import, crate, and repo are all one name now.
 
-**What about `tsxtract` / `tsxtractor`?** Old names. `import tsxtract`
-still works as a deprecated shim (removal ≥ 0.8.0); `tsxtractor` was
-deleted. The bare `tsxtract` name on PyPI belongs to an unrelated JAX
-project — never install it alongside this package.
+**What about `tsxtract` / `tsxtractor`?** Deleted old names — no shims, no
+aliases. `import kymora` is the only spelling. (The bare `tsxtract` name on
+PyPI is an unrelated JAX project; never install it expecting this library.)
 
 **Which Python versions?** 3.10–3.13, via prebuilt wheels (no Rust needed).
 See [Install](install.md).

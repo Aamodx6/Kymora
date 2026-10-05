@@ -292,8 +292,3 @@ class KymoraSelector:
         mask = np.zeros(n, dtype=bool)
         mask[self.selected_indices_] = True
         return mask
-
-
-#: Deprecated alias for :class:`KymoraSelector` (pre-rename name).
-#: Removal no earlier than version 0.8.0.
-TsxSelector = KymoraSelector

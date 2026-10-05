@@ -76,7 +76,7 @@ def env_header_lines(env: dict | None, commit: str) -> list[str]:
         lines.append(
             f"**Software:** Python {py.get('version', '?').split()[0]}, "
             f"numpy {pkgs.get('numpy', '?')}, numba {pkgs.get('numba', '?')}, "
-            f"tsxtractor {pkgs.get('tsxtractor', '?')}  "
+            f"kymora {pkgs.get('kymora', '?')}  "
         )
         lines.append(
             f"**Code state:** captured at commit {git.get('commit', '?')[:12]} "

@@ -1,26 +1,14 @@
 # Rename release checklist — Kymora (do NOT publish yet)
 
 Owner-gated. Nothing in this file publishes anything; it is the runbook
-for the 0.7.0 rename release and the `tsxtract-rs` deprecation tail.
+for the 0.7.0 rename release.
 
-## 1. GitHub repo rename (owner, ~5 min)
+## 1. GitHub repo rename — DONE (owner renamed `Tsxtract` → `Kymora`)
 
-1. Repo Settings → General → Repository name: `Tsxtract` → `Kymora`.
-   GitHub keeps redirects (`github.com/Aamodx6/Tsxtract/*` → `.../Kymora/*`),
-   stars, watchers, and forks automatically.
-2. Each clone updates its remote once:
-   `git remote set-url origin https://github.com/Aamodx6/Kymora.git`
-   (old URL keeps working via redirect, but update to avoid confusion).
-3. GitHub Pages (mkdocs site): the site URL changes
-   `aamodx6.github.io/Tsxtract/` → `aamodx6.github.io/Kymora/`
-   (`mkdocs.yml` `site_url`/`repo_url` already point at `Kymora`).
-   After the rename, re-run the docs workflow once to republish under the
-   new path; the old path 404s (no redirect for project pages — note in
-   Phase 5 site redirects if it matters).
-4. Vercel (`landing/`): the project follows the GitHub rename via redirect,
-   but confirm the linked repo + production domain in the Vercel dashboard.
-5. Canonical account (`Aamodx6` vs `Aamod007` bylines/footers) is still
-   NEEDS-OWNER — independent of the rename.
+GitHub kept redirects; the local remote is updated. Remaining: re-run the
+docs workflow once to republish the mkdocs site under
+`aamodx6.github.io/Kymora/`; confirm the linked repo in the Vercel
+dashboard. Canonical account (`Aamod007` bylines) still NEEDS-OWNER.
 
 ## 2. PyPI trusted publishing for `kymora` (owner, web UI)
 
@@ -47,14 +35,13 @@ deprecation release is possible. `pip install tsxtract-rs` now fails with
 
 ## 4. Removal schedule (already recorded in CHANGELOG)
 
-- `import tsxtract` shim: removal >= **0.8.0** (`tsxtractor` already deleted).
-- `TsxSelector` alias: removal >= **0.8.0**.
-- `tsxtract-rs` 0.6.1 shim dist: no updates, ever.
+- Old import names (`tsxtract`, `tsxtractor`) and the `TsxSelector` alias:
+  deleted outright, no removal window. `tsxtract-rs` the PyPI project was
+  deleted by the owner (name can never be re-registered).
 
 ## 5. Post-publish verification (paste output into the release notes PR)
 
-- `pip download kymora==0.7.0 --no-deps` + clean-venv
-  `import kymora` / `import tsxtract` (warns).
+- `pip download kymora==0.7.0 --no-deps` + clean-venv `import kymora`.
 - `feature_names()` sha256 still
   `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`.
 - README quickstart blocks 1–4 verbatim in the clean venv.

@@ -26,11 +26,11 @@ feature is a **major** version change; appending a new feature at the end is a
 - `TsxError` → `KymoraError` (Rust-internal only; Python callers still
   receive `ValueError` with identical messages).
 
-### Deprecated
-- `import tsxtract` is a thin shim that re-exports `kymora` and emits a
-  `DeprecationWarning` on first import. Removal no earlier than **0.8.0**
-  (the older `tsxtractor` alias was deleted outright). Migrate with:
-  `pip install kymora` + `import kymora as km` (was `import tsxtract as tsx`).
+### Removed
+- Every old name is gone with no shim and no re-export: `import tsxtract`,
+  `import tsxtractor`, and the `TsxSelector` alias were deleted outright.
+  Migrate with: `pip install kymora` + `import kymora as km`
+  (was `import tsxtract as tsx`).
 - `tsxtract-rs` was deleted from PyPI (deleted names can never be
   re-registered, so there will be no deprecation release under that name).
   `pip install tsxtract-rs` no longer resolves — install `kymora` instead.

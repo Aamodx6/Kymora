@@ -20,15 +20,9 @@ def test_version_is_exposed_and_pep440_shaped():
 
 
 def test_version_matches_installed_distribution_metadata():
-    from importlib.metadata import PackageNotFoundError, version
+    from importlib.metadata import version
 
-    for dist_name in ("kymora", "tsxtract-rs"):
-        try:
-            assert kymora.__version__ == version(dist_name)
-            return
-        except PackageNotFoundError:
-            continue
-    raise AssertionError("No distribution metadata found for kymora or tsxtract-rs")
+    assert kymora.__version__ == version("kymora")
 
 
 def test_public_api_surface_is_exactly_what_is_documented():
@@ -47,35 +41,18 @@ def test_public_api_surface_is_exactly_what_is_documented():
         "describe_feature",
         "select_features",
         "KymoraSelector",
-        "TsxSelector",  # deprecated alias for KymoraSelector
         "tune",
         "__version__",
     }
-    assert kymora.TsxSelector is kymora.KymoraSelector
     for name in kymora.__all__:
         assert hasattr(kymora, name), name
 
 
-def test_deprecated_tsxtract_shim_warns_and_reexports_identical_objects():
-    import importlib
-
-    # First import must emit the warning; capture it so the suite stays
-    # warning-clean even under `-W error`.
-    with pytest.warns(DeprecationWarning, match="deprecated"):
-        import tsxtract as shim
-
-    assert set(shim.__all__) == set(kymora.__all__)
-    for name in kymora.__all__:
-        assert getattr(shim, name) is getattr(kymora, name), name
-    assert shim.__version__ == kymora.__version__
-    with pytest.warns(DeprecationWarning, match="deprecated"):
-        importlib.reload(shim)
-
-
-def test_tsxtractor_shim_is_gone():
+@pytest.mark.parametrize("gone_name", ["tsxtract", "tsxtractor"])
+def test_old_import_names_are_gone(gone_name):
     import importlib.util
 
-    assert importlib.util.find_spec("tsxtractor") is None
+    assert importlib.util.find_spec(gone_name) is None
 
 
 def test_py_typed_marker_ships_with_the_package():
@@ -182,7 +159,7 @@ def test_df_preserves_the_nan_row_contract():
     assert not df.iloc[1].isna().all()
 
 
-def test_pandas_is_not_imported_by_importing_tsxtract():
+def test_pandas_is_not_imported_by_importing_kymora():
     """Core install must stay numpy-only: pandas is imported lazily inside
     extract_features_df, never at package import time."""
     source = (PKG_DIR / "__init__.py").read_text(encoding="utf-8")

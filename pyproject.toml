@@ -42,5 +42,5 @@ Changelog = "https://github.com/Aamodx6/Kymora/blob/main/CHANGELOG.md"
 [tool.maturin]
 python-source = "python"
 module-name = "kymora._core"
-python-packages = ["kymora", "tsxtract"]
+python-packages = ["kymora"]
 features = ["pyo3/extension-module"]
