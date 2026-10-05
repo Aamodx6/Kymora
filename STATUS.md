@@ -43,7 +43,7 @@
 |------|--------|--------|-------|
 | 3.1 NaN/Inf policy doc | ✅ | | docs/numerics.md canonical (nan-policy.md → pointer); `nan_policy` propagate(default)/raise on batch/ragged/sliding/mc/streaming; omit + unknown rejected with guidance; NaN errors bypass KymoraError (values≠structure) |
 | 3.2 float32 support | ✅ | | Fixed FFI panic on f32+non-core33 (PanicException → ValueError); f32 gather for minimal/subsets; precision validated; f32≈f64 rtol 1e-4 (measured 8.8e-6); 9 tests |
-| 3.3 Multivariate input | ⬜ | | |
+| 3.3 Multivariate input | ✅ | | extract_features_mc accepts list of 2D (ragged T, uniform C) bit-identical to stacked 3D; ch{c}__{feature} blocks + cross verified vs batch; mc_df labeled; found silent-wrong on Fortran input/out (fixed in 3.4) |
 | 3.4 Non-contiguous handling | ⬜ | | |
 | 3.5 Shape/dtype test matrix | ⬜ | | |
 
