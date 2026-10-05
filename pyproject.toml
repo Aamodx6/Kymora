@@ -10,6 +10,7 @@ dynamic = ["version"]
 description = "Fast time-series feature extraction, Rust core"
 readme = "README.md"
 license = "MIT"
+authors = [{ name = "Aamod Kumar" }]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 keywords = ["time-series", "feature-extraction", "rust", "tsfresh", "machine-learning"]
