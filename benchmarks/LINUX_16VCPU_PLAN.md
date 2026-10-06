@@ -2,7 +2,7 @@
 
 Purpose: replace the exploratory i7-13620H laptop numbers (`CLAIMS.md`,
 `F1_REPORT.md`) with authoritative figures from a 16-vCPU Linux runner
-(arch.md §14.1: cloud runs are worded "16 vCPU"). Re-runs the exact F1 +
+(docs/internal/arch.md §14.1: cloud runs are worded "16 vCPU"). Re-runs the exact F1 +
 3b protocol. DO NOT improvise — follow the steps verbatim and commit the
 artifacts.
 

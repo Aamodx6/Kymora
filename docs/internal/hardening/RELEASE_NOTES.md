@@ -21,6 +21,9 @@ Full list in CHANGELOG.md. Highlights:
   verified sktime adapter example included.
 - Three FFI-crossing panics and two silent-wrong paths eliminated (all now
   `ValueError` or exact); see CHANGELOG Fixed section.
+- Numerically-degenerate windows (1-ulp scale) now yield NaN for
+  `skewness`/`kurtosis` in batch and streaming alike (scipy gh-15905
+  parity); `nan_policy="raise"` does not fire on guard-produced NaN.
 - Perf regression gate (`tools/perf_gate.py` + CI), generated feature
   catalog (`tools/gen_feature_docs.py` + CI), external parity suite,
   proptest/cargo-fuzz targets, cross-platform wheel-test CI.

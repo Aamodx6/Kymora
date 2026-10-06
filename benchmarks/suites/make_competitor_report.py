@@ -1,14 +1,14 @@
 """Phase B3 (step 2): Competitor report — the three honest-claims views.
 
 Reads the raw JSONL artifacts and produces benchmarks/results/COMPETITOR_REPORT.md
-with, for every row (arch.md §11.6):
+with, for every row (docs/internal/arch.md §11.6):
   1. raw runtime (median ms, plus best-of)
   2. µs per series-feature
   3. matched-feature runtime (only definition-agreed features; N/A where the
      frozen matched set is empty, e.g. catch22/antropy/tsflex/sktime)
 
 Timeout / error cases are listed explicitly — the matrix is never silently
-incomplete (arch.md §11.1).
+incomplete (docs/internal/arch.md §11.1).
 """
 
 from __future__ import annotations
@@ -131,7 +131,7 @@ def main() -> int:
     lines.append("# Phase B3 Step 2: Competitor Throughput Matrix — Three Views\n")
     lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
     lines.append("**Hardware:** 13th Gen Intel i7-13620H (10C/16T hybrid), Windows 11, 16 threads, f64 C-contiguous  ")
-    lines.append("**Views per row (arch.md §11.6):** raw median ms · µs/series-feature · matched-feature (definition-agreed subset only)  ")
+    lines.append("**Views per row (docs/internal/arch.md §11.6):** raw median ms · µs/series-feature · matched-feature (definition-agreed subset only)  ")
     lines.append("**Protocol:** fresh subprocess per case, warmup, GC disabled; per-case wall-clock timeout recorded as an explicit `timeout` row; tsfresh/sktime slow families use min_runs=1 (single full run dominates); see `benchmarks/suites/throughput_competitors.py`.\n")
 
     dists = ["gaussian", "random_walk", "ar1", "heavy_tailed", "sinusoid"]

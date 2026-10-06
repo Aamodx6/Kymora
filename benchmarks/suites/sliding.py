@@ -1,6 +1,6 @@
 """Phase B3: Sliding-window benchmark suite.
 
-Per arch.md §11.5 (sliding/streaming): windows 64/256/1024 × strides
+Per docs/internal/arch.md §11.5 (sliding/streaming): windows 64/256/1024 × strides
 1/8/64/window vs tsflex, `sliding_window_view` + baseline, pandas rolling.
 
 Hard Rule 1 (correctness before speed): every mode is verified against

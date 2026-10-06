@@ -2,7 +2,7 @@
 
 **Branch:** `hardening/kymora-v-next`
 **Started:** 2026-10-05
-**Tracking:** STATUS.md (per-task), OWNER_DECISIONS.md (owner-only actions)
+**Tracking:** STATUS.md (per-task, same folder), ../../OWNER_DECISIONS.md (owner-only actions)
 
 ## Codebase State Summary
 

@@ -1,7 +1,7 @@
 """Deterministic synthetic time-series dataset generator.
 
 Generates realistic, challenging, and adversarial time-series shapes and distributions
-per arch.md §11.4:
+per docs/internal/arch.md §11.4:
 - Gaussian white noise
 - Random walk
 - Sinusoid + noise (multiple SNR)
@@ -58,7 +58,7 @@ ALL_DISTRIBUTIONS = [
     "mixed_magnitudes",
 ]
 
-# Benchmark shapes per arch.md §11.4
+# Benchmark shapes per docs/internal/arch.md §11.4
 BENCHMARK_SHAPES = [
     (1, 10), (1, 100), (1, 100_000), (1, 1_000_000),
     (10, 500), (100, 100), (100, 500),
@@ -67,7 +67,7 @@ BENCHMARK_SHAPES = [
     (1_000_000, 100), (100, 50_000),
 ]
 
-# Odd / adversarial lengths per arch.md §11.4
+# Odd / adversarial lengths per docs/internal/arch.md §11.4
 ODD_LENGTHS = [7, 31, 499, 500, 503, 997, 1000, 1024, 2047, 4093, 65536, 100003]
 
 

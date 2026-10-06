@@ -1,6 +1,6 @@
 """Phase B3: Streaming benchmark suite.
 
-Per arch.md §11.5 (sliding/streaming) and §8 (D4):
+Per docs/internal/arch.md §11.5 (sliding/streaming) and §8 (D4):
   - push latency (O(1) tier) vs naive recompute
   - compute(kind="fast") vs compute(kind="all") vs full batch recompute
   - capacity sweep 64 … 65536 (push + compute latency, RSS delta)
