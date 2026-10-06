@@ -91,36 +91,51 @@ def test_i4_no_panic_across_ffi():
 
 
 def test_i5_gil_released():
-    """I5: GIL released for the whole parallel region.
+    """I5: GIL released for the whole parallel region (progress-based).
 
-    Two Python threads each running extract_features on large batches run concurrently.
+    A daemon heartbeat thread ticks ~once per ms while the main thread runs
+    a >=300 ms extraction. Progress — not a wall-clock ratio — is asserted:
+    beside released-GIL compute the sleeper ticks nearly every millisecond,
+    while beside a GIL-holding call it could only proceed at the 5 ms
+    interpreter switch interval (~20% of elapsed ms at best). The 40%
+    threshold sits 2x clear of both sides. (The old ratio assertion on a
+    ~16 ms workload flaked on a shared macOS runner.)
     """
-    X1 = np.random.randn(2000, 500)
-    X2 = np.random.randn(2000, 500)
+    rng = np.random.default_rng(11)
+    X = np.ascontiguousarray(rng.standard_normal((30_000, 500)))
 
-    # Warmup
-    kymora.extract_features(X1[:10])
+    # Warmup (pools, page faults). n_jobs=1 keeps per-call timing stable
+    # across core counts; GIL release is unconditional (py.detach at every
+    # extraction entry point in src/ffi.rs), so this still tests I5.
+    kymora.extract_features(X[:8], n_jobs=1)
 
+    ticks = 0
+    stop = False
+
+    def heartbeat():
+        nonlocal ticks
+        while not stop:
+            time.sleep(0.001)
+            ticks += 1
+
+    hb = threading.Thread(target=heartbeat, daemon=True)
     t0 = time.perf_counter()
-    _ = kymora.extract_features(X1)
-    t_single = time.perf_counter() - t0
+    hb.start()
+    out = kymora.extract_features(X, n_jobs=1)
+    elapsed_ms = (time.perf_counter() - t0) * 1e3
+    stop = True
+    hb.join()
 
-    def worker(arr):
-        kymora.extract_features(arr)
-
-    t0 = time.perf_counter()
-    t1 = threading.Thread(target=worker, args=(X1,))
-    t2 = threading.Thread(target=worker, args=(X2,))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    t_threaded = time.perf_counter() - t0
-
-    # If GIL was held, t_threaded would be >= 2 * t_single.
-    # With GIL released, both threads execute concurrently.
-    # We assert that concurrency exists (t_threaded < 1.8 * t_single or reasonable factor).
-    assert t_threaded < 1.9 * (t_single * 2), f"GIL may be held: single={t_single:.3f}s, threaded={t_threaded:.3f}s"
+    assert elapsed_ms >= 300, (
+        f"workload too small to overlap: {elapsed_ms:.0f} ms < 300 ms"
+    )
+    assert ticks >= 0.4 * elapsed_ms, (
+        f"heartbeat starved: {ticks} ticks in {elapsed_ms:.0f} ms "
+        "(GIL may be held)"
+    )
+    # Timing-independent: the result equals a fresh reference run.
+    ref = kymora.extract_features(X, n_jobs=1)
+    np.testing.assert_array_equal(out, ref)
 
 
 def test_i6_output_dtype_float64():
