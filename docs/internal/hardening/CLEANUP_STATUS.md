@@ -371,7 +371,6 @@ streaming expansion); also documented. Goldens, validation, and all gates
 unaffected (no degenerate inputs in fixtures).
 
 ### Final tree (depth 2; ignored build/cache dirs omitted)
-
 - `.github/` actions/, CODEOWNERS, dependabot.yml, ISSUE_TEMPLATE/,
   PULL_REQUEST_TEMPLATE.md, workflows/
 - `benchmarks/` adapters/, agreement/, baseline/, datasets/, harness/,
@@ -397,3 +396,26 @@ Tracked: 357 files / 5.7 MB → 364 files / 5.8 MB (net +7: +benchmarks/README,
 moves preserve history).
 All gates green at every commit; golden files unchanged; nothing pushed,
 merged, or tagged.
+
+## Leftover phases — DONE
+
+- L1 banner: 2 lines atop `benchmarks/results/L1_ROOT_CAUSE.md`, body
+  untouched (`960adf0`).
+- 5.1 `.gitignore`: sectioned rewrite, frozen evidence explicitly excluded
+  (`*.svg` deliberately not ignored — `benchmarks/report/charts/*.svg` is
+  tracked); `git ls-files | git check-ignore --stdin` empty
+  (`23df316`, also adds `tools/README.md` + `docs/internal/README.md`).
+  Backup sweep: no `*.bak/*~/*.orig/*.old` outside `target/` build noise.
+- L1 rerun on HEAD (`9d6364c`): fresh `throughput.py --no-competitors`
+  matrix (135 rows, kymora×numpy×numba all ok) → `2026-10-05_l1_rerun/
+  l1_root_cause.json` (8 losses, was 17; only 1×100 gaussian 1.78×,
+  heavy_tailed 1.75×, random_walk 1.43× robust). CLAIMS Where-slower row +
+  README loss section rewritten from that artifact only (check_claims
+  green). Scratch `throughput.jsonl` re-deleted after use.
+- feature_map.json numba set 23→33 (`d90ee36`): missing 10 verified EXACT
+  (worst 9.7e-14) on gaussian/random_walk/ar1/heavy_tailed/sinusoid ×
+  1×100/10×500/100×500, strict fastmath=False; adversarial dists excluded
+  (conservative). Rerun agreement relabeled deterministically (measured
+  values proven identical; 33/33 EXACT, 0 WRONG).
+- Deferred (unchanged): perf_gate → quiet CI; hygiene hash-check + 5.2 →
+  CI branch post-rebase (OWNER_DECISIONS.md §7).
