@@ -93,7 +93,17 @@ hardening pass.
 3. `git push origin v0.8.0`
 4. Monitor release workflow
 
-### Cleanup note (2026-10-06, repo-cleanup branch)
+### Cleanup note (2026-10-06, SUPERSEDED 2026-10-07 — do not follow the original text)
+The original note below assumed the `v0.8.0` tag had never been pushed.
+That assumption is FALSE: the tag is on origin at `9b9e104`, `kymora 0.8.0`
+was published to PyPI from it (sdist + 5 wheels, trusted-publisher run
+37306732236), and GitHub Release "Kymora 0.8.0" (Latest) exists. A second
+release run (37307597215) failed with `400 File already exists` — i.e. a
+duplicate publish attempt, not an auth failure. Trusted Publishing works;
+no pending publisher is needed.
+DO NOT move or delete the `v0.8.0` tag. The next release is 0.8.1.
+
+Original (stale) text, kept for the record:
 A local `v0.8.0` tag already exists pointing at `9b9e104` (pre-cleanup tree).
 It was NOT pushed and must NOT be pushed as-is: after the cleanup branch is
 merged, delete it locally (`git tag -d v0.8.0`) and recreate it on the final
