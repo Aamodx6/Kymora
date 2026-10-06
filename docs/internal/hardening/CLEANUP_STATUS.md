@@ -1,6 +1,6 @@
 # CLEANUP_STATUS.md — repo cleanup + folder reorganization
 
-Branch: `chore/repo-cleanup` (do not push, do not merge).
+Branch: `chore/repo-cleanup`.
 Backup: tag `pre-cleanup` + branch `backup/pre-cleanup` (both created, verified).
 Base note: brief said branch from `hardening/kymora-v-next`, but local `main`
 is `hardening/kymora-v-next` + 3 CI fixes (`67fd6e8`, `5e9ffbb`, `9b9e104`,
@@ -41,7 +41,9 @@ Phase 2 will establish which is true on this tree.
 | patent/ | DIR (tracked, FROZEN) | 0.0 MB |
 | .pytest_cache/ | DIR (ignored) | 0.0 MB |
 | proptest-regressions/ | DIR (untracked) | 0.0 MB |
-| root files (docs/internal/arch.md, CHANGELOG.md, README.md, Cargo.lock, …) | FILEs | <0.1 MB total |
+| root files (arch.md, CHANGELOG.md, README.md, Cargo.lock, … — paths as at
+measurement time; the Phase 4 moves later relocated them to
+`docs/internal/`, see CLEANUP_MOVES.tsv) | FILEs | <0.1 MB total |
 
 Working-dir total ≈ **6178 MB (~6.0 GiB)**: untracked/ignored **6172.7 MB**
 (42555 files, includes `.git/`) + tracked **5.7 MB** (357 files).
@@ -206,9 +208,9 @@ post-rebuild run, clean on the next two — timing artifact, not code),
 cargo 30, clippy/fmt/mkdocs/claims/feature-docs/validation/snippets/mypy
 green, golden sha `8a1e27…31af2e`, golden diff empty.
 
-Working dir: ~6178 MB → ~10 MB excl. `.git` (tracked 5.7 MB + live
-`.gstack/` + rebuilt `site/`? no — site/ only on mkdocs build; current
-10 MB is tracked + `.gstack/` + fresh build outputs pending next build).
+Working dir: ~6178 MB → ~10 MB excl. `.git` (tracked 5.7 MB plus live
+`.gstack/` state and fresh build outputs; `site/` only exists after an
+explicit `mkdocs build`).
 `.git`: 63.8 MB loose → plain `git gc --prune=now` → 6.0 MB packed
 (no reflog expire, no --aggressive, per orders; before/after from
 `git count-objects -vH`: 63.76 MiB/3298 loose → 5.85 MiB packed).
@@ -285,19 +287,6 @@ Wheel rebuilt from current tree (`maturin build --release`, reinstalled
 
 `.gstack/` was already ignored (line 13) — no change needed. Added
 `.mypy_cache/` and `fuzz/Cargo.lock`. Full rewrite deferred to Phase 5.
-
-## Phase 3 — PENDING
-
-Tracked-file triage: vacuously clean (>1 MB: none; >5 MB dirs: none).
-Remaining work: paper-PDF decision, root-file moves (Phase 4), `git gc`.
-
-## Phase 4 — PENDING (path map CLEANUP_MOVES.tsv to be written first)
-
-## Phase 5 — PENDING
-
----
-*Phase 1 complete. No file deleted, no tracked file modified. Next: commit
-this report, then Phase 2 dry-run.*
 
 ## Incident 2026-10-06 — shared-tree collision (REPAIRED, work PAUSED)
 
@@ -419,3 +408,30 @@ merged, or tagged.
   values proven identical; 33/33 EXACT, 0 WRONG).
 - Deferred (unchanged): perf_gate → quiet CI; hygiene hash-check + 5.2 →
   CI branch post-rebase (OWNER_DECISIONS.md §7).
+
+## Non-cleanup changes in this branch (for the PR description)
+
+Moves-only ended at `08954db`. The commits below change behavior, numbers,
+or published docs — reviewers should read them as functional changes, and
+`2b32c85`/`86cde1f` are kept as separate commits so they cherry-pick cleanly:
+
+- `86cde1f` fix: skew/kurt NaN on numerically-degenerate windows (mirrors
+  scipy gh-15905). Batch + streaming both return NaN on 1-ulp and constant
+  windows; 1e9+1e-3 noise unaffected (finite, paths agree ~5.5e-5);
+  1e9+1e-9 noise NaNs (below one ulp of 1e9 — documented, not a bug).
+  Follow-up `2b32c85`: deterministic batch-vs-streaming tests (constant,
+  1-ulp, both 1e9 cases), `nan_policy="raise"` documented as input-only,
+  CHANGELOG "Fixed" entry + RELEASE_NOTES line. Goldens/validation unchanged.
+- `9d6364c` bench: HEAD L1 rerun (8 losses, was 17) + Where-slower rewrite
+  from `2026-10-05_l1_rerun/l1_root_cause.json`. Only the three 1×100 rows
+  are robust claims; the other five rows are labeled exploratory/noisy-host
+  (no env/CPU load or per-row CV was recorded — follow-up, Oct 2026).
+- `d90ee36` bench: numba matched set 23→33 in `feature_map.json` (10 added
+  features verified EXACT, worst rel-err 9.7e-14; script-regenerated via
+  `benchmarks/suites/agreement.py` step 10, rerun agreement 33/33 EXACT).
+  README/CLAIMS equal-feature tables already read 33 before this change —
+  unaffected.
+- `86ec065` docs: `exclude_docs: internal/` in mkdocs.yml — `docs/internal/`
+  no longer publishes to GitHub Pages (verified `site/internal` absent).
+- `960adf0`/`23df316` docs: 2-line historical banner on L1_ROOT_CAUSE.md;
+  sectioned `.gitignore` + README indexes (no behavior change).

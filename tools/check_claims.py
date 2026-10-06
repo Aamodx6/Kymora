@@ -5,10 +5,10 @@ Exit code 0 if all figures are traceable, 1 otherwise.
 Usage: python tools/check_claims.py [--fix]
 """
 
+import json
 import re
 import sys
 from pathlib import Path
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAIMS_FILE = REPO_ROOT / "CLAIMS.md"
 
@@ -144,9 +144,68 @@ def check_file(filepath, claims_text, claims_numbers):
     return issues, pending
 
 
+# Expected Where-slower figures from the HEAD L1 rerun artifact
+# (benchmarks/results/2026-10-05_l1_rerun/l1_root_cause.json). Tolerances are
+# display-rounding width: ratios/CIs to 0.01, medians to 0.005 ms.
+L1_RERUN_FILE = (
+    REPO_ROOT / "benchmarks" / "results" / "2026-10-05_l1_rerun" / "l1_root_cause.json"
+)
+L1_ROBUST_ROWS = {
+    # (n_series, length, dist): (ratio, ci_lo, ci_hi, km_median_ms, numba_median_ms)
+    (1, 100, "gaussian"): (1.78, 1.76, 1.80, 0.029, 0.016),
+    (1, 100, "heavy_tailed"): (1.75, 1.74, 1.76, 0.029, 0.016),
+    (1, 100, "random_walk"): (1.43, 1.42, 1.45, 0.029, 0.020),
+}
+L1_TEN_BY_500_RANGE = (0.85, 1.08)
+
+
+def verify_l1_rerun(claims_text):
+    """Check the CLAIMS.md Where-slower figures against the L1 rerun artifact.
+
+    Returns a list of drift descriptions (empty when everything matches).
+    """
+    issues = []
+    if not L1_RERUN_FILE.exists():
+        return ["artifact missing: " + L1_RERUN_FILE.as_posix()]
+    artifact = json.loads(L1_RERUN_FILE.read_text(encoding="utf-8"))
+    rows = {(r["n_series"], r["length"], r["dist"]): r for r in artifact["loss_table"]}
+
+    for key, (ratio, lo, hi, km_med, numba_med) in L1_ROBUST_ROWS.items():
+        row = rows.get(key)
+        if row is None:
+            issues.append(f"loss-table row missing for {key}")
+            continue
+        a_lo, a_hi = row["ratio_ci95"]
+        for label, got, want, tol in [
+            ("ratio", row["ratio"], ratio, 0.01),
+            ("ci_lo", a_lo, lo, 0.01),
+            ("ci_hi", a_hi, hi, 0.01),
+            ("km_median_ms", row["km_median_ms"], km_med, 0.005),
+            ("numba_median_ms", row["numba_median_ms"], numba_med, 0.005),
+        ]:
+            if abs(got - want) > tol:
+                issues.append(f"{key} {label}: artifact {got:.4f} vs CLAIMS {want}")
+        for token in (f"{ratio:.2f}×", f"[{lo:.2f},{hi:.2f}]"):
+            if token not in claims_text:
+                issues.append(f"CLAIMS.md no longer states {token} for {key}")
+
+    ratios_10x500 = [r["ratio"] for k, r in rows.items() if k[0] == 10 and k[1] == 500]
+    if ratios_10x500:
+        lo_want, hi_want = L1_TEN_BY_500_RANGE
+        if abs(min(ratios_10x500) - lo_want) > 0.01 or abs(max(ratios_10x500) - hi_want) > 0.01:
+            issues.append(
+                "10×500 range drifted: artifact "
+                f"{min(ratios_10x500):.2f}–{max(ratios_10x500):.2f} "
+                f"vs CLAIMS {lo_want:.2f}–{hi_want:.2f}"
+            )
+    return issues
+
+
 def main():
     claims_text = load_claims()
     claims_numbers = extract_numbers_from_claims(claims_text)
+
+    l1_issues = verify_l1_rerun(claims_text)
 
     all_issues = []
     all_pending = []
@@ -174,6 +233,12 @@ def main():
         for issue in all_issues:
             print(f"  {issue['file']}:{issue['line']}: {issue['claim']}")
             print(f"    → {issue['context']}")
+            print()
+        sys.exit(1)
+    if l1_issues:
+        print(f"\n⚠  {len(l1_issues)} Where-slower value(s) drifted from the L1 rerun artifact:\n")
+        for issue in l1_issues:
+            print(f"  {issue}")
             print()
         sys.exit(1)
     else:

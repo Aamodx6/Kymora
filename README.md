@@ -239,10 +239,10 @@ Pooled medians: kymora over 4 HEAD rounds (n=400 runs), competitors over 10 roun
 
 Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_cause.json`, `benchmarks/results/L1_ROOT_CAUSE.md`, `B3_REPORT.md`):
 
-- **Tiny single-shot calls.** Against a hand-written numba baseline on the same 33 features (HEAD rerun 2026-10-05), kymora loses only at 1 × 100 — gaussian 1.78× [1.76,1.80], heavy_tailed 1.75× [1.74,1.76], random_walk 1.43× [1.42,1.45] (95% CIs exclude 1.0; classified call-overhead + quantile-stage). At 10 × 500 the rows are parity/noise (0.85×–1.08×). Absolute medians at 1 × 100 are ~0.029 ms vs numba 0.016–0.020 ms.
-- **Thread wake at small n.** At 100 × 100, 16 threads made kymora ~27% *slower* than 1 thread (pool wake/join swamps ~12 µs/series of compute). Scaling efficiency at small batches is poor regardless of core count.
-- **Single-series tail latency at very short lengths.** At length 10, kymora wins the median (345.8 µs vs numpy's 1,317.6 µs) but loses the tail (p99 15.4 ms, max 29.1 ms) to wake jitter.
-- **Not a robust loss:** the 100 × 500 rows against the numba baseline are parity within noise (0.94×–0.99×, CI crosses 1.0).
+- **Tiny single-shot calls.** Against a hand-written numba baseline on the same 33 features (HEAD rerun 2026-10-05), kymora loses only at 1 × 100 — gaussian 1.78× [1.76,1.80], heavy_tailed 1.75× [1.74,1.76], random_walk 1.43× [1.42,1.45] (95% CIs exclude 1.0; classified call-overhead + quantile-stage). At 10 × 500 the rows are parity/noise (0.85×–1.08×) and the 1 × 100 sinusoid row is a kymora win with a clamped CI — all four are exploratory (noisy host, CI95 rel-widths 13–78%; the rerun recorded no env/CPU load or per-row CV), so no claim is made off them. Absolute medians at 1 × 100 are ~0.029 ms vs numba 0.016–0.020 ms.
+- **Thread wake at small n** (pre pool-cache, 0.8.0 prep). At 100 × 100, 16 threads made kymora ~27% *slower* than 1 thread (pool wake/join swamps ~12 µs/series of compute). Scaling efficiency at small batches is poor regardless of core count.
+- **Single-series tail latency at very short lengths** (pre pool-cache, 0.8.0 prep). At length 10, kymora wins the median (345.8 µs vs numpy's 1,317.6 µs) but loses the tail (p99 15.4 ms, max 29.1 ms) to wake jitter.
+- **Not a robust loss** (pre pool-cache, 0.8.0 prep): the 100 × 500 rows against the numba baseline are parity within noise (0.94×–0.99×, CI crosses 1.0).
 
 Guidance: batch many series into one call, or use `StreamingExtractor` for one-series-at-a-time ingest. At ≥1,000 series the picture inverts — kymora beats the numba baseline 3.4×–11.1× on identical features (equal-feature table above).
 
