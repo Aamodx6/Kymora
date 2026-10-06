@@ -65,6 +65,29 @@ jobs:
           python -m pip install -e ".[all]"
           python -m pip_audit --desc
 
+  parity:
+    # Same teeth as the CI parity job: dev-parity extras installed,
+    # KYMORA_REQUIRE_PARITY=1 turns reference-library skips into failures.
+    name: parity external (ubuntu-latest, py3.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      KYMORA_REQUIRE_PARITY: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[dev-parity,test]"
+          maturin develop --release
+      - run: python -m pytest tests/parity -q -rs
+
   fuzz-smoke:
     name: fuzz smoke (ubuntu-latest, 10min)
     runs-on: ubuntu-latest

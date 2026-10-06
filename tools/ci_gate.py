@@ -25,6 +25,7 @@ GATE_JOBS = (
     "rust",
     "test",
     "test-macos-intel",
+    "parity",
     "validation-report",
     "typecheck",
     "docs",
@@ -70,6 +71,7 @@ def self_test() -> int:
         ("changes cancelled", fixture({"changes": {"result": "cancelled"}}), 1),
         ("one job failed", fixture({"test": {"result": "failure"}}), 1),
         ("one job cancelled", fixture({"docs": {"result": "cancelled"}}), 1),
+        ("failed parity job", fixture({"parity": {"result": "failure"}}), 1),
         ("reusable wheels call failed", fixture({"wheels": {"result": "failure"}}), 1),
     ]
     failures = 0

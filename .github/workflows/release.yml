@@ -9,6 +9,14 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
+# One tag must never start two concurrent publishes: queue, never cancel
+# (cancel-in-progress: false). A duplicate run fails safe at PyPI with
+# `400 File already exists` (observed on v0.8.0), but serialization avoids
+# the noise and any upload race entirely.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 

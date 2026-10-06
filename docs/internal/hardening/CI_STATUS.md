@@ -109,6 +109,20 @@ all workflow YAML parses; `act` not run (no runner images on this host).
     from `perf_gate.py` `ratio X.XXXX` output) files immediately — that
     magnitude is never scheduler noise. Repeats now run to completion even
     after a failure (log keeps all three ratios for the grep).
+9. Release hardening (round 4): `release.yml` gains workflow-level
+    `concurrency: {group: release-<ref>, cancel-in-progress: false}` — one
+    tag queues behind another instead of racing it (the v0.8.0
+    duplicate-publish 400 came from two runs on one tag). `pypi-publish`
+    job, `pypi` environment, OIDC token permission, and tag-only `if:`
+    byte-identical (verified by diff).
+10. External parity with teeth (round 4): new `parity` job in `ci.yml`
+    (ubuntu, py3.12, installs `.[dev-parity,sklearn]`, runs
+    `pytest tests/parity -q -rs` with `KYMORA_REQUIRE_PARITY=1`, which
+    `tests/parity/conftest.py` turns reference-library skips into failures;
+    hook verified both ways locally). Path-gated like the test jobs, in
+    `ci-gate` needs (self-test now 8/8, incl. the new failed-parity case).
+    Same job on nightly schedule. No CI job previously installed
+    dev-parity — parity skipped silently everywhere; that hole is closed.
 
 ## 3. Old -> new job map
 
@@ -182,3 +196,21 @@ stay non-required; perf regressions surface as `perf-regression` issues
   `gh` issue flow (needs `issues: write`, granted); owner sets the single
   required check + creates the `vX.Y.Z` tag process (`version-check`
   enforces tag == Cargo.toml).
+
+## 7. Round-4 verification (release hardening + parity teeth)
+
+- `actionlint` 1.7.12 at repo root: clean (two self-inflicted newline
+  joins caught and fixed during editing; final run exit 0).
+- `python -c yaml.safe_load` on all 6 workflow files: OK.
+- `git diff` on `release.yml` `pypi-publish` job / `pypi` env / OIDC /
+  tag-only `if:`: empty (byte-identical; only the `concurrency` hunk added).
+- `python tools/ci_gate.py --self-test`: 8/8 pass, incl. new
+  `failed parity job => gate fails`.
+- `tests/parity/conftest.py` hook verified locally against the real suite:
+  blocked-tsfresh import skips without the env, fails with
+  `KYMORA_REQUIRE_PARITY=1`; unblocked suite passes 2/2 with the env set.
+- `git diff --stat HEAD -- tests/`: conftest.py only (new file; golden untouched).
+- First-run confirmation for the owner: after pushing, the CI run must show
+  jobs `parity external (ubuntu-latest, py3.12)` and
+  `ci gate (all green)` both green; the gate name is unchanged so the
+  `main protection` ruleset keeps matching.
