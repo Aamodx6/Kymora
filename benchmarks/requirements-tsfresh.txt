@@ -1,5 +1,5 @@
 tsfresh>=0.20.0
-numpy<2.0.0
+numpy<3.0.0
 pandas>=1.5.0
 scipy>=1.10.0
-psutil>=5.9.0
+psutil>=7.2.2
