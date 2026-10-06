@@ -42,6 +42,7 @@ from benchmarks.adapters.numba_baseline import (  # noqa: E402
 from benchmarks.adapters.numpy_baseline import CORE33_NAMES as NUMPY_NAMES  # noqa: E402
 from benchmarks.harness.runner import run_benchmark_subprocess  # noqa: E402
 from benchmarks.harness.stats import bootstrap_ratio_ci  # noqa: E402
+from benchmarks.harness.env import save_env, snapshot_load  # noqa: E402
 from benchmarks.datasets.generators import generate_series  # noqa: E402
 
 RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
@@ -370,6 +371,7 @@ def main() -> int:
     print("=" * 100)
     print("  L1 ROOT-CAUSE EVIDENCE PASS (numba_baseline_fast vs kymora)")
     print("=" * 100)
+    load_start = snapshot_load()
 
     # ── 0. Load throughput rows and find the losing pairs ──────────────────
     rows = [json.loads(l) for l in THROUGHPUT_JSONL.read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -417,6 +419,7 @@ def main() -> int:
             "n_series": n, "length": length, "dist": dist,
             "km_median_ms": t_km, "numba_median_ms": t_nb,
             "ratio": ratio, "ratio_ci95": [ci_lo, ci_hi],
+            "km_cv": r_km.stats.get("cv"), "numba_cv": r_nb.stats.get("cv"),
             "km_runs": len(r_km.runs), "numba_runs": len(r_nb.runs),
             "numba_fastmath_variant": r_nb.extra.get("fastmath_variant"),
             "original_ratio": L["ratio"],
@@ -654,6 +657,10 @@ def main() -> int:
     }
     OUT_JSON.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
     print(f"\nWrote {OUT_JSON}")
+    save_env(
+        OUT_JSON.parent / "env.json",
+        extra={"load_start": load_start, "load_end": snapshot_load()},
+    )
     return 0
 
 

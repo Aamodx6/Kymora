@@ -1,0 +1,164 @@
+name: Nightly
+
+# Non-gating checks: advisories, fuzz, and the noise-prone perf gate. Nothing
+# here is a required status check. Draft PRs touching this workflow or
+# deny.toml exercise the real runners via the pull_request trigger; the
+# perf-regression issue below only ever fires on schedule/dispatch, never
+# on PR events.
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/nightly.yml"
+      - "deny.toml"
+  workflow_dispatch:
+    inputs:
+      fuzz_seconds:
+        description: "Seconds per fuzz target"
+        default: "200"
+
+permissions:
+  contents: read
+
+jobs:
+  cargo-audit:
+    name: cargo audit (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - name: cargo-audit (RustSec advisory DB)
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit
+
+  cargo-deny:
+    name: cargo deny (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - name: cargo-deny (advisories, bans, licenses, sources)
+        run: |
+          cargo install cargo-deny --locked
+          cargo deny check
+
+  pip-audit:
+    name: pip audit (ubuntu-latest, py3.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: ./.github/actions/setup-venv
+      - name: pip-audit (PyPI advisory DB)
+        run: |
+          python -m pip install --upgrade pip pip-audit
+          python -m pip install -e ".[all]"
+          python -m pip_audit --desc
+
+  fuzz-smoke:
+    name: fuzz smoke (ubuntu-latest, 10min)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@0e28dd9a7764e5f83064112bb1f24025a14c313c # nightly
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - run: cargo install cargo-fuzz --locked
+      # Default 3 targets x 200s ~= 10 minutes of fuzzing, plus setup under
+      # the 25-minute job timeout. Override per-target seconds via dispatch.
+      - run: |
+          cd fuzz
+          for target in compute_all streaming ragged; do
+            cargo fuzz run "$target" -- -max_total_time=${{ github.event.inputs.fuzz_seconds || '200' }} -print_final_stats=1
+          done
+
+  perf-gate:
+    # Fixed runner class (ubuntu-latest), 3 repeats of the noise-aware gate.
+    # Non-required: continue-on-error keeps the workflow status green, but a
+    # regression still files/updates a `perf-regression` issue below —
+    # schedule/dispatch only (never on PR events), and only after 2
+    # consecutive failures (spam guard) — UNLESS a single repeat shows a
+    # >15% regression (ratio >= 1.15 in perf_gate.py output), which files
+    # immediately: that magnitude is never scheduler noise.
+    name: perf gate core33 (ubuntu-latest, x3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e "."
+          maturin develop --release
+      # --ci never records: first run on a runner class passes with a
+      # notice; maintainers record baselines via
+      # `python tools/perf_gate.py --runs 30 --update-baseline`.
+      # 3 repeats: one flaky sample must not page anyone. Each repeat runs
+      # even if the previous one failed (no `set -e` abort): the step fails
+      # at the end if any repeat failed, and the log keeps every ratio so
+      # the >15% bypass below can inspect all three.
+      - name: Perf gate (3 repeats)
+        run: |
+          : > perf_gate.log
+          FAILED=0
+          for i in 1 2 3; do
+            echo "--- perf gate repeat $i/3 ---" | tee -a perf_gate.log
+            python tools/perf_gate.py --runs 30 --ci 2>&1 | tee -a perf_gate.log || FAILED=1
+          done
+          exit $FAILED
+      - name: Detect large regression (>15%)
+        if: always()
+        run: |
+          if grep -Eq 'ratio (1\.1[5-9]|1\.[2-9]|2\.|[3-9]\.)' perf_gate.log; then
+            echo "large regression detected (ratio >= 1.15) — issue files immediately"
+            echo 'BIG_REGRESSION=true' >> "$GITHUB_ENV"
+          else
+            echo 'BIG_REGRESSION=false' >> "$GITHUB_ENV"
+          fi
+      - name: File or update perf-regression issue
+        # Schedule/dispatch only — PR runs exercise the gate but never file.
+        if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${BIG_REGRESSION:-false}" = "true" ]; then
+            echo "ratio >= 1.15 in this run: filing immediately, spam guard bypassed"
+          else
+            # Spam guard: only file after 2 consecutive failures. This run is
+            # still in progress, so look at the latest COMPLETED run on this
+            # branch — if it also failed, this is the 2nd consecutive failure.
+            PREV=$(gh run list --workflow nightly.yml --branch "${{ github.ref_name }}" --limit 5 --json status,conclusion --jq '[.[] | select(.status == "completed")][0].conclusion')
+            if [ "$PREV" != "failure" ]; then
+              echo "spam guard: latest completed run was '${PREV:-none}' — need a prior failure for 2 consecutive, or a >15% regression; no issue filed"
+              exit 0
+            fi
+          fi
+          TITLE="perf gate failure (core33, ubuntu-latest)"
+          BODY="nightly perf-gate failed twice in a row on ${{ github.ref_name }} (run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). Baselines: benchmarks/results/perf_baseline.json. This issue updates on every consecutive failure; close it once green for 7 days."
+          gh label create perf-regression --color FBCA04 --description "core33 perf gate regression (nightly)" 2>/dev/null || true
+          NUM=$(gh issue list --label perf-regression --state open --json number --jq '.[0].number')
+          if [ -z "$NUM" ]; then
+            gh issue create --title "$TITLE" --label perf-regression --body "$BODY"
+          else
+            gh issue comment "$NUM" --body "$BODY"
+          fi

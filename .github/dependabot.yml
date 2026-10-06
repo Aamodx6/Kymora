@@ -16,6 +16,13 @@ updates:
       cargo:
         patterns: ["*"]
 
-  # pip/PyPI is intentionally absent: dependencies live in pyproject.toml
-  # behind the maturin backend; Renovate/dependabot pip support for that
-  # layout is limited and the runtime dep set is numpy-only.
+  # Runtime deps are numpy-only behind the maturin backend, but the
+  # test/docs/bench extras (pandas, sklearn, mkdocs, …) still deserve
+  # weekly grouped bumps.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      pip:
+        patterns: ["*"]

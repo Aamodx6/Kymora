@@ -111,6 +111,40 @@ def _get_os_info() -> dict[str, Any]:
     }
 
 
+def _get_load() -> dict[str, Any]:
+    """System load snapshot: 1/5/15-min averages where the OS provides them.
+
+    `os.getloadavg` exists on Unix/macOS but not Windows; there (or when it
+    fails) fall back to psutil's instantaneous CPU percent, else None. Callers
+    record one snapshot at run start and one at run end (`load_start` /
+    `load_end` in env.json) so a noisy host is visible in the artifact.
+    """
+    try:
+        avg1, avg5, avg15 = os.getloadavg()
+        return {
+            "source": "getloadavg",
+            "avg_1min": float(avg1),
+            "avg_5min": float(avg5),
+            "avg_15min": float(avg15),
+        }
+    except (AttributeError, OSError):
+        pass
+    try:
+        import psutil
+        return {
+            "source": "psutil_cpu_percent",
+            "cpu_percent": float(psutil.cpu_percent(interval=1.0)),
+        }
+    except Exception:
+        pass
+    return {"source": None}
+
+
+def snapshot_load() -> dict[str, Any]:
+    """Public load snapshot for suite drivers (start/end bracketing)."""
+    return _get_load()
+
+
 def _get_git_info() -> dict[str, Any]:
     repo_root = Path(__file__).resolve().parents[2]
     info = {"commit": "unknown", "branch": "unknown", "is_dirty": False}
@@ -257,8 +291,12 @@ def capture_env() -> dict[str, Any]:
     }
 
 
-def save_env(out_path: Path | str) -> dict[str, Any]:
+def save_env(out_path: Path | str, extra: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Write env.json next to a suite's jsonl. `extra` (e.g. load_start /
+    load_end snapshots bracketing the run) is merged at the top level."""
     env_data = capture_env()
+    if extra:
+        env_data.update(extra)
     out = Path(out_path)
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:

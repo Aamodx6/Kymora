@@ -1,0 +1,213 @@
+name: Wheels (reusable)
+
+# Single home for wheel builds + install tests. Called by ci.yml (code PRs)
+# and release.yml (tags). Nothing else in the repo builds wheels.
+#
+# Matrix scale is an input: PRs run lite (5 builds + 3 OSes x py3.13);
+# main pushes and tags run full (lite + py3.10/3.14 extremes on linux/win).
+on:
+  workflow_call:
+    inputs:
+      full:
+        description: "Run the extended wheel-test matrix (py3.10/3.14 extremes)"
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Run the extended wheel-test matrix"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    name: wheel build (manylinux, ${{ matrix.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - name: Build wheel
+        uses: PyO3/maturin-action@423a6347767a8b16e65c2a7a7042e4a921528da8 # v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+          manylinux: "2014"
+          # aarch64 needs emulation/cross; x86_64 builds natively.
+          sccache: "true"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: wheels-linux-${{ matrix.target }}
+          path: dist
+
+  build-macos:
+    name: wheel build (macOS, ${{ matrix.target }})
+    runs-on: macos-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - uses: PyO3/maturin-action@423a6347767a8b16e65c2a7a7042e4a921528da8 # v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+          sccache: "true"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: wheels-macos-${{ matrix.target }}
+          path: dist
+
+  build-windows:
+    name: wheel build (Windows, x64)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - uses: PyO3/maturin-action@423a6347767a8b16e65c2a7a7042e4a921528da8 # v1
+        with:
+          target: x64
+          args: --release --out dist
+          sccache: "true"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: wheels-windows-x64
+          path: dist
+
+  build-sdist:
+    name: sdist (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: PyO3/maturin-action@423a6347767a8b16e65c2a7a7042e4a921528da8 # v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: wheels-sdist
+          path: dist
+
+  wheel-test:
+    # Lite matrix (always): one supported Python per desktop OS, from the
+    # matching built artifact. Installs from the wheel only — no Rust
+    # toolchain on this runner, so a missing/incompatible wheel fails here
+    # instead of at a user's pip. Then smoke import + full test suite.
+    # NOTE: `shell: bash` everywhere below — the default pwsh on Windows
+    # neither glob-expands the wheel path nor fails fast, which once shipped
+    # a green step with no kymora installed at all.
+    name: wheel-test (${{ matrix.os }}, py${{ matrix.python }})
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: "3.13", artifact: wheels-linux-x86_64}
+          - {os: macos-latest, python: "3.13", artifact: wheels-macos-aarch64}
+          - {os: windows-latest, python: "3.13", artifact: wheels-windows-x64}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist
+      - name: Install from wheel
+        shell: bash
+        run: |
+          # Dependencies come from PyPI; kymora itself must come from the
+          # freshly built wheel, so install it with --no-index --no-deps.
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24"
+          python -m pip install --no-index --no-deps --find-links dist kymora
+          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
+      - name: Smoke import outside the source tree
+        shell: bash
+        run: |
+          cd "$(mktemp -d)"
+          python -c "
+          import numpy as np, kymora
+          X = np.random.default_rng(0).standard_normal((64, 128))
+          f = kymora.extract_features(X)
+          assert f.shape == (64, len(kymora.feature_names())), f.shape
+          assert np.isfinite(f).all()
+          print('ok', kymora.__version__, f.shape)
+          "
+      - name: Full test suite against the wheel
+        shell: bash
+        run: |
+          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q
+
+  wheel-test-extended:
+    # Full matrix extra (main/tags only): oldest/newest Python extremes on
+    # linux + windows. Same wheel-only install-test as `wheel-test`.
+    name: wheel-test-extended (${{ matrix.os }}, py${{ matrix.python }})
+    if: ${{ inputs.full }}
+    needs: [build-linux, build-macos, build-windows]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: "3.10", artifact: wheels-linux-x86_64}
+          - {os: ubuntu-latest, python: "3.14", artifact: wheels-linux-x86_64}
+          - {os: windows-latest, python: "3.10", artifact: wheels-windows-x64}
+          - {os: windows-latest, python: "3.14", artifact: wheels-windows-x64}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist
+      - name: Install from wheel
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24"
+          python -m pip install --no-index --no-deps --find-links dist kymora
+          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
+      - name: Smoke import outside the source tree
+        shell: bash
+        run: |
+          cd "$(mktemp -d)"
+          python -c "
+          import numpy as np, kymora
+          X = np.random.default_rng(0).standard_normal((64, 128))
+          f = kymora.extract_features(X)
+          assert f.shape == (64, len(kymora.feature_names())), f.shape
+          assert np.isfinite(f).all()
+          print('ok', kymora.__version__, f.shape)
+          "
+      - name: Full test suite against the wheel
+        shell: bash
+        run: |
+          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q

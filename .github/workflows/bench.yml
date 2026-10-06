@@ -1,70 +1,100 @@
-name: benchmarks
+name: Bench
 
-# Runs the benchmark suite on CI runners so headline numbers are not
-# single-machine artifacts. Results are uploaded as artifacts; they are NOT
-# copied into README/CLAIMS.md until a maintainer reviews them (machine-class
-# differences make CI numbers non-comparable to laptop numbers).
-# See CLAIMS.md "PENDING" rows and OWNER_DECISIONS.md item 5.
-
+# Manual / never gating. Publishes numbers a stranger can reproduce on a
+# known runner instead of one laptop. Consolidates the old `Benchmark`
+# (bench_libraries.py) and `benchmarks` (equal-feature + remeasure) flows;
+# results upload as artifacts and are NOT copied into README/CLAIMS.md until
+# a maintainer reviews them (machine-class differences make CI numbers
+# non-comparable to laptop numbers). See CLAIMS.md "PENDING" rows and
+# OWNER_DECISIONS.md item 5.
 on:
-  workflow_dispatch: {}
-  schedule:
-    # Weekly, Sundays 03:00 UTC
-    - cron: "0 3 * * 0"
+  workflow_dispatch:
+    inputs:
+      n_series:
+        description: "Number of series"
+        default: "1000"
+      n_steps:
+        description: "Steps per series"
+        default: "500"
 
 permissions:
   contents: read
 
 jobs:
-  bench:
-    name: bench (${{ matrix.os }})
+  bench-libraries:
+    name: bench libraries (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[bench]"
+          maturin develop --release
+      - name: Record runner spec
+        run: |
+          echo "cores: $(nproc)" | tee -a "$GITHUB_STEP_SUMMARY"
+          python -c "import platform;print('python:', platform.python_version())" | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: |
+          python benchmarks/bench_libraries.py \
+            --n-series ${{ github.event.inputs.n_series || '1000' }} \
+            --n-steps ${{ github.event.inputs.n_steps || '500' }} \
+            --json benchmarks/results/latest.json \
+            --markdown benchmarks/results/latest.md
+      - run: cat benchmarks/results/latest.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: benchmark-results
+          path: benchmarks/results/
+
+  bench-equal-feature:
+    name: bench equal-feature (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     strategy:
       fail-fast: false
+      # macos-14 retires 2026-11-02; macos-15 is the supported arm64 label.
       matrix:
-        os: [ubuntu-latest, macos-14]
+        os: [ubuntu-latest, macos-15]
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-
+          cache: pip
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-
+        uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - name: Install Rust caching
-        uses: Swatinem/rust-cache@v2
-
+        uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - name: Build wheel (release)
         run: |
           python -m pip install --upgrade pip
           pip install maturin numpy
           maturin build --release --out dist
           pip install --force-reinstall --no-deps dist/kymora-*.whl
-
       - name: Install benchmark dependencies
         run: |
           pip install pytest psutil scipy pandas tsfresh pycatch22 tsfel joblib
-
       - name: Sanity build info
         run: |
           python -c "import kymora; print('kymora', kymora.__version__); print(len(kymora.feature_names()), 'features')"
-
       - name: Equal-feature parity gate
         run: |
           python benchmarks/suites/equal_feature.py parity
-
       - name: Equal-feature benchmark (reduced)
         run: |
           python benchmarks/suites/equal_feature.py bench --rounds 2 --shape 1000 500
-
       - name: Profile + scaling re-measure
         run: |
           python benchmarks/suites/remeasure_readme.py --skip-slow
-
       - name: Record runner environment
         shell: bash
         run: |
@@ -74,9 +104,8 @@ jobs:
             python -c "import platform, os; print(platform.platform()); print('CPUs:', os.cpu_count())"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Upload benchmark artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: bench-results-${{ matrix.os }}-${{ github.run_id }}
           path: |
