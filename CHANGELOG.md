@@ -61,6 +61,13 @@ Numerics, feature names/order, and the NaN/error contracts are unchanged
   vs batch 0.0) under a stale anchor; constant windows use exact
   `W·first²`.
 - Length-1 `trend_slope` returned ±inf instead of NaN.
+- Numerically-degenerate windows (non-constant but
+  `var <= (eps·mean)²`, e.g. a 1-ulp window) emitted rounding garbage for
+  `skewness`/`kurtosis` (batch ~√2 vs streaming 0.0); both paths now
+  return NaN, mirroring `scipy.stats.skew`/`kurtosis` (gh-15905).
+  Guard-produced NaN is an output value: `nan_policy="raise"` does not
+  fire on it. `cid_ce` on such windows stays defined but may disagree
+  between batch and streaming (different center rounding).
 
 ## [0.7.0] - 2026-10-04
 

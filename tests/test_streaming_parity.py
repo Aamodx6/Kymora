@@ -250,6 +250,71 @@ def _degenerate_nonconstant(win):
     return v > 0.0 and v <= (np.finfo(np.float64).eps * m) ** 2
 
 
+def test_degenerate_guard_deterministic():
+    """Deterministic batch-vs-streaming cover for the scipy gh-15905 guard
+    (commit 86cde1f): constant, 1-ulp, 1e9+1e-3 (guard must NOT trigger),
+    1e9+1e-9 (guard triggers -- 1e-9 is far below one ulp of 1e9)."""
+    skew_i = FAST_NAMES.index("skewness")
+    kurt_i = FAST_NAMES.index("kurtosis")
+
+    def both_paths(win):
+        win = np.asarray(win, dtype=np.float64)
+        b = kymora.extract_features(win[None, :], features=FAST_NAMES)[0]
+        ext = kymora.StreamingExtractor(len(win))
+        for v in win:
+            ext.push(float(v))
+        s = ext.compute(kind="fast")
+        return b, s
+
+    # 1. Constant window: both NaN.
+    b, s = both_paths(np.full(8, 3.0))
+    assert np.isnan(b[skew_i]) and np.isnan(b[kurt_i])
+    assert np.isnan(s[skew_i]) and np.isnan(s[kurt_i])
+
+    # 2. 1-ulp window: variance is summation noise -> both NaN (scipy parity).
+    b, s = both_paths(np.array([-10.0, -9.999999999999998]))
+    assert np.isnan(b[skew_i]) and np.isnan(b[kurt_i])
+    assert np.isnan(s[skew_i]) and np.isnan(s[kurt_i])
+
+    # 3. 1e9 offset + 1e-3 noise: well above the (eps*mean)^2 threshold,
+    # guard must NOT trigger; paths agree to ~5.5e-5 (measured). Tiny-noise
+    # windows center-round differently between batch and streaming, so the
+    # bound here is looser than OFFSET_SHAPE_BOUND (which covers O(1)
+    # noise); finiteness is the guard assertion.
+    rng = np.random.default_rng(0)
+    win = 1e9 + rng.normal(0, 1e-3, 50)
+    b, s = both_paths(win)
+    assert np.isfinite(b[skew_i]) and np.isfinite(b[kurt_i])
+    assert np.isfinite(s[skew_i]) and np.isfinite(s[kurt_i])
+    assert abs(s[skew_i] - b[skew_i]) < 1e-3
+    assert abs(s[kurt_i] - b[kurt_i]) < 1e-3
+
+    # 4. 1e9 offset + 1e-9 noise: 1e-9 is far below one ulp of 1e9
+    # (~2.4e-7), so the variance is rounding noise and the guard
+    # legitimately fires -> both NaN. Documented, not a bug.
+    win = 1e9 + rng.normal(0, 1e-9, 50)
+    b, s = both_paths(win)
+    assert np.isnan(b[skew_i]) and np.isnan(b[kurt_i])
+    assert np.isnan(s[skew_i]) and np.isnan(s[kurt_i])
+
+
+def test_degenerate_guard_nan_policy_raise_does_not_fire():
+    """Guard-produced NaN is an output value, not an input defect:
+    nan_policy='raise' scans inputs only, so a 1-ulp window returns NaN
+    (both paths) instead of raising."""
+    win = np.array([[-10.0, -9.999999999999998]])
+    row = kymora.extract_features(win, nan_policy="raise")[0]
+    names = kymora.feature_names()
+    assert np.isnan(row[names.index("skewness")])
+    assert np.isnan(row[names.index("kurtosis")])
+    ext = kymora.StreamingExtractor(2, nan_policy="raise")
+    ext.push(-10.0)
+    ext.push(-9.999999999999998)
+    got = ext.compute(kind="fast")
+    assert np.isnan(got[FAST_NAMES.index("skewness")])
+    assert np.isnan(got[FAST_NAMES.index("kurtosis")])
+
+
 @HYP_SETTINGS
 @given(
     w=st.integers(min_value=2, max_value=32),

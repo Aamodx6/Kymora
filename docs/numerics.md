@@ -21,6 +21,10 @@ Unknown-policy and omit errors are raised before any compute starts. The
 `raise` scan runs before the thread pool is entered, so an invalid call fails
 immediately.
 
+`nan_policy="raise"` scans **inputs** only: a NaN produced as an output
+value — including a guard-produced `skewness`/`kurtosis` NaN on a
+numerically-degenerate window — is returned normally, never raised.
+
 ## NaN as a value (propagate)
 
 | Input condition | Output |
