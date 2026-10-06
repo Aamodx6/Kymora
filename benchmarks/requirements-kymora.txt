@@ -1,4 +1,4 @@
 numpy>=1.24.0
 scipy>=1.10.0
 pandas>=1.5.0
-psutil>=5.9.0
+psutil>=7.2.2
