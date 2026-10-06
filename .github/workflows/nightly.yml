@@ -87,7 +87,9 @@ jobs:
     # Non-required: continue-on-error keeps the workflow status green, but a
     # regression still files/updates a `perf-regression` issue below —
     # schedule/dispatch only (never on PR events), and only after 2
-    # consecutive failures (spam guard).
+    # consecutive failures (spam guard) — UNLESS a single repeat shows a
+    # >15% regression (ratio >= 1.15 in perf_gate.py output), which files
+    # immediately: that magnitude is never scheduler noise.
     name: perf gate core33 (ubuntu-latest, x3)
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -111,26 +113,45 @@ jobs:
       # --ci never records: first run on a runner class passes with a
       # notice; maintainers record baselines via
       # `python tools/perf_gate.py --runs 30 --update-baseline`.
-      # 3 repeats: one flaky sample must not page anyone.
+      # 3 repeats: one flaky sample must not page anyone. Each repeat runs
+      # even if the previous one failed (no `set -e` abort): the step fails
+      # at the end if any repeat failed, and the log keeps every ratio so
+      # the >15% bypass below can inspect all three.
       - name: Perf gate (3 repeats)
         run: |
+          : > perf_gate.log
+          FAILED=0
           for i in 1 2 3; do
-            echo "--- perf gate repeat $i/3 ---"
-            python tools/perf_gate.py --runs 30 --ci
+            echo "--- perf gate repeat $i/3 ---" | tee -a perf_gate.log
+            python tools/perf_gate.py --runs 30 --ci 2>&1 | tee -a perf_gate.log || FAILED=1
           done
+          exit $FAILED
+      - name: Detect large regression (>15%)
+        if: always()
+        run: |
+          if grep -Eq 'ratio (1\.1[5-9]|1\.[2-9]|2\.|[3-9]\.)' perf_gate.log; then
+            echo "large regression detected (ratio >= 1.15) — issue files immediately"
+            echo 'BIG_REGRESSION=true' >> "$GITHUB_ENV"
+          else
+            echo 'BIG_REGRESSION=false' >> "$GITHUB_ENV"
+          fi
       - name: File or update perf-regression issue
         # Schedule/dispatch only — PR runs exercise the gate but never file.
         if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Spam guard: only file after 2 consecutive failures. This run is
-          # still in progress, so look at the latest COMPLETED run on this
-          # branch — if it also failed, this is the 2nd consecutive failure.
-          PREV=$(gh run list --workflow nightly.yml --branch "${{ github.ref_name }}" --limit 5 --json status,conclusion --jq '[.[] | select(.status == "completed")][0].conclusion')
-          if [ "$PREV" != "failure" ]; then
-            echo "spam guard: latest completed run was '${PREV:-none}' — need a prior failure for 2 consecutive; no issue filed"
-            exit 0
+          if [ "${BIG_REGRESSION:-false}" = "true" ]; then
+            echo "ratio >= 1.15 in this run: filing immediately, spam guard bypassed"
+          else
+            # Spam guard: only file after 2 consecutive failures. This run is
+            # still in progress, so look at the latest COMPLETED run on this
+            # branch — if it also failed, this is the 2nd consecutive failure.
+            PREV=$(gh run list --workflow nightly.yml --branch "${{ github.ref_name }}" --limit 5 --json status,conclusion --jq '[.[] | select(.status == "completed")][0].conclusion')
+            if [ "$PREV" != "failure" ]; then
+              echo "spam guard: latest completed run was '${PREV:-none}' — need a prior failure for 2 consecutive, or a >15% regression; no issue filed"
+              exit 0
+            fi
           fi
           TITLE="perf gate failure (core33, ubuntu-latest)"
           BODY="nightly perf-gate failed twice in a row on ${{ github.ref_name }} (run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). Baselines: benchmarks/results/perf_baseline.json. This issue updates on every consecutive failure; close it once green for 7 days."

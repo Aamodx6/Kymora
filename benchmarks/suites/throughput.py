@@ -31,6 +31,7 @@ from benchmarks.adapters.kymora import Adapter as KymoraAdapter
 from benchmarks.adapters.numpy_baseline import Adapter as NumpyAdapter
 from benchmarks.adapters.numba_baseline import Adapter as NumbaAdapter
 from benchmarks.datasets.generators import generate_series, ALL_DISTRIBUTIONS
+from benchmarks.harness.env import save_env, snapshot_load
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
@@ -181,6 +182,7 @@ def run_throughput_suite(
     output_file: str | None = None,
 ):
     """Run the full throughput benchmark suite."""
+    load_start = snapshot_load()
     if shapes is None:
         shapes = THROUGHPUT_SHAPES
     if distributions is None:
@@ -311,6 +313,10 @@ def run_throughput_suite(
             f.write(json.dumps(rec) + "\n")
 
     print(f"\n4. Saved {len(all_results)} records to {output_file}")
+    save_env(
+        Path(output_file).parent / "env.json",
+        extra={"load_start": load_start, "load_end": snapshot_load()},
+    )
 
     # ── 5. Summary table ──
     print("\n" + "=" * 80)

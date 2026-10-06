@@ -33,6 +33,12 @@ from typing import Callable
 
 import numpy as np
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from benchmarks.harness.env import save_env, snapshot_load  # noqa: E402
+
 
 @dataclass
 class Result:
@@ -291,6 +297,7 @@ def main() -> int:
     )
     args = ap.parse_args()
 
+    load_start = snapshot_load()
     rng = np.random.default_rng(args.seed)
     X = np.ascontiguousarray(rng.standard_normal((args.n_series, args.n_steps)))
 
@@ -335,6 +342,10 @@ def main() -> int:
         with open(args.json, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2)
         print(f"wrote {args.json}")
+        save_env(
+            os.path.join(os.path.dirname(os.path.abspath(args.json)), "env.json"),
+            extra={"load_start": load_start, "load_end": snapshot_load()},
+        )
     if args.markdown:
         os.makedirs(os.path.dirname(os.path.abspath(args.markdown)), exist_ok=True)
         with open(args.markdown, "w", encoding="utf-8") as fh:

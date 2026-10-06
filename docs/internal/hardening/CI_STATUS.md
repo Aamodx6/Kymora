@@ -1,18 +1,33 @@
 # CI_STATUS.md — CI/CD restructure tracking
 
-Branch: `chore/ci-restructure` (do not push, do not tag, do not publish).
-Base: `main` @ `9b9e104` — branch was `git reset --hard main` (== `origin/main`).
-Date: 2026-10-05/06. Constraint: no behavior change in what is verified —
-every existing check still exists with the same coverage, better structure.
-Release OIDC permission semantics unchanged (only restructured).
+Branch: `chore/ci-restructure` (do not push until the draft PR; do not tag, do not publish).
+Base: `origin/main` @ `c830a69` (cleanup merged via PRs #2 + #3; branch rebased
+cleanly, single commit `b95d53c` on top). Date: 2026-10-05/07. Constraint: no
+behavior change in what is verified — every existing check still exists with
+the same coverage, better structure. Release OIDC permission semantics
+unchanged (only restructured) — and verified working: `kymora 0.8.0` published
+to PyPI via Trusted Publishing (run 37306732236). The failed release run
+37307597215 was a duplicate-publish `400 File already exists`, not an auth
+failure; no pending publisher is needed. Do NOT move the `v0.8.0` tag
+(next release is 0.8.1).
 
 ## 0. Base reality (read before reviewing)
 
-- The brief assumed "rebase onto main with cleanup merged". Cleanup is NOT
-  merged and is PAUSED by the owner (see `CLEANUP_STATUS.md` incident
-  2026-10-06 on `chore/repo-cleanup`): `CLEANUP_MOVES.tsv` was never created
-  (Phase 4 moves never ran), so there are no moved paths to sweep — §1
-  records the zero-hit sweep explicitly.
+- Cleanup IS merged (`origin/main` @ `c830a69`: PR #2 merge `3784f13` +
+  PR #3 merge `c830a69`). This branch was rebased onto it with zero
+  conflicts (`b95d53c`). The §0 incident narrative from round 2 (cleanup
+  paused, contaminated commits, `git reset --hard`) is history — kept below
+  the line for the record and no longer operative.
+- Post-merge sweep (2026-10-07, on the rebased tree): every
+  `CLEANUP_MOVES.tsv` path swept across `.github/**`, `Makefile`,
+  `tools/**`, `mkdocs.yml`, `pyproject.toml`/`Cargo.toml`. Only stale hit:
+  `tools/check_repo_hygiene.py` `ROOT_ALLOWED` still listed the moved root
+  files (`arch.md`, `PLAN.md`, `STATUS.md`, `CLEANUP_STATUS.md`,
+  `RELEASE_NOTES.md`) — fixed to the final 20-entry layout (§2.6).
+  `rename_to_kymora.py` and `Makefile`/`mkdocs.yml` refs already point at
+  the new `docs/internal/` paths. `release.yml` never referenced
+  `RELEASE_NOTES.md`. **Zero stale hits after the fix.**
+- Historical (round 2, superseded):
 - The prior session's `chore/ci-restructure` tip (`b8c8537`) carried the
   incident's contaminated commits; per the incident note they were dropped
   by resetting the branch to `main`. The CI branch therefore contains NO
@@ -64,9 +79,10 @@ all workflow YAML parses; `act` not run (no runner images on this host).
    after **2 consecutive failures** — the step queries the latest COMPLETED
    run on the branch via `gh run list`; a single failure (previous run green
    or none) exits 0 without filing. Rationale: shared runners make one-off
-   perf failures noise; two in a row is signal. (The `>15% failure-rate`
-   alternative was considered; consecutive-2 is deterministic and simpler to
-   audit from the issue timeline.)
+   perf failures noise; two in a row is signal. Update 2026-10-07: a single
+   repeat at ratio >= 1.15 now bypasses the spam guard and files immediately
+   (see delta 8 above); the old "(>15% failure-rate) alternative considered"
+   note is superseded by this magnitude rule.
    Perf job keeps `continue-on-error: true` (workflow stays green); the
    `perf-regression` issue (label auto-created) is the signal. Perf job
    carries `issues: write` (top-level stays `contents: read`).
@@ -74,10 +90,25 @@ all workflow YAML parses; `act` not run (no runner images on this host).
    default true): lite = 5 builds + `wheel-test` (3 OSes × py3.13, always);
    full adds `wheel-test-extended` (py3.10/3.14 × linux/win). ci passes
    `full: event == push` (PRs lite, main full); release passes `full: true`.
-6. Hygiene: `ROOT_ALLOWED` allowlist = the 23 observed root files
-   (incl. forward-compatible `CLEANUP_STATUS.md` + `deny.toml`, absent on
-   `main` but arriving with cleanup/this work). Verified `hygiene OK` on
-   this tree.
+6. Hygiene: `ROOT_ALLOWED` = final post-cleanup root layout (20 entries:
+    dotfile + manifests + docs + scripts + `deny.toml`; the moved process
+    files stay out — a reappearance at root fails the gate). Plus two new
+    checks: paper/landing figure SHA256 equality (5 PNG pairs) and
+    `mkdocs.yml` must carry `exclude_docs: internal/`. Verified `hygiene OK`.
+7. Bench provenance (new): every suite writes `env.json` next to its jsonl
+    (CPU model, core counts, OS, governor/power info where available, load
+    average at start AND end via new `snapshot_load()`), and every timing row
+    carries per-row CV (harness `stats.cv` was already in remeasure rows;
+    added `kymora_cv`/`competitor_cv` to equal-feature rows and `km_cv`/
+    `numba_cv` to L1 loss rows). `l1_root_cause.py`/`throughput.py` never
+    called `save_env` before — that is why the 2026-10-05 rerun has no
+    env.json. bench.yml upload globs already cover the dated result dirs
+    (and results/ root for bench-libraries), so no workflow change needed.
+8. Nightly perf-issue rule tightened: 2 consecutive failures files as
+    before, but a single repeat with ratio >= 1.15 (>15% regression, grepped
+    from `perf_gate.py` `ratio X.XXXX` output) files immediately — that
+    magnitude is never scheduler noise. Repeats now run to completion even
+    after a failure (log keeps all three ratios for the grep).
 
 ## 3. Old -> new job map
 
