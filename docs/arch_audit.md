@@ -1,7 +1,7 @@
 # Architecture and Feature Catalog Audit (`docs/arch_audit.md`)
 
 **Date:** 2026-10-04  
-**Audit Target:** Alignment between built library `kymora.feature_names()`, `README.md`, `arch.md`, and `benchmarks/agreement/feature_map.json`.
+**Audit Target:** Alignment between built library `kymora.feature_names()`, `README.md`, `docs/internal/arch.md`, and `benchmarks/agreement/feature_map.json`.
 
 ---
 
@@ -52,9 +52,9 @@ assert len(names) == 33
 
 ---
 
-## 2. Audit against `arch.md`
+## 2. Audit against `docs/internal/arch.md`
 
-`arch.md` §2.3 defines the internal Rust module split and feature groups:
+`docs/internal/arch.md` §2.3 defines the internal Rust module split and feature groups:
 - **`stats.rs` (14 features):** `mean`, `std`, `var`, `min`, `max`, `median`, `quantiles` (10, 25, 75, 90), `skew`, `kurtosis`, `abs_energy`, `rms`.
 - **`change.rs` (4 features):** `mean_abs_change`, `mean_change`, `cid_ce`, `mean_second_derivative_central`.
 - **`counts.rs` (5 features):** `zero_crossings`, `mean_crossings`, `number_of_peaks`, `longest_strike_above_mean`, `longest_strike_below_mean`.
@@ -62,7 +62,7 @@ assert len(names) == 33
 - **`entropy.rs` (1 feature):** `permutation_entropy`.
 - **`spectral.rs` (3 features):** `dominant_frequency`, `spectral_centroid`, `spectral_entropy`.
 
-**Result:** `arch.md` matches the compiled core exactly in count (33) and mathematical scope. Minor naming differences in descriptive text (`rms` vs `root_mean_square`, `skew` vs `skewness`) map 1:1 to registry symbols.
+**Result:** `docs/internal/arch.md` matches the compiled core exactly in count (33) and mathematical scope. Minor naming differences in descriptive text (`rms` vs `root_mean_square`, `skew` vs `skewness`) map 1:1 to registry symbols.
 
 ---
 

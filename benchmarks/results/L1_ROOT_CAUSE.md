@@ -1,3 +1,5 @@
+> Historical record. Paths `benches/` = today's `benchmarks/`;
+> name Tsxtract = Kymora.
 # L1 Root Cause — The 17 numba_baseline_fast losses (EVIDENCE ONLY, no fixes)
 
 **Generated:** 2026-10-04 · **Suite:** `benches/suites/l1_root_cause.py` · **Raw evidence:** `benches/results/l1_root_cause.json`

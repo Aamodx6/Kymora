@@ -1,0 +1,2532 @@
+{
+  "generated": "2026-10-05 20:51:35",
+  "loss_table": [
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "gaussian",
+      "km_median_ms": 0.02869999298127368,
+      "numba_median_ms": 0.01610000617802143,
+      "ratio": 1.7826075756699302,
+      "ratio_ci95": [
+        1.7647058823529411,
+        1.7950304776641746
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 2.845394736842105
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "heavy_tailed",
+      "km_median_ms": 0.02849999873433262,
+      "numba_median_ms": 0.01630000042496249,
+      "ratio": 1.7484661344355887,
+      "ratio_ci95": [
+        1.7392628342475145,
+        1.7592584275314933
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 2.0533333333333337
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "random_walk",
+      "km_median_ms": 0.029100003303028643,
+      "numba_median_ms": 0.0202999945031479,
+      "ratio": 1.4334980878204737,
+      "ratio_ci95": [
+        1.4166670827754504,
+        1.4504957378003405
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 2.538961038961039
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "sinusoid",
+      "km_median_ms": 0.02950000634882599,
+      "numba_median_ms": 0.05219999002292752,
+      "ratio": 0.5651343292569379,
+      "ratio_ci95": [
+        0.5593871579602336,
+        1.0000002474815657
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 2.379032258064516
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "ar1",
+      "km_median_ms": 0.19189999875379726,
+      "numba_median_ms": 0.22539999190485105,
+      "ratio": 0.8513753577897409,
+      "ratio_ci95": [
+        0.7951107206137962,
+        0.9317685622845632
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 1.1634439242825156
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "gaussian",
+      "km_median_ms": 0.185650002094917,
+      "numba_median_ms": 0.17220000154338777,
+      "ratio": 1.0781068549998842,
+      "ratio_ci95": [
+        0.9960755440409381,
+        1.2119402043607763
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 1.5
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "heavy_tailed",
+      "km_median_ms": 0.1760500017553568,
+      "numba_median_ms": 0.18084999464917928,
+      "ratio": 0.9734587059118596,
+      "ratio_ci95": [
+        0.8962200082513947,
+        1.0222904554755705
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 1.3428891377379617
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "random_walk",
+      "km_median_ms": 0.1578499941388145,
+      "numba_median_ms": 0.15220000204863027,
+      "ratio": 1.0371221551520018,
+      "ratio_ci95": [
+        0.9309563000337013,
+        1.0709497184742456
+      ],
+      "km_runs": 100,
+      "numba_runs": 100,
+      "numba_fastmath_variant": "fastmath=True",
+      "original_ratio": 1.3117350611951044
+    }
+  ],
+  "stage_table": [
+    {
+      "n_series": 1,
+      "length": 100,
+      "threads": 16,
+      "km_core33_ms": 0.0315,
+      "km_pass1_ms": 0.0189,
+      "km_quantiles_ms": 0.01005,
+      "km_fft_spectral_ms": 0.0057,
+      "km_acf_ms": 0.006449999999999997,
+      "km_perm_ms": 0.0017000000000000001,
+      "km_misc_ms": 0.0,
+      "km_call_floor_ms": 0.0197,
+      "numba_full_ms": 0.0354,
+      "numba_stages_ms": {
+        "pass1": 0.0007,
+        "pass2": 0.0043,
+        "quantiles": 0.002,
+        "skew_kurt": 0.0010999999999999998,
+        "fft_spectral": 0.0144,
+        "acf": 0.0021,
+        "perm": 0.0006000000000000001,
+        "misc": 0.0046,
+        "python_loop_overhead": 0.0002
+      },
+      "numba_stages_sum_ms": 0.0298
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "threads": 1,
+      "km_core33_ms": 0.0441,
+      "km_pass1_ms": 0.02445,
+      "km_quantiles_ms": 0.0,
+      "km_fft_spectral_ms": 0.0,
+      "km_acf_ms": 0.0,
+      "km_perm_ms": 0.0,
+      "km_misc_ms": 0.01965,
+      "km_call_floor_ms": 0.0034,
+      "numba_full_ms": 0.0323,
+      "numba_stages_ms": {
+        "pass1": 0.003,
+        "pass2": 0.003,
+        "quantiles": 0.0027,
+        "skew_kurt": 0.0015999999999999999,
+        "fft_spectral": 0.017,
+        "acf": 0.0017000000000000001,
+        "perm": 0.0006999999999999999,
+        "misc": 0.0018,
+        "python_loop_overhead": 0.0005
+      },
+      "numba_stages_sum_ms": 0.0315
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "threads": 16,
+      "km_core33_ms": 0.2713,
+      "km_pass1_ms": 0.0483,
+      "km_quantiles_ms": 0.08024999999999999,
+      "km_fft_spectral_ms": 0.047749999999999994,
+      "km_acf_ms": 0.08615,
+      "km_perm_ms": 0.0,
+      "km_misc_ms": 0.008850000000000025,
+      "km_call_floor_ms": 0.01425,
+      "numba_full_ms": 0.1713,
+      "numba_stages_ms": {
+        "pass1": 0.0182,
+        "pass2": 0.027299999999999998,
+        "quantiles": 0.2333,
+        "skew_kurt": 0.019,
+        "fft_spectral": 0.6024499999999999,
+        "acf": 0.0352,
+        "perm": 0.012199999999999999,
+        "misc": 0.022049999999999997,
+        "python_loop_overhead": 0.0016
+      },
+      "numba_stages_sum_ms": 0.9697
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "threads": 1,
+      "km_core33_ms": 0.16995,
+      "km_pass1_ms": 0.0224,
+      "km_quantiles_ms": 0.1406,
+      "km_fft_spectral_ms": 0.0441,
+      "km_acf_ms": 0.0455,
+      "km_perm_ms": 0.013099999999999997,
+      "km_misc_ms": 0.0,
+      "km_call_floor_ms": 0.0024,
+      "numba_full_ms": 1.0649,
+      "numba_stages_ms": {
+        "pass1": 0.03845,
+        "pass2": 0.0483,
+        "quantiles": 0.18434999999999999,
+        "skew_kurt": 0.0102,
+        "fft_spectral": 0.607,
+        "acf": 0.009550000000000001,
+        "perm": 0.0074,
+        "misc": 0.0141,
+        "python_loop_overhead": 0.0009
+      },
+      "numba_stages_sum_ms": 0.9193499999999999
+    }
+  ],
+  "agreement": [
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "gaussian",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.8590621210729004e-16,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 1.650169913793303e-15,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 1.310717667382726e-16,
+          "abs_err": 1.7763568394002505e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 1.8450732241719483e-16,
+          "abs_err": 1.3877787807814457e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.2394287451240857e-16,
+          "abs_err": 3.469446951953614e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 1.9421440812409547e-16,
+          "abs_err": 6.938893903907228e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 1.6171849074528607e-16,
+          "abs_err": 1.3877787807814457e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 2.0467939430953676e-16,
+          "abs_err": 8.673617379884035e-19,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 2.7693572160779625e-16,
+          "abs_err": 6.938893903907228e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 1.1655629853101501e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 2.4850185854393016e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "random_walk",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.8122662097199184e-16,
+          "abs_err": 8.881784197001252e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 1.3585940902636006e-14,
+          "abs_err": 3.1086244689504383e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 1.2704884141916898e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 2.4385285293301027e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.3559432424965341e-16,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 2.2013999122235222e-16,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 1.3315740170118e-15,
+          "abs_err": 2.0816681711721685e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 2.5049094336384987e-15,
+          "abs_err": 1.0408340855860843e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 5.356180627362766e-16,
+          "abs_err": 2.0816681711721685e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 9.9692517181801e-16,
+          "abs_err": 3.3306690738754696e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "ar1",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 4.07662713161984e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 7.484482127305019e-16,
+          "abs_err": 8.881784197001252e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.5103416091102114e-15,
+          "abs_err": 7.771561172376096e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 1.5296503354110485e-14,
+          "abs_err": 5.329070518200751e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 5.837170254356409e-16,
+          "abs_err": 4.440892098500626e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 7.948662146802101e-16,
+          "abs_err": 5.551115123125783e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 6.263300062173892e-16,
+          "abs_err": 2.7755575615628914e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 6.464033804925902e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 6.659536010305923e-16,
+          "abs_err": 8.326672684688674e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 1.5316060252433983e-16,
+          "abs_err": 1.734723475976807e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 1.5406961677454388e-15,
+          "abs_err": 1.3877787807814457e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 5.190702415893569e-16,
+          "abs_err": 5.551115123125783e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 4.4370727378552553e-16,
+          "abs_err": 3.3306690738754696e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "heavy_tailed",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 2.781146975246666e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 3.4834345561042404e-16,
+          "abs_err": 8.881784197001252e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.1707078197167966e-15,
+          "abs_err": 5.551115123125783e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 1.6872487173463228e-15,
+          "abs_err": 6.217248937900877e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 4.926730508186352e-16,
+          "abs_err": 7.105427357601002e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 2.948354260010035e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 2.9363016747150355e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 2.078800986929061e-16,
+          "abs_err": 1.3877787807814457e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 1.8498627892260363e-16,
+          "abs_err": 8.673617379884035e-19,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 4.260492888855001e-16,
+          "abs_err": 3.469446951953614e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 2.0832386955151448e-16,
+          "abs_err": 5.551115123125783e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 2.447155109221594e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "sinusoid",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 1.5672799334045172e-16,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 4.4249963028497054e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.5790303834917095e-15,
+          "abs_err": 3.8163916471489756e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 9.287491060715793e-16,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 3.0647375895985607e-16,
+          "abs_err": 8.881784197001252e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 4.589609850440161e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 5.028480226100296e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 4.945848192297993e-16,
+          "abs_err": 1.6653345369377348e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 4.26508941856469e-16,
+          "abs_err": 3.3306690738754696e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 1.7078405174718782e-16,
+          "abs_err": 8.673617379884035e-19,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 9.824798539217318e-16,
+          "abs_err": 4.163336342344337e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 5.353928719070997e-15,
+          "abs_err": 1.8735013540549517e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "gaussian",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 6.528912997919821e-16,
+          "abs_err": 6.661338147750939e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.2798240830574977e-15,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.2931022481642424e-15,
+          "abs_err": 2.498001805406602e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 2.935760678274151e-14,
+          "abs_err": 7.993605777301127e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 4.3300720956087073e-16,
+          "abs_err": 1.4210854715202004e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 1.1176625658863241e-15,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.1287332680028358e-15,
+          "abs_err": 6.938893903907228e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 2.675767625365639e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 6.323877130976472e-16,
+          "abs_err": 5.551115123125783e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 7.609998353008589e-16,
+          "abs_err": 5.285485590866834e-19,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 1.677029863212734e-15,
+          "abs_err": 1.734723475976807e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 1.1105224567113144e-16,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 2.9906415726368888e-15,
+          "abs_err": 8.049116928532385e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 1.908939098283932e-15,
+          "abs_err": 1.7763568394002505e-15,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "random_walk",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 2.0093164784496808e-15,
+          "abs_err": 4.440892098500626e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.06186501751241e-15,
+          "abs_err": 5.186961971048731e-13,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 2.0963584878513194e-14,
+          "abs_err": 1.7208456881689926e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 9.729894649992993e-14,
+          "abs_err": 1.1857181902996672e-13,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 5.931202250419818e-15,
+          "abs_err": 2.7977620220553945e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 1.461157486954015e-14,
+          "abs_err": 1.454392162258955e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.434469380279627e-14,
+          "abs_err": 1.4210854715202004e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 1.3288965729530507e-14,
+          "abs_err": 1.2989609388114332e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 1.1984581663857296e-14,
+          "abs_err": 1.1435297153639112e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 2.792215770928716e-16,
+          "abs_err": 4.163336342344337e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 7.317991969109957e-15,
+          "abs_err": 6.938893903907228e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 2.2848287536152577e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 3.2614587365413275e-15,
+          "abs_err": 7.632783294297951e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 2.36733376282218e-15,
+          "abs_err": 1.2212453270876722e-15,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "ar1",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 8.884404082258047e-16,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.6786602287251997e-15,
+          "abs_err": 3.774758283725532e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.554746856706511e-15,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 2.070995580628008e-14,
+          "abs_err": 8.881784197001252e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 3.744740116729573e-16,
+          "abs_err": 7.105427357601002e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 1.9563659578678985e-15,
+          "abs_err": 1.4432899320127035e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.7641467266607024e-15,
+          "abs_err": 9.43689570931383e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 1.890918610295694e-15,
+          "abs_err": 3.608224830031759e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 3.77139965314462e-16,
+          "abs_err": 2.7755575615628914e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 7.792592784693836e-16,
+          "abs_err": 1.734723475976807e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 1.587445929420882e-15,
+          "abs_err": 9.020562075079397e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 6.5927233685120606e-15,
+          "abs_err": 7.494005416219807e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 1.6069389359626732e-15,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "heavy_tailed",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 7.282116444055382e-16,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.592149166686156e-15,
+          "abs_err": 5.329070518200751e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.8043372899203903e-15,
+          "abs_err": 1.7763568394002505e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 3.1527199218643084e-15,
+          "abs_err": 3.730349362740526e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 1.1923956314522428e-15,
+          "abs_err": 3.907985046680551e-14,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 5.076437921019694e-16,
+          "abs_err": 3.8163916471489756e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 7.249875721240371e-16,
+          "abs_err": 6.938893903907228e-17,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 1.6890127011203552e-15,
+          "abs_err": 1.3877787807814457e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 1.2038627209872976e-15,
+          "abs_err": 1.1102230246251565e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 1.3322416578921065e-15,
+          "abs_err": 7.589415207398531e-19,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 1.7486563476187468e-15,
+          "abs_err": 4.9873299934333204e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 2.220777026254913e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 4.189609388789346e-15,
+          "abs_err": 1.1102230246251565e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 1.068887674097518e-15,
+          "abs_err": 9.992007221626409e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "sinusoid",
+      "n_exact": 33,
+      "n_close": 0,
+      "n_diff_def": 0,
+      "n_wrong": 0,
+      "per_feature": {
+        "mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "std": {
+          "rel_err": 6.188264396277077e-16,
+          "abs_err": 4.440892098500626e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "var": {
+          "rel_err": 1.2934771456559329e-15,
+          "abs_err": 6.661338147750939e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "min": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "max": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "median": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_10": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_25": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_75": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "quantile_90": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "skewness": {
+          "rel_err": 1.7548375933480703e-14,
+          "abs_err": 2.2724877535296173e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "kurtosis": {
+          "rel_err": 5.0089536433117576e-15,
+          "abs_err": 7.327471962526033e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "abs_energy": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "root_mean_square": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_abs_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_change": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "cid_ce": {
+          "rel_err": 7.465218135441008e-16,
+          "abs_err": 3.552713678800501e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_second_derivative_central": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "zero_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "mean_crossings": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "number_of_peaks": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_above_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "longest_strike_below_mean": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_1": {
+          "rel_err": 1.3532519881006005e-15,
+          "abs_err": 1.3322676295501878e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_2": {
+          "rel_err": 1.2448141872210062e-15,
+          "abs_err": 1.2212453270876722e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_5": {
+          "rel_err": 1.2710104257455168e-15,
+          "abs_err": 1.2212453270876722e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "autocorr_lag_10": {
+          "rel_err": 1.3882972782134699e-15,
+          "abs_err": 1.2212453270876722e-15,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_slope": {
+          "rel_err": 1.806346635763147e-15,
+          "abs_err": 1.8431436932253575e-18,
+          "status": "EXACT",
+          "matched": true
+        },
+        "trend_r2": {
+          "rel_err": 4.003343091909467e-15,
+          "abs_err": 1.734723475976807e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "permutation_entropy": {
+          "rel_err": 2.2208973979761505e-16,
+          "abs_err": 2.220446049250313e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "dominant_frequency": {
+          "rel_err": 0.0,
+          "abs_err": 0.0,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_centroid": {
+          "rel_err": 1.5098267979364954e-14,
+          "abs_err": 1.9949319973733282e-16,
+          "status": "EXACT",
+          "matched": true
+        },
+        "spectral_entropy": {
+          "rel_err": 2.0330608518315237e-14,
+          "abs_err": 7.632783294297951e-16,
+          "status": "EXACT",
+          "matched": true
+        }
+      }
+    }
+  ],
+  "fft_check": [
+    {
+      "n": 10,
+      "max_rel_err": 2.9989448026736627e-16,
+      "single_call_us": 4.8
+    },
+    {
+      "n": 100,
+      "max_rel_err": 4.429067438232165e-15,
+      "single_call_us": 17.1
+    },
+    {
+      "n": 500,
+      "max_rel_err": 2.235307692780884e-14,
+      "single_call_us": 68.3
+    },
+    {
+      "n": 512,
+      "max_rel_err": 6.3997049580288844e-15,
+      "single_call_us": 9.3
+    },
+    {
+      "n": 1023,
+      "max_rel_err": 1.8481739957460025e-14,
+      "single_call_us": 153.8
+    },
+    {
+      "n": 1024,
+      "max_rel_err": 1.2194910017004724e-14,
+      "single_call_us": 14.8
+    },
+    {
+      "n": 4093,
+      "max_rel_err": 5.979167344648549e-14,
+      "single_call_us": 673.5
+    },
+    {
+      "n": 4096,
+      "max_rel_err": 3.735557326586317e-14,
+      "single_call_us": 77.0
+    }
+  ],
+  "fastmath_bound": [
+    {
+      "n_series": 1,
+      "length": 100,
+      "fastmath_true_ms": 0.0212,
+      "fastmath_false_ms": 0.0205,
+      "delta_pct": -3.3018867924528266
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "fastmath_true_ms": 0.17554999999999998,
+      "fastmath_false_ms": 0.19715,
+      "delta_pct": 12.304186841355746
+    }
+  ],
+  "classifications": [
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "gaussian",
+      "ratio": 1.7826075756699302,
+      "ratio_ci95": [
+        1.7647058823529411,
+        1.7950304776641746
+      ],
+      "labels": [
+        "call-overhead",
+        "algorithmic(quantile-stage)"
+      ],
+      "floor_share": 0.6253968253968254,
+      "thread_delta_16v1": -0.2857142857142857,
+      "mismatched_share_of_gap": 0.13961044561794317
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "heavy_tailed",
+      "ratio": 1.7484661344355887,
+      "ratio_ci95": [
+        1.7392628342475145,
+        1.7592584275314933
+      ],
+      "labels": [
+        "call-overhead",
+        "algorithmic(quantile-stage)"
+      ],
+      "floor_share": 0.6253968253968254,
+      "thread_delta_16v1": -0.2857142857142857,
+      "mismatched_share_of_gap": 0.14144737237564656
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "random_walk",
+      "ratio": 1.4334980878204737,
+      "ratio_ci95": [
+        1.4166670827754504,
+        1.4504957378003405
+      ],
+      "labels": [
+        "call-overhead",
+        "algorithmic(quantile-stage)"
+      ],
+      "floor_share": 0.6253968253968254,
+      "thread_delta_16v1": -0.2857142857142857,
+      "mismatched_share_of_gap": 0.1919641915001099
+    },
+    {
+      "n_series": 1,
+      "length": 100,
+      "dist": "sinusoid",
+      "ratio": 0.5651343292569379,
+      "ratio_ci95": [
+        0.5593871579602336,
+        1.0000002474815657
+      ],
+      "labels": [
+        "call-overhead",
+        "algorithmic(quantile-stage)"
+      ],
+      "floor_share": 0.6253968253968254,
+      "thread_delta_16v1": -0.2857142857142857,
+      "mismatched_share_of_gap": 0
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "ar1",
+      "ratio": 0.8513753577897409,
+      "ratio_ci95": [
+        0.7951107206137962,
+        0.9317685622845632
+      ],
+      "labels": [
+        "threading",
+        "unfair-baseline"
+      ],
+      "floor_share": 0.05252488020641357,
+      "thread_delta_16v1": 0.5963518681965284,
+      "mismatched_share_of_gap": 0.7973854802842217
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "gaussian",
+      "ratio": 1.0781068549998842,
+      "ratio_ci95": [
+        0.9960755440409381,
+        1.2119402043607763
+      ],
+      "labels": [
+        "threading",
+        "unfair-baseline"
+      ],
+      "floor_share": 0.05252488020641357,
+      "thread_delta_16v1": 0.5963518681965284,
+      "mismatched_share_of_gap": 0.3693239209890013
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "heavy_tailed",
+      "ratio": 0.9734587059118596,
+      "ratio_ci95": [
+        0.8962200082513947,
+        1.0222904554755705
+      ],
+      "labels": [
+        "threading",
+        "unfair-baseline"
+      ],
+      "floor_share": 0.05252488020641357,
+      "thread_delta_16v1": 0.5963518681965284,
+      "mismatched_share_of_gap": 0.4046434254817643
+    },
+    {
+      "n_series": 10,
+      "length": 500,
+      "dist": "random_walk",
+      "ratio": 1.0371221551520018,
+      "ratio_ci95": [
+        0.9309563000337013,
+        1.0709497184742456
+      ],
+      "labels": [
+        "threading",
+        "unfair-baseline"
+      ],
+      "floor_share": 0.05252488020641357,
+      "thread_delta_16v1": 0.5963518681965284,
+      "mismatched_share_of_gap": 0.30730479118013354
+    }
+  ],
+  "notes": [
+    "Kymora stage times are differential estimates via features= subsets (shared intermediates; residual reported as km_misc_ms).",
+    "Numba stage kernels mirror benchmarks/adapters/numba_baseline.py exactly; stages are timed as batch loops in Python (loop overhead measured via empty kernel and subtracted).",
+    "numba stage sum vs numba_full_ms difference = output alloc + numpy overhead + kernel-call dispatch."
+  ]
+}

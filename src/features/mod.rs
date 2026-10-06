@@ -163,8 +163,8 @@ pub fn compute_all(x: &[f64], out: &mut [f64]) {
     put(q25);
     put(q75);
     put(q90);
-    put(stats::skewness(m3, nf, var, std));
-    put(stats::kurtosis(m4, nf, var, std));
+    put(stats::skewness(m3, nf, var, std, mean));
+    put(stats::kurtosis(m4, nf, var, std, mean));
     put(abs_energy);
     put((abs_energy / nf).sqrt());
 

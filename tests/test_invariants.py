@@ -1,4 +1,4 @@
-"""Tests enforcing invariants I1 through I7 defined in arch.md §3."""
+"""Tests enforcing invariants I1 through I7 defined in docs/internal/arch.md §3."""
 import json
 import os
 import threading

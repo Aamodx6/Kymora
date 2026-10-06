@@ -1,6 +1,6 @@
 """Comprehensive benchmark matrix: profiles, competitors, thread scaling, and memory.
 
-Measures all dimensions specified in arch.md §11:
+Measures all dimensions specified in docs/internal/arch.md §11:
 1. Profiles: minimal, core33, extended, full
 2. Thread scaling: 1, 2, 4, 8, all (with speedup & scaling efficiency)
 3. Memory: tracemalloc peak RSS delta for 100k x 500

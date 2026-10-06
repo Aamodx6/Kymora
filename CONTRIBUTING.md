@@ -82,6 +82,26 @@ be asked to change approach, not just to fix a test.
 Validation happens before the parallel region, so a bad input fails immediately
 instead of after occupying worker threads.
 
+## Repository map
+
+One line per directory (see `docs/internal/arch.md` for the full picture):
+
+- `src/` — Rust core: all numerics (`src/features/`), kernels, FFI boundary.
+- `python/kymora/` — thin pass-through package (no numeric logic).
+- `tests/` — unit (`test_*.py`), `golden/` (frozen), `parity/`, `property/`,
+  `reference/`, `fixtures/`.
+- `benchmarks/` — `suites/` (one script per area), `harness/`, `adapters/`,
+  `results/` (frozen evidence — never edit in place), `datasets/`, `report/`.
+- `tools/` — maintainer scripts, each with a one-line docstring.
+- `docs/` — user docs (mkdocs site); `docs/internal/` — developer/process
+  docs (`arch.md`, `hardening/`, `refactor/`).
+- `paper/` — canonical JOSS draft (`paper.md`); `legacy/` — superseded draft.
+- `patent/` — untouched disclosure material.
+- `landing/` — marketing site (Vercel, separate deploy).
+- `fuzz/` — cargo-fuzz targets (corpora not committed).
+- `proptest-regressions/` — proptest regression seeds (must stay at crate root).
+- `.github/` — CI workflows (see OWNER_DECISIONS.md for the post-rebase list).
+
 ## Adding a feature
 
 The 33-feature set is closed on purpose — the low-redundancy set *is* the product
@@ -121,7 +141,7 @@ Once agreed:
 
 If a PR's version impact is unclear, say so in the description rather than
 guessing — see `docs/nan-policy.md#stability` and the compatibility table in
-`arch.md`.
+`docs/internal/arch.md`.
 
 ## Pull requests
 

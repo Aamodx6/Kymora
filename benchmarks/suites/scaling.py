@@ -5,7 +5,7 @@ Measures parallel scaling efficiency across:
   - Series counts: 1, 10, 100, 1000, 10000, 100000
   - Length sweep: 10, 100, 500, 1000, 5000, 50000
 
-Per arch.md §11.5 (scaling suite):
+Per docs/internal/arch.md §11.5 (scaling suite):
 - Amdahl fit and parallel efficiency η = T1/(N·T_N)
 - Crossover analysis (where Kymora beats/loses to competitors)
 - Reports efficiency vs both logical and physical cores

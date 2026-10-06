@@ -264,13 +264,18 @@ pub fn pass2_fused(
     let var = if constant { 0.0 } else { m2 / nf };
     let std = var.sqrt();
 
-    let skewness = if std == 0.0 {
+    // Degenerate-window NaN rule mirrors scipy (`m2 <= (eps*mean)^2`,
+    // gh-15905) and `stats::{skewness,kurtosis}`: variance at/below one
+    // squared ulp of the mean is summation noise, not signal.
+    let degenerate = std == 0.0 || var <= (f64::EPSILON * mean) * (f64::EPSILON * mean);
+
+    let skewness = if degenerate {
         f64::NAN
     } else {
         (m3 / nf) / (var * std)
     };
 
-    let kurtosis = if std == 0.0 {
+    let kurtosis = if degenerate {
         f64::NAN
     } else {
         (m4 / nf) / (var * var) - 3.0
@@ -365,13 +370,18 @@ pub fn pass2_fused_f32(
     let var = if constant { 0.0 } else { m2 / nf };
     let std = var.sqrt();
 
-    let skewness = if std == 0.0 {
+    // Degenerate-window NaN rule mirrors scipy (`m2 <= (eps*mean)^2`,
+    // gh-15905) and `stats::{skewness,kurtosis}`: variance at/below one
+    // squared ulp of the mean is summation noise, not signal.
+    let degenerate = std == 0.0 || var <= (f64::EPSILON * mean) * (f64::EPSILON * mean);
+
+    let skewness = if degenerate {
         f64::NAN
     } else {
         (m3 / nf) / (var * std)
     };
 
-    let kurtosis = if std == 0.0 {
+    let kurtosis = if degenerate {
         f64::NAN
     } else {
         (m4 / nf) / (var * var) - 3.0

@@ -1,6 +1,6 @@
 """Phase B3: Startup benchmark suite.
 
-Per arch.md §11.5 (startup suite):
+Per docs/internal/arch.md §11.5 (startup suite):
   - import wall time (fresh subprocess, repeated for stability)
   - `-X importtime` top cumulative modules (recorded per lib)
   - first-call time (cold extraction after fresh import)
@@ -9,7 +9,7 @@ Per arch.md §11.5 (startup suite):
 
 Cold-cache install time is NOT measured here: it requires network access and
 would be non-reproducible; it is recorded as an explicit "not measured" note
-in the report (no silent gaps, arch.md §11.1).
+in the report (no silent gaps, docs/internal/arch.md §11.1).
 
 Every row uses the §11.8 BenchmarkRecord schema and is appended to
 results/startup.jsonl incrementally (resume-safe via --resume).

@@ -13,7 +13,7 @@
 ## Phase 0: Setup
 | Task | Status | Notes |
 |------|--------|-------|
-| Read all ground-rule files | ✅ | CLAUDE.md, arch.md, CLAIMS.md, CHANGELOG.md, Cargo.toml, pyproject.toml, Makefile, workflows, F1_REPORT.md |
+| Read all ground-rule files | ✅ | ../../CLAUDE.md, ../arch.md, ../../CLAIMS.md, ../../CHANGELOG.md, ../../Cargo.toml, ../../pyproject.toml, ../../Makefile, ../../.github/workflows, benchmarks/results/F1_REPORT.md |
 | Create branch | ✅ | `hardening/kymora-v-next` |
 | Write PLAN.md | ✅ | |
 | Write STATUS.md | ✅ | This file |
