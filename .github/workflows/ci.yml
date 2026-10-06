@@ -140,6 +140,33 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -q
 
+  parity:
+    # External parity (tsfresh/TSFEL matched sets) with teeth: installs the
+    # dev-parity extras and sets KYMORA_REQUIRE_PARITY=1, so a missing
+    # reference library fails via tests/parity/conftest.py instead of
+    # skipping silently. Path-gated like the other test jobs.
+    name: parity external (ubuntu-latest, py3.12)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      KYMORA_REQUIRE_PARITY: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[dev-parity,sklearn]"
+          maturin develop --release
+      - run: python -m pytest tests/parity -q -rs
+
   validation-report:
     name: validation report (ubuntu-latest, py3.12)
     needs: [changes]
@@ -266,7 +293,7 @@ jobs:
     # allows path-gated skips. Logic lives in tools/ci_gate.py (unit-tested
     # below and via --self-test).
     name: ci gate (all green)
-    needs: [changes, rust, test, test-macos-intel, validation-report, typecheck, docs, hygiene, audit-pr, wheels]
+    needs: [changes, rust, test, test-macos-intel, parity, validation-report, typecheck, docs, hygiene, audit-pr, wheels]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
