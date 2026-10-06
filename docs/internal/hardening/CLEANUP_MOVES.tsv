@@ -60,7 +60,6 @@ pyproject.toml	pyproject.toml	KEEP (root)	—	—	No include/exclude/path refs t
 Makefile	Makefile	KEEP (root)	—	—	Stays; :33 comment updated in move PR (allowed: not .github)
 Dockerfile	Dockerfile	KEEP (root, owner-option)	docs/REFACTOR_STATE.md:90 references Dockerfile CMD (no path change; stays root)	—	Brief target layout omits it but root is the docker convention; propose KEEP
 reproduce.sh	reproduce.sh	KEEP (root, owner-option)	No refs to moved paths (verified)	—	Brief layout omits it; propose KEEP (entry-point script convention)
-vercel.json	vercel.json	KEEP (root, owner-option)	No refs to moved paths (verified)	—	Vercel requires root config; propose KEEP
 CODE_OF_CONDUCT.md	CODE_OF_CONDUCT.md	KEEP (root, owner-option)	No refs to moved paths (verified)	—	Brief layout omits it but GitHub surfaces it from root; propose KEEP
 vercel.json	vercel.json	KEEP (root, decided 2026-10-06)	—	—	Vercel project config (buildCommand/installCommand/outputDirectory all target landing/); project root = repo root. landing/vercel.json holds routing only. Moving breaks deploys.
 proptest-regressions/proptest_checks.txt	proptest-regressions/proptest_checks.txt	KEEP (root, functional)	—	—	proptest loads regression seeds relative to crate root (Cargo.toml dir); moving breaks `cargo test` seed replay. CI ROOT_ALLOWED must permit this dir.
