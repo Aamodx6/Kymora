@@ -46,7 +46,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from benchmarks.harness.env import save_env  # noqa: E402
+from benchmarks.harness.env import save_env, snapshot_load  # noqa: E402
 from benchmarks.harness.runner import run_benchmark_subprocess  # noqa: E402
 from benchmarks.harness.stats import bootstrap_ratio_ci  # noqa: E402
 
@@ -361,7 +361,7 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
     dists = dists or ["gaussian"]
     date_dir = RESULTS_ROOT / f"{datetime.now().strftime('%Y-%m-%d')}_equal_feature"
     date_dir.mkdir(parents=True, exist_ok=True)
-    save_env(date_dir / "env.json")
+    load_start = snapshot_load()
 
     # Which libraries to run: always kymora + each competitor with a non-empty set
     competitors = [c for c, m in EQUAL_SETS.items() if m]
@@ -410,6 +410,12 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
                 km_ms = float(np.median([rd["median_ms"] for rd in km_rounds]))
                 other_ms = float(np.median([rd["median_ms"] for rd in other_rounds]))
 
+                def _cv(samples):
+                    m = float(np.mean(samples)) if samples else float("nan")
+                    if not samples or len(samples) < 2 or not m:
+                        return float("nan")
+                    return float(np.std(samples, ddof=1) / m)
+
                 # Bootstrap CI on the ratio from per-round medians
                 km_samples = [rd["median_ms"] for rd in km_rounds]
                 other_samples = [rd["median_ms"] for rd in other_rounds]
@@ -431,8 +437,10 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
                     "n_features_competitor": len(wanted),
                     "kymora_median_ms": km_ms,
                     "kymora_rounds": km_samples,
+                    "kymora_cv": _cv(km_samples),
                     "competitor_median_ms": other_ms,
                     "competitor_rounds": other_samples,
+                    "competitor_cv": _cv(other_samples),
                     "ratio_competitor_over_kymora": ratio,
                     "ratio_ci95": [ci_lo, ci_hi],
                     "kymora_output_shape": list(km_shape),
@@ -453,6 +461,10 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
         for row in all_rows:
             f.write(json.dumps(row) + "\n")
     print(f"  artifact: {date_dir / 'equal_feature.jsonl'}")
+    save_env(
+        date_dir / "env.json",
+        extra={"load_start": load_start, "load_end": snapshot_load()},
+    )
 
     _write_report(date_dir, all_rows)
 
