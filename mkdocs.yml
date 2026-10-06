@@ -5,6 +5,8 @@ repo_url: https://github.com/Aamodx6/Kymora
 repo_name: Aamodx6/Kymora
 edit_uri: edit/main/docs/
 
+exclude_docs: internal/
+
 theme:
   name: material
   palette:
