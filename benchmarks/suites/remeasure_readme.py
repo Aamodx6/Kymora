@@ -25,7 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from benchmarks.harness.env import save_env  # noqa: E402
+from benchmarks.harness.env import save_env, snapshot_load  # noqa: E402
 from benchmarks.harness.runner import run_benchmark_subprocess, append_record  # noqa: E402
 from benchmarks.harness.stats import compute_stats  # noqa: E402
 
@@ -210,7 +210,7 @@ def main() -> None:
 
     out_dir = RESULTS_ROOT / f"{datetime.now().strftime('%Y-%m-%d')}_remeasure"
     out_dir.mkdir(parents=True, exist_ok=True)
-    save_env(out_dir / "env.json")
+    load_start = snapshot_load()
 
     print("== Profile rows (1,000 x 500, 16 threads) ==")
     profile_rows = _run_profile_rows(out_dir / "profiles.jsonl")
@@ -227,6 +227,10 @@ def main() -> None:
     }
     with open(out_dir / "remeasure_summary.json", "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
+    save_env(
+        out_dir / "env.json",
+        extra={"load_start": load_start, "load_end": snapshot_load()},
+    )
     print(f"\nArtifacts in {out_dir}")
 
 

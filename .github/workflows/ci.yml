@@ -6,23 +6,70 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Path filtering is job-level (see the `changes` job): docs/landing-only
+# changes run only the docs + hygiene jobs, code changes run everything.
+# Workflow-level `paths-ignore` is deliberately NOT used: a workflow that
+# never triggers leaves required checks "expected" forever and blocks merge.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rust:
-    name: rust (fmt, clippy, unit tests)
+  changes:
+    name: changes (paths-filter)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      docs: ${{ steps.filter.outputs.docs }}
+      deps: ${{ steps.filter.outputs.deps }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - id: filter
+        uses: dorny/paths-filter@15192bc058cc28a13dbf6cde61f19e18988b7af6 # v3
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'python/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'pyproject.toml'
+              - '.github/**'
+              - 'tests/**'
+              - 'tools/**'
+              - 'fuzz/**'
+              - 'benchmarks/**'
+            docs:
+              - 'docs/**'
+              - 'landing/**'
+              - 'README.md'
+              - 'CLAIMS.md'
+              - 'mkdocs.yml'
+            deps:
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'pyproject.toml'
+              - 'deny.toml'
+
+  rust:
+    name: rust fmt, clippy, tests (ubuntu-latest)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - run: cargo fmt --all -- --check
       # The pyo3 extension-module feature omits libpython at link time, which
       # breaks `cargo test` binaries; test the pure-Rust core without it.
@@ -30,23 +77,27 @@ jobs:
       - run: cargo test --no-default-features
 
   test:
-    name: py${{ matrix.python }} on ${{ matrix.os }}
+    name: test (py${{ matrix.python }}, ${{ matrix.os }})
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       # 3.9 omitted deliberately (EOL Oct 2025; abi3-py310 floor is 3.10).
-      # macos x86_64 has no GitHub-hosted runner anymore (see wheel-smoke);
-      # macos-latest is arm64. Linux aarch64 covers the other ARM target.
+      # macos-latest is arm64. Linux aarch64 covers the other ARM target;
+      # macOS Intel is covered by the dedicated test-macos-intel job.
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
         python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: ${{ matrix.python }}
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
         with:
           key: ${{ matrix.os }}-${{ matrix.python }}
       - uses: ./.github/actions/setup-venv
@@ -60,16 +111,49 @@ jobs:
       - name: Run tests
         run: python -m pytest tests/ -q
 
-  validation-report:
-    name: reference-validation report
-    runs-on: ubuntu-latest
+  test-macos-intel:
+    # macos-13 (Intel) is retired; macos-15-intel is the supported Intel
+    # label until Aug 2027 (see docs/internal/hardening/CI_STATUS.md).
+    name: test (py3.12, macos-15-intel)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: macos-15-intel
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
+        with:
+          key: macos-15-intel-3.12
+      - uses: ./.github/actions/setup-venv
+      - name: Install package and test deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install maturin
+          python -m pip install -e ".[test]"
+      - name: Build extension in release mode
+        run: maturin develop --release
+      - name: Run tests
+        run: python -m pytest tests/ -q
+
+  validation-report:
+    name: validation report (ubuntu-latest, py3.12)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - uses: ./.github/actions/setup-venv
       - run: |
           python -m pip install --upgrade pip maturin
@@ -78,21 +162,25 @@ jobs:
       - run: python tools/validation_report.py --out validation-report.md
       - name: Publish report to the job summary
         run: cat validation-report.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: validation-report
           path: validation-report.md
 
   typecheck:
-    name: mypy against the type stubs
+    name: mypy (ubuntu-latest, py3.12)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - uses: ./.github/actions/setup-venv
       - run: |
           python -m pip install --upgrade pip maturin mypy pandas-stubs
@@ -100,37 +188,60 @@ jobs:
           maturin develop --release
       - run: mypy python/kymora
 
-  snippets:
-    name: README + docs snippets execute
+  docs:
+    # Folds old ci jobs `snippets` + `feature-docs` plus the docs.yml
+    # `mkdocs build --strict` check: one job, same coverage.
+    name: docs (ubuntu-latest, py3.12)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true' || needs.changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - uses: ./.github/actions/setup-venv
       - run: |
-          python -m pip install --upgrade pip maturin scikit-learn
+          python -m pip install --upgrade pip maturin mkdocs mkdocs-material scikit-learn
           python -m pip install -e ".[test]"
           maturin develop --release
+      - run: mkdocs build --strict
+      - run: python tools/check_claims.py
+      - run: python tools/gen_feature_docs.py --check
       - run: python tools/check_snippets.py
 
-  audit:
-    name: dependency audit (Rust + Python)
+  hygiene:
+    name: repo hygiene (ubuntu-latest)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - run: python tools/check_repo_hygiene.py
+
+  audit-pr:
+    # Dependency audits also run on PRs, but only when manifests change; the
+    # full cargo-audit/deny + pip-audit suite always runs in nightly.yml too.
+    name: dependency audit PR (ubuntu-latest)
+    needs: [changes]
+    if: needs.changes.outputs.deps == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@49a0bdc70d2e1b713ca9e2869b211fcce03d3c1c # v2
       - name: cargo-audit (RustSec advisory DB)
         run: |
           cargo install cargo-audit --locked
           cargo audit
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
+          cache: pip
       - uses: ./.github/actions/setup-venv
       - name: pip-audit (PyPI advisory DB)
         run: |
@@ -138,89 +249,32 @@ jobs:
           python -m pip install -e ".[all]"
           python -m pip_audit --desc
 
-  perf-gate:
-    name: core33 perf regression gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: ./.github/actions/setup-venv
-      - run: |
-          python -m pip install --upgrade pip maturin
-          python -m pip install -e "."
-          maturin develop --release
-      # --ci never records: first run on a runner class passes with a
-      # notice; maintainers record baselines via
-      # `python tools/perf_gate.py --runs 30 --update-baseline`.
-      - run: python tools/perf_gate.py --runs 30 --ci
+  wheels:
+    # Wheel build + install tests live ONLY in wheels.yml. PRs get the lite
+    # matrix (5 builds + 3 OSes x py3.13); pushes to main get the full one.
+    name: "wheels (reusable: build + install-test)"
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    uses: ./.github/workflows/wheels.yml
+    with:
+      full: ${{ github.event_name == 'push' }}
 
-  feature-docs:
-    name: generated feature catalog is current
+  ci-gate:
+    # The ONLY required status check (see CONTRIBUTING.md). Aggregates every
+    # job (including the wheels reusable-workflow call): fails when changes
+    # itself failed/was cancelled, or on any other failure/cancelled;
+    # allows path-gated skips. Logic lives in tools/ci_gate.py (unit-tested
+    # below and via --self-test).
+    name: ci gate (all green)
+    needs: [changes, rust, test, test-macos-intel, validation-report, typecheck, docs, hygiene, audit-pr, wheels]
+    if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: ./.github/actions/setup-venv
-      - run: |
-          python -m pip install --upgrade pip maturin
-          python -m pip install -e "."
-          maturin develop --release
-      - run: python tools/gen_feature_docs.py --check
-
-  fuzz-smoke:
-    name: fuzz smoke (nightly, linux)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@nightly
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo install cargo-fuzz --locked
-      - run: |
-          cd fuzz
-          for target in compute_all streaming ragged; do
-            cargo fuzz run "$target" -- -max_total_time=30 -print_final_stats=1
-          done
-
-  wheel-smoke:
-    # Tests the built wheels (not dev builds): abi3 wheels are the shipping
-    # config, so this is what users install. Covers linux x64 + windows x64
-    # here; the release workflow builds the full platform matrix.
-    # NOTE: `shell: bash` everywhere below — the default pwsh on Windows
-    # neither glob-expands the wheel path nor fails fast, which once shipped
-    # a green step with no kymora installed at all.
-    name: wheel install + tests on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python: ["3.10", "3.14"]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.python }}
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: ./.github/actions/setup-venv
-      - name: Build release wheel
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip maturin
-          python -m maturin build --release
-      - name: Install wheel + test deps (no editable install)
-        shell: bash
-        run: |
-          python -m pip install "target/wheels/kymora-"*.whl
-          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
-      - name: Run tests against the installed wheel
-        shell: bash
-        run: python -m pytest tests/ -q
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Self-test the gate logic
+        run: python tools/ci_gate.py --self-test
+      - name: Fail on any failure or cancellation
+        env:
+          NEEDS_JSON: ${{ toJson(needs) }}
+        run: python tools/ci_gate.py

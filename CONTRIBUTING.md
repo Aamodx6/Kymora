@@ -46,6 +46,30 @@ the working tree, so a stale wheel makes tests silently run old code:
 maturin develop --release
 ```
 
+## CI
+
+Same checks as above, split across workflows so PRs stay fast and releases
+stay safe. Docs/landing-only changes run just the docs + hygiene jobs
+(job-level path filter in `ci.yml`); code changes run everything.
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `ci.yml` | push to `main`, PRs, manual | Gating: Rust fmt/clippy/tests, pytest matrix (py3.10–3.14 × linux/macOS/Windows + Intel Mac), validation report, mypy, docs (mkdocs strict + claims + feature catalog + snippets), hygiene, dependency audit (when manifests change), wheels smoke via `wheels.yml` — aggregated by `ci-gate` |
+| `wheels.yml` | called by `ci.yml`/`release.yml`, manual | Reusable: build all 5 wheels + sdist, install-test each wheel (lite on PRs: 3 OSes × py3.13; full on main/tags: + py3.10/3.14 extremes) |
+| `release.yml` | push tags `v*`, manual (dry run) | Tag-only publish: version-check (tag == Cargo.toml), calls `wheels.yml`, then SBOM, PyPI publish (OIDC), attach to GitHub Release |
+| `nightly.yml` | daily schedule, manual | Non-gating: cargo-audit/deny, pip-audit, 10-min fuzz smoke, core33 perf gate (files/updates a `perf-regression` issue on failure) |
+| `bench.yml` | manual only | Benchmarks: library comparison + equal-feature matrix (never gating, artifacts only) |
+| `docs.yml` | `main` pushes touching docs, manual | Build + deploy the mkdocs site to GitHub Pages |
+
+**The only required status check is `ci gate (all green)`.** It `needs`
+every `ci.yml` job with `if: always()`: any failure or cancellation fails
+the gate, path-gated skips are allowed. Never require individual jobs —
+their names change with the matrix; require the gate.
+
+Job-level detail (old→new name map, required-check list, runner notes) lives
+in `docs/internal/hardening/CI_STATUS.md` — read it before renaming a job,
+since branch-protection required checks reference job names.
+
 ## Benchmarks
 
 The benchmark suite is plain Python; these commands work on any OS (the
