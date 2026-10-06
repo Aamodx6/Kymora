@@ -18,6 +18,10 @@ highlight = "all"
 allow = [
   "MIT",
   "Apache-2.0",
+  # target-lexicon (build dep via pyo3-build-config) is Apache-2.0 WITH
+  # LLVM-exception: same Apache-2.0 grant plus a compiled-artifacts
+  # exception, OSI-approved, no copyleft.
+  "Apache-2.0 WITH LLVM-exception",
   "BSD-2-Clause",
   "BSD-3-Clause",
   "ISC",
