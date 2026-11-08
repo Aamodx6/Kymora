@@ -321,6 +321,8 @@ jobs:
     name: "wheels (reusable: build + install-test)"
     needs: [changes]
     if: needs.changes.outputs.code == 'true'
+    permissions:
+      contents: read
     uses: ./.github/workflows/wheels.yml
     with:
       full: ${{ github.event_name == 'push' }}

@@ -68,6 +68,8 @@ jobs:
   wheels:
     name: "wheels (reusable: build + install-test)"
     needs: [version-check]
+    permissions:
+      contents: read
     uses: ./.github/workflows/wheels.yml
     with:
       full: true
