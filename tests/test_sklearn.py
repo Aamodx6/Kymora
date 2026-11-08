@@ -1,4 +1,4 @@
-"""KymoraTransformer sklearn integration (Phase 4.1).
+"""KymoraTransformer sklearn integration.
 
 - Pipeline / clone / pickle / set_output(pandas|polars) behavior.
 - Full `parametrize_with_checks` compliance; checks that cannot apply to a
