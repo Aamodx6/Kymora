@@ -172,7 +172,7 @@ re-verify after rebasing onto the merged cleanup.
    `check_claims.py`, `gen_feature_docs.py --check` — no workflow edits
    needed, but re-run the job.
 4. `nightly.yml` fuzz job (`cd fuzz`) and `docs/internal/hardening/`
-   references (`CI_STATUS.md` already points there) are unaffected.
+   references (CI job detail now lives in `CONTRIBUTING.md` §CI) are unaffected.
 5. Re-verify the guards post-rebase: feature_names() sha256 still
    `8a1e27…31af2e`, `git diff <merge-base> -- tests/golden` empty.
 
