@@ -1,4 +1,4 @@
-"""Build the Phase 2.4 streaming artifact from B3 suite rows.
+"""Build the streaming artifact from B3 suite rows.
 
 Reads the rows appended to benchmarks/results/streaming.jsonl by the most
 recent `benchmarks/suites/streaming.py` run (all rows after SKIP_ROWS), and
@@ -46,7 +46,7 @@ def main() -> int:
     caps = [64, 256, 4096, 65536]
 
     lines = [
-        "# Streaming per-push cost vs window size (Phase 2.4)",
+        "# Streaming per-push cost vs window size",
         "",
         "Suite: `benchmarks/suites/streaming.py` (B3), run 2026-10-05 on",
         "i7-13620H laptop (10 cores / 16 threads), Windows 11, Performance plan,",

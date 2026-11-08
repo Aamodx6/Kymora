@@ -1,4 +1,4 @@
-"""sktime adapter check (Phase 4.3). Optional: skips without sktime/pandas."""
+"""sktime adapter check. Optional: skips without sktime/pandas."""
 
 import numpy as np
 import pytest

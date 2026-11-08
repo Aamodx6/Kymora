@@ -113,7 +113,7 @@ jobs:
 
   test-macos-intel:
     # macos-13 (Intel) is retired; macos-15-intel is the supported Intel
-    # label until Aug 2027 (see docs/internal/hardening/CI_STATUS.md).
+    # label until Aug 2027 (see CONTRIBUTING.md §CI runner notes).
     name: test (py3.12, macos-15-intel)
     needs: [changes]
     if: needs.changes.outputs.code == 'true'
