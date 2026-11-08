@@ -91,36 +91,42 @@ def test_i4_no_panic_across_ffi():
 
 
 def test_i5_gil_released():
-    """I5: GIL released for the whole parallel region.
+    """I5: extraction releases the GIL for Python-thread progress."""
+    rng = np.random.default_rng(11)
+    X = np.ascontiguousarray(rng.standard_normal((30_000, 500)))
 
-    Two Python threads each running extract_features on large batches run concurrently.
-    """
-    X1 = np.random.randn(2000, 500)
-    X2 = np.random.randn(2000, 500)
+    # Warmup (pools, page faults). n_jobs=1 keeps per-call timing stable
+    # across core counts; GIL release is unconditional (py.detach at every
+    # extraction entry point in src/ffi.rs), so this still tests I5.
+    kymora.extract_features(X[:8], n_jobs=1)
 
-    # Warmup
-    kymora.extract_features(X1[:10])
+    ticks = 0
+    stop = False
+    ready = threading.Event()
 
+    def heartbeat():
+        nonlocal ticks
+        ready.set()
+        while not stop:
+            ticks += 1
+
+    hb = threading.Thread(target=heartbeat, daemon=True)
+    hb.start()
+    assert ready.wait(timeout=1.0)
     t0 = time.perf_counter()
-    _ = kymora.extract_features(X1)
-    t_single = time.perf_counter() - t0
+    out = kymora.extract_features(X, n_jobs=1)
+    elapsed_ms = (time.perf_counter() - t0) * 1e3
+    stop = True
+    hb.join(timeout=1.0)
+    assert not hb.is_alive()
 
-    def worker(arr):
-        kymora.extract_features(arr)
-
-    t0 = time.perf_counter()
-    t1 = threading.Thread(target=worker, args=(X1,))
-    t2 = threading.Thread(target=worker, args=(X2,))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    t_threaded = time.perf_counter() - t0
-
-    # If GIL was held, t_threaded would be >= 2 * t_single.
-    # With GIL released, both threads execute concurrently.
-    # We assert that concurrency exists (t_threaded < 1.8 * t_single or reasonable factor).
-    assert t_threaded < 1.9 * (t_single * 2), f"GIL may be held: single={t_single:.3f}s, threaded={t_threaded:.3f}s"
+    assert ticks >= 1_000, (
+        f"heartbeat starved: {ticks} ticks in {elapsed_ms:.0f} ms "
+        "(GIL may be held)"
+    )
+    # Timing-independent: the result equals a fresh reference run.
+    ref = kymora.extract_features(X, n_jobs=1)
+    np.testing.assert_array_equal(out, ref)
 
 
 def test_i6_output_dtype_float64():
