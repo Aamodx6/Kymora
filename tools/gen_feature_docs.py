@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate docs/features.md from the built library (Phase 6.2).
+"""Generate docs/features.md from the built library.
 
 Single source of truth: `feature_names()` for order, `describe_feature()`
 for definition/min_length/nan_when/cost/needs/aliases (from

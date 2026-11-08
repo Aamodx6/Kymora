@@ -1,4 +1,4 @@
-"""Invariance property tests (Phase 3.5).
+"""Invariance property tests.
 
 Mathematical identities the pipeline must preserve regardless of
 implementation: permutation invariance of order-free statistics, affine
