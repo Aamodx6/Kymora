@@ -17,16 +17,19 @@ on:
         description: "Steps per series"
         default: "500"
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   bench-libraries:
     name: bench libraries (ubuntu-latest)
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
@@ -58,6 +61,8 @@ jobs:
     name: bench equal-feature (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       # macos-14 retires 2026-11-02; macos-15 is the supported arm64 label.
@@ -65,6 +70,8 @@ jobs:
         os: [ubuntu-latest, macos-15]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
