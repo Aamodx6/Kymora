@@ -66,9 +66,31 @@ every `ci.yml` job with `if: always()`: any failure or cancellation fails
 the gate, path-gated skips are allowed. Never require individual jobs —
 their names change with the matrix; require the gate.
 
-Job-level detail (old→new name map, required-check list, runner notes) lives
-in `docs/internal/hardening/CI_STATUS.md` — read it before renaming a job,
-since branch-protection required checks reference job names.
+Job-level detail (read it before renaming a job, since branch-protection
+required checks reference job names):
+
+| Job (display name) | What it runs |
+|---|---|
+| `rust fmt, clippy, tests (ubuntu-latest)` | `cargo fmt --check`, clippy `-D warnings`, `cargo test --no-default-features` |
+| `test (pyX.Y, os)` (20 combos) + `test (py3.12, macos-15-intel)` | pytest matrix py3.10–3.14 × linux/arm/macOS/Windows + Intel Mac |
+| `parity external (ubuntu-latest, py3.12)` | `pytest tests/parity` with `KYMORA_REQUIRE_PARITY=1` — a missing reference library fails instead of skipping |
+| `validation report (ubuntu-latest, py3.12)` | `tools/validation_report.py`, published to the job summary |
+| `mypy (ubuntu-latest, py3.12)` | `mypy python/kymora` |
+| `docs (ubuntu-latest, py3.12)` | `mkdocs build --strict` + `check_claims.py` + `gen_feature_docs.py --check` + `check_snippets.py` |
+| `repo hygiene (ubuntu-latest)` | `tools/check_repo_hygiene.py` |
+| `dependency audit PR (ubuntu-latest)` | cargo-audit + pip-audit, only when `Cargo.toml`/`Cargo.lock`/`pyproject.toml`/`deny.toml` change (full suite also in nightly) |
+| `wheels (reusable: build + install-test)` | calls `wheels.yml` (lite on PRs, full on main/tags) |
+| `ci gate (all green)` | the only required check (see above) |
+
+Runner notes: `macos-13` (Intel) is retired; `macos-15-intel` is the
+supported Intel label until Aug 2027. Nightly (non-gating) runs the full
+audit/deny suite, a 10-minute fuzz smoke, and the core33 perf gate — a
+`perf-regression` issue is filed after 2 consecutive failures, or
+immediately on a single repeat ≥15% regression (scheduler noise is below
+that). Releases are serialized per tag (`concurrency: release-<ref>`,
+no cancel) so two runs on one tag cannot race a duplicate PyPI publish;
+the `vX.Y.Z` tag must equal `Cargo.toml [package] version` (enforced by
+`release.yml` `version-check`).
 
 ## Benchmarks
 
