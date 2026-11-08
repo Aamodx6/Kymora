@@ -15,7 +15,7 @@ except ImportError:
 import kymora
 
 
-def test_phase4_profile_shapes():
+def test_extended_profile_shapes():
     profiles = kymora.list_profiles()
     assert profiles["core33"] == 33
     assert profiles["extended"] == 143

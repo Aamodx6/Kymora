@@ -1,4 +1,4 @@
-"""Tests for Phase 2 features: native f32 inputs, out= parameter, and CSR ragged API."""
+"""Tests for native f32 inputs, the out= parameter, and the CSR ragged API."""
 import numpy as np
 import pytest
 import kymora
