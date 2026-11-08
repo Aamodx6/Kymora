@@ -17,8 +17,7 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   version-check:
@@ -28,8 +27,12 @@ jobs:
     name: version check (tag matches Cargo.toml)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Tag vX.Y.Z must equal Cargo.toml version
         env:
           REF: ${{ github.ref }}
@@ -108,6 +111,7 @@ jobs:
     environment: pypi
     permissions:
       # Trusted Publishing (OIDC) — no PyPI API token is stored in this repo.
+      contents: read
       id-token: write
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
