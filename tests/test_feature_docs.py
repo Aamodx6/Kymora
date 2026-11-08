@@ -1,4 +1,4 @@
-"""Feature-doc metadata consistency (Phase 6.2).
+"""Feature-doc metadata consistency.
 
 `CORE33_META` (src/registry.rs, exposed via `describe_feature`) must agree
 with observable behavior: every core33 feature carries definition/min_length/

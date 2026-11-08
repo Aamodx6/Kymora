@@ -1,4 +1,4 @@
-"""Streaming vs batch parity (Phase 2.3).
+"""Streaming vs batch parity.
 
 `StreamingExtractor.compute(kind="fast")` must match `extract_features` on the
 same window within rtol 1e-9 (float64) across distributions, window sizes, and

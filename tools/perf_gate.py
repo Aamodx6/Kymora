@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Performance regression gate for the core33 hot path (Phase 5.3).
+"""Performance regression gate for the core33 hot path.
 
 Probes `extract_features` on 1k x 500 core33 (direct call, no harness
 overhead beyond the call itself) and compares the median against a stored

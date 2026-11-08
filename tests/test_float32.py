@@ -1,4 +1,4 @@
-"""float32 input support end to end (Phase 3.2).
+"""float32 input support end to end.
 
 - f32 2D / list / CSR-ragged read natively (zero-copy borrow, no `astype`
   round-trip) with float64 accumulation; results match the float64 pipeline

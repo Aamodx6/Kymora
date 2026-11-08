@@ -1,4 +1,4 @@
-"""Multichannel input surface (Phase 3.3).
+"""Multichannel input surface.
 
 - 3D `(n_samples, n_channels, length)` output is `(n, C * n_features + cross)`
   with `ch{c}__{feature}` per-channel blocks then cross columns.
