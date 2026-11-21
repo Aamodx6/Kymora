@@ -7,13 +7,13 @@ name = "kymora"
 # Version is single-sourced from Cargo.toml; maturin injects the crate
 # version into the wheel metadata at build time. Do not add `version` here.
 dynamic = ["version"]
-description = "Fast time-series feature extraction, Rust core"
+description = "Fast time-series feature extraction, Rust core (formerly tsxtract)"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Aamod Kumar" }]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
-keywords = ["time-series", "feature-extraction", "rust", "tsfresh", "machine-learning"]
+keywords = ["time-series", "feature-extraction", "rust", "tsfresh", "machine-learning", "tsxtract"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",

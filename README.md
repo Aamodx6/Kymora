@@ -1,4 +1,4 @@
-# Kymora
+# Kymora (formerly Tsxtract)
 ### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
@@ -8,6 +8,12 @@
 [![Release](https://github.com/Aamodx6/Kymora/actions/workflows/release.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/release.yml)
 [![Nightly](https://github.com/Aamodx6/Kymora/actions/workflows/nightly.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/nightly.yml)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://aamodx6.github.io/Kymora/)
+
+> [!NOTE]
+> **Kymora** was previously developed and released under the name **Tsxtract**. On PyPI, it is published and installed as [`kymora`](https://pypi.org/project/kymora/):
+> ```bash
+> pip install kymora
+> ```
 
 > **Batch time-series feature extraction: 33 features at 3.18 ms median per 1,000 series x 500 steps, with zero defensive memory copies.**
 

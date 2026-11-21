@@ -1,5 +1,7 @@
 # kymora
 
+> **Note:** Kymora was previously developed and released under the name **Tsxtract**. It is published on PyPI as [`kymora`](https://pypi.org/project/kymora/).
+
 High-performance time-series feature extraction for Python, powered by a native Rust engine.
 
 Extract curated statistical, temporal, spectral, multichannel, and multi-view features across large batches of time series. The Rust core operates directly on zero-copy NumPy buffers, releases the GIL, and parallelizes across series with Rayon; per-series work runs through fused single-traversal passes over lazily computed shared intermediates.
