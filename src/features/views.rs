@@ -30,17 +30,11 @@ pub fn is_pruned(view: &str, feat_name: &str, inv: Invariances) -> bool {
                 return true;
             }
             // Permutation entropy is invariant under monotonic transformation
-            if inv.contains(Invariances::MONOTONE) {
-                return true;
-            }
-            false
+            inv.contains(Invariances::MONOTONE)
         }
         "detrend" => {
             // Trend slope is identically 0 on linearly detrended series
-            if feat_name == "trend_slope" || feat_name == "trend_r2" {
-                return true;
-            }
-            false
+            feat_name == "trend_slope" || feat_name == "trend_r2"
         }
         _ => false,
     }
