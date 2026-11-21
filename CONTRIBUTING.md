@@ -141,8 +141,8 @@ One line per directory (see `docs/internal/arch.md` for the full picture):
 - `tools/` — maintainer scripts, each with a one-line docstring.
 - `docs/` — user docs (mkdocs site); `docs/internal/` — developer/process
   docs (`arch.md`, `hardening/`, `refactor/`).
-- `paper/` — canonical JOSS draft (`paper.md`); `legacy/` — superseded draft.
-- `patent/` — untouched disclosure material.
+- `paper/` — local-only JOSS draft (`paper.md`); gitignored, not part of the repo.
+- `patent/` — local-only disclosure material; gitignored, not part of the repo.
 - `landing/` — marketing site (Vercel, separate deploy).
 - `fuzz/` — cargo-fuzz targets (corpora not committed).
 - `proptest-regressions/` — proptest regression seeds (must stay at crate root).
