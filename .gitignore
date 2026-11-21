@@ -2,7 +2,7 @@
 # (`make dev`, `mkdocs build`, per-dir READMEs). See CLEANUP_STATUS.md Phase 2.
 #
 # FROZEN EVIDENCE (never ignore — must stay tracked):
-#   tests/golden/, patent/, benchmarks/results/ (tracked runs cited by CLAIMS.md),
+#   tests/golden/, benchmarks/results/ (tracked runs cited by CLAIMS.md),
 #   benchmarks/agreement/, benchmarks/report/, Cargo.lock.
 # Do NOT add patterns matching those paths. `*.svg` is deliberately absent:
 # benchmarks/report/charts/*.svg is tracked evidence.
@@ -46,6 +46,10 @@ landing/.vercel/
 perf.data*
 *.prof
 *.etl
+
+# --- Local-only material (owner's working copy; never published) ---
+/paper/
+/patent/
 
 # --- Local tool state (not repo content) ---
 .gstack/

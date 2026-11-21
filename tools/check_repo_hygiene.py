@@ -13,7 +13,6 @@ Exit 1 on any violation.
 
 from __future__ import annotations
 
-import hashlib
 import subprocess
 import sys
 from pathlib import Path
@@ -72,17 +71,6 @@ ROOT_ALLOWED = frozenset(
     }
 )
 
-# Paper/landing figure duplicates must stay byte-identical (different deploy
-# targets, same bytes).
-FIGURE_PAIRS = (
-    ("paper/figures/architecture.png", "landing/public/figures/architecture.png"),
-    ("paper/figures/scaling.png", "landing/public/figures/scaling.png"),
-    ("paper/figures/speedup.png", "landing/public/figures/speedup.png"),
-    ("paper/figures/memory.png", "landing/public/figures/memory.png"),
-    ("paper/figures/throughput.png", "landing/public/figures/throughput.png"),
-)
-
-
 def tracked_files() -> list[str]:
     out = subprocess.run(
         ["git", "ls-files", "-z"],
@@ -108,19 +96,6 @@ def main() -> int:
     mkdocs = (REPO / "mkdocs.yml").read_text(encoding="utf-8")
     if "exclude_docs" not in mkdocs or "internal/" not in mkdocs:
         errors.append("mkdocs.yml must exclude docs/internal/ (exclude_docs: internal/)")
-
-    # Paper/landing figure duplicates must stay byte-identical.
-    for paper_fig, landing_fig in FIGURE_PAIRS:
-        pf, lf = REPO / paper_fig, REPO / landing_fig
-        if not pf.exists() or not lf.exists():
-            errors.append(f"figure pair missing: {paper_fig} / {landing_fig}")
-            continue
-        hp = hashlib.sha256(pf.read_bytes()).hexdigest()
-        hl = hashlib.sha256(lf.read_bytes()).hexdigest()
-        if hp != hl:
-            errors.append(
-                f"figure drift: {paper_fig} ({hp[:12]}) != {landing_fig} ({hl[:12]})"
-            )
 
     for path in tracked_files():
         if "/" not in path and path not in ROOT_ALLOWED:
