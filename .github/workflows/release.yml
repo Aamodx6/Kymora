@@ -9,10 +9,14 @@ on:
     tags: ["v*"]
   workflow_dispatch:
     inputs:
-      test_pypi:
-        description: "Publish to TestPyPI instead of production PyPI (dry run / staging)"
+      dry_run:
+        description: "Dry run: build and verify release assets without publishing"
         type: boolean
         default: true
+      test_pypi:
+        description: "Publish to TestPyPI instead of production PyPI (staging)"
+        type: boolean
+        default: false
 
 # One tag must never start two concurrent publishes: queue, never cancel
 # (cancel-in-progress: false). A duplicate run fails safe at PyPI with
@@ -103,9 +107,9 @@ jobs:
 
   pypi-publish:
     name: PyPI publish (production)
-    # Tag-only AND not test_pypi dry run: publishing to production PyPI.
+    # Tag-only AND not test_pypi / not dry run: publishing to production PyPI.
     # OIDC Trusted Publishing, environment protection rules require manual maintainer approval.
-    if: startsWith(github.ref, 'refs/tags/v') && (inputs.test_pypi != true)
+    if: startsWith(github.ref, 'refs/tags/v') && (inputs.test_pypi != true) && (inputs.dry_run != true)
     needs: [version-check, wheels]
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -122,9 +126,9 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
 
   testpypi-publish:
-    name: TestPyPI publish (staging / dry-run)
-    # Runs when test_pypi input is true on workflow_dispatch or testing tags.
-    if: inputs.test_pypi == true
+    name: TestPyPI publish (staging)
+    # Runs when test_pypi input is true AND dry_run is false on workflow_dispatch or testing tags.
+    if: (inputs.test_pypi == true) && (inputs.dry_run != true)
     needs: [version-check, wheels]
     runs-on: ubuntu-latest
     timeout-minutes: 10
