@@ -313,7 +313,7 @@ jobs:
       - name: Run perf gate probe
         run: python tools/perf_gate.py --ci --export-benchmark-json benchmark_results.json
       - name: Store and track benchmark result
-        uses: benchmark-action/github-action-benchmark@47343e0d86e92ab0ae7e78553d1fb52ef5ca4837 # v1.20.4
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
           name: Kymora Core33 1kx500 Benchmark
           tool: 'customSmallerIsBetter'
