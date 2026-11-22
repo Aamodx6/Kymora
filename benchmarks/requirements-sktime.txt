@@ -1,7 +1,7 @@
 sktime>=1.2.0
 numpy<3.0.0
-pandas>=1.5.0
-scipy>=1.10.0
+pandas>=2.3.3
+scipy>=1.15.3
 psutil>=7.2.2
-pycatch22>=0.4.4
-tsfresh>=0.20.0
+pycatch22>=1.0.2
+tsfresh>=0.21.2
