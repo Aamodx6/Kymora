@@ -1470,14 +1470,14 @@ fn extract_one_slice_f64<'py>(
         "minimal" => {
             let out_arr = PyArray1::<f64>::zeros(py, [10], false);
             let out_slice = out_slice_mut_1d(&out_arr)?;
-            let plan = FeaturePlan::build(Some("minimal"), None)?;
+            let plan = FeaturePlan::build(Some("minimal"), None::<&[&str]>)?;
             crate::scratch::with_thread_scratch(slice.len(), |scratch| {
                 pipeline::run_plan(slice, &plan, scratch, out_slice);
             });
             Ok(out_arr)
         }
         _ => {
-            let plan = FeaturePlan::build(Some(profile), None)?;
+            let plan = FeaturePlan::build(Some(profile), None::<&[&str]>)?;
             let n_cols = plan.n_features();
             let out_arr = PyArray1::<f64>::zeros(py, [n_cols], false);
             let out_slice = out_slice_mut_1d(&out_arr)?;
