@@ -10,6 +10,71 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
+## [0.8.2] - 2026-11-22
+
+Release hardening, small-batch execution fast path, multi-session throughput
+protocol, reproducible benchmarking suite, and archival citation metadata.
+Numerics, feature names/order, and the NaN/error contracts are unchanged
+(`feature_names()` sha256 `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`).
+
+### Added
+- `kymora.extract_one(x)`: minimal-validation single-series fast path bypassing batch
+  dispatch, achieving 3.90 µs median latency at 1×100 (p99 6.40 µs, meeting the <8 µs
+  single-call target).
+- Dynamic sequential execution fast path: batch calls automatically run inline on the
+  caller thread with zero Rayon pool dispatch overhead when `n_series * len < THRESH`
+  (default 8,000 points, configurable via `KYMORA_SERIAL_THRESHOLD` environment variable)
+  or when `n_series < threads`. Verified bit-identical to parallel dispatch.
+- `kymora._core._exec_mode(n_series, length)`: runtime introspection helper reporting
+  `"sequential"` or `"parallel"` dispatch mode.
+- One-command benchmark reproduction script `reproduce.sh` automating environment
+  verification, parity checks, and benchmark execution.
+- Zenodo archival metadata (`.zenodo.json`) and automated cross-file version
+  consistency checker (`tools/check_versions.py`).
+
+### Performance
+- Multi-session headline throughput (3 sessions × 4 rounds × 30 runs, 360 runs total
+  with inter-method cooldowns under Windows High Performance plan): pooled median
+  1.94 ms / 514,245 series/s (95% CI [495,050, 529,605] series/s; isolated baseline
+  358,654 series/s / 2.79 ms). Same-session interleaved raw ratios: 95.4× catch22,
+  1,291× TSFEL, 12,106× tsfresh.
+- Parity-gated equal-feature 33-feature benchmark (1,000 × 500, 16 threads): Kymora is
+  fastest on all 16 evaluated shapes, with 1,000 × 500 ratios of 6.0× vs Numba
+  [5.7, 6.5], 165.1× vs NumPy [157.2, 170.5], 1,089.1× vs TSFEL [1,007.3, 1,132.2],
+  and 2,812.4× vs tsfresh [2,584.3, 2,914.1].
+- Streaming re-validation on HEAD: per-push cost is 0.20 µs flat across window sizes
+  $W \in \{64, 256, 4096, 65536\}$; `compute(kind="fast")` is 0.30 µs flat across all $W$.
+  Periodic drift-guard re-anchoring measured at 3.6 µs ($W=64$) to 182.4 µs ($W=65,536$;
+  amortized O(1), worst-case O(W)).
+- Memory usage: bounded worker scratch of 2.29–3.33 MiB across 16 threads (0.20–2.52 MiB
+  on 4 threads) for $N \le 10,000$. Peak RSS delta of 406.86 MiB at 100,000 × 500
+  (381.47 MiB input buffer + 25.18 MiB output buffer + 25.38 MiB worker scratch/commit).
+  Direct buffer borrowing with no copy of the input.
+- UCR-42 accuracy-vs-extraction evaluation: Kymora core33 attains 0.771 accuracy
+  (mean rank 2.76) at ~100× lower extraction cost than catch22 (0.767, rank 2.69);
+  tsfresh (0.824, rank 1.48) and TSFEL (0.812, rank 2.07) achieve higher accuracy
+  reflecting their larger feature catalogs (777 and 285 features vs 33).
+- Documented losses retained in public ledger:
+  - Small-batch 1×10: Numba JIT is faster than Kymora (Numba 3.00 µs vs Kymora 5.90 µs).
+  - 16-thread scaling plateau: 16 threads (2.30 ms) vs 8 threads (2.22 ms) on hybrid
+    Intel 13620H (6P+4E / 16T) shows scheduling inefficiency on E-cores; documented
+    with core affinity guidance.
+
+### Fixed
+- Replaced ambiguous "zero-copy" terminology with precise "direct buffer borrowing
+  (no copy of the input)".
+- Streaming complexity clarified as "amortized O(1), worst-case O(W) during periodic
+  drift-guard re-anchoring".
+- Re-baselined all profile, scaling, and memory rows in documentation and removed
+  outdated dagger (†) markers.
+
+### Breaking Changes
+- None. API, binary signatures, and feature output order remain strictly backwards-compatible.
+
+### Upgrade Notes
+- Documentation and benchmark figures published in 0.8.1 and 0.8.0 are superseded by
+  the 2026-11-22 high-performance multi-session measurements recorded in `CLAIMS.md`.
+
 ## [0.8.1] - 2026-11-22
 
 Benchmark re-baseline and documentation sync. No change to numerics, API,
