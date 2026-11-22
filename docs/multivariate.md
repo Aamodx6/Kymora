@@ -7,7 +7,7 @@
 
 | Input | Output | Notes |
 |---|---|---|
-| 3D `(n_samples, n_channels, length)`, C-contiguous float64 | `(n_samples, C * n_plan + n_cross)` | Zero-copy borrow like the 2D path |
+| 3D `(n_samples, n_channels, length)`, C-contiguous float64 | `(n_samples, C * n_plan + n_cross)` | Direct buffer borrowing (no copy of the input) like the 2D path |
 | List of 2D `(C, length_i)` float64 | same, per-sample widths | Ragged lengths across samples; channel count must agree |
 
 `n_plan` is the profile/feature count; `n_cross` is `pairs * 4 + 4` when

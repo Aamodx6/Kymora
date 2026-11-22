@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `kymora` v0.8.0.
+Complete Python API specification for `kymora` v0.8.2.
 
 ```python
 import kymora
 
-kymora.__version__  # "0.8.0"
+kymora.__version__  # "0.8.2"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.
@@ -81,6 +81,89 @@ extract_features_df(
 Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
 
 Requires `pandas` (`pip install "kymora[pandas]"`).
+
+---
+
+### extract_features_polars
+
+```python skip
+extract_features_polars(
+    X: Any,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
+) -> pl.DataFrame
+```
+
+Same computation as `extract_features`, returned as a native `polars.DataFrame`. Columns match `feature_names(...)`. Constructed directly from extracted NumPy buffers without unnecessary memory copies.
+
+Accepts a 2D NumPy array, Polars DataFrame, or PyArrow Table.
+
+Requires `polars` (`pip install "kymora[polars]"`).
+
+---
+
+### extract_one
+
+```python skip
+extract_one(
+    x: np.ndarray,
+) -> np.ndarray
+```
+
+Extract the 33 Core features for a single 1D time series with minimal validation overhead.
+
+Designed for ultra-low-latency single-series inference and streaming event loops. Operates directly on the caller thread without thread pool synchronization or task scheduling overhead (~3.9 µs median on $1 \times 100$).
+
+**Parameters**
+
+- `x` — 1D C-contiguous `float64` array.
+
+**Returns**
+
+A 1D `float64` array of shape `(33,)`.
+
+---
+
+### extract_features_chunked
+
+```python skip
+extract_features_chunked(
+    source: Any,
+    chunk_size: int = 1000,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
+    as_df: bool = False,
+    as_polars: bool = False,
+) -> Iterator[np.ndarray | pd.DataFrame | pl.DataFrame]
+```
+
+Extract features in streaming chunks to keep memory usage bounded on large datasets or out-of-core files.
+
+**Supported Sources**
+
+- In-memory 2D NumPy arrays or memory-mapped files (`np.memmap`)
+- File paths (`str` or `Path`) pointing to `.parquet`, `.csv`, or `.npy` files
+- Python iterables / generators yielding 1D series
+
+**Parameters**
+
+- `source` — 2D array, file path, or iterable of 1D series.
+- `chunk_size` — Number of series per chunk (default `1000`).
+- `profile`, `features`, `n_jobs`, `views`, `nan_policy`, `contiguous` — as in `extract_features`.
+- `as_df` — If `True`, yields chunks as labeled `pandas.DataFrame`.
+- `as_polars` — If `True`, yields chunks as labeled `polars.DataFrame`.
+
+**Yields**
+
+Extracted features for each chunk (`np.ndarray`, `pd.DataFrame`, or `pl.DataFrame`).
 
 ---
 

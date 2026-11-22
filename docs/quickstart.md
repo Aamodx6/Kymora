@@ -124,6 +124,67 @@ predictions = pipe.predict(feats)
 
 ---
 
+## Native Polars DataFrame Extraction
+
+For direct integration (no copy of the input) into Polars query plans (`pip install "kymora[polars]"`):
+
+```python skip
+import polars as pl
+import kymora
+
+# Ingest directly from Polars DataFrame or NumPy array
+df_pl = kymora.extract_features_polars(X)
+print(df_pl.schema)
+print(df_pl.head(5))
+```
+
+---
+
+## Out-of-Core & Chunked Processing
+
+When datasets exceed available memory or are stored on disk as Parquet, CSV, or memory-mapped files:
+
+```python skip
+# Process a large Parquet file in chunks of 5,000 series
+for chunk_df in kymora.extract_features_chunked("sensor_data.parquet", chunk_size=5000, as_df=True):
+    # Train incremental model or write to feature store
+    process_features(chunk_df)
+
+# Works identically with generators and memory-mapped NumPy arrays
+generator = (fetch_next_series() for _ in range(1_000_000))
+for feat_batch in kymora.extract_features_chunked(generator, chunk_size=10_000):
+    model.partial_fit(feat_batch)
+```
+
+---
+
+## Single-Series Ultra-Fast Inference
+
+For online inference or low-latency callbacks on individual time series:
+
+```python
+# Low-overhead call directly on caller thread (~3.9 µs per 100-sample series)
+sample = rng.standard_normal(100)
+feats_single = kymora.extract_one(sample)  # (33,) float64
+```
+
+---
+
+## Concurrency & Multiprocessing Best Practices
+
+Kymora is designed to scale across hardware threads within a single Python process:
+
+1. **Native Threading (Default):** Kymora releases Python's Global Interpreter Lock (GIL) and distributes series across Rayon threads. You do *not* need Python `multiprocessing` for batch extraction.
+2. **Explicit Thread Allocation (`n_jobs`):** Pass `n_jobs=4` to restrict Kymora to 4 threads, leaving other cores free for data loading or model inference.
+3. **Using inside `multiprocessing.Pool` or Celery:** When calling Kymora inside multi-process workers, avoid CPU oversubscription by setting `n_jobs=1` per worker:
+   ```python skip
+   def process_worker(batch):
+       return kymora.extract_features(batch, n_jobs=1)
+   ```
+4. **Fork Safety:** Kymora dynamically initializes worker pools after process forks, avoiding deadlocks in Linux `fork()` environments.
+
+---
+
 ## Hardware Auto-Tuning (Wisdom)
 
 Benchmark your local architecture to configure the optimal execution backend:
