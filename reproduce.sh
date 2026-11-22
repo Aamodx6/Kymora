@@ -21,13 +21,13 @@ if command -v uv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
     source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate"
     uv pip install --upgrade pip
-    uv pip install numpy scipy numba tabulate
+    uv pip install numpy scipy numba tabulate pandas tsfresh pycatch22 tsfel
     if [ -f "dist/kymora-0.8.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" ]; then
         uv pip install dist/kymora-0.8.2-*.whl
     elif [ -f "dist/kymora-0.8.2-cp38-abi3-win_amd64.whl" ]; then
         uv pip install dist/kymora-0.8.2-*.whl
     else
-        uv pip install -e . --no-build-isolation || pip install kymora==0.8.2 || pip install -e .
+        uv pip install -e ".[bench,test]" --no-build-isolation
     fi
 else
     echo ">> Using standard python3 venv..."
@@ -38,8 +38,8 @@ else
     # shellcheck disable=SC1091
     source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate"
     pip install --upgrade pip
-    pip install numpy scipy numba tabulate
-    pip install kymora==0.8.2 || pip install -e .
+    pip install numpy scipy numba tabulate pandas tsfresh pycatch22 tsfel
+    pip install -e ".[bench,test]"
 fi
 
 echo ""

@@ -34,6 +34,8 @@ Artifacts:
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import sys
@@ -357,6 +359,12 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
     """Interleaved equal-feature benchmark across shapes and libraries."""
     import kymora
 
+    try:
+        available_threads = len(os.sched_getaffinity(0))
+    except AttributeError:
+        available_threads = os.cpu_count() or 1
+    benchmark_threads = min(16, available_threads)
+
     shapes = shapes or BENCH_SHAPES
     dists = dists or ["gaussian"]
     date_dir = RESULTS_ROOT / f"{datetime.now().strftime('%Y-%m-%d')}_equal_feature"
@@ -391,14 +399,14 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
 
             for comp in competitors:
                 wanted = list(EQUAL_SETS[comp].keys())
-                km_fn = lambda Xk, w=wanted: _extract_kymora_matched(Xk, w, threads=16)  # noqa: E731
+                km_fn = lambda Xk, w=wanted: _extract_kymora_matched(Xk, w, threads=benchmark_threads)  # noqa: E731
                 other_fn = _competitor_runner(comp)
 
                 km_rounds = []
                 other_rounds = []
                 for r in range(rounds):
                     km_rounds.append(_time_fn(km_fn, X, min_runs=5, budget_s=1.0))
-                    other_rounds.append(_time_fn(other_fn, X, threads=16, min_runs=3, budget_s=1.0))
+                    other_rounds.append(_time_fn(other_fn, X, threads=benchmark_threads, min_runs=3, budget_s=1.0))
                     print(
                         f"  {n_series}x{length} {dist} {comp} round {r + 1}/{rounds}: "
                         f"kymora {km_rounds[-1]['median_ms']:.2f} ms, "
