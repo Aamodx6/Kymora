@@ -13,17 +13,27 @@ use _core::plan::FeaturePlan;
 
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 #[inline(always)]
-unsafe fn callgrind_start() {
-    // Valgrind client request: CALLGRIND_START_INSTRUMENTATION (0x5601)
+unsafe fn valgrind_client_request(request: usize) -> usize {
+    let args: [usize; 6] = [request, 0, 0, 0, 0, 0];
+    let res: usize;
     std::arch::asm!(
         "rol rdi, 3",
         "rol rdi, 13",
         "rol rdi, 61",
         "rol rdi, 51",
         "xchg rbx, rbx",
-        inout("rdi") 0x56010000usize => _,
+        in("rax") args.as_ptr(),
+        inout("rdx") 0usize => res,
         options(nostack, preserves_flags)
     );
+    res
+}
+
+#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
+#[inline(always)]
+unsafe fn callgrind_start() {
+    // 0x43540004 = VG_USERREQ_TOOL_BASE('C','T') + 4 (CALLGRIND_START_INSTRUMENTATION)
+    valgrind_client_request(0x4354_0004);
 }
 
 #[cfg(not(all(target_os = "linux", target_arch = "x86_64")))]
@@ -33,16 +43,8 @@ unsafe fn callgrind_start() {}
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
 #[inline(always)]
 unsafe fn callgrind_stop() {
-    // Valgrind client request: CALLGRIND_STOP_INSTRUMENTATION (0x5602)
-    std::arch::asm!(
-        "rol rdi, 3",
-        "rol rdi, 13",
-        "rol rdi, 61",
-        "rol rdi, 51",
-        "xchg rbx, rbx",
-        inout("rdi") 0x56020000usize => _,
-        options(nostack, preserves_flags)
-    );
+    // 0x43540005 = VG_USERREQ_TOOL_BASE('C','T') + 5 (CALLGRIND_STOP_INSTRUMENTATION)
+    valgrind_client_request(0x4354_0005);
 }
 
 #[cfg(not(all(target_os = "linux", target_arch = "x86_64")))]

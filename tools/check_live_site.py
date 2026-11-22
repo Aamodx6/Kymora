@@ -109,6 +109,21 @@ def main() -> int:
                 print(f"  -> [FAIL] Found {len(v)} violation(s)")
             else:
                 print(f"  -> [OK] No denylisted terms detected")
+
+            # Also inspect linked application scripts (e.g. React/Vite SPA bundles)
+            script_srcs = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', body)
+            for src in script_srcs:
+                script_url = urllib.parse.urljoin(url, src)
+                try:
+                    script_body = fetch_url(script_url)
+                    sv = check_html(script_url, script_body)
+                    if sv:
+                        all_violations.extend(sv)
+                        print(f"  -> [FAIL] Found {len(sv)} violation(s) in script {script_url}")
+                    else:
+                        print(f"  -> [OK] Script clean: {script_url} ({len(script_body):,} bytes)")
+                except Exception as s_exc:
+                    print(f"  -> [WARN] Could not fetch linked script {script_url}: {s_exc}")
         except Exception as exc:
             err = f"[{url}] Failed to fetch live site: {exc}"
             print(f"  -> [ERROR] {err}")

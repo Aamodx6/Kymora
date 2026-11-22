@@ -46,6 +46,7 @@ jobs:
               - 'tools/**'
               - 'fuzz/**'
               - 'benchmarks/**'
+              - 'benches/**'
             docs:
               - 'docs/**'
               - 'landing/**'
@@ -391,7 +392,6 @@ jobs:
           cp "$HEAD_BIN" /tmp/bench-bins/head-bench
       - name: Build BASE instruction benchmark
         id: build-base
-        continue-on-error: true
         run: |
           BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
           if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
@@ -399,18 +399,20 @@ jobs:
           fi
           echo "Attempting to build base ref: $BASE_REF"
           git checkout "$BASE_REF" || git checkout origin/main
-          if cargo build --release --bench core33_instructions --no-default-features; then
-            BASE_BIN=$(find target/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
+          if [ ! -f benches/core33_instructions.rs ]; then
+            echo "Base ref does not contain benches/core33_instructions.rs (historical baseline unavailable)"
+            echo "base_built=false" >> "$GITHUB_OUTPUT"
+          else
+            CARGO_TARGET_DIR=target-base cargo build --release --bench core33_instructions --no-default-features
+            BASE_BIN=$(find target-base/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
             if [ -n "$BASE_BIN" ] && [ -f "$BASE_BIN" ]; then
               echo "Found BASE binary at: $BASE_BIN"
               cp "$BASE_BIN" /tmp/bench-bins/base-bench
               echo "base_built=true" >> "$GITHUB_OUTPUT"
             else
-              echo "base_built=false" >> "$GITHUB_OUTPUT"
+              echo "Failed to locate compiled base binary in target-base"
+              exit 1
             fi
-          else
-            echo "Base ref does not support core33_instructions bench target"
-            echo "base_built=false" >> "$GITHUB_OUTPUT"
           fi
           git checkout -
       - name: Run instruction-count comparison gate

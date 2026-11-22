@@ -34,13 +34,19 @@ def parse_callgrind_summary(out_file: Path) -> int:
             # summary: <Ir> ...
             parts = line.split()
             if len(parts) >= 2 and parts[1].isdigit():
-                return int(parts[1])
+                val = int(parts[1])
+                if val <= 0:
+                    raise ValueError(f"Non-positive instruction count ({val}) in {out_file}")
+                return val
     # Fallback: search for 'events: Ir' and total
     for line in content.splitlines():
         if line.startswith("totals:"):
             parts = line.split()
             if len(parts) >= 2 and parts[1].isdigit():
-                return int(parts[1])
+                val = int(parts[1])
+                if val <= 0:
+                    raise ValueError(f"Non-positive instruction count ({val}) in {out_file}")
+                return val
     raise ValueError(f"Could not parse instruction count from {out_file}")
 
 
@@ -100,7 +106,19 @@ def main() -> int:
     tmp_dir = Path(os.environ.get("RUNNER_TEMP", "/tmp")) / "callgrind_runs"
     tmp_dir.mkdir(parents=True, exist_ok=True)
 
-    base_available = args.base_bin and args.base_bin.exists()
+    if not args.workloads:
+        print("Error: No workloads specified.", file=sys.stderr)
+        return 1
+    valid_workloads = set(WORKLOADS)
+    for wl in args.workloads:
+        if wl not in valid_workloads:
+            print(f"Error: Invalid workload '{wl}'. Valid options: {WORKLOADS}", file=sys.stderr)
+            return 1
+
+    base_available = bool(args.base_bin)
+    if base_available and not args.base_bin.exists():
+        print(f"Error: Base binary specified but file does not exist: {args.base_bin}", file=sys.stderr)
+        return 1
 
     results = []
     has_regression = False
@@ -119,11 +137,7 @@ def main() -> int:
 
         if base_available:
             base_out = tmp_dir / f"callgrind_base_{wl}.out"
-            try:
-                base_ir = run_callgrind(args.base_bin, wl, base_out)
-            except Exception as exc:
-                print(f"Warning: Base binary failed for workload {wl}: {exc}")
-                base_ir = None
+            base_ir = run_callgrind(args.base_bin, wl, base_out)
         else:
             base_ir = None
 

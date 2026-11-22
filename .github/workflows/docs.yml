@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
@@ -48,6 +50,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
@@ -61,15 +65,18 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@047ef7e07661e70d4408034a7491cf37803a6b57 # v4.2.0
         with:
           node-version: 20
       - name: Build landing site
+        working-directory: landing
         run: |
-          cd landing
           npm ci
           npm run build
       - name: Deploy to Vercel (if VERCEL_TOKEN configured)
+        working-directory: landing
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -77,6 +84,8 @@ jobs:
         run: |
           if [ -n "$VERCEL_TOKEN" ]; then
             echo "Deploying landing to production with Vercel CLI..."
+            npx --yes vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+            npx --yes vercel build --prod --token="$VERCEL_TOKEN"
             npx --yes vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
           else
             echo "Notice: VERCEL_TOKEN not configured in secrets; landing built and verified cleanly."
@@ -89,6 +98,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
