@@ -49,6 +49,7 @@ perf.data*
 
 # --- Local-only material (owner's working copy; never published) ---
 /patent/
+/paper/
 
 # --- Local tool state (not repo content) ---
 .gstack/

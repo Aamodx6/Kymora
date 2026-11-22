@@ -17,7 +17,6 @@ CHECK_FILES = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "docs" / "benchmarks.md",
     REPO_ROOT / "docs" / "index.md",
-    REPO_ROOT / "paper" / "paper.md",
     # Landing page source files
     *(REPO_ROOT / "landing" / "src").glob("**/*.tsx"),
     *(REPO_ROOT / "landing" / "src").glob("**/*.ts"),
@@ -29,8 +28,8 @@ CLAIM_PATTERNS = [
     re.compile(r"([\d,]+)\s*series/s(?:ec(?:ond)?)?", re.IGNORECASE),
     # Latency: e.g. "1.94 ms"
     re.compile(r"(\d+\.?\d*)\s*ms\b"),
-    # Speedup ratios: e.g. "95.4×" or "95.4x faster"
-    re.compile(r"(\d+(?:,\d+)?)\s*[×x]\s*(?:faster|slower)?", re.IGNORECASE),
+    # Speedup ratios: e.g. "95.4×" or "95.4x faster" or "1,089.1×"
+    re.compile(r"((?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?)\s*[×x]\s*(?:faster|slower)?", re.IGNORECASE),
     # Per-feature cost: e.g. "0.0964 µs"
     re.compile(r"(\d+\.?\d*)\s*µs"),
     # Memory: e.g. "25.18 MiB"

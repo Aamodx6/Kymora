@@ -4,7 +4,7 @@ labels: ["polars", "benchmarks", "good first issue"]
 ---
 
 ## Context
-Kymora provides native integration with Polars via `kymora.polars`. Polars users often operate on `LazyFrame` query plans rather than eager DataFrames.
+Kymora provides native integration with Polars via `kymora.extract_features_polars` and chunked streaming. Polars users often operate on `LazyFrame` query plans rather than eager DataFrames.
 
 ## Acceptance Criteria
 1. Create a benchmark in `benchmarks/suites/bench_polars.py` measuring extraction overhead on eager `pl.DataFrame` vs `pl.LazyFrame` with varying batch chunk sizes.

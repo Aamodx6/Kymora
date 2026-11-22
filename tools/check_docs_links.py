@@ -35,7 +35,20 @@ def extract_anchors(file_path: Path) -> set[str]:
     except Exception:
         return anchors
 
+    in_code_block = False
+    fence_char = ""
     for line in content.splitlines():
+        trimmed = line.strip()
+        if trimmed.startswith("```") or trimmed.startswith("~~~"):
+            if not in_code_block:
+                in_code_block = True
+                fence_char = trimmed[:3]
+            elif trimmed.startswith(fence_char):
+                in_code_block = False
+            continue
+        if in_code_block:
+            continue
+
         # Check markdown headings (# Heading)
         heading_match = re.match(r"^#{1,6}\s+(.+)$", line.strip())
         if heading_match:

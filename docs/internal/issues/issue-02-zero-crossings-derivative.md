@@ -17,4 +17,4 @@ In audio and vibration analysis, the zero-crossing rate of the first difference 
 - `src/plan.rs`: Feature bitflag registration.
 
 ## Tests to Add
-- `tests/unit/test_zero_crossings_derivative.py`: Verification against NumPy reference `np.sum(np.diff(np.sign(np.diff(x))) != 0) / (len(x) - 2)`.
+- `tests/unit/test_zero_crossings_derivative.py`: Verification against NumPy reference `np.sum((np.diff(x)[:-1] * np.diff(x)[1:]) < 0) / (len(x) - 2)`.

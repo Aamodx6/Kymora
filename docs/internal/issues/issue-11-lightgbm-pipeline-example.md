@@ -8,7 +8,7 @@ labels: ["documentation", "examples", "good first issue", "machine-learning"]
 
 ## Acceptance Criteria
 1. Add a self-contained script `docs/examples/lightgbm_pipeline.py`.
-2. Generate synthetic multivariate time-series classification dataset.
+2. Generate synthetic time-series classification dataset (2D array: $N \text{ samples} \times L \text{ timestamps}$).
 3. Construct `sklearn.pipeline.Pipeline` with `KymoraTransformer` and `LightGBM` (with graceful fallback to `HistGradientBoostingClassifier`).
 4. Evaluate cross-validation score and latency.
 

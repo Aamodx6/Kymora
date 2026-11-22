@@ -49,7 +49,7 @@ python -c "import kymora as km, numpy as np, numba; print(f'Kymora: {km.__versio
 ROUNDS="${1:-3}"
 
 echo ""
-echo ">> Step 1: Running Parity Gate (verifying numerical agreement <= 1e-9)..."
+echo ">> Step 1: Running Parity Gate (verifying numerical agreement: exact <= 1e-9, close <= 1e-5)..."
 python benchmarks/suites/equal_feature.py parity
 
 echo ""
@@ -76,9 +76,12 @@ if results:
             data = json.loads(line)
             comp = data.get("competitor", "unknown")
             shape = f"{data.get('n_series', 0)}x{data.get('length', 0)}"
-            n_feats = data.get("n_features", 0)
-            ratio = data.get("ratio_median", 0.0)
-            ci = f"[{data.get('ratio_ci_low', 0.0):.1f}, {data.get('ratio_ci_high', 0.0):.1f}]"
+            n_feats = data.get("n_features_kymora", data.get("n_features", 0))
+            ratio = data.get("ratio_competitor_over_kymora", data.get("ratio_median", 0.0))
+            if "ratio_ci95" in data and isinstance(data["ratio_ci95"], (list, tuple)):
+                ci = f"[{data['ratio_ci95'][0]:.1f}, {data['ratio_ci95'][1]:.1f}]"
+            else:
+                ci = f"[{data.get('ratio_ci_low', 0.0):.1f}, {data.get('ratio_ci_high', 0.0):.1f}]"
             print(f"{comp:<15} | {shape:<12} | {n_feats:<10} | {ratio:>14.1f}x | {ci:<15}")
     print("-" * 75)
 else:
