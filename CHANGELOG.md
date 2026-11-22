@@ -10,7 +10,26 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
-## [0.8.0] - Unreleased
+## [0.8.1] - 2026-11-22
+
+Benchmark re-baseline and documentation sync. No change to numerics, API,
+feature names/order, or the NaN/error contracts (`feature_names()` sha256
+unchanged).
+
+### Changed
+- Published benchmarks re-measured on the 0.8.0 release wheel: matched-feature
+  ratios 6.0x-2,812.4x across four shapes (1,000 x 500 headline: numba 6.0x,
+  numpy 165.1x, TSFEL 1,089.1x, tsfresh 2,812.4x); raw time 1.84 ms /
+  542,682 series/s; profiles, thread scaling, and memory refreshed. README,
+  docs/benchmarks.md, CLAIMS.md, the landing page, and the launch drafts now
+  cite the 2026-11-22 artifacts; the 0.7.0 rows remain in CLAIMS as
+  superseded.
+
+### Fixed
+- Small-batch loss wording: the superseded "up to ~40x" claim against numba
+  at 1x100 is replaced everywhere by the measured 1.43x-1.78x.
+
+## [0.8.0] - 2026-10-05
 
 New extraction options, ecosystem integration, and correctness hardening.
 Numerics, feature names/order, and the NaN/error contracts are unchanged
@@ -302,6 +321,7 @@ an sdist build; that is fixed here.
 - Windows x86_64 wheel and sdist only — see 0.2.0 for the full platform matrix.
 
 [Unreleased]: https://github.com/Aamodx6/Kymora/compare/v0.7.0...HEAD
+[0.8.1]: https://github.com/Aamodx6/Kymora/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/Aamodx6/Kymora/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Aamodx6/Kymora/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/Aamodx6/Kymora/compare/v0.5.0...v0.6.0
