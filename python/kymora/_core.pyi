@@ -9,6 +9,21 @@ _F64Array = npt.NDArray[np.float64]
 _F32Array = npt.NDArray[np.float32]
 _I64Array = npt.NDArray[np.int64]
 
+def extract_one(
+    x: _F64Array | _F32Array | Sequence[float],
+    profile: str | None = None,
+) -> _F64Array:
+    """Extract features for a single 1D series with minimal validation overhead.
+
+    Args:
+        x: 1D array or sequence of float64/float32 values.
+        profile: Optional profile name (default "core33").
+
+    Returns:
+        1D float64 array of shape (n_features,).
+    """
+    ...
+
 def extract_features(
     X: _F64Array | _F32Array | Sequence[_F64Array] | Sequence[_F32Array],
     profile: str | None = None,

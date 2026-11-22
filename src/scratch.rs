@@ -7,6 +7,20 @@
 
 use realfft::num_complex::Complex;
 use realfft::RealFftPlanner;
+use std::cell::RefCell;
+
+thread_local! {
+    static THREAD_SCRATCH: RefCell<Scratch> = RefCell::new(Scratch::new(512));
+}
+
+/// Execute a closure with a thread-local reusable `Scratch` buffer.
+pub fn with_thread_scratch<R, F: FnOnce(&mut Scratch) -> R>(len: usize, f: F) -> R {
+    THREAD_SCRATCH.with(|cell| {
+        let mut scratch = cell.borrow_mut();
+        scratch.ensure_capacity(len);
+        f(&mut scratch)
+    })
+}
 
 #[repr(align(64))]
 pub struct Scratch {

@@ -54,6 +54,18 @@ from ._core import (
     list_profiles,
     sliding_features,
 )
+
+try:
+    from ._core import extract_one
+except ImportError:  # pragma: no cover
+    def extract_one(x: Any, profile: str | None = None) -> np.ndarray:
+        import numpy as np
+        arr = np.asarray(x, dtype=np.float64)
+        if arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+        res = extract_features(arr, profile=profile or "core33", n_jobs=1)
+        return res[0]
+
 from .chunked import extract_features_chunked
 from .select import KymoraSelector, select_features
 from .tune import tune
@@ -65,6 +77,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 __all__ = [
     "extract_features",
+    "extract_one",
     "extract_features_mc",
     "extract_features_ragged",
     "extract_features_df",

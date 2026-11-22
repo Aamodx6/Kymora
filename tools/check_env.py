@@ -53,7 +53,9 @@ def get_kymora_wheel_or_binary_info() -> dict[str, Any]:
         if candidates:
             bin_path = candidates[0]
             info["binary_path"] = str(bin_path)
-            info["sha256"] = hashlib.sha256(bin_path.read_bytes()).hexdigest()
+            sha = hashlib.sha256(bin_path.read_bytes()).hexdigest()
+            info["sha256"] = sha
+            info["binary_sha256"] = sha
     except Exception as e:
         info["error"] = str(e)
 
