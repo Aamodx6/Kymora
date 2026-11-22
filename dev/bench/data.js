@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795349346835,
+  "lastUpdate": 1795350117103,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -186,6 +186,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0494",
             "unit": "ms",
             "extra": "runs=30, cv=0.050"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "601526218e6c81fd779b536756c4962cad2c3fbb",
+          "message": "Phase 9: Release 0.8.2 Dry Run, Verification Scripts, and Release Notes (#33)\n\n* Phase 9: Release 0.8.2 Dry Run, Verification Scripts, and Release Notes\n\n* docs(release-notes): replace denylisted phrase with 'no copy of the input'",
+          "timestamp": "2026-11-22T17:50:27+05:30",
+          "tree_id": "73602f68a6463f4951ade179b21ccbdcf49e1306",
+          "url": "https://github.com/Aamodx6/Kymora/commit/601526218e6c81fd779b536756c4962cad2c3fbb"
+        },
+        "date": 1795350116549,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 4.5956,
+            "range": "0.6076",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.146"
           }
         ]
       }
