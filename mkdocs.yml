@@ -5,7 +5,10 @@ repo_url: https://github.com/Aamodx6/Kymora
 repo_name: Aamodx6/Kymora
 edit_uri: edit/main/docs/
 
-exclude_docs: internal/
+exclude_docs: |
+  internal/*
+  launch/*
+  arch_audit.md
 
 theme:
   name: material
@@ -29,6 +32,7 @@ nav:
     - Home: index.md
     - Install: install.md
     - Quickstart: quickstart.md
+    - When NOT to use: when-not-to-use.md
     - Migrating: migrating.md
     - FAQ: faq.md
   - Reference:
@@ -44,6 +48,7 @@ nav:
     - Parity matrix: parity_matrix.md
   - Benchmarks:
     - Benchmarks: benchmarks.md
+    - Feature mapping: benchmarks/feature_mapping.md
   - Project:
     - Contributing: contributing.md
     - Roadmap: ROADMAP.md

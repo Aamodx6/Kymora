@@ -9,7 +9,7 @@ conversions anywhere.
 |---|---|---|
 | `extract_features` 2D / list | yes | Native narrow read, float64 accumulation; matches float64 on the same values within rtol 1e-4 (measured max 8.8e-6) |
 | `extract_features_ragged` CSR | yes | Same agreement |
-| `extract_features` + `minimal` / core33 subsets | yes | Gathered from a full core33 row, still zero-copy |
+| `extract_features` + `minimal` / core33 subsets | yes | Gathered from a full core33 row, no copy of the input |
 | `extract_features` + `extended` / `full` / non-raw views | **no** | Raises `ValueError` (f32 kernels implement core33 only); pass float64. This path previously panicked across the FFI boundary. |
 | `sliding_features`, `extract_features_mc`, streaming | **no** | `ValueError`; pass float64 |
 

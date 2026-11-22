@@ -28,4 +28,4 @@ stated beside a number). Every published number traces to an artifact via
 [CLAIMS.md](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md).
 
 **When should I *not* use this?** See
-[When not to use this](index.md#when-not-to-use-this).
+[When NOT to use Kymora](when-not-to-use.md).

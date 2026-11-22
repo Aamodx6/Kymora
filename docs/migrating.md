@@ -104,7 +104,7 @@ drop-in replacements inside a trained model.
 `tsfresh`'s parameterised families — `agg_linear_trend`, `change_quantiles`,
 `fft_coefficient` at arbitrary indices, `cwt_coefficients`, and the rest of the
 long tail — are not implemented and will not be. The feature set is closed by
-design; see [when not to use this](index.md#when-not-to-use-this). If your model
+design; see [when not to use Kymora](when-not-to-use.md). If your model
 depends on those, `tsfresh` is the right tool and this library is not.
 
 ## Behaviour differences worth knowing

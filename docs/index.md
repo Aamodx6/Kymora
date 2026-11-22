@@ -27,8 +27,38 @@ df = kymora.extract_features_df(X)       # pandas DataFrame with labeled columns
 - **$O(n)$ multi-select quantiles**: histogram/selection multi-quantile evaluation avoids full sorting overhead on the core33 and minimal profiles.
 - **Multi-View Transform Engine**: Multiply feature coverage across 8 mathematical domain views (`raw`, `diff`, `diff2`, `detrend`, `znorm`, `abs`, `logret`, `rank`) with automatic invariance pruning.
 - **Multichannel & Cross-Channel Dynamics**: Full support for 3D time-series batches `(samples, channels, length)`, evaluating per-channel baselines and pairwise cross-correlation / covariance interactions.
-- **Fleet Real-Time Streaming**: `MultiStreamExtractor` monitors thousands of live time-series streams simultaneously with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$, and a fast 6-feature tier avoids sorting and FFT.
+- **Fleet Real-Time Streaming**: `StreamingExtractor` monitors live time-series streams with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$ (worst-case $O(W)$ upon drift re-anchoring), and a fast 12-feature tier avoids sorting and FFT.
 - **Supervised Feature Selection**: `select_features` and `KymoraSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
+
+---
+
+## Benchmarks Overview
+
+All numbers below are pooled medians from interleaved rounds with 95% bootstrap CIs, subprocess-isolated, GC disabled — measured on an Intel Core i7-13620H (10 cores, 6P+4E, 16 threads, High Performance power scheme). For complete methodology, reproduction scripts, and artifact SHAs, see [Benchmarks](benchmarks.md) and [`CLAIMS.md`](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md).
+
+### Equal-feature comparison — like-for-like (1,000 × 500)
+
+Both sides compute **exactly the same features**: each competitor is restricted to the subset whose mathematical definitions match Kymora's, and every feature pair is numerically verified before timing (parity gate: max rel err $\le 10^{-9}$; artifact `2026-11-22_equal_feature/parity.json`). 16 threads, 6 interleaved rounds per row:
+
+| Library | Equal features | Kymora med (ms) | Library med (ms) | Ratio (95% CI) |
+| :--- | :---: | :---: | :---: | :--- |
+| numba baseline | 33 | 2.24 | 13.34 | **6.0× slower** [5.7, 6.5] |
+| numpy baseline | 33 | 2.19 | 361.33 | **165.1× slower** [157.2, 170.5] |
+| TSFEL | 13 | 1.97 | 2,145.73 | **1,089.1× slower** [1,007.3, 1,132.2] |
+| tsfresh | 13 | 2.34 | 6,580.57 | **2,812.4× slower** [2,584.3, 2,914.1] |
+
+Kymora is fastest on **all 16 equal-feature rows** measured across 4 shapes (ratios 6.0×–2,812.4×). `catch22` has no row here by design: none of its 22 features is definition-identical to a core33 feature (see [Feature mapping](benchmarks/feature_mapping.md)).
+
+### Raw-time comparison — full default catalogs (1,000 × 500)
+
+| Library | Features | Runtime (1k × 500) | Series / sec | Speedup (raw time) |
+| :--- | :---: | :---: | :---: | :--- |
+| **Kymora (`core33`)** | **33** | **1.94 ms** | **514,245** | **Baseline (1.0×)** |
+| `catch22` | 22 | 185.50 ms | 5,391 | **95.4× slower** |
+| `TSFEL` | 156 | 2,509.53 ms | 398 | **1,291× slower** |
+| `tsfresh` | 777 | 23,540.62 ms | 42 | **12,106× slower** |
+
+For detailed breakdowns, multi-core scaling, memory footprint sweeps, and UCR predictive accuracy benchmarks, see [Benchmarks](benchmarks.md).
 
 ---
 
@@ -51,15 +81,20 @@ Three compounding effects, in order of contribution:
 
 1. **Parallelism across series.** The dominant term. Each series is independent, so throughput scales with core count while the GIL is released. (Conversely, a single series shows no *parallel* advantage — there is nothing to spread.)
 2. **Fused per-series passes.** Feature groups share traversals and shared intermediates are computed at most once per series, so catalog breadth does not multiply cost.
-3. **Zero-copy buffers.** Inputs are borrowed views of the caller's NumPy memory and the output array is allocated once and written in place — no defensive copies, no per-series allocation in the hot path.
+3. **Direct buffer borrowing (no copy of the input).** Inputs are borrowed views of the caller's NumPy memory and the output array is allocated once and written in place — no defensive copies, no per-series allocation in the hot path.
 
 What does *not* contribute (despite older wording that suggested otherwise): explicit SIMD intrinsics (there are none — only compiler auto-vectorization) and a custom spin-pool scheduler (the prototype lives on `experiment/spin-pool`, measured at ±1% — see `docs/internal/experiments.md`; scheduling is Rayon).
 
 ---
 
-## When not to use this
+## When NOT to use Kymora
 
-- **Parameterized feature families.** The catalog is closed by design: no user-defined features and no parameter grids beyond the shipped profiles (no `cwt_coefficients`, no `agg_linear_trend` grids; FFT coefficients ship fixed at k=0..99 in `full`). If your model depends on custom grids, `tsfresh` is the right tool.
-- **Non-CPU execution.** GPU and distributed backends are out of scope.
-- **Single-series latency.** Fixed overhead per call is ~0.1 ms; for one short series a Numba loop can be faster. The advantage appears across batches.
-- **Non-float or strided input.** Only contiguous `float64`/`float32` is accepted — anything else raises instead of copying silently (or pass `contiguous="copy"` for one explicit copy), so cast with `X.astype(np.float64)` first.
+Engineering honesty is essential: Kymora is not the right tool for every workload.
+
+- **Single-series tiny workloads ($N=1, L \le 10$):** Fixed C-API call overhead (~1.5–3 µs) means inlined Numba loops run faster for single short series. Use Numba for single-series scalar processing.
+- **Massive exploratory feature searches (500+ features):** If your workflow requires computing hundreds of parameterized feature variations without prior domain knowledge, use `tsfresh`.
+- **Non-CPU execution:** Kymora is engineered strictly for multi-core CPUs; GPU and distributed backends are out of scope.
+- **Micro streaming windows ($W < 4$):** Higher-order moments are degenerate for windows smaller than 4 points.
+- **Non-float or strided input:** Only contiguous `float64`/`float32` is accepted — anything else raises instead of copying silently (or pass `contiguous="copy"` for one explicit copy).
+
+For an in-depth breakdown with measured latency profiles and recommendations, see [When NOT to Use Kymora](when-not-to-use.md).
