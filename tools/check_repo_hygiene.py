@@ -49,6 +49,7 @@ REQUIRED_GITIGNORE_ENTRIES = ("target/", "site/", "dist/", "node_modules/")
 ROOT_ALLOWED = frozenset(
     {
         ".gitignore",
+        ".zenodo.json",
         "Cargo.lock",
         "Cargo.toml",
         "CHANGELOG.md",
