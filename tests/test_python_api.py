@@ -173,3 +173,8 @@ def test_pandas_is_not_imported_by_importing_kymora():
     ]
     assert not module_level, module_level
     assert importlib.util.find_spec("kymora._core") is not None
+
+
+def test_deliberate_gate_failure_proof():
+    """DELIBERATE FAILURE: Temporary test to prove ci gate triggers and blocks when a test fails."""
+    assert False, "Deliberate test failure for CI gate proof"
