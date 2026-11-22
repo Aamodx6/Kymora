@@ -46,17 +46,6 @@ unsafe fn callgrind_start() {
 #[inline(always)]
 unsafe fn callgrind_start() {}
 
-#[cfg(all(target_os = "linux", target_arch = "x86_64"))]
-#[inline(always)]
-unsafe fn callgrind_stop() {
-    // 0x43540005 = VG_USERREQ_TOOL_BASE('C','T') + 5 (CALLGRIND_STOP_INSTRUMENTATION)
-    valgrind_client_request(0x4354_0005);
-}
-
-#[cfg(not(all(target_os = "linux", target_arch = "x86_64")))]
-#[inline(always)]
-unsafe fn callgrind_stop() {}
-
 fn generate_deterministic_data(n_rows: usize, n_steps: usize) -> Vec<f64> {
     let mut data = Vec::with_capacity(n_rows * n_steps);
     for i in 0..n_rows {
