@@ -98,7 +98,10 @@ fn main() {
     for (name, rows, steps) in workloads {
         if target == "all" || target == name {
             let sum = run_workload(rows, steps, &plan);
-            println!("WORKLOAD {}: rows={}, steps={}, checksum={:.4}", name, rows, steps, sum);
+            println!(
+                "WORKLOAD {}: rows={}, steps={}, checksum={:.4}",
+                name, rows, steps, sum
+            );
         }
     }
 }

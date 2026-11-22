@@ -71,6 +71,9 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: rustfmt, clippy
@@ -81,11 +84,16 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: cargo fmt --all -- --check
       # The pyo3 extension-module feature omits libpython at link time, which
-      # breaks `cargo test` binaries; test the pure-Rust core without it.
+      # breaks `cargo test` binaries on macOS unless dynamic_lookup is passed;
+      # test the pure-Rust core without it.
       - name: Clippy
         run: cargo clippy --no-default-features --all-targets -- -D warnings
+        env:
+          RUSTFLAGS: ${{ runner.os == 'macOS' && '-C link-arg=-undefined -C link-arg=dynamic_lookup' || '' }}
       - name: Rust tests
         run: cargo test --no-default-features
+        env:
+          RUSTFLAGS: ${{ runner.os == 'macOS' && '-C link-arg=-undefined -C link-arg=dynamic_lookup' || '' }}
 
   test:
     name: test (py${{ matrix.python }}, ${{ matrix.os }})
@@ -378,7 +386,9 @@ jobs:
         run: |
           cargo build --release --bench core33_instructions --no-default-features
           mkdir -p /tmp/bench-bins
-          cp target/release/core33_instructions /tmp/bench-bins/head-bench
+          HEAD_BIN=$(find target/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
+          echo "Found HEAD binary at: $HEAD_BIN"
+          cp "$HEAD_BIN" /tmp/bench-bins/head-bench
       - name: Build BASE instruction benchmark
         id: build-base
         continue-on-error: true
@@ -390,8 +400,14 @@ jobs:
           echo "Attempting to build base ref: $BASE_REF"
           git checkout "$BASE_REF" || git checkout origin/main
           if cargo build --release --bench core33_instructions --no-default-features; then
-            cp target/release/core33_instructions /tmp/bench-bins/base-bench
-            echo "base_built=true" >> "$GITHUB_OUTPUT"
+            BASE_BIN=$(find target/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
+            if [ -n "$BASE_BIN" ] && [ -f "$BASE_BIN" ]; then
+              echo "Found BASE binary at: $BASE_BIN"
+              cp "$BASE_BIN" /tmp/bench-bins/base-bench
+              echo "base_built=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "base_built=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "Base ref does not support core33_instructions bench target"
             echo "base_built=false" >> "$GITHUB_OUTPUT"
@@ -423,6 +439,7 @@ jobs:
           cache: pip
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: ./.github/actions/setup-venv
       - name: Verify free-threaded execution without GIL
         run: |
           python -m pip install --upgrade pip maturin
