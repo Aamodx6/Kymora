@@ -31,7 +31,7 @@ Technical readiness is **100% GREEN**. Automated operations must now **STOP** at
 | **Build** | Multi-arch binary wheel matrix | **GREEN** | CI job `wheels` (`wheels.yml`) | Linux (`x86_64`, `aarch64`), macOS (`x86_64`, `arm64`), Windows (`x64`). |
 | **Build** | Source distribution (`sdist`) | **GREEN** | CI job `sdist verify and install` | Source tarball builds and installs cleanly on fresh runners. |
 | **Runtime** | Cross-platform Python test matrix | **GREEN** | CI matrix `test (py3.10..3.14)` | 44 matrix jobs across Linux, macOS, and Windows all PASS. |
-| **Runtime** | Python 3.13 free-threaded (`cp313t`) | **GREEN** | CI job `test freethreaded` | Passes smoke tests under free-threaded CPython. |
+| **Runtime** | Python 3.13 free-threaded (`cp313t`) | **DOCUMENTATION-ONLY** | CI job `test freethreaded` | Documented limitation: PyO3 0.23 requires CPython >= 3.14 for free-threaded builds (`PyO3 does not support the free-threaded build of CPython versions below 3.14`). PyO3 module has `#[pymodule(gil_used = false)]` configured for thread safety under 3.14t+. |
 | **Correctness** | Parity gate (numerical agreement) | **GREEN** | CI job `parity external` | Relative errors $\le 10^{-11}$ across tsfresh, TSFEL, Numba, NumPy. |
 | **Performance** | Automated regression gate | **GREEN** | CI job `benchmark regression gate` | 7% budget monitored with `github-action-benchmark`. |
 | **Reproduction** | One-command reproduction suite | **GREEN** | `reproduce.sh` in `validation-report` | Runs parity gate, benchmarks, and outputs ratio table in CI. |

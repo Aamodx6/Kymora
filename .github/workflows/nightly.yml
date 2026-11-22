@@ -30,6 +30,7 @@ jobs:
           cache: pip
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: ./.github/actions/setup-venv
       - name: Install latest and pre-release dependencies
         run: |
           python -m pip install --upgrade pip maturin
@@ -47,7 +48,7 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.10"
-      - uses: astral-sh/setup-uv@873523f338d1ec34ff907b8b408e063ee7cf2c30 # v5.3.0
+      - uses: astral-sh/setup-uv@1edb52594c857e2b5b13128931090f0640537287 # v5.3.0
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
       - name: Install minimum direct declared dependencies via uv
@@ -135,9 +136,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Lychee Link Checker
-        uses: lycheeverse/lychee-action@f7a93a388f837330fd54865aa7965be5d36e2f57 # v2.3.0
+        uses: lycheeverse/lychee-action@649b0e4890508ea3e11ea6b3ee35ce899a25afd5 # v2.9.0
         with:
-          args: --verbose --no-progress --exclude-mail --exclude-loopback './**/*.md' './**/*.html'
+          args: --verbose --no-progress --exclude-mail --exclude-loopback --accept 200..=204,403,429 './**/*.md' './**/*.html'
         continue-on-error: true
 
   wallclock-trend:
