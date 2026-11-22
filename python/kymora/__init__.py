@@ -58,7 +58,10 @@ from ._core import (
 try:
     from ._core import extract_one
 except ImportError:  # pragma: no cover
-    def extract_one(x: Any, profile: str | None = None) -> np.ndarray:
+    def extract_one(
+        x: npt.NDArray[np.float64] | npt.NDArray[np.float32] | Sequence[float],
+        profile: str | None = None,
+    ) -> npt.NDArray[np.float64]:
         import numpy as np
         arr = np.asarray(x)
         if arr.ndim != 1:
@@ -75,6 +78,7 @@ from .tune import tune
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
+    import numpy.typing as npt
     import pandas as pd
     import polars as pl
 
