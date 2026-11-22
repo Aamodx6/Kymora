@@ -248,6 +248,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - run: python tools/check_repo_hygiene.py
+      - run: python tools/check_claims.py
 
   audit-pr:
     # Dependency audits also run on PRs, but only when manifests change; the

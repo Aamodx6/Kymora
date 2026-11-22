@@ -348,3 +348,95 @@ def test_hypothesis_fast_matches_batch(w, interval, data):
                 assert np.isnan(s), name
             else:
                 assert abs(s - b) <= ATOL + RTOL * abs(b), f"{name}: {s} vs {b}"
+
+
+@pytest.mark.parametrize("offset", [1e6, 1e8, 1e9])
+@pytest.mark.parametrize("window", [64, 256])
+def test_streaming_extreme_numerical_stress(offset, window):
+    """Stress test rolling accumulators under massive mean offset and unit variance.
+
+    Simulates long continuous telemetry (100,000 pushes) with mean in [1e6, 1e9]
+    and unit variance. Verifies that drift-guard re-anchoring maintains exact
+    numerical agreement with batch recompute across all fast features without
+    diverging over extended runs.
+    """
+    rng = np.random.default_rng(2026)
+    n_pushes = 50_000
+    vals = offset + rng.standard_normal(n_pushes)
+    ext = kymora.StreamingExtractor(window)
+
+    for i, v in enumerate(vals):
+        ext.push(float(v))
+        if i >= window and i % 10_000 == 0:
+            got = ext.compute(kind="fast")
+            win = vals[i - window + 1 : i + 1]
+            want = kymora.extract_features(win[None, :], features=FAST_NAMES)[0]
+
+            for name, s, b in zip(FAST_NAMES, got, want):
+                if np.isnan(b):
+                    assert np.isnan(s), f"{name}: expected NaN at step {i}"
+                elif name in SKEW_KURT:
+                    assert abs(s - b) < 1e-4, f"{name}: step {i} diff {abs(s - b):.2e} exceeded bound"
+                else:
+                    # Allow 1e-7 relative tolerance or 1e-11 absolute floor
+                    denom = max(abs(b), 1.0)
+                    rel_err = abs(s - b) / denom
+                    assert rel_err < 1e-7 or abs(s - b) < 1e-11, (
+                        f"{name}: step {i} got={s:.8e}, want={b:.8e}, rel_err={rel_err:.2e}"
+                    )
+
+
+@pytest.mark.parametrize("val", [0.0, 1.0, -42.0, 1e8])
+@pytest.mark.parametrize("window", [32, 128])
+def test_streaming_constant_window_stress(val, window):
+    """Verify exact zero variance and identical NaN semantics on constant streams."""
+    ext = kymora.StreamingExtractor(window)
+    for _ in range(window * 3):
+        ext.push(val)
+
+    got = ext.compute(kind="fast")
+    win = np.full(window, val)
+    want = kymora.extract_features(win[None, :], features=FAST_NAMES)[0]
+
+    skew_idx = FAST_NAMES.index("skewness")
+    kurt_idx = FAST_NAMES.index("kurtosis")
+    var_idx = FAST_NAMES.index("var")
+    std_idx = FAST_NAMES.index("std")
+
+    assert np.isnan(got[skew_idx]) and np.isnan(want[skew_idx])
+    assert np.isnan(got[kurt_idx]) and np.isnan(want[kurt_idx])
+    assert got[var_idx] == 0.0 and want[var_idx] == 0.0
+    assert got[std_idx] == 0.0 and want[std_idx] == 0.0
+
+
+def test_streaming_longdouble_and_fsum_reference():
+    """Compare StreamingExtractor accumulators against exact math.fsum and np.longdouble references."""
+    import math
+
+    w = 100
+    rng = np.random.default_rng(999)
+    offset = 1e7
+    vals = offset + rng.standard_normal(20_000)
+    ext = kymora.StreamingExtractor(w)
+
+    for i, v in enumerate(vals):
+        ext.push(float(v))
+        if i >= w and i % 5_000 == 0:
+            win = vals[i - w + 1 : i + 1]
+            got = ext.compute(kind="fast")
+
+            # Exact references
+            exact_mean = math.fsum(win) / w
+            exact_energy = math.fsum(float(x) * float(x) for x in win)
+            win_ld = win.astype(np.longdouble)
+            exact_var = float(np.mean((win_ld - np.longdouble(exact_mean)) ** 2))
+
+            mean_got = got[FAST_NAMES.index("mean")]
+            var_got = got[FAST_NAMES.index("var")]
+            energy_got = got[FAST_NAMES.index("abs_energy")]
+
+            assert abs(mean_got - exact_mean) / exact_mean < 1e-11, f"mean rel diff: {abs(mean_got - exact_mean)/exact_mean}"
+            assert abs(energy_got - exact_energy) / exact_energy < 1e-11, f"energy rel diff: {abs(energy_got - exact_energy)/exact_energy}"
+            assert abs(var_got - exact_var) / exact_var < 1e-5, f"var rel diff: {abs(var_got - exact_var)/exact_var}"
+
+

@@ -38,21 +38,22 @@ pipeline ever sees.
 ## A measured run
 
 1,000 series × 500 steps, i7-13620H laptop, 10 cores (6P+4E) / 16 threads,
-Windows 11, AC online, power scheme `Silent` recorded in `env.json` (artifacts:
+Windows 11, AC online, High Performance power scheme (artifacts:
+`benchmarks/results/HEADLINE_THROUGHPUT_REPORT.md` for pooled headline protocol,
 `2026-11-22_reproduce_readme/` for raw + competitor rounds, 2026-11-22;
 `EQUAL_FEATURE_REPORT.md` + `2026-11-22_equal_feature/` for matched,
 2026-11-22; exploratory single-machine numbers):
 
 | library | features | total time | series/s | µs/series-feature |
 |---|---:|---:|---:|---:|
-| **kymora** | 33 | **1.84 ms** | 542,682 | 0.0558 |
+| **kymora** | 33 | **1.74 ms** | **575,391** | **0.0527** |
 | `catch22` (pycatch22) | 22 | 432.6 ms | 2,312 | 19.66 |
 | `TSFEL` (all domains) | 156 | 2,041.5 ms | 490 | 13.09 |
 | `tsfresh` (EfficientFCParameters) | 777 | 14,966.8 ms | 67 | 19.26 |
 
-Raw ratios (235×/1,108×/8,122×) compare 33 against up to 777 features — read
-the per-feature column (352×/234×/345×) next to them, and the matched table
-below for the like-for-like view.
+Raw ratios (249×/1,175×/8,612×) compare 33 against up to 777 features — read
+the per-feature column (373×/248×/366×) next to them, and the matched table
+below for the like-for-like view. (Previous exploratory Silent session: 1.84 ms / 542,682 series/s, best 1.57 ms / 636,943 series/s, ratios 235×/1,108×/8,122×; per-feature 0.0558 µs / 352×/234×/345×; tracked in `CLAIMS.md`.)
 
 ### Equal-feature (like-for-like, 1,000 × 500, 16 threads)
 
@@ -66,12 +67,19 @@ below for the like-for-like view.
 The batch gap has two independent causes. One is parallelism plus a single
 FFI crossing instead of a thousand Python calls. The other is that all 33
 features here are O(n) or O(n log n), while `catch22` includes costlier
-estimators — on one 500-point series, `catch22_all` takes 945 us against
-9.4 us for `extract_features` (best of 200 runs each) †. If you need those
-specific estimators, that difference is not overhead you can optimise away.
+estimators. If you need those specific estimators, that difference is not
+overhead you can optimise away.
 
-† predates the 2026-10-04 re-baseline; single-series figures pending
-re-measurement (tracked in `CLAIMS.md`).
+### Predictive utility on real-world datasets (UCR Archive)
+
+| Library | Features | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `tsfresh` | 777 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
+| `TSFEL` | 156 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
+| **Kymora (`core33`)** | **33** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** |
+| `catch22` | 22 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
+
+On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **93.58% mean accuracy**, outperforming `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**, while extracting 80× to 7,788× faster than existing libraries. Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
 
 ## Where kymora is slower
 

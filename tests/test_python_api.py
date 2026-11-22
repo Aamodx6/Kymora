@@ -32,6 +32,8 @@ def test_public_api_surface_is_exactly_what_is_documented():
         "extract_features_ragged",
         "extract_features_df",
         "extract_features_mc_df",
+        "extract_features_chunked",
+        "extract_features_polars",
         "sliding_features",
         "StreamingExtractor",
         "MultiStreamExtractor",

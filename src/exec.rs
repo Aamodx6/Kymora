@@ -9,6 +9,7 @@ use rayon::prelude::*;
 
 pub const SERIAL_THRESHOLD: usize = 8;
 pub const MIN_ROWS_PER_TASK: usize = 16;
+pub const SERIAL_WORK_SIZE_THRESHOLD: usize = 50_000;
 
 /// Extract features into pre-allocated flat slice in row-major order (f64) using FeaturePlan.
 pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &mut [f64]) {
@@ -18,8 +19,10 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
     }
     let n_cols = plan.n_features();
     let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+    let total_points: usize = rows.iter().map(|r| r.len()).sum();
 
-    if n_rows < SERIAL_THRESHOLD {
+    let pool_threads = rayon::current_num_threads();
+    if n_rows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
         let mut scratch = Scratch::new(max_len);
         for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
             pipeline::run_plan(row, plan, &mut scratch, row_out);
@@ -58,8 +61,10 @@ pub fn extract_into_slice_f32(
     }
 
     let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
+    let total_points: usize = rows.iter().map(|r| r.len()).sum();
+    let pool_threads = rayon::current_num_threads();
 
-    if n_rows < SERIAL_THRESHOLD {
+    if n_rows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
         let mut scratch = Scratch::new(max_len);
         match gather {
             None => {
@@ -113,7 +118,9 @@ pub fn extract_windows_plan_into_slice(
         return;
     }
 
-    if n_windows < SERIAL_THRESHOLD {
+    let total_points = n_windows * window;
+    let pool_threads = rayon::current_num_threads();
+    if n_windows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
         let mut scratch = Scratch::new(window);
         for i in 0..n_windows {
             let start = i * stride;

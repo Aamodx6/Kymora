@@ -41,18 +41,19 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
 };
 
-/* Measured 2026-11-22, pooled medians; artifact benchmarks/results/2026-11-22_reproduce_readme/.
-   Kymora version label matches the artifact-era code (0.8.0). */
+/* Measured 2026-11-22, pooled medians under High Performance protocol;
+   artifacts benchmarks/results/HEADLINE_THROUGHPUT_REPORT.md and 2026-11-22_reproduce_readme/.
+   Kymora version label matches HEAD / 0.8.1 release. */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
     name: "Kymora",
-    version: "0.8.0",
+    version: "0.8.1",
     language: "Rust + PyO3",
     featuresCount: 33,
-    totalTimeMs: 1.84,
-    seriesPerSec: 542682,
-    msPerFeature: 0.0558,
+    totalTimeMs: 1.74,
+    seriesPerSec: 575391,
+    msPerFeature: 0.0527,
     multiplierVsKymora: 1.0,
     isKymora: true,
     notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
@@ -66,7 +67,7 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 432.6,
     seriesPerSec: 2312,
     msPerFeature: 19.66,
-    multiplierVsKymora: 235.0,
+    multiplierVsKymora: 249.0,
     isKymora: false,
     notes: "Per-series Python iteration loop overhead",
   },
@@ -79,7 +80,7 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 2041.5,
     seriesPerSec: 490,
     msPerFeature: 13.09,
-    multiplierVsKymora: 1108.0,
+    multiplierVsKymora: 1175.0,
     isKymora: false,
     notes: "Sequential python feature routines with heavy array copies",
   },
@@ -92,7 +93,7 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     totalTimeMs: 14966.8,
     seriesPerSec: 67,
     msPerFeature: 19.26,
-    multiplierVsKymora: 8122.0,
+    multiplierVsKymora: 8612.0,
     isKymora: false,
     notes: "Requires long DataFrame melt; IPC and pickle serialization cost",
   },

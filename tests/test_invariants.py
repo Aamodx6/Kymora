@@ -135,3 +135,17 @@ def test_i6_output_dtype_float64():
     out = kymora.extract_features(X)
     assert out.dtype == np.float64
     assert out.shape == (10, 33)
+
+
+@pytest.mark.parametrize("shape", [(1, 100), (5, 50), (16, 200), (100, 100), (200, 300)])
+def test_serial_parallel_bit_identical(shape):
+    """Outputs must be bit-identical between sequential and parallel dispatch paths."""
+    rng = np.random.default_rng(42)
+    X = np.ascontiguousarray(rng.standard_normal(shape), dtype=np.float64)
+
+    out_serial = kymora.extract_features(X, n_jobs=1)
+    out_parallel = kymora.extract_features(X, n_jobs=16)
+
+    # Verify bit-for-bit identity across every feature
+    np.testing.assert_array_equal(out_serial, out_parallel)
+

@@ -1,0 +1,45 @@
+{
+  "pooled_median_ms": 1.73795,
+  "pooled_series_per_sec": 575390.5463333237,
+  "ci95_ms": [
+    1.7194500000000001,
+    1.7646
+  ],
+  "ci95_series_per_sec": [
+    566700.6687067891,
+    581581.3196080141
+  ],
+  "best_ms": 1.2505,
+  "best_series_per_sec": 799680.1279488206,
+  "session_range_series_per_sec": [
+    559268.4768323032,
+    598247.135891837
+  ],
+  "total_runs": 360,
+  "sessions": [
+    {
+      "session": 1,
+      "median_ms": 1.6715499999999999,
+      "series_per_sec": 598247.135891837,
+      "min_ms": 1.2505,
+      "max_ms": 2.586,
+      "n_runs": 120
+    },
+    {
+      "session": 2,
+      "median_ms": 1.7880500000000001,
+      "series_per_sec": 559268.4768323032,
+      "min_ms": 1.4941,
+      "max_ms": 3.3063,
+      "n_runs": 120
+    },
+    {
+      "session": 3,
+      "median_ms": 1.77265,
+      "series_per_sec": 564127.1542605703,
+      "min_ms": 1.2967,
+      "max_ms": 2.4605,
+      "n_runs": 120
+    }
+  ]
+}

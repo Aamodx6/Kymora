@@ -95,6 +95,19 @@ the caller to pass float64 — this path previously panicked across the FFI
 boundary. Results match the float64 pipeline on the same values within
 f32-arithmetic tolerance (rtol 1e-4; measured max 8.8e-6).
 
+## Streaming Numerical Stability & Reference Bounds
+
+Streaming accumulator numerical precision is audited against double-precision math libraries and higher-precision references (`math.fsum` and `numpy.longdouble` exact sums).
+
+### Anchored Drift-Guard Accumulator Bounds
+
+Under continuous ingestion, streaming fast features agree with exact batch evaluation within:
+- **Mean & Energy:** Relative error $\le 10^{-11}$ across long streams ($10^6 \le \mu \le 10^9$ with $\sigma \approx 1$).
+- **Variance & Std:** Relative error $\le 10^{-5}$ under massive offsets ($10^7$ offset), and $\le 10^{-7}$ under standard telemetry.
+- **Skewness & Kurtosis:** Absolute error $\le 10^{-4}$ under massive offsets, returning exact `NaN` on degenerate windows where $\text{var} \le (\epsilon \cdot \mu)^2$.
+- **Differences (`mean_change`, `mean_abs_change`, `cid_ce`):** Bit-identical agreement ($0.0$ difference).
+- **Constant & Zero Streams:** Bit-for-bit exact zero variance (`0.0`), identical `NaN` semantics on undefined higher moments.
+
 ## Stability
 
 These rules are part of the public contract. Changing which conditions

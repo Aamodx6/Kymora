@@ -48,7 +48,6 @@ perf.data*
 *.etl
 
 # --- Local-only material (owner's working copy; never published) ---
-/paper/
 /patent/
 
 # --- Local tool state (not repo content) ---

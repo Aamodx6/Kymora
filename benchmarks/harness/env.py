@@ -271,9 +271,28 @@ def check_environment_warnings(env_data: dict[str, Any]) -> list[str]:
     return warnings
 
 
+def _get_kymora_info() -> dict[str, Any]:
+    try:
+        from tools.check_env import get_kymora_wheel_or_binary_info
+        return get_kymora_wheel_or_binary_info()
+    except Exception:
+        try:
+            import hashlib
+            import kymora
+            info = {"version": getattr(kymora, "__version__", "unknown")}
+            km_dir = Path(kymora.__file__).parent
+            candidates = list(km_dir.glob("_core*.pyd")) + list(km_dir.glob("_core*.so"))
+            if candidates:
+                info["binary_sha256"] = hashlib.sha256(candidates[0].read_bytes()).hexdigest()
+            return info
+        except Exception as e:
+            return {"error": str(e)}
+
+
 def capture_env() -> dict[str, Any]:
     """Capture full hardware, OS, Python, Rust, and library environment."""
     return {
+        "kymora": _get_kymora_info(),
         "cpu": _get_cpu_info(),
         "cpu_freq": measure_cpu_freq(),
         "power": _get_power_info(),

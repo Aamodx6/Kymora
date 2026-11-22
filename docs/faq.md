@@ -23,9 +23,9 @@ structural problems raise `ValueError`/`TypeError`. See
 ## Performance
 
 **What do the headline numbers mean?** `core33` medians from the committed
-F1 artifact on one laptop (exploratory — hardware and threads are always
+benchmark artifacts on one laptop (exploratory — hardware and threads are always
 stated beside a number). Every published number traces to an artifact via
-[CLAIMS.md](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md). Numbers marked † are pending re-baseline.
+[CLAIMS.md](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md).
 
 **When should I *not* use this?** See
 [When not to use this](index.md#when-not-to-use-this).

@@ -119,3 +119,78 @@ depends on those, `tsfresh` is the right tool and this library is not.
 | Input dtype | coerced | float64 required, `TypeError` otherwise |
 | Parallelism | multiprocessing over series, optional | threads over series, always on, GIL released |
 | Dependencies | pandas, scipy, statsmodels, tqdm, ... | numpy only |
+
+## Migrating from TSFEL
+
+### The shape of the change
+
+`TSFEL` computes features from 1D signals or DataFrames using modular configuration dictionaries (`get_features_by_domain()`), often taking several seconds per batch. `kymora` processes entire 2D matrices across all CPU cores with zero defensive copies in sub-milliseconds:
+
+```python skip
+# TSFEL (serial or multi-domain extraction)
+import tsfel
+cfg = tsfel.get_features_by_domain()
+features = tsfel.time_series_features_extractor(cfg, signal_1d, fs=100)
+
+# kymora (multi-core batch extraction)
+import kymora
+features_df = kymora.extract_features_df(batch_2d)  # (n_series, 33)
+```
+
+### Feature-name mapping
+
+13 features in TSFEL have direct mathematical equivalents in Kymora:
+
+| Kymora | TSFEL feature | Mathematical Definition | Parity Agreement |
+|---|---|---|---|
+| `mean` | `Mean` | Arithmetic mean | EXACT (rel err ≤ 1e-9) |
+| `std` | `Standard deviation` | Population standard deviation (ddof=0) | EXACT |
+| `var` | `Variance` | Population variance (ddof=0) | EXACT |
+| `min` | `Min` | Minimum value | EXACT |
+| `max` | `Max` | Maximum value | EXACT |
+| `median` | `Median` | 50th percentile | EXACT |
+| `skewness` | `Skewness` | Biased Fisher-Pearson skewness | EXACT |
+| `kurtosis` | `Kurtosis` | Excess Fisher kurtosis | EXACT |
+| `abs_energy` | `Absolute energy` | $\sum x_i^2$ | EXACT |
+| `root_mean_square` | `Root mean square` | $\sqrt{\frac{1}{N}\sum x_i^2}$ | EXACT |
+| `mean_abs_change` | `Mean absolute diff` | $\frac{1}{N-1}\sum \|x_i - x_{i-1}\|$ | EXACT |
+| `mean_change` | `Mean diff` | $\frac{1}{N-1}\sum (x_i - x_{i-1})$ | EXACT |
+| `zero_crossings` | `Zero crossing rate` | Strict zero crossings count | EXACT |
+
+Other TSFEL spectral features have clean Kymora equivalents:
+- TSFEL `Spectral centroid` $\to$ Kymora `spectral_centroid`
+- TSFEL `Fundamental frequency` $\to$ Kymora `dominant_frequency`
+- TSFEL `Spectral entropy` $\to$ Kymora `spectral_entropy`
+
+---
+
+## Migrating from catch22
+
+### The shape of the change
+
+`pycatch22` runs a C-based pipeline over one time series at a time, requiring explicit Python loops or external multiprocessing pools. `kymora` ingests 2D NumPy matrices natively, distributing work across CPU cores with Rayon's work-stealing scheduler:
+
+```python skip
+# pycatch22 (per-series loop)
+import pycatch22
+features = [pycatch22.catch22_all(row.tolist())["values"] for row in X]
+
+# kymora (batch multi-core)
+import kymora
+features = kymora.extract_features(X)  # (n_series, 33)
+```
+
+### Why catch22 features differ
+
+`catch22` selected 22 features from `hctsa` designed specifically for classification diversity across the UCR archive, many of which use non-standard heuristic parameters or complex nonlinear optimization fits (e.g. `DN_HistogramMode_5`, `CO_Embed2_Dist_tau_d_expfit`, `SB_TransitionMatrix_3ac_sumdiagcov`).
+
+None of the 22 features in catch22 shares an exact mathematical definition with standard statistical moments. However, Kymora provides high-signal standard alternatives for each domain:
+
+| catch22 concept | catch22 feature | Kymora equivalent | Notes |
+|---|---|---|---|
+| Linear autocorrelation | `CO_FirstMin_ac`, `CO_trev_1_num` | `autocorr_lag_1`, `autocorr_lag_2`, `autocorr_lag_5`, `autocorr_lag_10` | Direct lag autocorrelations |
+| Information & Entropy | `IN_AutoMutualInfoStats_40_gaussian_fmmi` | `permutation_entropy`, `spectral_entropy` | Permutation order 3 & FFT power entropy |
+| Distribution & Outliers | `DN_OutlierInclude_p_001_mdrmd`, `DN_Mean` | `mean`, `std`, `skewness`, `kurtosis`, `quantile_*` | Centered moments & quantiles |
+| Scaling & Crossings | `SB_BinaryStats_diff_longstretch0` | `longest_strike_above_mean`, `longest_strike_below_mean`, `zero_crossings`, `mean_crossings` | Run length and crossing statistics |
+| Dynamics & Trend | `FC_LocalSimple_mean1_tauresrat` | `trend_slope`, `trend_r2`, `cid_ce` | Regression slope, fit quality, complexity |
+

@@ -17,9 +17,9 @@ export const Features: React.FC = () => {
       title: 'Rust-Core Speed',
       tag: 'Rust + Rayon',
       description:
-        'Inner computational loops are compiled with full optimizations and run across worker threads. Computes 33 features at 1.84 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory).',
+        'Inner computational loops are compiled with full optimizations and run across worker threads. Computes 33 features at 1.74 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory).',
       codeSnippet: '// Rayon parallel chunk iterator\nseries.par_chunks(chunk_size)\n  .map(|chunk| compute_features(chunk))',
-      badge: '1.84 ms median (1k x 500)',
+      badge: '1.74 ms median (1k x 500)',
     },
     {
       number: '02',
