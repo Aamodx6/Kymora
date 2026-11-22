@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795351771156,
+  "lastUpdate": 1795353926922,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -248,6 +248,37 @@ window.BENCHMARK_DATA = {
             "range": "0.2078",
             "unit": "ms",
             "extra": "runs=30, cv=0.097"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "66203eb69a6e0cee9286d5b8c63924f6a9050ec5",
+          "message": "chore: enforce paper confidentiality via gitignore and address review findings (#36)",
+          "timestamp": "2026-11-22T18:52:34+05:30",
+          "tree_id": "ec196202aca51b213c7f28680c0e3bcb61ff6ad8",
+          "url": "https://github.com/Aamodx6/Kymora/commit/66203eb69a6e0cee9286d5b8c63924f6a9050ec5"
+        },
+        "date": 1795353926192,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.8456,
+            "range": "0.0562",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.015"
           }
         ]
       }
