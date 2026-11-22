@@ -17,4 +17,4 @@ labels: ["enhancement", "good first issue", "features"]
 - `src/plan.rs`: Parameterized feature registration.
 
 ## Tests to Add
-- `tests/unit/test_energy_chunks.py`: Assert that sum across all chunks $k=1..C$ equals $1.0$ (within numerical tolerance).
+- `tests/unit/test_energy_chunks.py`: Assert that sum across all chunks $k=1..C$ equals $1.0$ (within numerical tolerance) for non-zero series; assert $0.0$ for all-zero series.

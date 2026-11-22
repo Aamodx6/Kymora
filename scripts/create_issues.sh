@@ -24,6 +24,21 @@ for issue_file in "$ISSUES_DIR"/*.md; do
     # Extract title from frontmatter
     TITLE=$(grep '^title:' "$issue_file" | head -n 1 | sed -e 's/^title:[[:space:]]*"\{0,1\}//' -e 's/"\{0,1\}[[:space:]]*$//')
     
+    # Extract labels from frontmatter
+    LABELS_ARGS=$(python3 -c "
+import re, sys
+with open(sys.argv[1], encoding='utf-8') as f:
+    text = f.read()
+m = re.search(r'^labels:\s*\[(.*?)\]', text, re.M)
+if m:
+    tags = [t.strip().strip('\"\'') for t in m.group(1).split(',') if t.strip()]
+    if 'good first issue' not in tags:
+        tags.append('good first issue')
+    print(' '.join(f'--label \"{t}\"' for t in tags))
+else:
+    print('--label \"good first issue\"')
+" "$issue_file")
+    
     # Extract body without frontmatter
     BODY=$(awk '
         BEGIN { in_fm = 0; fm_done = 0 }
@@ -34,11 +49,12 @@ for issue_file in "$ISSUES_DIR"/*.md; do
         fm_done == 1 { print }
     ' "$issue_file")
     
-    echo "Creating issue: '$TITLE'..."
+    echo "Creating issue: '$TITLE' with labels $LABELS_ARGS..."
+    # shellcheck disable=SC2086
     gh issue create \
         --repo "$REPO" \
         --title "$TITLE" \
-        --label "good first issue" \
+        $LABELS_ARGS \
         --body "$BODY"
         
     echo "Created successfully."

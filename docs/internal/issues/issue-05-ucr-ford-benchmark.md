@@ -4,7 +4,7 @@ labels: ["benchmarks", "good first issue", "reproducibility"]
 ---
 
 ## Context
-The UCR archive contains FordA and FordB datasets (automotive subsystem sensor classification with $N=3,601$ train and $N=1,320$ test series, length $L=500$). These represent real-world acoustic diagnosis tasks.
+The UCR archive contains FordA ($N=3,601$ train, $1,320$ test) and FordB ($N=3,636$ train, $810$ test) datasets of length $L=500$. These represent real-world acoustic diagnosis tasks.
 
 ## Acceptance Criteria
 1. Add an automated download and caching runner for FordA/FordB in `benchmarks/suites/ucr/`.

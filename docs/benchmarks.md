@@ -99,7 +99,7 @@ No honest benchmark omits the losses (full analysis in
 
 which runs, in order: competitor venv setup (`benchmarks/setup_venvs.py`),
 the B0 smoke matrix, the B1 agreement/parity suite, and the report build.
-Every figure in the README, docs, landing page, and paper traces to an
+Every figure in the README, docs, and landing page traces to an
 artifact in `benchmarks/results/` via [CLAIMS.md](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md);
 `tools/check_claims.py` fails the build if a figure appears anywhere
 without a CLAIMS.md entry.

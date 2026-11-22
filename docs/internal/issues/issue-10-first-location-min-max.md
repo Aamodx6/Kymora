@@ -1,20 +1,20 @@
 ---
-title: "feat: Add first_location_of_maximum and first_location_of_minimum"
-labels: ["features", "good first issue", "temporal"]
+title: "feat: Add count_above and count_below threshold features"
+labels: ["features", "good first issue", "distribution"]
 ---
 
 ## Context
-Relative temporal position of extremes is a standard descriptor in time-series classification (e.g. `tsfresh.first_location_of_maximum`). It represents the index of the first occurrence of the series global maximum/minimum, normalized by length: $\tau_{\max} = \arg\max_t(x_t) / N$.
+Threshold exceedance counts are standard features in time-series anomaly detection and feature extraction catalogs (e.g. `tsfresh.count_above`, `tsfresh.count_below`). They compute the fraction of samples strictly greater than or less than a specified threshold value $\theta$: $f(x, \theta) = \frac{1}{N}\sum_{t=1}^N \mathbb{I}(x_t > \theta)$.
 
 ## Acceptance Criteria
-1. Implement single-pass scan recording the index of the first maximum and minimum in `src/features/extrema.rs`.
-2. Normalize index to $[0.0, 1.0]$.
-3. For constant series, return $0.0$.
-4. Register under `extended` profile.
+1. Implement single-pass scan counting values above and below threshold $\theta$ in `src/features/distribution.rs`.
+2. Normalize count by length $N$ to yield a fraction in $[0.0, 1.0]$.
+3. Default parameter $\theta = 0.0$ or user-specified value.
+4. Register under `extended` and `full` profiles.
 
 ## Files to Touch
-- `src/features/extrema.rs`
+- `src/features/distribution.rs`
 - `src/plan.rs`
 
 ## Tests to Add
-- `tests/unit/test_extrema_locations.py`: Test on step, ramp, sinusoid, and noisy signals vs `np.argmax(x) / len(x)`.
+- `tests/unit/test_threshold_counts.py`: Verification against NumPy reference `np.mean(x > theta)` and `np.mean(x < theta)`.

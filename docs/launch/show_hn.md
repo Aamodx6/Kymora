@@ -44,7 +44,7 @@ Faster features only matter if they predict well. We evaluated feature sets acro
 - **Direct Buffer Borrowing**: Operates directly on contiguous NumPy arrays with no copy of the input.
 - **Dynamic Fast Path**: Batches with $N \times L < 8,000$ points run sequentially inline on the caller thread to eliminate thread pool dispatch latency. Dedicated `extract_one` achieves 3.90 µs median latency ($1 \times 100$).
 - **Streaming Moments**: `StreamingExtractor` maintains rolling shifted power sums in amortized $O(1)$ time ($0.20\ \mu\text{s}$ per push; $0.30\ \mu\text{s}$ fast evaluation; worst-case $O(W)$ during periodic drift-guard re-anchoring).
-- **Integrations**: Scikit-learn transformer (`KymoraTransformer`), Polars plugin (`kymora.polars`), and strict NaN policies.
+- **Integrations**: Scikit-learn transformer (`KymoraTransformer`), Polars support (`extract_features_polars`), and strict NaN policies.
 
 ### Honest Loss Ledger
 We maintain a public record of all cases where Kymora is slower or scales sub-linearly:
@@ -92,7 +92,7 @@ Thanks for checking out Kymora! A few upfront notes on methodology, design bound
 ### Q2: "tsfresh has 777 features and automated feature selection. How is this a fair comparison?"
 **A:** That is why we report two separate comparisons:
 1. **Equal-Feature Benchmark**: We restricted tsfresh and TSFEL to the exact identical feature definitions and verified numerical parity ($\le 10^{-9}$ relative error) before timing. This isolates pure engine efficiency.
-2. **UCR-42 Predictive Benchmark**: We evaluated whether Kymora's 33 features are predictive compared to tsfresh's 777 features. tsfresh achieves higher accuracy (0.824 vs 0.771), which we report plainly in our README and papers, but takes $>2,800\times$ longer to compute.
+2. **UCR-42 Predictive Benchmark**: We evaluated whether Kymora's 33 features are predictive compared to tsfresh's 777 features. tsfresh achieves higher accuracy (0.824 vs 0.771), which we report plainly in our README and documentation, but takes $>2,800\times$ longer to compute.
 
 ### Q3: "Why not write this in C++ or Julia?"
 **A:** Rust gives us memory safety, direct buffer borrowing without defensive copies, fearless multithreading with Rayon, and clean PyO3 bindings with no external runtime. It also compiles cleanly across Linux, macOS, and Windows with ABI3 compatibility.

@@ -61,12 +61,8 @@ pipe = Pipeline([
     ("clf", RandomForestClassifier()),
 ])
 
-# 4. Polars integration
-import polars as pl
-import kymora.polars as kmp
-
-df = pl.DataFrame({"signal": X.tolist()})
-df_features = df.with_columns(kmp.extract_features(pl.col("signal")).alias("feats"))
+# 4. Polars integration (returns native Polars DataFrame)
+df_features = km.extract_features_polars(X)
 ```
 
 ### Amortized $O(1)$ Streaming Moments

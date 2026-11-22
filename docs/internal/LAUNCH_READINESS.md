@@ -25,8 +25,7 @@ Technical readiness is **100% GREEN**. Automated operations must now **STOP** at
 | **Banned Phrases** | Terminology audit | **GREEN** | Local script audit (`re.search`) | 0 unpermitted hits for `zero-copy`, `beats`, `outperforms`. |
 | **Docs** | Strict MkDocs build | **GREEN** | `mkdocs build --strict` | Site builds cleanly in < 1 second with zero markdown or link errors. |
 | **Docs** | Documentation link integrity | **GREEN** | `tools/check_docs_links.py` | All internal relative links and anchor headers verified. |
-| **Paper** | JOSS manuscript & claims sync | **GREEN** | `paper/gen_numbers.py --check` | `paper/paper.md` numbers match CLAIMS; citeproc compiles cleanly. |
-| **Preprint** | LaTeX arXiv preprint | **GREEN** | `paper/arxiv/main.tex` | Formatted two-column preprint with BibTeX citations. |
+| **Paper / Drafts** | Confidentiality policy | **GREEN** | `.gitignore` (`/paper/`, `/patent/`) | Academic drafts are confidential, gitignored, and kept in private author storage. |
 | **Build** | Rust fmt, clippy, unit tests | **GREEN** | CI job `rust fmt, clippy, tests` | Zero clippy warnings under `-D warnings`. |
 | **Build** | Multi-arch binary wheel matrix | **GREEN** | CI job `wheels` (`wheels.yml`) | Linux (`x86_64`, `aarch64`), macOS (`x86_64`, `arm64`), Windows (`x64`). |
 | **Build** | Source distribution (`sdist`) | **GREEN** | CI job `sdist verify and install` | Source tarball builds and installs cleanly on fresh runners. |
@@ -96,15 +95,13 @@ The automated maintainer agents must **NOT** execute the following steps. Each r
 - [ ] Copy the generated DOI (e.g., `10.5281/zenodo.XXXXXXX`) and paste it into:
   - `CITATION.cff` (replace `10.5281/zenodo.placeholder`)
   - `README.md` (replace DOI badge URL)
-  - `paper/paper.md`
 - [ ] Run repository settings configuration:
   ```bash
-  bash scripts/gh_repo_settings.sh
+  bash scripts/gh_repo_settings.sh --apply
   ```
 
-### 5. arXiv and JOSS Submission
-- [ ] Submit `paper/arxiv/main.tex` and accompanying figures to arXiv (under `cs.LG` or `stat.ML`). Request endorsement if required.
-- [ ] Submit manuscript `paper/paper.md` to JOSS (Journal of Open Source Software) using the tagged release and Zenodo DOI.
+### 5. Academic Submissions & Confidentiality
+- [ ] Academic manuscript and preprint drafts are confidential and maintained separately in private author workspaces (untracked by git via `.gitignore`). Coordinate submission timing directly with authors.
 
 ### 6. crates.io Publish Decision
 - [ ] Decide whether to publish the current `kymora` crate to crates.io now or wait for the planned pure-Rust `kymora-core` split in v0.9.0 (as recommended in `docs/internal/crate_decision.md`).

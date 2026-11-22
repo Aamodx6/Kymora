@@ -11,6 +11,13 @@ set -euo pipefail
 
 REPO="Aamodx6/Kymora"
 
+if [ "${1:-}" != "--apply" ]; then
+  echo "DRY RUN: Pass '--apply' to execute these repository settings on GitHub."
+  echo "Target repository: ${REPO}"
+  echo "Actions: update description, homepage, 11 topics, enable issues & discussions."
+  exit 0
+fi
+
 echo "Setting repository metadata for ${REPO}..."
 
 gh repo edit "${REPO}" \

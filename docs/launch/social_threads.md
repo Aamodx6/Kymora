@@ -32,7 +32,7 @@ New in 0.8.2:
 • Dedicated `extract_one` achieving 3.90 µs median latency ($1 \times 100$)
 • Dynamic sequential execution fast path for batches $<8,000$ points
 • Amortized O(1) rolling streaming moments ($0.20\ \mu\text{s}$ push, $0.30\ \mu\text{s}$ compute)
-• Scikit-learn transformer (`KymoraTransformer`) & Polars plugin
+• Scikit-learn transformer (`KymoraTransformer`) & Polars interop
 
 **5/7**  
 We believe in honest benchmarking, so our Loss Ledger lists where we fall short:

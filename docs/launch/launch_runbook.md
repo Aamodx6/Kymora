@@ -11,7 +11,7 @@ Do not post to all channels simultaneously. Use a staged roll-out to gather earl
 | Stage | Target Channel | Timing | Primary Objective |
 |---|---|---|---|
 | **Stage 1: Soft Launch** | `/r/rust` & PyData Discourse | Day 1 (14:00 UTC) | Review Rust internals, PyO3 bindings, and packaging with technical communities. |
-| **Stage 2: Main Launch** | **Show HN** | Day 3 (Tuesday/Wednesday 13:00 UTC / 09:00 ET) | Broad developer & data science visibility. Maintainer active in comments. |
+| **Stage 2: Main Launch** | **Show HN** | Day 3 (Tuesday/Wednesday 13:00 UTC / 08:00 EST) | Broad developer & data science visibility. Maintainer active in comments. |
 | **Stage 3: Ecosystem Expansion** | `/r/Python`, `/r/MachineLearning`, LinkedIn, X | Day 4–5 | Machine learning practitioners, ecosystem integration tutorials. |
 
 ---
