@@ -166,7 +166,9 @@ jobs:
       matrix:
         include:
           - {os: ubuntu-latest, python: "3.13", artifact: wheels-linux-x86_64}
+          - {os: ubuntu-24.04-arm, python: "3.13", artifact: wheels-linux-aarch64}
           - {os: macos-latest, python: "3.13", artifact: wheels-macos-aarch64}
+          - {os: macos-15-intel, python: "3.13", artifact: wheels-macos-x86_64}
           - {os: windows-latest, python: "3.13", artifact: wheels-windows-x64}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -178,24 +180,39 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: dist
-      - name: Install from wheel
+      - name: Create fresh virtual environment and install wheel
         shell: bash
         run: |
-          # Dependencies come from PyPI; kymora itself must come from the
-          # freshly built wheel, so install it with --no-index --no-deps.
-          python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
-          python -m pip install "polars>=0.20" || echo "polars not available on this platform"
-          python -m pip install --no-index --no-deps --find-links dist kymora
-      - name: Verify clean install (6 checks) outside source tree
+          python -m venv "$RUNNER_TEMP/wheel_venv"
+          if [ -d "$RUNNER_TEMP/wheel_venv/bin" ]; then
+            VPY="$RUNNER_TEMP/wheel_venv/bin/python"
+          else
+            VPY="$RUNNER_TEMP/wheel_venv/Scripts/python"
+          fi
+          echo "VPY=$VPY" >> "$GITHUB_ENV"
+          "$VPY" -m pip install --upgrade pip
+          "$VPY" -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
+          "$VPY" -m pip install "polars>=0.20" || echo "polars not available on this platform"
+          "$VPY" -m pip install --no-index --no-deps --find-links dist kymora
+      - name: Assert clean installation outside source tree
         shell: bash
         run: |
-          cd "$(mktemp -d)"
-          python "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
-      - name: Full test suite against the wheel
+          TEST_DIR="$(mktemp -d)"
+          cd "$TEST_DIR"
+          "$VPY" -c "
+          import sys, os, kymora
+          src_python = os.path.join(os.environ['GITHUB_WORKSPACE'], 'python')
+          assert src_python not in sys.path, f'Source tree leaked to sys.path: {sys.path}'
+          assert 'site-packages' in kymora.__file__, f'kymora loaded from unexpected location: {kymora.__file__}'
+          print(f'Verified: imported {kymora.__name__} {kymora.__version__} from {kymora.__file__}')
+          "
+          "$VPY" "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
+      - name: Run test suite against wheel with python/ not on sys.path
         shell: bash
         run: |
-          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q
+          TEST_DIR="$(mktemp -d)"
+          cd "$TEST_DIR"
+          "$VPY" -m pytest "${GITHUB_WORKSPACE}/tests/" -q
 
   wheel-test-extended:
     # Full matrix extra (main/tags only): oldest/newest Python extremes on
@@ -223,19 +240,36 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: dist
-      - name: Install from wheel
+      - name: Create fresh virtual environment and install wheel
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
-          python -m pip install "polars>=0.20" || echo "polars not available on this platform"
-          python -m pip install --no-index --no-deps --find-links dist kymora
-      - name: Verify clean install (6 checks) outside source tree
+          python -m venv "$RUNNER_TEMP/wheel_ext_venv"
+          if [ -d "$RUNNER_TEMP/wheel_ext_venv/bin" ]; then
+            VPY="$RUNNER_TEMP/wheel_ext_venv/bin/python"
+          else
+            VPY="$RUNNER_TEMP/wheel_ext_venv/Scripts/python"
+          fi
+          echo "VPY=$VPY" >> "$GITHUB_ENV"
+          "$VPY" -m pip install --upgrade pip
+          "$VPY" -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
+          "$VPY" -m pip install "polars>=0.20" || echo "polars not available on this platform"
+          "$VPY" -m pip install --no-index --no-deps --find-links dist kymora
+      - name: Assert clean installation outside source tree
         shell: bash
         run: |
-          cd "$(mktemp -d)"
-          python "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
-      - name: Full test suite against the wheel
+          TEST_DIR="$(mktemp -d)"
+          cd "$TEST_DIR"
+          "$VPY" -c "
+          import sys, os, kymora
+          src_python = os.path.join(os.environ['GITHUB_WORKSPACE'], 'python')
+          assert src_python not in sys.path, f'Source tree leaked to sys.path: {sys.path}'
+          assert 'site-packages' in kymora.__file__, f'kymora loaded from unexpected location: {kymora.__file__}'
+          print(f'Verified: imported {kymora.__name__} {kymora.__version__} from {kymora.__file__}')
+          "
+          "$VPY" "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
+      - name: Run test suite against wheel with python/ not on sys.path
         shell: bash
         run: |
-          python -m pytest "${GITHUB_WORKSPACE}/tests/" -q
+          TEST_DIR="$(mktemp -d)"
+          cd "$TEST_DIR"
+          "$VPY" -m pytest "${GITHUB_WORKSPACE}/tests/" -q

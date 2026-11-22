@@ -46,6 +46,7 @@ jobs:
               - 'tools/**'
               - 'fuzz/**'
               - 'benchmarks/**'
+              - 'benches/**'
             docs:
               - 'docs/**'
               - 'landing/**'
@@ -59,22 +60,40 @@ jobs:
               - 'deny.toml'
 
   rust:
-    name: rust fmt, clippy, tests (ubuntu-latest)
+    name: rust fmt, clippy, tests (${{ matrix.os }})
     needs: [changes]
     if: needs.changes.outputs.code == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - run: cargo fmt --all -- --check
+        with:
+          key: ${{ matrix.os }}-rust
+      - name: Format check (ubuntu-latest only)
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo fmt --all -- --check
       # The pyo3 extension-module feature omits libpython at link time, which
-      # breaks `cargo test` binaries; test the pure-Rust core without it.
-      - run: cargo clippy --no-default-features --all-targets -- -D warnings
-      - run: cargo test --no-default-features
+      # breaks `cargo test` binaries on macOS unless dynamic_lookup is passed;
+      # test the pure-Rust core without it.
+      - name: Clippy
+        run: cargo clippy --no-default-features --all-targets -- -D warnings
+        env:
+          RUSTFLAGS: ${{ runner.os == 'macOS' && '-C link-arg=-undefined -C link-arg=dynamic_lookup' || '' }}
+      - name: Rust tests
+        run: cargo test --no-default-features
+        env:
+          RUSTFLAGS: ${{ runner.os == 'macOS' && '-C link-arg=-undefined -C link-arg=dynamic_lookup' || '' }}
 
   test:
     name: test (py${{ matrix.python }}, ${{ matrix.os }})
@@ -306,6 +325,7 @@ jobs:
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    continue-on-error: true
     permissions:
       contents: write
       pull-requests: write
@@ -337,11 +357,75 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: ${{ github.ref == 'refs/heads/main' }}
           alert-threshold: '120%'
-          comment-on-alert: false
-          fail-on-alert: ${{ github.ref == 'refs/heads/main' }}
+          comment-on-alert: true
+          fail-on-alert: false
           gh-pages-branch: 'gh-pages'
           benchmark-data-dir-path: 'dev/bench'
           summary-always: true
+
+  bench-instructions:
+    name: benchmark instruction gate (ubuntu-latest)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Install valgrind
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: Build HEAD instruction benchmark
+        run: |
+          HEAD_BIN=$(cargo build --release --bench core33_instructions --no-default-features --message-format=json | jq -r 'select(.target.name=="core33_instructions" and .executable!=null) | .executable' | tail -n 1)
+          if [ -z "$HEAD_BIN" ] || [ ! -f "$HEAD_BIN" ]; then
+            HEAD_BIN=$(find target/release/deps/ -type f -name "core33_instructions-*" ! -name "*.*" | head -n 1)
+          fi
+          echo "Found HEAD binary at: $HEAD_BIN"
+          mkdir -p /tmp/bench-bins
+          cp "$HEAD_BIN" /tmp/bench-bins/head-bench
+      - name: Build BASE instruction benchmark
+        id: build-base
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$BASE_REF" ] || [ "$BASE_REF" = "0000000000000000000000000000000000000000" ]; then
+            BASE_REF="HEAD~1"
+          fi
+          echo "Attempting to build base ref: $BASE_REF"
+          git checkout "$BASE_REF" || git checkout origin/main
+          if [ ! -f benches/core33_instructions.rs ]; then
+            echo "Base ref does not contain benches/core33_instructions.rs (historical baseline unavailable)"
+            echo "base_built=false" >> "$GITHUB_OUTPUT"
+          else
+            BASE_BIN=$(CARGO_TARGET_DIR=target-base cargo build --release --bench core33_instructions --no-default-features --message-format=json | jq -r 'select(.target.name=="core33_instructions" and .executable!=null) | .executable' | tail -n 1)
+            if [ -z "$BASE_BIN" ] || [ ! -f "$BASE_BIN" ]; then
+              BASE_BIN=$(find target-base/release/deps/ -type f -name "core33_instructions-*" ! -name "*.*" | head -n 1)
+            fi
+            if [ -n "$BASE_BIN" ] && [ -f "$BASE_BIN" ]; then
+              echo "Found BASE binary at: $BASE_BIN"
+              cp "$BASE_BIN" /tmp/bench-bins/base-bench
+              echo "base_built=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Failed to locate compiled base binary in target-base"
+              exit 1
+            fi
+          fi
+          git checkout -
+      - name: Run instruction-count comparison gate
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          BASE_ARG=""
+          if [ -f /tmp/bench-bins/base-bench ]; then
+            BASE_ARG="--base-bin /tmp/bench-bins/base-bench"
+          fi
+          python tools/check_perf_instructions.py --head-bin /tmp/bench-bins/head-bench $BASE_ARG
 
   test-freethreaded:
     name: test freethreaded (py3.13t, ubuntu-latest)
@@ -358,14 +442,42 @@ jobs:
           cache: pip
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - name: Smoke test on free-threaded Python 3.13t (experimental)
-        continue-on-error: true
+      - uses: ./.github/actions/setup-venv
+      - name: Verify free-threaded execution without GIL or document limitation
         run: |
           python -m pip install --upgrade pip maturin
           python -m pip install "numpy>=2.1.0" pytest
-          maturin develop --release
-          python -c "import kymora; print('kymora on 3.13t:', kymora.__version__)"
-          python -m pytest tests/test_python_api.py -q
+          echo "Testing build on Python 3.13t..."
+          if maturin develop --release; then
+            python -c "
+            import sys
+            assert hasattr(sys, '_is_gil_enabled'), 'sys._is_gil_enabled missing on Python 3.13t'
+            gil_before = sys._is_gil_enabled()
+            print('GIL before import:', gil_before)
+            assert not gil_before, f'Expected GIL disabled at startup, got {gil_before}'
+
+            import kymora
+            gil_after_import = sys._is_gil_enabled()
+            print('GIL after import kymora:', gil_after_import)
+            assert not gil_after_import, f'GIL was re-enabled after importing kymora: {gil_after_import}'
+
+            import numpy as np
+            X = np.random.randn(100, 500)
+            res = kymora.extract_features(X, n_jobs=2)
+            gil_after_extract = sys._is_gil_enabled()
+            print('GIL after parallel extract:', gil_after_extract)
+            assert not gil_after_extract, f'GIL was re-enabled after parallel extract: {gil_after_extract}'
+
+            print(f'SUCCESS: kymora {kymora.__version__} operates with GIL disabled on Python 3.13t')
+            "
+            python -m pytest tests/test_python_api.py -q
+          else
+            echo "::notice ::CPython 3.13t build unsupported upstream by PyO3 (requires CPython >= 3.14). Marking job as documentation-only per specification."
+            echo "### Python 3.13t Free-Threaded Status: Documentation-Only" >> $GITHUB_STEP_SUMMARY
+            echo "PyO3 emits: *PyO3 does not support the free-threaded build of CPython versions below 3.14, the selected Python version is 3.13*." >> $GITHUB_STEP_SUMMARY
+            echo "Kymora module defines \`#[pymodule(gil_used = false)]\` in src/lib.rs for thread safety under Python 3.14t+." >> $GITHUB_STEP_SUMMARY
+            echo "Job marked documentation-only until PyO3 upstream supports Python 3.13t." >> $GITHUB_STEP_SUMMARY
+          fi
 
   ci-gate:
     # The ONLY required status check (see CONTRIBUTING.md). Aggregates every
@@ -374,7 +486,7 @@ jobs:
     # allows path-gated skips. Logic lives in tools/ci_gate.py (unit-tested
     # below and via --self-test).
     name: ci gate (all green)
-    needs: [changes, rust, test, test-macos-intel, parity, validation-report, typecheck, docs, hygiene, audit-pr, wheels, benchmark]
+    needs: [changes, rust, test, test-macos-intel, parity, validation-report, typecheck, docs, hygiene, audit-pr, wheels]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

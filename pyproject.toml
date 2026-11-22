@@ -67,4 +67,4 @@ exclude = [
 [tool.pytest.ini_options]
 # Collection-time deprecation from sklearn's generator-based
 # parametrize_with_checks (third-party; the checks themselves all pass).
-filterwarnings = ["ignore::pytest.PytestRemovedIn10Warning"]
+filterwarnings = ["ignore::pytest.PytestDeprecationWarning"]

@@ -22,3 +22,7 @@ path = "fuzz_targets/streaming.rs"
 [[bin]]
 name = "ragged"
 path = "fuzz_targets/ragged.rs"
+
+[[bin]]
+name = "edge_cases"
+path = "fuzz_targets/edge_cases.rs"

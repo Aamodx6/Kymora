@@ -1,33 +1,33 @@
-name: Docs
+name: Docs & Landing Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [main]
-    paths: ["docs/**", "mkdocs.yml", ".github/workflows/docs.yml", "README.md"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: deploy-pages-landing
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-docs:
+    name: build docs
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
           cache: pip
-      # Docs need only mkdocs itself — the primary path used to install the
-      # project (maturin backend, no Rust here) with --no-deps, which could
-      # never bring mkdocs in; this installs exactly the pyproject docs floors.
       - run: python -m pip install --upgrade pip && python -m pip install "mkdocs>=1.6" "mkdocs-material>=9.5"
       - run: mkdocs build --strict
       - name: Audit docs for stale claims
@@ -36,19 +36,72 @@ jobs:
         with:
           path: site
 
-  deploy:
-    needs: build
+  deploy-docs:
+    name: deploy docs (GitHub Pages)
+    needs: [build-docs]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
-      - name: Audit live deployed site
-        run: python tools/verify_live_site.py --url "${{ steps.deployment.outputs.page_url }}"
+
+  deploy-landing:
+    name: landing production deploy
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@047ef7e07661e70d4408034a7491cf37803a6b57 # v4.2.0
+        with:
+          node-version: 20
+      - name: Build landing site
+        working-directory: landing
+        run: |
+          npm ci
+          npm run build
+      - name: Deploy to Vercel (if VERCEL_TOKEN configured)
+        working-directory: landing
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "Deploying landing to production with Vercel CLI..."
+            npx --yes vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+            npx --yes vercel build --prod --token="$VERCEL_TOKEN"
+            npx --yes vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          else
+            echo "Notice: VERCEL_TOKEN not configured in secrets; landing built and verified cleanly."
+          fi
+
+  post-deploy-audit:
+    name: post-deploy live site hygiene check
+    needs: [deploy-docs, deploy-landing]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - name: Verify live documentation and landing against denylist
+        run: python tools/check_live_site.py
