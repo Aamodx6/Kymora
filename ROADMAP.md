@@ -23,7 +23,7 @@ This roadmap documents Kymora's current development priorities, known limitation
 ## Short-Term Roadmap (v0.8.x - v0.9.x)
 
 - [ ] **Python 3.13 Free-Threaded (cp313t) Wheels:**
-  - Build and validate wheels with the free-threaded CPython build, leveraging Kymora's GIL-free Rust architecture.
+  - Dedicated pre-built wheels for free-threaded CPython (`cp313t`) are not supported yet (planned for 0.9.x once upstream free-threaded ABI stabilizes in PyO3 and NumPy). Leverage Kymora's GIL-free Rust architecture once dependencies support it.
 - [ ] **Pure Rust Crate (`kymora-core`):**
   - Factor out the numerical engine into an independent `kymora-core` crate on crates.io with optional Rayon support and zero PyO3 dependencies.
 - [ ] **In-Browser WASM Feature Extraction:**

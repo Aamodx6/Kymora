@@ -8,6 +8,11 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      test_pypi:
+        description: "Publish to TestPyPI instead of production PyPI (dry run / staging)"
+        type: boolean
+        default: true
 
 # One tag must never start two concurrent publishes: queue, never cancel
 # (cancel-in-progress: false). A duplicate run fails safe at PyPI with
@@ -97,17 +102,15 @@ jobs:
           path: kymora-sbom.spdx.json
 
   pypi-publish:
-    name: PyPI publish (ubuntu-latest)
-    # Tag-only: unreachable on workflow_dispatch from a branch (dry run builds
-    # wheels + SBOM but publishes nothing). OIDC semantics unchanged from the
-    # old `publish` job: Trusted Publishing, no stored API token.
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: PyPI publish (production)
+    # Tag-only AND not test_pypi dry run: publishing to production PyPI.
+    # OIDC Trusted Publishing, environment protection rules require manual maintainer approval.
+    if: startsWith(github.ref, 'refs/tags/v') && (inputs.test_pypi != true)
     needs: [version-check, wheels]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: pypi
     permissions:
-      # Trusted Publishing (OIDC) — no PyPI API token is stored in this repo.
       id-token: write
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
@@ -118,15 +121,38 @@ jobs:
       - run: ls -l dist
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
 
-  github-release:
-    name: GitHub release attach (ubuntu-latest)
-    # Tag-only, same gate as pypi-publish.
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [version-check, wheels, sbom, pypi-publish]
+  testpypi-publish:
+    name: TestPyPI publish (staging / dry-run)
+    # Runs when test_pypi input is true on workflow_dispatch or testing tags.
+    if: inputs.test_pypi == true
+    needs: [version-check, wheels]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - run: ls -l dist
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  github-release:
+    name: GitHub release attach (ubuntu-latest)
+    # Tag-only: attach release assets and build attestations when a tag is published.
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version-check, wheels, sbom]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
@@ -137,7 +163,17 @@ jobs:
         with:
           name: sbom
           path: dist
-      - name: Attach wheels, sdist, and SBOM to the release
+      - name: Generate SHA256SUMS.txt
+        shell: bash
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@c074443f1b5fb4a4829e20cb370720aaa33246eb # v2
+        with:
+          subject-path: "dist/*"
+      - name: Attach wheels, sdist, SBOM, and checksums to the release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: dist/*
