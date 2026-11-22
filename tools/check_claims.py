@@ -24,11 +24,11 @@ CHECK_FILES = [
 
 # Patterns that look like benchmark claims (numbers with units or ratios)
 CLAIM_PATTERNS = [
-    # Throughput: e.g. "314,450 series/s" or "314450 series/sec"
+    # Throughput: e.g. "514,245 series/s" or "514245 series/sec"
     re.compile(r"([\d,]+)\s*series/s(?:ec(?:ond)?)?", re.IGNORECASE),
-    # Latency: e.g. "3.18 ms"
+    # Latency: e.g. "1.94 ms"
     re.compile(r"(\d+\.?\d*)\s*ms\b"),
-    # Speedup ratios: e.g. "262×" or "262x faster"
+    # Speedup ratios: e.g. "95.4×" or "95.4x faster"
     re.compile(r"(\d+(?:,\d+)?)\s*[×x]\s*(?:faster|slower)?", re.IGNORECASE),
     # Per-feature cost: e.g. "0.0964 µs"
     re.compile(r"(\d+\.?\d*)\s*µs"),

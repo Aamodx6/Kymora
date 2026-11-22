@@ -131,7 +131,7 @@ def main():
         "",
         "- **Why Numba Wins at N=1:** At $1 \\times 100$, Numba compiles directly to native machine code within the Python interpreter's active address space. Because Numba emits direct LLVM instructions inside the Python process, it incurs zero C-FFI wrapper overhead, zero dynamic type dispatch, and produces inlined scalar results directly in Python stack registers (~11.8 µs).",
         "- **Kymora Trade-Off:** Kymora crosses the PyO3 C-extension ABI boundary, allocates a safe NumPy array object, and validates memory safety across the Rust/Python divide. While `kymora.extract_one` reduces this invocation latency to **< 8 µs** (meeting the target), Numba remains extremely competitive at $N=1$.",
-        "- **Ledger Policy:** Per repository policy, this loss is maintained transparently in `CLAIMS.md`'s loss ledger. Kymora does not claim superiority at $N=1$, leading instead where batch parallelism, zero defensive copies, and memory boundedness dominate ($N \\ge 10$).",
+        "- **Ledger Policy:** Per repository policy, this loss is maintained transparently in `CLAIMS.md`'s loss ledger. Kymora does not claim superiority at $N=1$, leading instead where batch parallelism, no copy of the input, and memory boundedness dominate ($N \\ge 10$).",
         "",
     ])
 

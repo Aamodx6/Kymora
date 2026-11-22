@@ -109,6 +109,14 @@ python benchmarks/report/make_report.py     # REPORT.md + results.json
 Run outputs under `benchmarks/results/` are artifacts — keep them out of
 commits unless a phase record explicitly says otherwise.
 
+## Benchmark Ledger Rules
+
+Every numeric performance, latency, or throughput claim in `README.md`, `docs/`, or public materials must adhere to strict ledger rules:
+1. **Single Source of Truth:** Every published number must trace directly to an entry in `CLAIMS.md` with an associated artifact path, git commit SHA, wheel SHA256, and hardware/environmental conditions. Run `python tools/check_claims.py` to verify traceability.
+2. **Never Soften Losses:** If a re-measurement or architectural change regresses performance or loses against a competitor, the loss must be documented honestly in `LOSS_LEDGER.md` and `CLAIMS.md` alongside the wins.
+3. **Strict Binary Provenance:** Benchmarks must be run on wheels built from the commit under test (`tools/check_env.py --strict-git`). Never benchmark against stale local wheels or unverified binaries.
+4. **Accuracy Reporting Policy:** Use catch22-class accuracy language; tsfresh/TSFEL are reported as more accurate by their measured gaps on matched sets. Avoid banned phrases such as "beats", "outperforms", or "statistically significant" unless supported by Holm-adjusted $p$-values. Always report streaming ingestion as "amortized $O(1)$, worst-case $O(W)$ upon drift re-anchoring".
+
 ## Architecture rules
 
 Three constraints keep the correctness story tractable. A PR that breaks one will

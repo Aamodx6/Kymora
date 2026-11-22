@@ -127,7 +127,7 @@ def main():
         "- **Per-Series Row Pointer Table:** In `extract_features`, `slice.chunks_exact(ncols).collect()` constructs a temporary vector of row slice fat pointers ($16\\text{ bytes}$ per pointer). At $N=1,000$, this is $16\\text{ KB}$; at $N=10,000$, $160\\text{ KB}$; at $N=100,000$, $1.6\\text{ MB}$.",
         "- **OS Page-Fault & VirtualAlloc Commit Behavior:** When allocating matrices with `np.empty` or iterating over a $381.47\\text{ MiB}$ matrix, OS physical pages are paged in and committed into Resident Set Size (RSS) dynamically as they are touched by worker threads.",
         "  This explains why earlier fresh-process delta measurements captured $3.2\\text{ MiB}$ at $N=1\\text{k}$, $7.6\\text{ MiB}$ at $N=10\\text{k}$, and a $14.28\\text{ MiB}$ high-water mark at $N=100\\text{k}$.",
-        "- **Zero Defensive Input Copies:** Across all batch sizes, the input numpy matrix is borrowed directly without duplication ($0\\times$ defensive copies).",
+        "- **No Defensive Input Copies:** Across all batch sizes, the input numpy matrix is borrowed directly without duplication ($0\\times$ defensive copies).",
         "",
     ])
 

@@ -41,24 +41,8 @@ test, frozen benchmark evidence, refactor records).
 
 ---
 
-## 2. Patent Folder
-
-### Status (Task 7.6 — file names only, content untouched and unread)
-The `patent/` directory exists in the public repository and contains one file:
-
-- `patent/patent_disclosure.md`
-
-No file in `patent/` was read, modified, moved, or deleted during this
-hardening pass.
-
-### Decision needed
-- Keep patent/ in the public repo?
-- Move to a private repo?
-- Remove entirely?
-
-> [!CAUTION]
-> Public release of source code can affect patentability. Consult an IP
-> attorney before the next public release.
+## 2. IP & Pre-Release Checklist
+Status: Consult intellectual property counsel regarding repository history, forks, and prior exposure before tagging v0.8.2. Details tracked in `LAUNCH_READINESS.md`.
 
 ---
 

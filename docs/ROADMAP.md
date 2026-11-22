@@ -25,8 +25,7 @@ Still-true post-1.0 ideas from the v1.0 PRD (§15), not otherwise tracked:
 ## experiment/spin-pool — persistent spin-then-park pool (NEEDS-OWNER #7)
 
 - Contents: `src/pool.rs` (222 lines) as of `f7282a0`; was declared as
-   `pub mod pool` in `src/lib.rs` with **zero callers**. `TSXTRACT_POOL`
-  (pre-rename name; now `KYMORA_POOL`)
+   `pub mod pool` in `src/lib.rs` with **zero callers**. `KYMORA_POOL`
   is read by nothing; `tune.py`'s pool dimension benchmarks variants of
   a backend that does not exist (recorded as provisional in
   `docs/api.md`).
