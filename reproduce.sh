@@ -1,26 +1,91 @@
 #!/usr/bin/env bash
-# Kymora Benchmark Suite Reproduction Script
+# reproduce.sh - One-command reproducible benchmark pipeline for Kymora
+# Verifies numerical parity, runs definition-matched benchmarks, and prints
+# the ratio comparison table in < 10 minutes.
 set -euo pipefail
 
-echo "=========================================="
-echo " Kymora Benchmark Reproduction Pipeline "
-echo "=========================================="
+echo "================================================================="
+echo "        Kymora Benchmark Reproduction Suite (0.8.2)              "
+echo "================================================================="
 
-PYTHON="${PYTHON:-python}"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
 
-echo "1. Checking environment..."
-$PYTHON -c "import sys; print(f'Python: {sys.version}')"
+VENV_DIR="${ROOT_DIR}/.reproduce_venv"
 
-echo "2. Setting up competitor environments..."
-$PYTHON benchmarks/setup_venvs.py --lib all
+if command -v uv >/dev/null 2>&1; then
+    echo ">> Using uv for fast environment management..."
+    if [ ! -d "$VENV_DIR" ]; then
+        uv venv "$VENV_DIR"
+    fi
+    # shellcheck disable=SC1091
+    source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate"
+    uv pip install --upgrade pip
+    uv pip install numpy scipy numba tabulate
+    if [ -f "dist/kymora-0.8.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl" ]; then
+        uv pip install dist/kymora-0.8.2-*.whl
+    elif [ -f "dist/kymora-0.8.2-cp38-abi3-win_amd64.whl" ]; then
+        uv pip install dist/kymora-0.8.2-*.whl
+    else
+        uv pip install -e . --no-build-isolation || pip install kymora==0.8.2 || pip install -e .
+    fi
+else
+    echo ">> Using standard python3 venv..."
+    PYTHON="${PYTHON:-python3}"
+    if [ ! -d "$VENV_DIR" ]; then
+        "$PYTHON" -m venv "$VENV_DIR"
+    fi
+    # shellcheck disable=SC1091
+    source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate"
+    pip install --upgrade pip
+    pip install numpy scipy numba tabulate
+    pip install kymora==0.8.2 || pip install -e .
+fi
 
-echo "3. Running Phase B0 Smoke Test..."
-$PYTHON benchmarks/smoke.py
+echo ""
+echo ">> Environment Check:"
+python -c "import kymora as km, numpy as np, numba; print(f'Kymora: {km.__version__} | NumPy: {np.__version__} | Numba: {numba.__version__}')"
 
-echo "4. Running Phase B1 Correctness & Agreement Suite..."
-$PYTHON benchmarks/suites/agreement.py || true
+ROUNDS="${1:-3}"
 
-echo "5. Generating Report..."
-$PYTHON benchmarks/report/make_report.py || true
+echo ""
+echo ">> Step 1: Running Parity Gate (verifying numerical agreement <= 1e-9)..."
+python benchmarks/suites/equal_feature.py parity
 
-echo "Benchmark reproduction completed."
+echo ""
+echo ">> Step 2: Running Equal-Feature Benchmark (1,000 x 500, ${ROUNDS} rounds)..."
+python benchmarks/suites/equal_feature.py bench --rounds "$ROUNDS" --shape 1000 500
+
+echo ""
+echo ">> Step 3: Formatting Summary Table..."
+python - <<'EOF'
+import json
+import glob
+import os
+
+results = sorted(glob.glob("benchmarks/results/*_equal_feature/equal_feature.jsonl"))
+if results:
+    latest = results[-1]
+    print(f"\nLatest benchmark run: {latest}\n")
+    print("-" * 75)
+    print(f"{'Competitor':<15} | {'Shape':<12} | {'Features':<10} | {'Ratio vs Kymora':<16} | {'95% CI':<15}")
+    print("-" * 75)
+    with open(latest, "r", encoding="utf-8") as f:
+        for line in f:
+            if not line.strip(): continue
+            data = json.loads(line)
+            comp = data.get("competitor", "unknown")
+            shape = f"{data.get('n_series', 0)}x{data.get('length', 0)}"
+            n_feats = data.get("n_features", 0)
+            ratio = data.get("ratio_median", 0.0)
+            ci = f"[{data.get('ratio_ci_low', 0.0):.1f}, {data.get('ratio_ci_high', 0.0):.1f}]"
+            print(f"{comp:<15} | {shape:<12} | {n_feats:<10} | {ratio:>14.1f}x | {ci:<15}")
+    print("-" * 75)
+else:
+    print("No equal_feature.jsonl found.")
+EOF
+
+echo ""
+echo "================================================================="
+echo "  Reproduction completed successfully. Details in CLAIMS.md.    "
+echo "================================================================="

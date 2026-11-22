@@ -194,6 +194,15 @@ jobs:
         with:
           name: validation-report
           path: validation-report.md
+      - name: Verify reproduce.sh one-command reproduction
+        run: |
+          python -m pip install numba tabulate
+          bash reproduce.sh 1 > reproduce_output.txt
+          cat reproduce_output.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: reproduce-output
+          path: reproduce_output.txt
 
   typecheck:
     name: mypy (ubuntu-latest, py3.12)

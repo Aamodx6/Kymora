@@ -6,8 +6,8 @@ Body:
 
 Kymora (Rust-core batch time-series feature extraction,
 https://github.com/Aamodx6/Kymora, MIT) computes 33 features over panels
-at ~1.8 ms per 1,000 × 500 on a laptop CPU (equal-feature vs tsfresh
-2,812× on matched definitions; artifacts in our repo, single-machine
+at pooled median 1.94 ms per 1,000 × 500 on a laptop CPU (equal-feature vs tsfresh
+2,812.4× on matched definitions; artifacts in our repo, single-machine
 numbers).
 
 We ship a tested sktime `BaseTransformer` adapter
