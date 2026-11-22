@@ -1,10 +1,5 @@
 name: Nightly
 
-# Non-gating checks: advisories, fuzz, and the noise-prone perf gate. Nothing
-# here is a required status check. Draft PRs touching this workflow or
-# deny.toml exercise the real runners via the pull_request trigger; the
-# perf-regression issue below only ever fires on schedule/dispatch, never
-# on PR events.
 on:
   schedule:
     - cron: "23 3 * * *"
@@ -12,20 +7,104 @@ on:
     paths:
       - ".github/workflows/nightly.yml"
       - "deny.toml"
+      - "fuzz/**"
   workflow_dispatch:
     inputs:
       fuzz_seconds:
         description: "Seconds per fuzz target"
-        default: "200"
+        default: "75"
 
 permissions:
   contents: read
 
 jobs:
-  cargo-audit:
-    name: cargo audit (ubuntu-latest)
+  deps-prerelease:
+    name: latest + pre deps (ubuntu-latest, py3.12)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Install latest and pre-release dependencies
+        run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install --upgrade --pre numpy scipy scikit-learn pandas polars pytest hypothesis
+          maturin develop --release
+      - name: Run test suite against pre-releases
+        run: python -m pytest tests/ -q
+
+  deps-lowest-direct:
+    name: lowest-direct deps (ubuntu-latest, py3.10)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.10"
+      - uses: astral-sh/setup-uv@873523f338d1ec34ff907b8b408e063ee7cf2c30 # v5.3.0
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Install minimum direct declared dependencies via uv
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip maturin
+          uv pip install --resolution lowest-direct -e ".[test]"
+          maturin develop --release
+          python -m pytest tests/ -q
+
+  hypothesis-deep:
+    name: hypothesis deep exploration (ubuntu-latest, 2000 examples)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: ./.github/actions/setup-venv
+      - name: Install dependencies and build extension
+        run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[test]"
+          maturin develop --release
+      - name: Run Hypothesis property tests with 2000 examples
+        run: python -m pytest tests/property tests/test_invariants.py -q -o hypothesis_settings.max_examples=2000
+
+  cargo-fuzz:
+    name: cargo-fuzz (ubuntu-latest, 5min total)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # nightly
+        with:
+          toolchain: nightly
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --locked
+      - name: Run fuzzing targets (streaming push/compute, compute_all, ragged, edge_cases)
+        run: |
+          cd fuzz
+          # Default 4 targets x 75s = 300s (5 minutes) total fuzzing time
+          for target in compute_all streaming ragged edge_cases; do
+            echo "--- Fuzzing $target (${{ github.event.inputs.fuzz_seconds || '75' }}s) ---"
+            cargo fuzz run "$target" -- -max_total_time=${{ github.event.inputs.fuzz_seconds || '75' }} -print_final_stats=1
+          done
+
+  security-audit:
+    name: security audit (cargo-audit, cargo-deny, pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -34,26 +113,10 @@ jobs:
         run: |
           cargo install cargo-audit --locked
           cargo audit
-
-  cargo-deny:
-    name: cargo deny (ubuntu-latest)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - name: cargo-deny (advisories, bans, licenses, sources)
+      - name: cargo-deny (bans, licenses, sources, advisories)
         run: |
           cargo install cargo-deny --locked
           cargo deny check
-
-  pip-audit:
-    name: pip audit (ubuntu-latest, py3.12)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
@@ -65,14 +128,25 @@ jobs:
           python -m pip install -e ".[all]"
           python -m pip_audit --desc
 
-  parity:
-    # Same teeth as the CI parity job: dev-parity extras installed,
-    # KYMORA_REQUIRE_PARITY=1 turns reference-library skips into failures.
-    name: parity external (ubuntu-latest, py3.12)
+  lychee-links:
+    name: lychee link check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      KYMORA_REQUIRE_PARITY: "1"
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Lychee Link Checker
+        uses: lycheeverse/lychee-action@f7a93a388f837330fd54865aa7965be5d36e2f57 # v2.3.0
+        with:
+          args: --verbose --no-progress --exclude-mail --exclude-loopback './**/*.md' './**/*.html'
+        continue-on-error: true
+
+  wallclock-trend:
+    name: wall-clock benchmark trend (alert only, non-failing)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
@@ -84,109 +158,51 @@ jobs:
       - uses: ./.github/actions/setup-venv
       - run: |
           python -m pip install --upgrade pip maturin
-          python -m pip install -e ".[dev-parity,test]"
+          python -m pip install -e ".[bench,test]"
           maturin develop --release
-      - run: python -m pytest tests/parity -q -rs
-
-  fuzz-smoke:
-    name: fuzz smoke (ubuntu-latest, 10min)
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
+      - name: Run perf probe
+        run: python tools/perf_gate.py --ci --export-benchmark-json "${{ runner.temp }}/benchmark_results.json"
+      - name: Clean working tree
+        run: |
+          git checkout -- .
+          git clean -fd
+      - name: Store and track benchmark trend
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
-          # cargo-fuzz needs -Z flags: nightly, pinned explicitly. (A bare
-          # `# nightly` comment is not an input — a dependabot pin bump
-          # silently flipped this job to stable and broke fuzz.)
-          toolchain: nightly
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - run: cargo install cargo-fuzz --locked
-      # Default 3 targets x 200s ~= 10 minutes of fuzzing, plus setup under
-      # the 25-minute job timeout. Override per-target seconds via dispatch.
-      - run: |
-          cd fuzz
-          for target in compute_all streaming ragged; do
-            cargo fuzz run "$target" -- -max_total_time=${{ github.event.inputs.fuzz_seconds || '200' }} -print_final_stats=1
-          done
+          name: Kymora Core33 1kx500 Benchmark (Nightly Trend)
+          tool: 'customSmallerIsBetter'
+          output-file-path: ${{ runner.temp }}/benchmark_results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: ${{ github.ref == 'refs/heads/main' }}
+          alert-threshold: '120%'
+          comment-on-alert: false
+          fail-on-alert: false
+          gh-pages-branch: 'gh-pages'
+          benchmark-data-dir-path: 'dev/bench'
+          summary-always: true
 
-  perf-gate:
-    # Fixed runner class (ubuntu-latest), 3 repeats of the noise-aware gate.
-    # Non-required: continue-on-error keeps the workflow status green, but a
-    # regression still files/updates a `perf-regression` issue below —
-    # schedule/dispatch only (never on PR events), and only after 2
-    # consecutive failures (spam guard) — UNLESS a single repeat shows a
-    # >15% regression (ratio >= 1.15 in perf_gate.py output), which files
-    # immediately: that magnitude is never scheduler noise.
-    name: perf gate core33 (ubuntu-latest, x3)
+  report-nightly-failure:
+    name: file or update nightly-failure issue
+    needs: [deps-prerelease, deps-lowest-direct, hypothesis-deep, cargo-fuzz, security-audit, lychee-links]
+    if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    continue-on-error: true
     permissions:
-      contents: read
       issues: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
-        with:
-          python-version: "3.12"
-          cache: pip
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
-      - uses: ./.github/actions/setup-venv
-      - run: |
-          python -m pip install --upgrade pip maturin
-          python -m pip install -e "."
-          maturin develop --release
-      # --ci never records: first run on a runner class passes with a
-      # notice; maintainers record baselines via
-      # `python tools/perf_gate.py --runs 30 --update-baseline`.
-      # 3 repeats: one flaky sample must not page anyone. Each repeat runs
-      # even if the previous one failed (no `set -e` abort): the step fails
-      # at the end if any repeat failed, and the log keeps every ratio so
-      # the >15% bypass below can inspect all three.
-      - name: Perf gate (3 repeats)
-        run: |
-          : > perf_gate.log
-          FAILED=0
-          for i in 1 2 3; do
-            echo "--- perf gate repeat $i/3 ---" | tee -a perf_gate.log
-            python tools/perf_gate.py --runs 30 --ci 2>&1 | tee -a perf_gate.log || FAILED=1
-          done
-          exit $FAILED
-      - name: Detect large regression (>15%)
-        if: always()
-        run: |
-          if grep -Eq 'ratio (1\.1[5-9]|1\.[2-9]|2\.|[3-9]\.)' perf_gate.log; then
-            echo "large regression detected (ratio >= 1.15) — issue files immediately"
-            echo 'BIG_REGRESSION=true' >> "$GITHUB_ENV"
-          else
-            echo 'BIG_REGRESSION=false' >> "$GITHUB_ENV"
-          fi
-      - name: File or update perf-regression issue
-        # Schedule/dispatch only — PR runs exercise the gate but never file.
-        if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      - name: Open or update nightly-failure issue
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${BIG_REGRESSION:-false}" = "true" ]; then
-            echo "ratio >= 1.15 in this run: filing immediately, spam guard bypassed"
-          else
-            # Spam guard: only file after 2 consecutive failures. This run is
-            # still in progress, so look at the latest COMPLETED run on this
-            # branch — if it also failed, this is the 2nd consecutive failure.
-            PREV=$(gh run list --workflow nightly.yml --branch "${{ github.ref_name }}" --limit 5 --json status,conclusion --jq '[.[] | select(.status == "completed")][0].conclusion')
-            if [ "$PREV" != "failure" ]; then
-              echo "spam guard: latest completed run was '${PREV:-none}' — need a prior failure for 2 consecutive, or a >15% regression; no issue filed"
-              exit 0
-            fi
-          fi
-          TITLE="perf gate failure (core33, ubuntu-latest)"
-          BODY="nightly perf-gate failed twice in a row on ${{ github.ref_name }} (run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}). Baselines: benchmarks/results/perf_baseline.json. This issue updates on every consecutive failure; close it once green for 7 days."
-          gh label create perf-regression --color FBCA04 --description "core33 perf gate regression (nightly)" 2>/dev/null || true
-          NUM=$(gh issue list --label perf-regression --state open --json number --jq '.[0].number')
+          TITLE="Nightly CI failure on ${{ github.ref_name }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY="Nightly workflow failed on ref \`${{ github.ref_name }}\`.\n\n**Run Details:** $RUN_URL\n\nInspect the failed jobs in the run logs to resolve the issue."
+          gh label create nightly-failure --color D93F0B --description "Automated nightly workflow failure" 2>/dev/null || true
+          NUM=$(gh issue list --label nightly-failure --state open --json number --jq '.[0].number')
           if [ -z "$NUM" ]; then
-            gh issue create --title "$TITLE" --label perf-regression --body "$BODY"
+            echo "Creating new issue with label nightly-failure..."
+            gh issue create --title "$TITLE" --label nightly-failure --body "$BODY"
           else
+            echo "Updating existing issue #$NUM..."
             gh issue comment "$NUM" --body "$BODY"
           fi

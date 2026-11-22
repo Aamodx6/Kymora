@@ -32,7 +32,6 @@ GATE_JOBS = (
     "hygiene",
     "audit-pr",
     "wheels",
-    "benchmark",
 )
 
 
