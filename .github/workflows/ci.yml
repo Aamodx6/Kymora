@@ -49,6 +49,7 @@ jobs:
             docs:
               - 'docs/**'
               - 'landing/**'
+              - 'paper/**'
               - 'README.md'
               - 'CLAIMS.md'
               - 'mkdocs.yml'
@@ -238,6 +239,7 @@ jobs:
           maturin develop --release
       - run: mkdocs build --strict
       - run: python tools/check_claims.py
+      - run: python paper/gen_numbers.py
       - run: python tools/verify_live_site.py
       - run: python tools/gen_feature_docs.py --check
       - run: python tools/check_snippets.py
@@ -250,6 +252,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - run: python tools/check_repo_hygiene.py
       - run: python tools/check_claims.py
+      - run: python paper/gen_numbers.py
       - run: python tools/verify_live_site.py
 
   audit-pr:
