@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795358641772,
+  "lastUpdate": 1795385623176,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -310,6 +310,37 @@ window.BENCHMARK_DATA = {
             "range": "0.025",
             "unit": "ms",
             "extra": "runs=30, cv=0.021"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a2ede8b1fa6e2357f0b23146740ba08a8ec51ad3",
+          "message": "Merge pull request #39 from Aamodx6/dependabot/pip/pip-64a8050e99\n\nbuild(deps): bump the pip group with 13 updates",
+          "timestamp": "2026-11-23T03:41:37+05:30",
+          "tree_id": "e3812b8498776c0ebaa17ae082d46ebac670ede0",
+          "url": "https://github.com/Aamodx6/Kymora/commit/a2ede8b1fa6e2357f0b23146740ba08a8ec51ad3"
+        },
+        "date": 1795385622696,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.8755,
+            "range": "0.0956",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.034"
           }
         ]
       }
