@@ -49,28 +49,12 @@ from ._core import (
     extract_features,
     extract_features_mc,
     extract_features_ragged,
+    extract_one,
     feature_names,
     feature_names_mc,
     list_profiles,
     sliding_features,
 )
-
-try:
-    from ._core import extract_one
-except ImportError:  # pragma: no cover
-    def extract_one(
-        x: npt.NDArray[np.float64] | npt.NDArray[np.float32] | Sequence[float],
-        profile: str | None = None,
-    ) -> npt.NDArray[np.float64]:
-        import numpy as np
-        arr = np.asarray(x)
-        if arr.ndim != 1:
-            raise ValueError(f"extract_one requires a 1D array, got shape {arr.shape}")
-        if arr.dtype not in (np.float64, np.float32):
-            arr = arr.astype(np.float64)
-        arr_2d = arr.reshape(1, -1)
-        res = extract_features(arr_2d, profile=profile or "core33", n_jobs=1)
-        return res[0]
 
 from .chunked import extract_features_chunked
 from .select import KymoraSelector, select_features
