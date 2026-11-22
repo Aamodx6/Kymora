@@ -129,10 +129,10 @@ def verify_headline_environment(strict_power: bool = True, strict_git: bool = Tr
             info = get_kymora_wheel_or_binary_info()
             if head_sha == "unknown":
                 reasons.append("Git HEAD SHA could not be resolved from repository checkout.")
-            if not info.get("binary_sha256") and not info.get("head_wheel_sha256"):
+            if not info.get("binary_sha256") or not info.get("head_wheel_sha256"):
                 reasons.append(
-                    "No verifiable build provenance (binary SHA256 or wheel SHA256) found for installed kymora. "
-                    "A traceable HEAD build is required for headline runs."
+                    "No verifiable build provenance (both binary SHA256 and head wheel SHA256 required) found for installed kymora. "
+                    "A traceable HEAD build from CI or dist/head_wheels is required for headline runs."
                 )
     except ImportError as e:
         reasons.append(f"kymora is not installed: {e}")

@@ -12,6 +12,7 @@ Asserts that forbidden deprecated benchmark numbers and claims do not appear:
 from __future__ import annotations
 
 import argparse
+import html
 import re
 import sys
 import urllib.request
@@ -31,14 +32,25 @@ FORBIDDEN_PATTERNS = [
 
 def check_content(text: str, source_name: str) -> list[str]:
     violations = []
-    for pattern in FORBIDDEN_PATTERNS:
-        matches = list(re.finditer(pattern, text, re.IGNORECASE))
-        for m in matches:
-            # Get surrounding context
-            start = max(0, m.start() - 30)
-            end = min(len(text), m.end() + 30)
-            snippet = text[start:end].replace("\n", " ")
-            violations.append(f"[{source_name}] Match for '{pattern}': '...{snippet}...'")
+    # Check both raw content and HTML-unescaped content
+    texts_to_check = [("raw", text)]
+    unescaped = html.unescape(text)
+    if unescaped != text:
+        texts_to_check.append(("unescaped", unescaped))
+
+    seen_matches = set()
+    for tag, content in texts_to_check:
+        for pattern in FORBIDDEN_PATTERNS:
+            matches = list(re.finditer(pattern, content, re.IGNORECASE))
+            for m in matches:
+                # Get surrounding context
+                start = max(0, m.start() - 30)
+                end = min(len(content), m.end() + 30)
+                snippet = content[start:end].replace("\n", " ")
+                key = (pattern, m.group(0).lower(), snippet)
+                if key not in seen_matches:
+                    seen_matches.add(key)
+                    violations.append(f"[{source_name}] Match for '{pattern}': '...{snippet}...'")
     return violations
 
 
@@ -50,8 +62,9 @@ def check_url(url: str) -> list[str]:
             body = resp.read().decode("utf-8", errors="replace")
             return check_content(body, url)
     except Exception as e:
-        print(f"Warning: Failed to fetch {url}: {e}")
-        return []
+        err_msg = f"[{url}] Failed to fetch live URL: {e}"
+        print(f"Error: {err_msg}")
+        return [err_msg]
 
 
 def check_directory(dir_path: Path) -> list[str]:
@@ -64,11 +77,16 @@ def check_directory(dir_path: Path) -> list[str]:
             if any(part in p.parts for part in ["tests", "tools", ".git", "venv", ".venv", "node_modules"]):
                 continue
             try:
+                p_resolved = p.resolve()
+                try:
+                    src_name = str(p_resolved.relative_to(REPO_ROOT.resolve()))
+                except ValueError:
+                    src_name = str(p_resolved)
                 content = p.read_text(encoding="utf-8", errors="replace")
-                v = check_content(content, str(p.relative_to(REPO_ROOT)))
+                v = check_content(content, src_name)
                 violations.extend(v)
-            except Exception:
-                pass
+            except Exception as e:
+                violations.append(f"[{p}] Failed to read file: {e}")
     return violations
 
 
@@ -90,7 +108,9 @@ def main():
             if p.exists():
                 all_violations.extend(check_directory(p))
             else:
-                print(f"Warning: Directory does not exist: {d}")
+                err = f"Directory explicitly requested does not exist: {d}"
+                print(f"Error: {err}")
+                all_violations.append(err)
 
     # If neither specified, scan docs/ and landing/ by default
     if not args.url and not args.dir:

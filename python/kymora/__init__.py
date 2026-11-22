@@ -60,10 +60,13 @@ try:
 except ImportError:  # pragma: no cover
     def extract_one(x: Any, profile: str | None = None) -> np.ndarray:
         import numpy as np
-        arr = np.asarray(x, dtype=np.float64)
-        if arr.ndim == 1:
-            arr = arr.reshape(1, -1)
-        res = extract_features(arr, profile=profile or "core33", n_jobs=1)
+        arr = np.asarray(x)
+        if arr.ndim != 1:
+            raise ValueError(f"extract_one requires a 1D array, got shape {arr.shape}")
+        if arr.dtype not in (np.float64, np.float32):
+            arr = arr.astype(np.float64)
+        arr_2d = arr.reshape(1, -1)
+        res = extract_features(arr_2d, profile=profile or "core33", n_jobs=1)
         return res[0]
 
 from .chunked import extract_features_chunked
