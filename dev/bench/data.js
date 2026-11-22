@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795350117103,
+  "lastUpdate": 1795351771156,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -217,6 +217,37 @@ window.BENCHMARK_DATA = {
             "range": "0.6076",
             "unit": "ms",
             "extra": "runs=30, cv=0.146"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e0fbda7c21feca43dfb3292d2c655b308e8b77db",
+          "message": "Phase 10: Community Issues, Launch Kit, and One-Command Reproduction Pipeline (#34)\n\n* Phase 10: Community Issues, Launch Kit, and One-Command Reproduction Pipeline\n\n* Fix benchmark reproduction dependencies and thread count\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\n\n* ci(p10): install bench extras in validation job and skip uninstalled competitors in equal_feature\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>",
+          "timestamp": "2026-11-22T18:17:35+05:30",
+          "tree_id": "a56a6f7e90558a4d4efea10f4b7ef0e45e3d2f15",
+          "url": "https://github.com/Aamodx6/Kymora/commit/e0fbda7c21feca43dfb3292d2c655b308e8b77db"
+        },
+        "date": 1795351770757,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 6.3384,
+            "range": "0.2078",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.097"
           }
         ]
       }
