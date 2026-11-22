@@ -253,15 +253,19 @@ def run_parity(n_series: int = 40, length: int = 500, seed: int = 42) -> bool:
         wanted = list(mapping.keys())
         km = _extract_kymora_matched(X, wanted, threads=1)
 
-        if comp == "tsfel":
-            other = _extract_tsfel_matched(X)
-        elif comp == "tsfresh":
-            other = _extract_tsfresh_matched(X)
-        elif comp == "numba":
-            # strict (fastmath=False) for agreement; also record fast variant
-            other = _extract_numba_matched(X, threads=1, fastmath=False)
-        else:  # numpy
-            other = _extract_numpy_matched(X)
+        try:
+            if comp == "tsfel":
+                other = _extract_tsfel_matched(X)
+            elif comp == "tsfresh":
+                other = _extract_tsfresh_matched(X)
+            elif comp == "numba":
+                # strict (fastmath=False) for agreement; also record fast variant
+                other = _extract_numba_matched(X, threads=1, fastmath=False)
+            else:  # numpy
+                other = _extract_numpy_matched(X)
+        except ImportError as exc:
+            print(f"  [SKIP] {comp}: competitor library not installed ({exc})")
+            continue
 
         per_feature = {}
         worst = 0.0
@@ -400,7 +404,12 @@ def run_bench(rounds: int = 4, shapes: list[tuple[int, int]] | None = None,
             for comp in competitors:
                 wanted = list(EQUAL_SETS[comp].keys())
                 km_fn = lambda Xk, w=wanted: _extract_kymora_matched(Xk, w, threads=benchmark_threads)  # noqa: E731
-                other_fn = _competitor_runner(comp)
+                try:
+                    other_fn = _competitor_runner(comp)
+                    _ = other_fn(X[:1], threads=1)
+                except ImportError as exc:
+                    print(f"  [SKIP] {comp}: competitor not installed ({exc})")
+                    continue
 
                 km_rounds = []
                 other_rounds = []
