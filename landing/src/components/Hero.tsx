@@ -327,7 +327,7 @@ export const Hero: React.FC = () => {
               <strong className="font-bold text-[#000000]">
                 The time-series extractor that shows its work.
               </strong>{' '}
-              Kymora maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 3.18 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
+              Kymora maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 1.84 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}
