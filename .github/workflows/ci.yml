@@ -311,13 +311,17 @@ jobs:
           python -m pip install -e ".[test]"
           maturin develop --release
       - name: Run perf gate probe
-        run: python tools/perf_gate.py --ci --export-benchmark-json benchmark_results.json
+        run: python tools/perf_gate.py --ci --export-benchmark-json "${{ runner.temp }}/benchmark_results.json"
+      - name: Clean working tree before benchmark tracking
+        run: |
+          git checkout -- .
+          git clean -fd
       - name: Store and track benchmark result
         uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
           name: Kymora Core33 1kx500 Benchmark
           tool: 'customSmallerIsBetter'
-          output-file-path: benchmark_results.json
+          output-file-path: ${{ runner.temp }}/benchmark_results.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: ${{ github.ref == 'refs/heads/main' }}
           alert-threshold: '107%'
