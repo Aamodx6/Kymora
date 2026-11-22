@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795348022177,
+  "lastUpdate": 1795348841179,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -124,6 +124,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0797",
             "unit": "ms",
             "extra": "runs=30, cv=0.028"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f4d229944626d944dd08f4ac57452e54268a1447",
+          "message": "docs(paper): update JOSS paper, add gen_numbers.py, and add arXiv draft (Phase 7) (#31)",
+          "timestamp": "2026-11-22T17:29:26+05:30",
+          "tree_id": "2120ed2d8e8a13735b1577d94a080364f1ec78a3",
+          "url": "https://github.com/Aamodx6/Kymora/commit/f4d229944626d944dd08f4ac57452e54268a1447"
+        },
+        "date": 1795348840678,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 3.3113,
+            "range": "0.5124",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.156"
           }
         ]
       }
