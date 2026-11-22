@@ -11,12 +11,14 @@ Evaluated via 5-fold stratified cross-validation using standard Random Forest an
 
 ## Summary across Datasets
 
-| Library | Features | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Per-Dataset Speedup | Median Time (ms) |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **tsfresh** | 777 | **95.97%** | **95.27%** | **1.60** | **1.60** | 7788.1× slower | 7592.33 ms |
-| **TSFEL** | 156 | **95.55%** | **94.75%** | **1.75** | **1.50** | 5344.2× slower | 3037.06 ms |
-| **catch22** | 22 | **93.73%** | **90.47%** | **2.38** | **3.25** | 79.5× slower | 60.68 ms |
-| **Kymora (core33)** | 33 | **92.34%** | **93.58%** | **2.88** | **2.25** | 1.0× (ref) | 0.81 ms |
+| Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Per-Dataset Speedup | Median Time (ms) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **tsfresh** | 777 | 5 | **95.97%** | **95.27%** | **1.60** | **1.60** | 7788.1× slower | 7592.33 ms |
+| **TSFEL** | 156 | 8 | **95.55%** | **94.75%** | **1.75** | **1.50** | 5344.2× slower | 3037.06 ms |
+| **catch22** | 22 | 8 | **93.73%** | **90.47%** | **2.38** | **3.25** | 79.5× slower | 60.68 ms |
+| **Kymora (core33)** | 33 | 8 | **92.34%** | **93.58%** | **2.88** | **2.25** | 1.0× (ref) | 0.81 ms |
+
+*Note: tsfresh evaluated on 5 datasets due to multi-hour extraction runtime on larger series; on the identical 5 matched datasets, Kymora achieves 91.80% RF and 93.42% Ridge accuracy.*
 
 ## Statistical Significance (Wilcoxon Signed-Rank Test vs Kymora)
 

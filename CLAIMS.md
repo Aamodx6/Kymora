@@ -110,7 +110,7 @@ Artifacts: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`, `benchmarks/results/uc
 | Claim | Artifact value | Conditions |
 |---|---|---|
 | Kymora core33 Ridge accuracy: 93.58% (rank 2.25) vs catch22 90.47% (rank 3.25) | `DOWNSTREAM_UCR_REPORT.md` | 5-fold stratified CV, leak-free StandardScaler, 8 UCR benchmarks |
-| Kymora core33 RF accuracy: 92.34% vs catch22 93.73%, TSFEL 95.55%, tsfresh 95.97% | `DOWNSTREAM_UCR_REPORT.md` | 5-fold stratified CV, 8 UCR benchmarks |
+| Kymora core33 RF accuracy: 92.34% vs catch22 93.73%, TSFEL 95.55%, tsfresh 95.97% | `DOWNSTREAM_UCR_REPORT.md` | 5-fold stratified CV, 8 UCR benchmarks (tsfresh evaluated on 5 matched datasets due to long series extraction runtime; Kymora RF accuracy on the same 5 matched datasets is 91.80%) |
 | Kymora extraction time 0.81 ms vs catch22 60.68 ms (80×), TSFEL 3,037.06 ms (5,344×), tsfresh 7,592.33 ms (7,788×) | `DOWNSTREAM_UCR_REPORT.md` | Median across datasets / per-dataset speedups |
 
 ## Pending re-baseline (no artifact — still stale)

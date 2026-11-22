@@ -20,8 +20,6 @@ use pyo3::prelude::*;
 
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    // Pre-warm Rayon global thread pool in background to eliminate first-call dispatch spikes
-    rayon::spawn(|| {});
     m.add_function(wrap_pyfunction!(ffi::extract_features, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::extract_features_mc, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::extract_features_ragged, m)?)?;

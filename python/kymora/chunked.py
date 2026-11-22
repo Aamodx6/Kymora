@@ -169,7 +169,8 @@ def extract_features_chunked(
     # 3. Source is an iterable / generator of series
     buffer: list[np.ndarray] = []
     for item in source:
-        arr = np.ascontiguousarray(item, dtype=np.float64)
+        # Copy to owned buffer so mutating generators do not overwrite buffered series
+        arr = np.ascontiguousarray(item, dtype=np.float64).copy()
         buffer.append(arr)
         if len(buffer) == chunk_size:
             out = extract_features(

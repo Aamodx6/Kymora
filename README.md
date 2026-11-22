@@ -247,15 +247,15 @@ Pooled medians: kymora over 360 runs across 3 interleaved sessions (median 1.74 
 
 Speed is meaningless if features fail to predict well downstream. We evaluated Kymora `core33` against `catch22`, `TSFEL`, and `tsfresh` on canonical UCR univariate classification datasets (5-fold stratified CV, standard `RandomForestClassifier` and `RidgeClassifier`):
 
-| Library | Features | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tsfresh` | 777 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
-| `TSFEL` | 156 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
-| **Kymora (`core33`)** | **33** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** (ref) |
-| `catch22` | 22 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
+| Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `tsfresh` | 777 | 5 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
+| `TSFEL` | 156 | 8 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
+| **Kymora (`core33`)** | **33** | **8** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** (ref) |
+| `catch22` | 22 | 8 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
 
 * On linear models (Ridge with fold-isolated `StandardScaler`), Kymora reaches **93.58% accuracy**, beating `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**.
-* On tree models (Random Forest), Kymora achieves **92.34% accuracy** (within ~1.4% of catch22 and ~3.2% of tsfresh/TSFEL), while extracting features with a median per-dataset speedup of **80× vs catch22**, **5,344× vs TSFEL**, and **7,788× vs tsfresh**.
+* On tree models (Random Forest), Kymora achieves **92.34% accuracy** (within ~1.4% of catch22 and ~3.2% of tsfresh/TSFEL; on the 5 datasets evaluated by tsfresh, Kymora achieves 91.80% RF and 93.42% Ridge), while extracting features with a median per-dataset speedup of **80× vs catch22**, **5,344× vs TSFEL**, and **7,788× vs tsfresh**.
 * Full per-dataset accuracy breakdown: [`benchmarks/results/DOWNSTREAM_UCR_REPORT.md`](benchmarks/results/DOWNSTREAM_UCR_REPORT.md).
 
 #### Where Kymora is slower

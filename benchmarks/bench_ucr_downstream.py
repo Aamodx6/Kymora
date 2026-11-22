@@ -321,21 +321,27 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
                 "ridge_wtl": f"{w_ridge}/{t_ridge}/{l_ridge}",
             }
 
-        # Holm-Bonferroni correction
+        # Holm-Bonferroni correction (enforce monotonicity with cumulative maximum)
         m = len(cols_compared)
         # RF Holm correction
         order_rf = np.argsort(raw_p_rf)
+        cummax_rf = 0.0
         for rank_i, idx in enumerate(order_rf):
             col = cols_compared[idx]
             holm_factor = m - rank_i
-            stats_results[col]["rf_holm_p"] = min(1.0, raw_p_rf[idx] * holm_factor)
+            adj_p = min(1.0, raw_p_rf[idx] * holm_factor)
+            cummax_rf = max(cummax_rf, adj_p)
+            stats_results[col]["rf_holm_p"] = cummax_rf
 
         # Ridge Holm correction
         order_ridge = np.argsort(raw_p_ridge)
+        cummax_ridge = 0.0
         for rank_i, idx in enumerate(order_ridge):
             col = cols_compared[idx]
             holm_factor = m - rank_i
-            stats_results[col]["ridge_holm_p"] = min(1.0, raw_p_ridge[idx] * holm_factor)
+            adj_p = min(1.0, raw_p_ridge[idx] * holm_factor)
+            cummax_ridge = max(cummax_ridge, adj_p)
+            stats_results[col]["ridge_holm_p"] = cummax_ridge
 
     return df, summary, stats_results
 
@@ -395,6 +401,29 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
         k_libs = len(summary)
         # Nemenyi critical difference at alpha=0.05 for k=4 is 2.569 * sqrt(k*(k+1)/(6*N))
         cd = 2.569 * np.sqrt((k_libs * (k_libs + 1)) / (6.0 * n_ds))
+
+        rf_ranks = summary["mean_rank_rf"].sort_values()
+        ridge_ranks = summary["mean_rank_ridge"].sort_values()
+        rf_lines = [f"  {ext:<10}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in rf_ranks.items()]
+        ridge_lines = [f"  {ext:<10}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in ridge_ranks.items()]
+
+        c22_ridge_p = stats_results.get("catch22", {}).get("ridge_pvalue", 1.0)
+        km_ridge_rank = summary.loc["Kymora (core33)", "mean_rank_ridge"] if "Kymora (core33)" in summary.index else 0
+        c22_ridge_rank = summary.loc["catch22", "mean_rank_ridge"] if "catch22" in summary.index else 0
+
+        findings = []
+        if c22_ridge_p < 0.05 and km_ridge_rank < c22_ridge_rank:
+            findings.append(
+                f"On Ridge linear models, Kymora (rank {km_ridge_rank:.2f}) significantly outperforms catch22 (rank {c22_ridge_rank:.2f}, $p = {c22_ridge_p:.4f}$) while requiring only 33 features."
+            )
+        if "catch22" in summary.index and "Kymora (core33)" in summary.index:
+            km_rf_rank = summary.loc["Kymora (core33)", "mean_rank_rf"]
+            c22_rf_rank = summary.loc["catch22", "mean_rank_rf"]
+            if abs(km_rf_rank - c22_rf_rank) <= cd:
+                findings.append("On tree models (RF), Kymora sits within the critical difference threshold of catch22.")
+
+        conclusion_text = f"**Key Finding:** {' '.join(findings)}" if findings else ""
+
         lines.extend([
             "",
             "## Critical Difference (CD) Analysis (Nemenyi Test, α = 0.05)",
@@ -407,19 +436,13 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
             "Rank Axis: 1.0 (Best) ------------------------------------------------ 4.0",
             "",
             "Random Forest Ranks:",
-            f"  tsfresh: 1.60  |====== CD ({cd:.2f}) ======|",
-            f"  TSFEL:   1.75  |====== CD ({cd:.2f}) ======|",
-            f"  catch22: 2.38          |====== CD ({cd:.2f}) ======|",
-            f"  Kymora:  2.88                  |====== CD ({cd:.2f}) ======|",
+            *rf_lines,
             "",
             "Ridge Classifier Ranks:",
-            f"  TSFEL:   1.50  |====== CD ({cd:.2f}) ======|",
-            f"  tsfresh: 1.60  |====== CD ({cd:.2f}) ======|",
-            f"  Kymora:  2.25          |====== CD ({cd:.2f}) ======|",
-            f"  catch22: 3.25                  |====== CD ({cd:.2f}) ======|",
+            *ridge_lines,
             "```",
             "",
-            "**Key Finding:** On Ridge linear models, Kymora (rank 2.25) significantly outperforms catch22 (rank 3.25, $p = 0.0156$) while requiring only 33 features. On tree models (RF), Kymora sits within the critical difference threshold of catch22.",
+            conclusion_text,
         ])
 
     lines.extend([

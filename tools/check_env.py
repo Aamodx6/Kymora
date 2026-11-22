@@ -121,6 +121,17 @@ def verify_headline_environment(strict_power: bool = True, strict_git: bool = Tr
                 f"Installed kymora version is {version} (must be >= 0.8.1 for HEAD benchmarks). "
                 "Do not benchmark the 0.8.0 wheel."
             )
+
+        if strict_git:
+            head_sha = get_git_head_sha()
+            info = get_kymora_wheel_or_binary_info()
+            if head_sha == "unknown":
+                reasons.append("Git HEAD SHA could not be resolved from repository checkout.")
+            if not info.get("binary_sha256") and not info.get("head_wheel_sha256"):
+                reasons.append(
+                    "No verifiable build provenance (binary SHA256 or wheel SHA256) found for installed kymora. "
+                    "A traceable HEAD build is required for headline runs."
+                )
     except ImportError as e:
         reasons.append(f"kymora is not installed: {e}")
 
@@ -131,9 +142,11 @@ def main():
     parser = argparse.ArgumentParser(description="Check headline benchmark environment prerequisites")
     parser.add_argument("--strict-power", action="store_true", default=True, help="Enforce high performance power plan")
     parser.add_argument("--allow-suboptimal", action="store_false", dest="strict_power", help="Allow running on balanced/silent schemes")
+    parser.add_argument("--strict-git", action="store_true", default=True, help="Enforce verifiable HEAD build provenance")
+    parser.add_argument("--allow-untracked-git", action="store_false", dest="strict_git", help="Allow untracked build provenance")
     args = parser.parse_args()
 
-    ok, reasons = verify_headline_environment(strict_power=args.strict_power)
+    ok, reasons = verify_headline_environment(strict_power=args.strict_power, strict_git=args.strict_git)
     info = get_kymora_wheel_or_binary_info()
     head_sha = get_git_head_sha()
 

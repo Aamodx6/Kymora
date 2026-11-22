@@ -72,14 +72,14 @@ overhead you can optimise away.
 
 ### Predictive utility on real-world datasets (UCR Archive)
 
-| Library | Features | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tsfresh` | 777 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
-| `TSFEL` | 156 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
-| **Kymora (`core33`)** | **33** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** |
-| `catch22` | 22 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
+| Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `tsfresh` | 777 | 5 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
+| `TSFEL` | 156 | 8 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
+| **Kymora (`core33`)** | **33** | **8** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** |
+| `catch22` | 22 | 8 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
 
-On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **93.58% mean accuracy**, outperforming `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**, while extracting 80× to 7,788× faster than existing libraries. Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
+On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **93.58% mean accuracy**, outperforming `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**, while extracting 80× to 7,788× faster than existing libraries (tsfresh evaluated on 5 matched datasets due to long series extraction runtime; on the same 5 datasets Kymora RF accuracy is 91.80%). Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
 
 ## Where kymora is slower
 

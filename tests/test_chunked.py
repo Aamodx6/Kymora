@@ -95,3 +95,20 @@ def test_chunked_invalid():
 
     with pytest.raises(ValueError, match="Unsupported file format"):
         list(km.extract_features_chunked("dummy.txt"))
+
+
+def test_chunked_mutating_generator_buffer():
+    # Generator reuses a single mutable buffer across iterations
+    def reusing_gen():
+        buf = np.zeros(20, dtype=np.float64)
+        for i in range(5):
+            buf.fill(float(i + 1))
+            yield buf
+
+    chunks = list(km.extract_features_chunked(reusing_gen(), chunk_size=3))
+    all_feats = np.vstack(chunks)
+    assert all_feats.shape == (5, 33)
+    # Mean of series i should be i+1
+    expected_means = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    mean_idx = km.feature_names().index("mean")
+    np.testing.assert_allclose(all_feats[:, mean_idx], expected_means)
