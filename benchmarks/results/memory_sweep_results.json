@@ -1,0 +1,42 @@
+[
+  {
+    "n_series": 1000,
+    "length": 500,
+    "input_mib": 3.814697265625,
+    "output_mib": 0.25177001953125,
+    "scratch_overhead_mib": 2.26171875,
+    "total_peak_delta_mib": 9.69140625
+  },
+  {
+    "n_series": 5000,
+    "length": 500,
+    "input_mib": 19.073486328125,
+    "output_mib": 1.25885009765625,
+    "scratch_overhead_mib": 2.32421875,
+    "total_peak_delta_mib": 21.40234375
+  },
+  {
+    "n_series": 10000,
+    "length": 500,
+    "input_mib": 38.14697265625,
+    "output_mib": 2.5177001953125,
+    "scratch_overhead_mib": 3.22265625,
+    "total_peak_delta_mib": 41.375
+  },
+  {
+    "n_series": 50000,
+    "length": 500,
+    "input_mib": 190.73486328125,
+    "output_mib": 12.5885009765625,
+    "scratch_overhead_mib": 14.01171875,
+    "total_peak_delta_mib": 204.75390625
+  },
+  {
+    "n_series": 100000,
+    "length": 500,
+    "input_mib": 381.4697265625,
+    "output_mib": 25.177001953125,
+    "scratch_overhead_mib": 25.2890625,
+    "total_peak_delta_mib": 406.765625
+  }
+]

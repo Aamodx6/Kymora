@@ -125,6 +125,10 @@ def describe_feature(name: str) -> dict[str, str]:
     """Return dictionary of feature metadata: description, cost, aliases, needs."""
     ...
 
+def _exec_mode(n_series: int, length: int) -> str:
+    """Return execution mode ('sequential' or 'parallel') for given shape."""
+    ...
+
 class StreamingExtractor:
     """Stateful streaming extractor with O(1)-amortized rolling-window updates.
 

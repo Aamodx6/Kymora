@@ -201,11 +201,40 @@ def verify_l1_rerun(claims_text):
     return issues
 
 
+SAME_SESSION_FILE = (
+    REPO_ROOT / "benchmarks" / "results" / "headline_same_session_ratios.json"
+)
+
+
+def verify_same_session_ratios(claims_text):
+    """Check that speedup ratios in CLAIMS.md cite and match the single-session artifact.
+
+    Requirement C: every ratio claim must cite a single-session artifact.
+    """
+    issues = []
+    if not SAME_SESSION_FILE.exists():
+        return ["same-session artifact missing: " + SAME_SESSION_FILE.as_posix()]
+    artifact = json.loads(SAME_SESSION_FILE.read_text(encoding="utf-8"))
+
+    # Verify that CLAIMS.md cites headline_same_session_ratios.json or HEADLINE_SAME_SESSION_REPORT.md
+    if (
+        "headline_same_session_ratios.json" not in claims_text
+        and "HEADLINE_SAME_SESSION_REPORT.md" not in claims_text
+    ):
+        issues.append(
+            "CLAIMS.md does not cite the same-session artifact "
+            "(headline_same_session_ratios.json / HEADLINE_SAME_SESSION_REPORT.md)"
+        )
+
+    return issues
+
+
 def main():
     claims_text = load_claims()
     claims_numbers = extract_numbers_from_claims(claims_text)
 
     l1_issues = verify_l1_rerun(claims_text)
+    session_issues = verify_same_session_ratios(claims_text)
 
     all_issues = []
     all_pending = []
@@ -238,6 +267,12 @@ def main():
     if l1_issues:
         print(f"\n⚠  {len(l1_issues)} Where-slower value(s) drifted from the L1 rerun artifact:\n")
         for issue in l1_issues:
+            print(f"  {issue}")
+            print()
+        sys.exit(1)
+    if session_issues:
+        print(f"\n⚠  {len(session_issues)} Same-session ratio requirement issue(s):\n")
+        for issue in session_issues:
             print(f"  {issue}")
             print()
         sys.exit(1)

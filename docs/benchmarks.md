@@ -39,21 +39,20 @@ pipeline ever sees.
 
 1,000 series × 500 steps, i7-13620H laptop, 10 cores (6P+4E) / 16 threads,
 Windows 11, AC online, High Performance power scheme (artifacts:
-`benchmarks/results/HEADLINE_THROUGHPUT_REPORT.md` for pooled headline protocol,
-`2026-11-22_reproduce_readme/` for raw + competitor rounds, 2026-11-22;
+`benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md` (`headline_same_session_ratios.json`) for 3-session interleaved headline protocol;
 `EQUAL_FEATURE_REPORT.md` + `2026-11-22_equal_feature/` for matched,
 2026-11-22; exploratory single-machine numbers):
 
 | library | features | total time | series/s | µs/series-feature |
 |---|---:|---:|---:|---:|
-| **kymora** | 33 | **1.74 ms** | **575,391** | **0.0527** |
-| `catch22` (pycatch22) | 22 | 432.6 ms | 2,312 | 19.66 |
-| `TSFEL` (all domains) | 156 | 2,041.5 ms | 490 | 13.09 |
-| `tsfresh` (EfficientFCParameters) | 777 | 14,966.8 ms | 67 | 19.26 |
+| **kymora** | 33 | **2.33 ms** | **428,633** | **0.0707** |
+| `catch22` (pycatch22) | 22 | 196.82 ms | 5,081 | 8.95 |
+| `TSFEL` (all domains) | 156 | 2,745.41 ms | 364 | 17.60 |
+| `tsfresh` (EfficientFCParameters) | 777 | 24,500.85 ms | 41 | 31.53 |
 
-Raw ratios (249×/1,175×/8,612×) compare 33 against up to 777 features — read
-the per-feature column (373×/248×/366×) next to them, and the matched table
-below for the like-for-like view. (Previous exploratory Silent session: 1.84 ms / 542,682 series/s, best 1.57 ms / 636,943 series/s, ratios 235×/1,108×/8,122×; per-feature 0.0558 µs / 352×/234×/345×; tracked in `CLAIMS.md`.)
+Raw ratios (84.4×/1,177×/10,502×) compare 33 against up to 777 features — read
+the per-feature column (126.5×/248.9×/446.0×) next to them, and the matched table
+below for the like-for-like view. Per-session ratios across 3 same-session interleaved rounds: catch22 [54.0×, 99.6×, 91.8×], TSFEL [995.5×, 1,316.0×, 1,394.0×], tsfresh [5,633.4×, 12,268.2×, 11,604.5×]; 95% bootstrap CI on Kymora throughput is [367,067, 475,896] series/s ([2.10, 2.72] ms).
 
 ### Equal-feature (like-for-like, 1,000 × 500, 16 threads)
 
@@ -74,12 +73,12 @@ overhead you can optimise away.
 
 | Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tsfresh` | 777 | 5 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
-| `TSFEL` | 156 | 8 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
-| **Kymora (`core33`)** | **33** | **8** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** |
-| `catch22` | 22 | 8 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
+| `tsfresh` | 777 | 42 | **84.79%** | **82.39%** | **1.64** | **1.79** | 20,943.62 ms |
+| `TSFEL` | 156 | 42 | **81.00%** | **79.71%** | 2.33 | 2.26 | 942.67 ms |
+| **Kymora (`core33`)** | **33** | **42** | **79.96%** | **77.42%** | **2.71** | **2.64** | **1.26 ms** |
+| `catch22` | 22 | 42 | 79.83% | 75.75% | 2.79 | 2.98 | 159.40 ms |
 
-On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **93.58% mean accuracy**, outperforming `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**, while extracting 80× to 7,788× faster than existing libraries (tsfresh evaluated on 5 matched datasets due to long series extraction runtime; on the same 5 datasets Kymora RF accuracy is 91.80%). Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
+On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **77.42% mean accuracy**, outperforming `catch22` (**75.75%**) with an average rank of **2.64 vs 2.98** (W/T/L 23/5/14, Holm-adjusted $p = 0.2016$), while extracting 117.2× to 17,217.0× faster than existing libraries across 42 matched datasets (Random Forest accuracy: **79.96%**, rank 2.71 vs catch22 2.79, Holm-adjusted $p = 0.5554$, Critical Difference $CD = 0.72$). Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
 
 ## Where kymora is slower
 

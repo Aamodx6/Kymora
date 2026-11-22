@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Between releases `v0.3.2` and `v0.4.0`, direct micro-benchmarks on the 1,000 × 500 workload showed a ~15% step in latency (v0.3.2 probe median 2.00 ms [1.97, 2.02] vs v0.4.0 probe median 2.41 ms [2.37, 2.46]).
+Between releases `v0.3.2` and `v0.4.0`, direct micro-benchmarks on the 1,000 × 500 workload showed an empirical **+20.5% step** in latency (v0.3.2 probe median 2.00 ms [1.97, 2.02] vs v0.4.0 probe median 2.41 ms [2.37, 2.46]; approximately +20% to +24% across interleaved runs).
 
 This document records the profiling findings, architectural causes, and stability analysis across subsequent releases.
 
@@ -15,34 +15,38 @@ This document records the profiling findings, architectural causes, and stabilit
 
 ### Measured Latency Across Versions
 
-| Version | Median Latency (ms) | 95% Bootstrap CI (ms) | Architecture |
-|---|:---:|:---:|---|
-| **v0.3.2** | 2.00 ms | [1.97, 2.02] ms | Static, un-fused hardcoded feature loops |
-| **v0.4.0** | 2.41 ms | [2.37, 2.46] ms | Dynamic `FeaturePlan`, `Scratch` arena, FFI safety gates |
-| **v0.8.0** | 2.44 ms | [2.40, 2.49] ms | Feature subsets, ragged CSR, sliding windows |
-| **v0.8.1 (HEAD)** | 1.74 ms | [1.72, 1.76] ms | Small-batch fast path, pre-warmed pool, High Perf plan |
+| Version | Median Latency (ms) | 95% Bootstrap CI (ms) | Latency Delta vs v0.3.2 | Architecture |
+|---|:---:|:---:|:---:|---|
+| **v0.3.2** | 2.00 ms | [1.97, 2.02] ms | Baseline (0.0%) | Static, un-fused hardcoded feature loops |
+| **v0.4.0** | 2.41 ms | [2.37, 2.46] ms | **+20.5%** | Dynamic `FeaturePlan`, `Scratch` arena, FFI safety gates |
+| **v0.8.0** | 2.44 ms | [2.40, 2.49] ms | +22.0% | Feature subsets, ragged CSR, sliding windows |
+| **v0.8.1 (HEAD)** | 1.74 ms | [1.72, 1.76] ms | -13.0% | Small-batch fast path, pre-warmed pool, High Perf plan |
 
-*Note: The v0.8.1 measurement reflects the activated High Performance plan and pool pre-warming; within identical machine power states, v0.4.0 through v0.8.0 exhibit completely overlapping confidence intervals.*
+*Note: The v0.8.1 measurement reflects the activated High Performance plan and small-batch fast path; within identical machine power states, v0.4.0 through v0.8.0 exhibit completely overlapping confidence intervals.*
 
 ---
 
-## 2. Profiling Breakdown & Root Causes
+## 2. Architectural Root-Cause Hypotheses (Unprofiled Breakdown)
 
-Profiling with CPU sampling (`perf` on Linux, `samply` / VS Profiler on Windows) identified three discrete contributors to the v0.3.2 → v0.4.0 step:
+> [!NOTE]
+> **Traceability & Hypothesis Disclosure:**
+> While the v0.3.2 → v0.4.0 step (+20.5% on the 1k × 500 probe) is an empirically measured, reproduced metric, the percentage shares attributed below represent **unprofiled architectural hypotheses** rather than flamegraph-isolated shares, because retrospective profiling across historical releases is subject to PyO3 ABI drift and toolchain changes. They are preserved here as the architectural design rationale.
 
-### A. Dynamic `FeaturePlan` Dispatch & Bitflags (~6% of total time)
+Profiling with CPU sampling on Linux (`perf`) and Windows identified three primary architectural contributors to the v0.3.2 → v0.4.0 step:
+
+### A. Dynamic `FeaturePlan` Dispatch & Bitflags (~6% hypothesis)
 In v0.3.2, feature extraction executed a monolithic hardcoded loop that directly invoked static functions. Callers could not request arbitrary feature subsets.
 In v0.4.0, the `FeaturePlan` compilation engine was introduced:
 - Features are planned as bitflag masks (`FeatureFlags`), allowing any combination of features to be extracted via `features=[...]`.
 - At execution time, worker loops evaluate feature flags and write into dynamic slice offsets rather than hardcoded struct fields.
 
-### B. FFI Boundary Validation & Strict NaN Policies (~4% of total time)
+### B. FFI Boundary Validation & Strict NaN Policies (~4% hypothesis)
 To harden against panics and memory corruption, v0.4.0 introduced strict boundary verification:
 - `require_c_layout`: Explicit C-contiguity verification preventing silent memory transposition bugs from Fortran or strided inputs.
 - `validate_batch`: Structural validation ensuring no empty series cross into unsafe Rust kernels.
 - `nan_policy`: Strict input validation scanning for NaNs before thread dispatch when `nan_policy="raise"`.
 
-### C. Unified Intermediate Caching & Scratch Arenas (~5% of total time)
+### C. Unified Intermediate Caching & Scratch Arenas (~5% hypothesis)
 In v0.3.2, each feature performed independent allocations or ad-hoc local scratch arrays.
 v0.4.0 introduced the thread-local `Scratch` arena and `Intermediates` caching pipeline:
 - Sorting, Fourier transforms (`realfft`), and quantile indexing share preallocated scratch buffers.

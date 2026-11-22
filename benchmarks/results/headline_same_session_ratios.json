@@ -1,0 +1,63 @@
+{
+  "n_sessions": 3,
+  "n_series": 1000,
+  "length": 500,
+  "threads": 16,
+  "pooled_medians_ms": {
+    "kymora": 2.333,
+    "catch22": 196.8225,
+    "tsfel": 2745.41,
+    "tsfresh": 24500.8479
+  },
+  "pooled_series_per_sec": 428632.6618088298,
+  "ci95_series_per_sec": [
+    367066.76944536215,
+    475895.8739827726
+  ],
+  "ci95_kymora_ms": [
+    2.1013,
+    2.7243
+  ],
+  "pooled_ratios_raw": {
+    "catch22": 84.3645520788684,
+    "tsfel": 1176.7723960565793,
+    "tsfresh": 10501.863651950278
+  },
+  "pooled_ratios_per_feature": {
+    "catch22": 126.5468281183026,
+    "tsfel": 248.93262224273792,
+    "tsfresh": 446.02509718707745
+  },
+  "session_records": [
+    {
+      "session": 1,
+      "median_km_ms": 4.1182,
+      "median_c22_ms": 222.3024,
+      "median_tsfel_ms": 4099.48755,
+      "median_tsfresh_ms": 23199.3399,
+      "ratio_catch22": 53.98047690738672,
+      "ratio_tsfel": 995.4561580302073,
+      "ratio_tsfresh": 5633.368923316012
+    },
+    {
+      "session": 2,
+      "median_km_ms": 1.9971,
+      "median_c22_ms": 198.8696,
+      "median_tsfel_ms": 2628.1257,
+      "median_tsfresh_ms": 24500.8479,
+      "ratio_catch22": 99.5791898252466,
+      "ratio_tsfel": 1315.9710079615443,
+      "ratio_tsfresh": 12268.212858645034
+    },
+    {
+      "session": 3,
+      "median_km_ms": 2.1277,
+      "median_c22_ms": 195.4155,
+      "median_tsfel_ms": 2965.923,
+      "median_tsfresh_ms": 24690.9284,
+      "ratio_catch22": 91.84353997274053,
+      "ratio_tsfel": 1393.9573248108286,
+      "ratio_tsfresh": 11604.51586219862
+    }
+  ]
+}

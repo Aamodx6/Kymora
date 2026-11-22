@@ -1,16 +1,17 @@
 """Comprehensive Downstream ML Benchmark: Time-Series Classification on UCR Archive.
 
-Evaluates Kymora core33 against catch22, TSFEL, and tsfresh on 22 canonical UCR
-classification datasets spanning sensor, motion, physiological, image outline,
-and spectral telemetry domains.
+Evaluates Kymora core33 against catch22, TSFEL, and tsfresh across >=40 canonical UCR
+univariate classification datasets on the archive's fixed train/test splits.
 
 Standardized Evaluation:
-- 5-Fold Stratified Cross-Validation (fixed seed 42)
+- Canonical UCR fixed train/test splits
+- Multi-core execution: 16 threads across all methods
+- Leak-free feature preprocessing: SimpleImputer and StandardScaler fit strictly on train split
 - Classifiers:
     1. RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
     2. RidgeClassifier(alpha=1.0, random_state=42)
-- Feature preprocessing: NaN imputation + Z-score standardization
-- Metrics: Mean Accuracy, Macro F1, Feature Extraction Wall-Clock Time, and Average Rank.
+- Statistical analysis: Matched-set comparison, Wilcoxon signed-rank test, Holm-Bonferroni correction,
+  and critical-difference diagram.
 """
 
 from __future__ import annotations
@@ -20,17 +21,16 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from scipy import stats
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import RidgeClassifier
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 import kymora as km
@@ -39,39 +39,28 @@ import kymora as km
 CACHE_DIR = Path(__file__).resolve().parent / "datasets" / "cache" / "ucr"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-# 22 canonical, diverse UCR univariate datasets
+# 42 canonical, diverse equal-length UCR univariate datasets
 UCR_BENCHMARK_DATASETS = [
-    "GunPoint",
-    "ItalyPowerDemand",
-    "ArrowHead",
-    "Coffee",
-    "ECG200",
-    "Trace",
-    "TwoLeadECG",
-    "SyntheticControl",
-    "CBF",
-    "Beef",
-    "Ham",
-    "Herring",
-    "Meat",
-    "ToeSegmentation1",
-    "ToeSegmentation2",
-    "Wine",
-    "BeetleFly",
-    "BirdChicken",
-    "BME",
-    "Chinatown",
-    "ECGFiveDays",
-    "SonyAIBORobotSurface1",
+    "ArrowHead", "BME", "BeetleFly", "BirdChicken", "CBF", "Chinatown", "Coffee",
+    "DistalPhalanxOutlineAgeGroup", "DistalPhalanxOutlineCorrect", "DistalPhalanxTW",
+    "ECG200", "ECGFiveDays", "FaceFour", "FacesUCR", "GunPoint", "Ham", "Herring",
+    "ItalyPowerDemand", "Lightning2", "Lightning7", "Meat", "MedicalImages",
+    "MiddlePhalanxOutlineAgeGroup", "MiddlePhalanxOutlineCorrect", "MiddlePhalanxTW",
+    "MoteStrain", "OliveOil", "Plane", "PowerCons", "SmoothSubspace",
+    "SonyAIBORobotSurface1", "SonyAIBORobotSurface2", "SyntheticControl",
+    "ToeSegmentation1", "ToeSegmentation2", "Trace", "TwoLeadECG", "Wine", "Beef",
+    "TwoPatterns", "Symbols", "SwedishLeaf"
 ]
 
+DEFAULT_THREADS = 16
 
-def load_ucr_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
-    """Load train + test splits for a UCR dataset from local cache or HuggingFace."""
-    cache_file = CACHE_DIR / f"{name}.npz"
-    if cache_file.exists():
-        data = np.load(cache_file)
-        return data["X"], data["y"]
+
+def load_ucr_dataset(name: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load canonical fixed train + test splits for a UCR dataset."""
+    split_file = CACHE_DIR / f"{name}_split.npz"
+    if split_file.exists():
+        data = np.load(split_file)
+        return data["X_tr"], data["y_tr"], data["X_te"], data["y_te"]
 
     base_url = f"https://huggingface.co/datasets/ChengsenWang/UCR-2018/resolve/main/{name}"
     train_df = pd.read_parquet(f"{base_url}/train.parquet")
@@ -79,45 +68,38 @@ def load_ucr_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
 
     X_tr = np.array([np.concatenate(r) for r in train_df["data"]], dtype=np.float64)
     X_te = np.array([np.concatenate(r) for r in test_df["data"]], dtype=np.float64)
+    y_tr = train_df["label"].to_numpy().astype(int)
+    y_te = test_df["label"].to_numpy().astype(int)
 
-    X = np.vstack([X_tr, X_te])
-    y = np.concatenate([train_df["label"].to_numpy(), test_df["label"].to_numpy()]).astype(int)
-
-    # Cache locally for instant repeat runs
-    np.savez_compressed(cache_file, X=X, y=y)
-    return X, y
+    np.savez_compressed(split_file, X_tr=X_tr, y_tr=y_tr, X_te=X_te, y_te=y_te)
+    return X_tr, y_tr, X_te, y_te
 
 
-# --- Feature Extractors ---
+# --- Feature Extractors (Multi-Core 16T) ---
 
 def extract_kymora(X: np.ndarray) -> np.ndarray:
-    return km.extract_features(X, profile="core33")
+    return km.extract_features(X, profile="core33", n_jobs=DEFAULT_THREADS)
 
 
 def extract_catch22(X: np.ndarray) -> np.ndarray:
     import pycatch22
-    out = []
-    for row in X:
-        res = pycatch22.catch22_all(row.tolist())
-        out.append(res["values"])
-    return np.array(out, dtype=np.float64)
+    rows = Parallel(n_jobs=DEFAULT_THREADS)(delayed(pycatch22.catch22_all)(row.tolist()) for row in X)
+    return np.array([r["values"] for r in rows], dtype=np.float64)
 
 
 def extract_tsfel(X: np.ndarray) -> np.ndarray:
     import tsfel
     cfg = tsfel.get_features_by_domain()
-    # TSFEL extracts per 1D series or 2D dataframe
-    out = []
-    for row in X:
-        f = tsfel.time_series_features_extractor(cfg, row, fs=100, verbose=0)
-        out.append(f.values.flatten())
-    return np.array(out, dtype=np.float64)
+    rows = Parallel(n_jobs=DEFAULT_THREADS)(
+        delayed(tsfel.time_series_features_extractor)(cfg, row, fs=100, verbose=0) for row in X
+    )
+    return np.array([r.values.flatten() for r in rows], dtype=np.float64)
 
 
 def extract_tsfresh(X: np.ndarray) -> np.ndarray:
     from tsfresh import extract_features
     from tsfresh.feature_extraction import EfficientFCParameters
-    
+
     n_series, length = X.shape
     df_long = pd.DataFrame({
         "id": np.repeat(np.arange(n_series), length),
@@ -129,61 +111,45 @@ def extract_tsfresh(X: np.ndarray) -> np.ndarray:
         column_id="id",
         column_sort="time",
         default_fc_parameters=EfficientFCParameters(),
-        n_jobs=4,
+        n_jobs=DEFAULT_THREADS,
         disable_progressbar=True,
     )
     return extracted.to_numpy(dtype=np.float64)
 
 
-def evaluate_dataset(
-    X_feats: np.ndarray, y: np.ndarray
+def evaluate_train_test(
+    X_tr_feats: np.ndarray, y_tr: np.ndarray,
+    X_te_feats: np.ndarray, y_te: np.ndarray,
 ) -> Tuple[float, float, float, float]:
-    """Evaluates features using 5-fold stratified CV with leak-free RF and Ridge pipelines.
+    """Evaluates features using the canonical fixed train/test split with leak-free pipelines."""
+    # Ensure infs are treated as missing values for imputer
+    X_tr_clean = np.where(np.isfinite(X_tr_feats), X_tr_feats, np.nan)
+    X_te_clean = np.where(np.isfinite(X_te_feats), X_te_feats, np.nan)
 
-    Notice: Imputation and scaling are performed strictly within each cross-validation fold
-    to prevent test data leakage. RidgeClassifier is preceded by StandardScaler to eliminate
-    unnormalized feature magnitude bias.
-    """
-    # Use min(5, min_class_count) splits to avoid fold errors on tiny classes
-    min_count = int(np.min(np.bincount(y)))
-    n_splits = max(2, min(5, min_count))
-    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+    # 1. Leak-free Imputation: fit strictly on train
+    imputer = SimpleImputer(strategy="constant", fill_value=0.0)
+    X_tr_imp = imputer.fit_transform(X_tr_clean)
+    X_te_imp = imputer.transform(X_te_clean)
 
-    rf_pipe = Pipeline([
-        ("imputer", SimpleImputer(strategy="constant", fill_value=0.0)),
-        ("rf", RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)),
-    ])
-    ridge_pipe = Pipeline([
-        ("imputer", SimpleImputer(strategy="constant", fill_value=0.0)),
-        ("scaler", StandardScaler()),
-        ("ridge", RidgeClassifier(alpha=1.0, random_state=42)),
-    ])
+    # 2. Random Forest: fit on train, predict test
+    rf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    rf.fit(X_tr_imp, y_tr)
+    pred_rf = rf.predict(X_te_imp)
+    acc_rf = float(accuracy_score(y_te, pred_rf))
+    f1_rf = float(f1_score(y_te, pred_rf, average="macro"))
 
-    rf_accs, rf_f1s = [], []
-    ridge_accs, ridge_f1s = [], []
+    # 3. Ridge Classifier: leak-free scaling fit strictly on train
+    scaler = StandardScaler()
+    X_tr_scl = scaler.fit_transform(X_tr_imp)
+    X_te_scl = scaler.transform(X_te_imp)
 
-    for train_idx, test_idx in cv.split(X_feats, y):
-        X_tr, X_te = X_feats[train_idx], X_feats[test_idx]
-        y_tr, y_te = y[train_idx], y[test_idx]
+    ridge = RidgeClassifier(alpha=1.0, random_state=42)
+    ridge.fit(X_tr_scl, y_tr)
+    pred_ridge = ridge.predict(X_te_scl)
+    acc_ridge = float(accuracy_score(y_te, pred_ridge))
+    f1_ridge = float(f1_score(y_te, pred_ridge, average="macro"))
 
-        # 1. Random Forest
-        rf_pipe.fit(X_tr, y_tr)
-        pred_rf = rf_pipe.predict(X_te)
-        rf_accs.append(accuracy_score(y_te, pred_rf))
-        rf_f1s.append(f1_score(y_te, pred_rf, average="macro"))
-
-        # 2. Ridge Classifier (with fold-isolated StandardScaler)
-        ridge_pipe.fit(X_tr, y_tr)
-        pred_ridge = ridge_pipe.predict(X_te)
-        ridge_accs.append(accuracy_score(y_te, pred_ridge))
-        ridge_f1s.append(f1_score(y_te, pred_ridge, average="macro"))
-
-    return (
-        float(np.mean(rf_accs)),
-        float(np.mean(rf_f1s)),
-        float(np.mean(ridge_accs)),
-        float(np.mean(ridge_f1s)),
-    )
+    return acc_rf, f1_rf, acc_ridge, f1_ridge
 
 
 def run_benchmark(
@@ -201,27 +167,29 @@ def run_benchmark(
         extractors["tsfresh"] = extract_tsfresh
 
     records = []
-    print(f"Starting downstream benchmark across {len(dataset_names)} UCR datasets...")
+    print(f"Starting downstream benchmark across {len(dataset_names)} UCR datasets (Fixed Train/Test Splits, 16 Threads)...")
 
     for d_idx, dname in enumerate(dataset_names, 1):
         print(f"\n[{d_idx}/{len(dataset_names)}] Loading {dname}...")
         try:
-            X, y = load_ucr_dataset(dname)
+            X_tr, y_tr, X_te, y_te = load_ucr_dataset(dname)
         except Exception as e:
             print(f"  Error loading {dname}: {e}")
             continue
 
-        n_samples, length = X.shape
-        n_classes = len(np.unique(y))
-        print(f"  Shape: {n_samples} series x {length} steps ({n_classes} classes)")
+        n_samples = len(X_tr) + len(X_te)
+        length = X_tr.shape[1]
+        n_classes = len(np.unique(np.concatenate([y_tr, y_te])))
+        print(f"  Shape: train {X_tr.shape}, test {X_te.shape} ({n_classes} classes)")
 
         for ename, efn in extractors.items():
             t0 = time.perf_counter()
             try:
-                feats = efn(X)
+                f_tr = efn(X_tr)
+                f_te = efn(X_te)
                 extract_time_ms = (time.perf_counter() - t0) * 1000.0
-                acc_rf, f1_rf, acc_ridge, f1_ridge = evaluate_dataset(feats, y)
-                n_feats = feats.shape[1]
+                acc_rf, f1_rf, acc_ridge, f1_ridge = evaluate_train_test(f_tr, y_tr, f_te, y_te)
+                n_feats = f_tr.shape[1]
             except Exception as e:
                 print(f"    {ename} FAILED: {e}")
                 continue
@@ -229,8 +197,11 @@ def run_benchmark(
             rec = {
                 "dataset": dname,
                 "n_samples": n_samples,
+                "n_train": len(X_tr),
+                "n_test": len(X_te),
                 "length": length,
                 "extractor": ename,
+                "threads": DEFAULT_THREADS,
                 "n_features": n_feats,
                 "extract_time_ms": extract_time_ms,
                 "acc_rf": acc_rf,
@@ -252,6 +223,12 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
     if df.empty:
         return pd.DataFrame(), pd.DataFrame(), {}
 
+    # Matched-set filtering: compare only across datasets every method completed
+    counts = df.groupby("dataset")["extractor"].nunique()
+    n_expected = df["extractor"].nunique()
+    matched_datasets = counts[counts == n_expected].index.tolist()
+    df = df[df["dataset"].isin(matched_datasets)].copy()
+
     # Compute ranks per dataset (higher accuracy = rank 1)
     df["rank_rf"] = df.groupby("dataset")["acc_rf"].rank(ascending=False, method="min")
     df["rank_ridge"] = df.groupby("dataset")["acc_ridge"].rank(ascending=False, method="min")
@@ -261,7 +238,7 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
     df["km_time"] = df["dataset"].map(km_times)
     df["speedup_vs_km"] = df["extract_time_ms"] / df["km_time"]
 
-    # Aggregate summary
+    # Aggregate summary on the matched set
     summary = df.groupby("extractor").agg(
         n_datasets=("dataset", "count"),
         mean_acc_rf=("acc_rf", lambda x: np.mean(x) * 100.0),
@@ -273,6 +250,7 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
         max_speedup=("speedup_vs_km", "max"),
         median_ext_time_ms=("extract_time_ms", "median"),
         features=("n_features", "median"),
+        threads=("threads", "first"),
     ).reset_index()
 
     # Statistical significance: Wilcoxon signed-rank tests & Win/Tie/Loss vs Kymora
@@ -301,7 +279,7 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
             raw_p_rf.append(rf_p)
             raw_p_ridge.append(ridge_p)
 
-            # Win / Tie / Loss (from Kymora perspective)
+            # Win / Tie / Loss (from Kymora perspective: diff > 0.5% accuracy)
             diff_rf = valid_rf["Kymora (core33)"] - valid_rf[col]
             diff_ridge = valid_ridge["Kymora (core33)"] - valid_ridge[col]
 
@@ -347,26 +325,28 @@ def compute_ranks_and_summary(records: List[Dict[str, Any]]) -> Tuple[pd.DataFra
 
 
 def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_results: Dict[str, Any], output_path: Path):
+    n_matched = len(df["dataset"].unique())
     lines = [
         "# UCR Downstream Classification Benchmark Report",
         "",
-        "Comprehensive evaluation of feature extraction libraries on canonical UCR univariate classification datasets.",
-        "Evaluated via 5-fold stratified cross-validation using standard Random Forest and Ridge classifiers.",
+        f"Comprehensive evaluation of feature extraction libraries on canonical UCR univariate classification datasets (Matched Set n = {n_matched}).",
+        "Evaluated on canonical fixed train/test splits using standard Random Forest and Ridge classifiers.",
         "",
         "> [!NOTE]",
         "> **Leak-Free & Fair Methodology:**",
-        "> 1. **Zero-Leakage Preprocessing:** `SimpleImputer` and `StandardScaler` are fitted strictly within each cross-validation fold.",
-        "> 2. **Multi-Core Baselines:** tsfresh and TSFEL run multi-threaded (`n_jobs=4`); Kymora uses 16 threads; catch22 runs single-core C.",
-        "> 3. **Per-Dataset Speedup:** Speedup ratios are calculated per-dataset (`time_baseline / time_kymora`) with median and [min, max] reported.",
+        "> 1. **Canonical Train/Test Splits:** Evaluates generalization on the archive's fixed test splits.",
+        "> 2. **Zero-Leakage Preprocessing:** `SimpleImputer` and `StandardScaler` are fitted strictly on the train split only.",
+        "> 3. **Multi-Core Parity:** All four libraries execute multi-threaded (16 threads).",
+        "> 4. **Strict Matched-Set Comparison:** Metrics and statistical ranks are computed solely across datasets where all methods completed.",
         "",
-        "## Summary across Datasets",
+        f"## Summary across Matched Datasets (n = {n_matched})",
         "",
         "| Library | Threads | Features | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Per-Dataset Speedup [min, max] | Median Time (ms) |",
         "|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|",
     ]
     for _, row in summary.sort_values("mean_rank_rf").iterrows():
         lib_name = row['extractor']
-        threads_str = "16" if "Kymora" in lib_name else ("1" if "catch22" in lib_name else "4")
+        threads_str = str(int(row.get('threads', DEFAULT_THREADS)))
         if lib_name == "Kymora (core33)":
             speedup_str = "1.0× (ref)"
         else:
@@ -383,7 +363,7 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
             "",
             "## Statistical Significance & Head-to-Head Record (vs Kymora)",
             "",
-            "| Competitor | Datasets | RF Win/Tie/Loss | Ridge Win/Tie/Loss | RF p-val (Holm) | Ridge p-val (Holm) | Significant (p < 0.05)? |",
+            "| Competitor | Matched Datasets | RF Win/Tie/Loss | Ridge Win/Tie/Loss | RF p-val (Holm) | Ridge p-val (Holm) | Significant (p < 0.05)? |",
             "|---|:---:|:---:|:---:|:---:|:---:|:---:|",
         ])
         for col, sres in stats_results.items():
@@ -397,30 +377,35 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
             )
 
         # Critical Difference
-        n_ds = len(df["dataset"].unique())
+        n_ds = n_matched
         k_libs = len(summary)
         # Nemenyi critical difference at alpha=0.05 for k=4 is 2.569 * sqrt(k*(k+1)/(6*N))
         cd = 2.569 * np.sqrt((k_libs * (k_libs + 1)) / (6.0 * n_ds))
 
-        rf_ranks = summary["mean_rank_rf"].sort_values()
-        ridge_ranks = summary["mean_rank_ridge"].sort_values()
-        rf_lines = [f"  {ext:<10}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in rf_ranks.items()]
-        ridge_lines = [f"  {ext:<10}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in ridge_ranks.items()]
+        summary_idx = summary.set_index("extractor")
+        rf_ranks = summary_idx["mean_rank_rf"].sort_values()
+        ridge_ranks = summary_idx["mean_rank_ridge"].sort_values()
+        rf_lines = [f"  {ext:<16}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in rf_ranks.items()]
+        ridge_lines = [f"  {ext:<16}: {rank:.2f}  |====== CD ({cd:.2f}) ======|" for ext, rank in ridge_ranks.items()]
 
-        c22_ridge_p = stats_results.get("catch22", {}).get("ridge_pvalue", 1.0)
-        km_ridge_rank = summary.loc["Kymora (core33)", "mean_rank_ridge"] if "Kymora (core33)" in summary.index else 0
-        c22_ridge_rank = summary.loc["catch22", "mean_rank_ridge"] if "catch22" in summary.index else 0
+        c22_ridge_holm = stats_results.get("catch22", {}).get("ridge_holm_p", 1.0)
+        km_ridge_rank = summary_idx.loc["Kymora (core33)", "mean_rank_ridge"] if "Kymora (core33)" in summary_idx.index else 0
+        c22_ridge_rank = summary_idx.loc["catch22", "mean_rank_ridge"] if "catch22" in summary_idx.index else 0
 
         findings = []
-        if c22_ridge_p < 0.05 and km_ridge_rank < c22_ridge_rank:
+        if c22_ridge_holm < 0.05 and km_ridge_rank < c22_ridge_rank:
             findings.append(
-                f"On Ridge linear models, Kymora (rank {km_ridge_rank:.2f}) significantly outperforms catch22 (rank {c22_ridge_rank:.2f}, $p = {c22_ridge_p:.4f}$) while requiring only 33 features."
+                f"On Ridge linear models, Kymora (rank {km_ridge_rank:.2f}) shows statistically significant superiority over catch22 (rank {c22_ridge_rank:.2f}, Holm-adjusted $p = {c22_ridge_holm:.4f}$). "
             )
-        if "catch22" in summary.index and "Kymora (core33)" in summary.index:
-            km_rf_rank = summary.loc["Kymora (core33)", "mean_rank_rf"]
-            c22_rf_rank = summary.loc["catch22", "mean_rank_rf"]
+        else:
+            findings.append(
+                f"On Ridge linear models, Kymora achieves rank {km_ridge_rank:.2f} vs catch22 rank {c22_ridge_rank:.2f} (Holm-adjusted $p = {c22_ridge_holm:.4f}$). "
+            )
+        if "catch22" in summary_idx.index and "Kymora (core33)" in summary_idx.index:
+            km_rf_rank = summary_idx.loc["Kymora (core33)", "mean_rank_rf"]
+            c22_rf_rank = summary_idx.loc["catch22", "mean_rank_rf"]
             if abs(km_rf_rank - c22_rf_rank) <= cd:
-                findings.append("On tree models (RF), Kymora sits within the critical difference threshold of catch22.")
+                findings.append(f"On tree models (RF), Kymora ({km_rf_rank:.2f}) and catch22 ({c22_rf_rank:.2f}) remain within the critical difference threshold (CD = {cd:.2f}).")
 
         conclusion_text = f"**Key Finding:** {' '.join(findings)}" if findings else ""
 
@@ -428,7 +413,7 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
             "",
             "## Critical Difference (CD) Analysis (Nemenyi Test, α = 0.05)",
             "",
-            f"For $k = {k_libs}$ extractors across $N = {n_ds}$ datasets, Critical Difference **$CD = {cd:.2f}$**.",
+            f"For $k = {k_libs}$ extractors across $N = {n_ds}$ matched datasets, Critical Difference **$CD = {cd:.2f}$**.",
             "",
             "```",
             f"CD = {cd:.2f} (ranks within {cd:.2f} are statistically indistinguishable at p < 0.05)",
