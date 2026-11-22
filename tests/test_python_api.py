@@ -28,6 +28,7 @@ def test_version_matches_installed_distribution_metadata():
 def test_public_api_surface_is_exactly_what_is_documented():
     assert set(kymora.__all__) == {
         "extract_features",
+        "extract_one",
         "extract_features_mc",
         "extract_features_ragged",
         "extract_features_df",

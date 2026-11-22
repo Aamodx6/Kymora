@@ -144,4 +144,14 @@ On the current test environment (Intel Core i7-13620H 10 cores / 16 threads @ 2.
 
 ---
 
-*Updated: 2026-10-04 (merged B3 ledger L1–L7/R1 from `benchmarks/LOSS_LEDGER.md` with B0 deep-dives; duplicate removed)*
+### 0.8.2 Evidence Round Update (2026-11-22)
+
+- **L1 / Tiny-Call Loss Retained Honestly:**
+  - Standard `extract_features` on 1×10 series incurs a p50 of 5.90 µs (first call 416.0 µs), losing to Numba serial compiled loop at 3.00 µs (1.97× loss).
+  - Profiling (`docs/internal/single_call_overhead.md`) showed that ~5.2 µs of caller overhead came from scratchpad heap allocations and GIL locks.
+  - Adding `kymora.extract_one(x)` with thread-local scratchpad caching and zero-GIL detachment reduced single-call latency to **3.90 µs** (p99 6.40 µs, max 10.9 µs), meeting the `<8 µs` target.
+  - At 1×10, Numba remains slightly faster (3.00 µs), and this loss is retained in this ledger.
+  - At 10×500 and above, Kymora wins decisively: 103.5 µs vs Numba 247.3 µs (2.4× speedup), 156.8 µs vs Numba 375.3 µs at 100×100 (2.4×), and 396.5 µs vs Numba 1,195.2 µs at 100×500 (3.0×).
+  - Artifacts: `benchmarks/results/SMALL_BATCH_REPORT.md` (`small_batch_results.json`), `benchmarks/results/THRESHOLD_SWEEP_REPORT.md` (`threshold_sweep_results.json`), and `docs/internal/single_call_overhead.md`.
+
+*Updated: 2026-11-22 (0.8.2 final evidence round)*

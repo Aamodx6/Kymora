@@ -7,6 +7,20 @@
 
 use realfft::num_complex::Complex;
 use realfft::RealFftPlanner;
+use std::cell::RefCell;
+
+thread_local! {
+    static THREAD_SCRATCH: RefCell<Scratch> = RefCell::new(Scratch::new(512));
+}
+
+/// Execute a closure with a thread-local reusable `Scratch` buffer.
+pub fn with_thread_scratch<R, F: FnOnce(&mut Scratch) -> R>(len: usize, f: F) -> R {
+    THREAD_SCRATCH.with(|cell| {
+        let mut scratch = cell.borrow_mut();
+        scratch.ensure_capacity(len);
+        f(&mut scratch)
+    })
+}
 
 #[repr(align(64))]
 pub struct Scratch {
@@ -47,24 +61,24 @@ impl Scratch {
     #[inline]
     pub fn ensure_capacity(&mut self, len: usize) {
         if self.centered.capacity() < len {
-            self.centered.reserve(len - self.centered.capacity());
+            self.centered.reserve(len - self.centered.len());
         }
         if self.sorted.capacity() < len {
-            self.sorted.reserve(len - self.sorted.capacity());
+            self.sorted.reserve(len - self.sorted.len());
         }
         if self.diffs.capacity() < len {
-            self.diffs.reserve(len - self.diffs.capacity());
+            self.diffs.reserve(len - self.diffs.len());
         }
         if self.fft_in.capacity() < len {
-            self.fft_in.reserve(len - self.fft_in.capacity());
+            self.fft_in.reserve(len - self.fft_in.len());
         }
         let nbins = len / 2 + 1;
         if self.power.capacity() < nbins {
-            self.power.reserve(nbins - self.power.capacity());
+            self.power.reserve(nbins - self.power.len());
         }
         self.sel_scratch.ensure_capacity(len);
         if self.view_buf.capacity() < len {
-            self.view_buf.reserve(len - self.view_buf.capacity());
+            self.view_buf.reserve(len - self.view_buf.len());
         }
     }
 }

@@ -39,20 +39,20 @@ pipeline ever sees.
 
 1,000 series × 500 steps, i7-13620H laptop, 10 cores (6P+4E) / 16 threads,
 Windows 11, AC online, High Performance power scheme (artifacts:
-`benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md` (`headline_same_session_ratios.json`) for 3-session interleaved headline protocol;
+`benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md` (`headline_same_session_ratios.json`) for 3-session interleaved headline protocol with inter-block cooldowns;
 `EQUAL_FEATURE_REPORT.md` + `2026-11-22_equal_feature/` for matched,
 2026-11-22; exploratory single-machine numbers):
 
-| library | features | total time | series/s | µs/series-feature |
-|---|---:|---:|---:|---:|
-| **kymora** | 33 | **2.33 ms** | **428,633** | **0.0707** |
-| `catch22` (pycatch22) | 22 | 196.82 ms | 5,081 | 8.95 |
-| `TSFEL` (all domains) | 156 | 2,745.41 ms | 364 | 17.60 |
-| `tsfresh` (EfficientFCParameters) | 777 | 24,500.85 ms | 41 | 31.53 |
+| library | features | total time | series/s | µs/series-feature | Raw Speedup | Per-Feature Speedup |
+|---|---:|---:|---:|---:|---:|---:|
+| **kymora (`core33`)** | **33** | **1.94 ms** | **514,245** | **0.0589** | **1.0× (ref)** | **1.0× (ref)** |
+| `catch22` (pycatch22) | 22 | 185.50 ms | 5,391 | 8.43 | **95.4×** | **143.1×** |
+| `TSFEL` (all domains) | 156 | 2,509.53 ms | 398 | 16.09 | **1,291×** | **273.0×** |
+| `tsfresh` (EfficientFCParameters) | 777 | 23,540.62 ms | 42 | 30.30 | **12,106×** | **514.1×** |
 
-Raw ratios (84.4×/1,177×/10,502×) compare 33 against up to 777 features — read
-the per-feature column (126.5×/248.9×/446.0×) next to them, and the matched table
-below for the like-for-like view. Per-session ratios across 3 same-session interleaved rounds: catch22 [54.0×, 99.6×, 91.8×], TSFEL [995.5×, 1,316.0×, 1,394.0×], tsfresh [5,633.4×, 12,268.2×, 11,604.5×]; 95% bootstrap CI on Kymora throughput is [367,067, 475,896] series/s ([2.10, 2.72] ms).
+Raw ratios (95.4×/1,291×/12,106×) compare 33 against up to 777 features — read
+the per-feature column (143.1×/273.0×/514.1×) next to them, and the matched table
+below for the like-for-like view. Per-session ratios across 3 same-session interleaved rounds: catch22 [91.8×, 100.5×, 87.9×], TSFEL [2,036.3×, 1,325.6×, 1,256.3×], tsfresh [11,952.0×, 12,014.0×, 12,630.8×]; 95% bootstrap CI on Kymora throughput is [495,050, 529,605] series/s ([1.89, 2.02] ms; isolated baseline 358,654 series/s / 2.79 ms).
 
 ### Equal-feature (like-for-like, 1,000 × 500, 16 threads)
 
@@ -73,23 +73,23 @@ overhead you can optimise away.
 
 | Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tsfresh` | 777 | 42 | **84.79%** | **82.39%** | **1.64** | **1.79** | 20,943.62 ms |
-| `TSFEL` | 156 | 42 | **81.00%** | **79.71%** | 2.33 | 2.26 | 942.67 ms |
-| **Kymora (`core33`)** | **33** | **42** | **79.96%** | **77.42%** | **2.71** | **2.64** | **1.26 ms** |
-| `catch22` | 22 | 42 | 79.83% | 75.75% | 2.79 | 2.98 | 159.40 ms |
+| `tsfresh` | 777 | 42 | **84.79%** | **82.39%** | **2.19** | **2.43** | 20,943.62 ms |
+| **Kymora (`full`)** | 543 | 42 | **82.79%** | **80.66%** | **2.83** | **3.17** | **2.17 ms** |
+| **Kymora (`extended`)** | 143 | 42 | **83.12%** | **80.39%** | **2.98** | **3.19** | **1.74 ms** |
+| `TSFEL` | 156 | 42 | 81.00% | 79.71% | 3.36 | 3.24 | 942.67 ms |
+| **Kymora (`core33`)** | **33** | **42** | **79.96%** | **77.42%** | **4.12** | **3.83** | **1.26 ms** |
+| `catch22` | 22 | 42 | 79.83% | 75.75% | 4.14 | 4.29 | 159.40 ms |
 
-On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **77.42% mean accuracy**, outperforming `catch22` (**75.75%**) with an average rank of **2.64 vs 2.98** (W/T/L 23/5/14, Holm-adjusted $p = 0.2016$), while extracting 117.2× to 17,217.0× faster than existing libraries across 42 matched datasets (Random Forest accuracy: **79.96%**, rank 2.71 vs catch22 2.79, Holm-adjusted $p = 0.5554$, Critical Difference $CD = 0.72$). Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
+On linear classifiers (Ridge with fold-isolated `StandardScaler`), Kymora achieves **77.42% mean accuracy**, outperforming `catch22` (**75.75%**) with an average rank of **3.83 vs 4.29** (W/T/L 23/5/14, Holm-adjusted $p = 0.2016$), while extracting 117.2× to 17,217.0× faster than existing libraries across 42 matched datasets (Random Forest accuracy: **79.96%**, rank 4.12 vs catch22 4.14, Holm-adjusted $p = 0.5554$, Critical Difference $CD = 1.05$). Kymora's `extended` (143 feats) and `full` (543 feats) profiles achieve 83.12% and 82.79% RF accuracy, closing the predictive gap to tsfresh. Full report: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`.
 
 ## Where kymora is slower
 
 No honest benchmark omits the losses (full analysis in
-`benchmarks/results/L1_ROOT_CAUSE.md`):
+`benchmarks/results/L1_ROOT_CAUSE.md`, `benchmarks/results/SMALL_BATCH_REPORT.md`, and `docs/internal/single_call_overhead.md`):
 
-- Tiny calls (a handful of series): fixed per-call overhead (~70 µs
-  dispatch floor) dominates; numba/numpy win that case (1.4×–1.8× measured).
-- The numba baseline wins small-batch throughput cases (10×500 and below).
-- Oversubscribing threads past the physical core count adds nothing on
-  hybrid laptops (see [Performance](performance.md)).
+- **Tiny single-shot calls:** Against a hand-written Numba baseline on the same 33 features, Kymora loses at 1 × 10 (p50 5.90 µs vs Numba 3.00 µs) and 1 × 100 with standard `extract_features` (p50 7.50 µs vs Numba 14.40 µs steady-state; first-call 35.2 µs), where Numba JIT compiles inline loops. With dedicated `kymora.extract_one(x)`, single-call latency drops to **3.90 µs** (p99 6.40 µs; target <8 µs achieved by bypassing GIL release and caching thread-local scratchpads). We keep the Numba 1×10 loss in the ledger honestly.
+- **Small-batch threshold:** Inline sequential caller execution below 8,000 points (`SERIAL_WORK_SIZE_THRESHOLD = 8000`, configurable via `KYMORA_SERIAL_THRESHOLD`) matches 1T and 16T execution and avoids Rayon thread wake jitter.
+- **Batch inflection:** At 10 × 500, Kymora wins 2.4× (103.5 µs vs 247.3 µs); at 100 × 100, Kymora wins 2.4× (156.8 µs vs 375.3 µs); at 100 × 500, Kymora wins 3.0× (396.5 µs vs 1,195.2 µs); at ≥1,000 series, Kymora beats the Numba baseline 6.0×–11.8× on identical features (equal-feature table above).
 
 ## Reproducing every figure
 

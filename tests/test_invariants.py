@@ -175,25 +175,95 @@ def _worker_fn(shape):
 
 
 def test_multiprocessing_fork_safety():
-    """Verify that using thread pools in parent does not deadlock forked child processes."""
+    """Verify that parent process using Rayon thread pool can fork child that safely calls extract_features."""
     import multiprocessing
 
     if not hasattr(os, "fork") or "fork" not in multiprocessing.get_all_start_methods():
         pytest.skip("Fork start method only available on Unix/macOS")
 
-    # 1. Use thread pool in parent process first
+    # 1. Parent process uses thread pool in parallel mode first
     rng = np.random.default_rng(42)
     X_parent = np.ascontiguousarray(rng.standard_normal((100, 500)), dtype=np.float64)
-    _ = kymora.extract_features(X_parent, n_jobs=4)
+    out_parent1 = kymora.extract_features(X_parent, n_jobs=4)
+    assert out_parent1.shape == (100, 33)
 
     # 2. Fork child process via fork context
     ctx = multiprocessing.get_context("fork")
     with ctx.Pool(processes=2) as pool:
-        res = pool.apply_async(_worker_fn, ((50, 100),))
+        res = pool.apply_async(_worker_fn, ((100, 500),))
         mode, out_shape = res.get(timeout=10.0)
 
     # Forked child must fall back to sequential and produce correct shape
     assert mode == "sequential"
-    assert out_shape == (50, 33)
+    assert out_shape == (100, 33)
+
+    # 3. Parent continues to use the pool safely after fork
+    out_parent2 = kymora.extract_features(X_parent, n_jobs=4)
+    np.testing.assert_array_equal(out_parent1, out_parent2)
+
+
+def test_multiprocessing_spawn_safety():
+    """Verify that parent process using Rayon thread pool can spawn child that safely calls extract_features."""
+    import multiprocessing
+
+    # 1. Parent process uses thread pool in parallel mode first
+    rng = np.random.default_rng(42)
+    X_parent = np.ascontiguousarray(rng.standard_normal((100, 500)), dtype=np.float64)
+    out_parent1 = kymora.extract_features(X_parent, n_jobs=4)
+    assert out_parent1.shape == (100, 33)
+
+    # 2. Spawn child process via spawn context
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Pool(processes=2) as pool:
+        res = pool.apply_async(_worker_fn, ((100, 500),))
+        mode, out_shape = res.get(timeout=15.0)
+
+    assert out_shape == (100, 33)
+
+    # 3. Parent continues to use the pool safely after child terminates
+    out_parent2 = kymora.extract_features(X_parent, n_jobs=4)
+    np.testing.assert_array_equal(out_parent1, out_parent2)
+
+
+def test_extract_one_contract():
+    """Verify kymora.extract_one produces bit-identical results to extract_features."""
+    rng = np.random.default_rng(123)
+    x = rng.standard_normal(100)
+
+    # 1D float64
+    out_one = kymora.extract_one(x)
+    out_batch = kymora.extract_features(x[None, :])[0]
+    assert out_one.shape == (33,)
+    np.testing.assert_array_equal(out_one, out_batch)
+
+    # 1D float32
+    x_f32 = x.astype(np.float32)
+    out_one_f32 = kymora.extract_one(x_f32)
+    assert out_one_f32.shape == (33,)
+
+    # Profiles
+    for prof in ["minimal", "core33", "extended"]:
+        o1 = kymora.extract_one(x, profile=prof)
+        ob = kymora.extract_features(x[None, :], profile=prof)[0]
+        np.testing.assert_array_equal(o1, ob)
+
+
+def test_serial_threshold_env_override():
+    """Verify KYMORA_SERIAL_THRESHOLD environment override dynamically changes dispatch."""
+    old_env = os.environ.get("KYMORA_SERIAL_THRESHOLD")
+    try:
+        # Force high threshold (50,000 points): shape 100x100 (10,000 pts) should become sequential
+        os.environ["KYMORA_SERIAL_THRESHOLD"] = "50000"
+        assert kymora._core._exec_mode(100, 100) == "sequential"
+
+        # Force low threshold (100 points): shape 100x100 should become parallel
+        os.environ["KYMORA_SERIAL_THRESHOLD"] = "100"
+        assert kymora._core._exec_mode(100, 100) == "parallel"
+    finally:
+        if old_env is not None:
+            os.environ["KYMORA_SERIAL_THRESHOLD"] = old_env
+        else:
+            os.environ.pop("KYMORA_SERIAL_THRESHOLD", None)
+
 
 

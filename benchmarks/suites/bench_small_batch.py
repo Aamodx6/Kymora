@@ -124,6 +124,14 @@ def main():
         t_km_16t = time_callable(km.extract_features, X, n_jobs=16, runs=args.runs)
         m_km_16t = compute_metrics(t_km_16t, first_call_ms=first_km_16t)
 
+        # Single-call fast path (extract_one) for single series
+        m_km_one = None
+        if n == 1 and hasattr(km, "extract_one"):
+            x_1d = X[0]
+            first_km_one = time_first_call(km.extract_one, x_1d)
+            t_km_one = time_callable(km.extract_one, x_1d, runs=args.runs)
+            m_km_one = compute_metrics(t_km_one, first_call_ms=first_km_one)
+
         # Numba baseline: both serial and parallel (prange), pick faster
         first_nb_s = time_first_call(nb_adapter.extract, X, feature_set="fast", threads=1)
         t_nb_s = time_callable(nb_adapter.extract, X, feature_set="fast", threads=1, runs=args.runs)
@@ -159,6 +167,7 @@ def main():
             "exec_mode": mode,
             "kymora_1t": m_km_1t,
             "kymora_16t": m_km_16t,
+            "kymora_extract_one": m_km_one,
             "numba": m_nb,
             "numba_serial": m_nb_s,
             "numba_parallel": m_nb_p,

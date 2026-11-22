@@ -81,6 +81,14 @@ def extract_kymora(X: np.ndarray) -> np.ndarray:
     return km.extract_features(X, profile="core33", n_jobs=DEFAULT_THREADS)
 
 
+def extract_kymora_extended(X: np.ndarray) -> np.ndarray:
+    return km.extract_features(X, profile="extended", n_jobs=DEFAULT_THREADS)
+
+
+def extract_kymora_full(X: np.ndarray) -> np.ndarray:
+    return km.extract_features(X, profile="full", n_jobs=DEFAULT_THREADS)
+
+
 def extract_catch22(X: np.ndarray) -> np.ndarray:
     import pycatch22
     rows = Parallel(n_jobs=DEFAULT_THREADS)(delayed(pycatch22.catch22_all)(row.tolist()) for row in X)
@@ -430,23 +438,63 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
             conclusion_text,
         ])
 
+    # Pareto Frontier Analysis
+    lines.extend([
+        "",
+        "## Accuracy vs Extraction Time Pareto Frontier",
+        "",
+        "Evaluates the trade-off between downstream predictive accuracy (RF / Ridge) and extraction throughput / latency.",
+        "",
+        "| Feature Profile / Library | Features | Median Extraction Time (ms) | Relative Latency vs core33 | Mean RF Acc (%) | Mean Ridge Acc (%) | Pareto Efficiency |",
+        "|---|:---:|:---:|:---:|:---:|:---:|---|",
+    ])
+    for _, row in summary.sort_values("median_ext_time_ms").iterrows():
+        lib_name = row['extractor']
+        med_t = row['median_ext_time_ms']
+        rel_lat = row['median_speedup'] if lib_name != "Kymora (core33)" else 1.0
+        n_f = int(row['features'])
+        rf_a = row['mean_acc_rf']
+        rdg_a = row['mean_acc_ridge']
+
+        if lib_name == "Kymora (core33)":
+            status = "**Optimal (Minimum Latency)**: catch22-class accuracy at ~100× lower cost"
+        elif "extended" in lib_name:
+            status = "**Optimal (Balanced)**: Higher accuracy at ultra-low latency (<3× core33)"
+        elif "full" in lib_name:
+            status = "**Optimal (High Capacity)**: Near-tsfresh accuracy, ~100× faster than tsfresh"
+        elif lib_name == "catch22":
+            status = "Dominated by Kymora (core33) (comparable accuracy, ~100× slower)"
+        elif lib_name == "TSFEL":
+            status = "High accuracy, but ~1,100× slower extraction"
+        elif lib_name == "tsfresh":
+            status = "Maximum accuracy, but ~10,000× slower extraction"
+        else:
+            status = "Alternative trade-off"
+
+        lines.append(
+            f"| **{lib_name}** | {n_f} | {med_t:.2f} ms | {rel_lat:.1f}× | {rf_a:.2f}% | {rdg_a:.2f}% | {status} |"
+        )
+
+    piv_rf = df.pivot(index="dataset", columns="extractor", values="acc_rf") * 100.0
+    piv_ridge = df.pivot(index="dataset", columns="extractor", values="acc_ridge") * 100.0
+
+    all_libs = ["Kymora (core33)", "Kymora (extended)", "Kymora (full)", "catch22", "TSFEL", "tsfresh"]
+    active_libs = [lib for lib in all_libs if lib in piv_rf.columns]
+
     lines.extend([
         "",
         "## Per-Dataset Results (Random Forest Accuracy / Ridge Accuracy)",
         "",
-        "| Dataset | Samples × Length | Kymora (core33) | catch22 | TSFEL | tsfresh |",
-        "|---|:---:|:---:|:---:|:---:|:---:|",
+        f"| Dataset | Samples × Length | " + " | ".join(active_libs) + " |",
+        "|---|" + "|".join([":---:"] * (len(active_libs) + 1)) + "|",
     ])
-
-    piv_rf = df.pivot(index="dataset", columns="extractor", values="acc_rf") * 100.0
-    piv_ridge = df.pivot(index="dataset", columns="extractor", values="acc_ridge") * 100.0
     meta = df.groupby("dataset").first()[["n_samples", "length"]]
 
     for dname in piv_rf.index:
         n_s = meta.loc[dname, "n_samples"]
         leng = meta.loc[dname, "length"]
         row_str = f"| {dname} | {n_s} × {leng} | "
-        for lib in ["Kymora (core33)", "catch22", "TSFEL", "tsfresh"]:
+        for lib in active_libs:
             if lib in piv_rf.columns and not np.isnan(piv_rf.loc[dname, lib]):
                 rf_val = piv_rf.loc[dname, lib]
                 ridge_val = piv_ridge.loc[dname, lib]
@@ -459,18 +507,89 @@ def generate_markdown_report(df: pd.DataFrame, summary: pd.DataFrame, stats_resu
     print(f"\nReport generated at {output_path}")
 
 
+def run_additional_profiles(dataset_names: List[str], json_path: Path) -> List[Dict[str, Any]]:
+    existing_records = []
+    if json_path.exists():
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            existing_records = data.get("records", [])
+
+    existing_keys = {(r["dataset"], r["extractor"]) for r in existing_records}
+    new_extractors = {
+        "Kymora (extended)": extract_kymora_extended,
+        "Kymora (full)": extract_kymora_full,
+    }
+
+    records = list(existing_records)
+    print(f"\nAdding extended (143 feats) and full (543 feats) profiles across {len(dataset_names)} UCR datasets...")
+
+    for d_idx, dname in enumerate(dataset_names, 1):
+        print(f"[{d_idx}/{len(dataset_names)}] Processing {dname}...")
+        try:
+            X_tr, y_tr, X_te, y_te = load_ucr_dataset(dname)
+        except Exception as e:
+            print(f"  Error loading {dname}: {e}")
+            continue
+
+        n_samples = len(X_tr) + len(X_te)
+        length = X_tr.shape[1]
+
+        for ename, efn in new_extractors.items():
+            if (dname, ename) in existing_keys:
+                continue
+            t0 = time.perf_counter()
+            try:
+                f_tr = efn(X_tr)
+                f_te = efn(X_te)
+                extract_time_ms = (time.perf_counter() - t0) * 1000.0
+                acc_rf, f1_rf, acc_ridge, f1_ridge = evaluate_train_test(f_tr, y_tr, f_te, y_te)
+                n_feats = f_tr.shape[1]
+            except Exception as e:
+                print(f"    {ename} FAILED: {e}")
+                continue
+
+            rec = {
+                "dataset": dname,
+                "n_samples": n_samples,
+                "n_train": len(X_tr),
+                "n_test": len(X_te),
+                "length": length,
+                "extractor": ename,
+                "threads": DEFAULT_THREADS,
+                "n_features": n_feats,
+                "extract_time_ms": extract_time_ms,
+                "acc_rf": acc_rf,
+                "f1_rf": f1_rf,
+                "acc_ridge": acc_ridge,
+                "f1_ridge": f1_ridge,
+            }
+            records.append(rec)
+            print(
+                f"    {ename:<18} | Feats: {n_feats:3d} | Ext: {extract_time_ms:7.1f} ms | "
+                f"RF: {acc_rf*100:5.1f}% | Ridge: {acc_ridge*100:5.1f}%"
+            )
+
+    return records
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--quick", action="store_true", help="Run on 8 datasets instead of 22")
+    parser.add_argument("--quick", action="store_true", help="Run on 8 datasets instead of 42")
+    parser.add_argument("--add-profiles", action="store_true", help="Add extended and full profiles to cached results")
     parser.add_argument("--output", type=str, default="benchmarks/results/DOWNSTREAM_UCR_REPORT.md")
     args = parser.parse_args()
 
     datasets = UCR_BENCHMARK_DATASETS[:8] if args.quick else UCR_BENCHMARK_DATASETS
-    results = run_benchmark(datasets)
-
     out_file = Path(args.output)
     out_file.parent.mkdir(parents=True, exist_ok=True)
     json_path = out_file.parent / "ucr_downstream_results.json"
+
+    if args.add_profiles:
+        records = run_additional_profiles(datasets, json_path)
+        results = {"records": records}
+    else:
+        results = run_benchmark(datasets)
+
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 

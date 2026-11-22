@@ -145,6 +145,14 @@ fn out_slice_mut_f32<'a>(arr: &'a Bound<'_, PyArray2<f32>>) -> Result<&'a mut [f
     unsafe { arr.as_slice_mut() }.map_err(|_| KymoraError::NotContiguous { index: None })
 }
 
+/// 1D variant of [`out_slice_mut`].
+#[inline]
+#[allow(clippy::mut_from_ref)]
+fn out_slice_mut_1d<'a>(arr: &'a Bound<'_, PyArray1<f64>>) -> Result<&'a mut [f64], KymoraError> {
+    // SAFETY: upheld per the contract above.
+    unsafe { arr.as_slice_mut() }.map_err(|_| KymoraError::NotContiguous { index: None })
+}
+
 fn run_in_pool<F, R>(n_jobs: Option<usize>, f: F) -> R
 where
     F: FnOnce() -> R + Send,
@@ -1391,5 +1399,117 @@ pub fn _exec_mode(n_series: usize, length: usize) -> &'static str {
         "parallel"
     } else {
         "sequential"
+    }
+}
+
+/// Extract features for a single 1D time series with minimal validation overhead.
+///
+/// Designed for ultra-low latency single-series inference and streaming feeds.
+/// Operates directly on the caller thread without thread pool or task scheduling overhead.
+#[pyfunction]
+#[pyo3(signature = (x, profile = None))]
+pub fn extract_one<'py>(
+    py: Python<'py>,
+    x: &Bound<'py, PyAny>,
+    profile: Option<&str>,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    let prof = profile.unwrap_or("core33");
+
+    // 1. 1D float64 numpy array (fastest path: zero-copy)
+    if let Ok(arr) = x.extract::<PyReadonlyArray1<f64>>() {
+        let view = arr.as_array();
+        let slice = view
+            .as_slice()
+            .ok_or(KymoraError::NotContiguous { index: None })?;
+        return extract_one_slice_f64(py, slice, prof);
+    }
+
+    // 2. 1D float32 numpy array
+    if let Ok(arr) = x.extract::<PyReadonlyArray1<f32>>() {
+        let view = arr.as_array();
+        let slice = view
+            .as_slice()
+            .ok_or(KymoraError::NotContiguous { index: None })?;
+        return extract_one_slice_f32(py, slice, prof);
+    }
+
+    // 3. 2D array with 1 row: (1, L)
+    if let Ok(arr) = x.extract::<PyReadonlyArray2<f64>>() {
+        let view = arr.as_array();
+        if view.nrows() == 1 {
+            let slice = view
+                .as_slice()
+                .ok_or(KymoraError::NotContiguous { index: None })?;
+            return extract_one_slice_f64(py, slice, prof);
+        }
+    }
+
+    // 4. Sequence/list fallback
+    let vec: Vec<f64> = x.extract()?;
+    extract_one_slice_f64(py, &vec, prof)
+}
+
+fn extract_one_slice_f64<'py>(
+    py: Python<'py>,
+    slice: &[f64],
+    profile: &str,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    if slice.is_empty() {
+        return Err(KymoraError::EmptyInput.into());
+    }
+
+    match profile {
+        "core33" => {
+            let out_arr = PyArray1::<f64>::zeros(py, [33], false);
+            let out_slice = out_slice_mut_1d(&out_arr)?;
+            crate::scratch::with_thread_scratch(slice.len(), |scratch| {
+                pipeline::run_core33(slice, scratch, out_slice);
+            });
+            Ok(out_arr)
+        }
+        "minimal" => {
+            let out_arr = PyArray1::<f64>::zeros(py, [10], false);
+            let out_slice = out_slice_mut_1d(&out_arr)?;
+            let plan = FeaturePlan::build(Some("minimal"), None::<&[&str]>)?;
+            crate::scratch::with_thread_scratch(slice.len(), |scratch| {
+                pipeline::run_plan(slice, &plan, scratch, out_slice);
+            });
+            Ok(out_arr)
+        }
+        _ => {
+            let plan = FeaturePlan::build(Some(profile), None::<&[&str]>)?;
+            let n_cols = plan.n_features();
+            let out_arr = PyArray1::<f64>::zeros(py, [n_cols], false);
+            let out_slice = out_slice_mut_1d(&out_arr)?;
+            crate::scratch::with_thread_scratch(slice.len(), |scratch| {
+                pipeline::run_plan(slice, &plan, scratch, out_slice);
+            });
+            Ok(out_arr)
+        }
+    }
+}
+
+fn extract_one_slice_f32<'py>(
+    py: Python<'py>,
+    slice: &[f32],
+    profile: &str,
+) -> PyResult<Bound<'py, PyArray1<f64>>> {
+    if slice.is_empty() {
+        return Err(KymoraError::EmptyInput.into());
+    }
+
+    match profile {
+        "core33" => {
+            let out_arr = PyArray1::<f64>::zeros(py, [33], false);
+            let out_slice = out_slice_mut_1d(&out_arr)?;
+            crate::scratch::with_thread_scratch(slice.len(), |scratch| {
+                pipeline::run_core33_f32(slice, scratch, out_slice);
+            });
+            Ok(out_arr)
+        }
+        _ => {
+            let f64_vec: Vec<f64> = slice.iter().map(|&v| v as f64).collect();
+            extract_one_slice_f64(py, &f64_vec, profile)
+        }
     }
 }

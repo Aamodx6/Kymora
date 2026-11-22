@@ -25,13 +25,25 @@ pub fn record_pool_use() {
     let _ = POOL_PID.compare_exchange(0, std::process::id(), Ordering::SeqCst, Ordering::SeqCst);
 }
 
+/// Dynamic work size threshold: reads `KYMORA_SERIAL_THRESHOLD` environment variable if set,
+/// otherwise dynamically scales with hardware/pool thread count (500 points per thread, min 8,000).
+pub fn get_serial_work_threshold() -> usize {
+    if let Ok(val) = std::env::var("KYMORA_SERIAL_THRESHOLD") {
+        if let Ok(thresh) = val.trim().parse::<usize>() {
+            return thresh;
+        }
+    }
+    let pool_threads = rayon::current_num_threads();
+    (pool_threads * 500).max(8_000)
+}
+
 /// Determine whether a workload should execute in parallel or sequentially.
 pub fn should_run_parallel(n_rows: usize, total_points: usize) -> bool {
     if is_forked_child() {
         return false;
     }
     let pool_threads = rayon::current_num_threads();
-    pool_threads > 1 && n_rows >= pool_threads && total_points >= SERIAL_WORK_SIZE_THRESHOLD
+    pool_threads > 1 && n_rows >= pool_threads && total_points >= get_serial_work_threshold()
 }
 
 /// Extract features into pre-allocated flat slice in row-major order (f64) using FeaturePlan.
@@ -45,10 +57,11 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
     let total_points: usize = rows.iter().map(|r| r.len()).sum();
 
     if !should_run_parallel(n_rows, total_points) {
-        let mut scratch = Scratch::new(max_len);
-        for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
-            pipeline::run_plan(row, plan, &mut scratch, row_out);
-        }
+        crate::scratch::with_thread_scratch(max_len, |scratch| {
+            for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
+                pipeline::run_plan(row, plan, scratch, row_out);
+            }
+        });
     } else {
         record_pool_use();
         out_slice
@@ -86,23 +99,22 @@ pub fn extract_into_slice_f32(
     let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
     let total_points: usize = rows.iter().map(|r| r.len()).sum();
     if !should_run_parallel(n_rows, total_points) {
-        let mut scratch = Scratch::new(max_len);
-        match gather {
+        crate::scratch::with_thread_scratch(max_len, |scratch| match gather {
             None => {
                 for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
-                    pipeline::run_core33_f32(row, &mut scratch, row_out);
+                    pipeline::run_core33_f32(row, scratch, row_out);
                 }
             }
             Some(idxs) => {
                 for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
                     let mut full = [0.0f64; 33];
-                    pipeline::run_core33_f32(row, &mut scratch, &mut full);
+                    pipeline::run_core33_f32(row, scratch, &mut full);
                     for (dst, &src) in row_out.iter_mut().zip(idxs.iter()) {
                         *dst = full[src];
                     }
                 }
             }
-        }
+        });
     } else {
         record_pool_use();
         out_slice
@@ -142,13 +154,14 @@ pub fn extract_windows_plan_into_slice(
 
     let total_points = n_windows * window;
     if !should_run_parallel(n_windows, total_points) {
-        let mut scratch = Scratch::new(window);
-        for i in 0..n_windows {
-            let start = i * stride;
-            let window_slice = &x[start..start + window];
-            let row_out = &mut out_slice[i * n_cols..(i + 1) * n_cols];
-            pipeline::run_plan(window_slice, plan, &mut scratch, row_out);
-        }
+        crate::scratch::with_thread_scratch(window, |scratch| {
+            for i in 0..n_windows {
+                let start = i * stride;
+                let window_slice = &x[start..start + window];
+                let row_out = &mut out_slice[i * n_cols..(i + 1) * n_cols];
+                pipeline::run_plan(window_slice, plan, scratch, row_out);
+            }
+        });
     } else {
         record_pool_use();
         out_slice

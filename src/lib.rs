@@ -21,6 +21,7 @@ use pyo3::prelude::*;
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ffi::extract_features, m)?)?;
+    m.add_function(wrap_pyfunction!(ffi::extract_one, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::extract_features_mc, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::extract_features_ragged, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::sliding_features, m)?)?;

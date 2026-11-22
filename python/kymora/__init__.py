@@ -49,22 +49,26 @@ from ._core import (
     extract_features,
     extract_features_mc,
     extract_features_ragged,
+    extract_one,
     feature_names,
     feature_names_mc,
     list_profiles,
     sliding_features,
 )
+
 from .chunked import extract_features_chunked
 from .select import KymoraSelector, select_features
 from .tune import tune
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
+    import numpy.typing as npt
     import pandas as pd
     import polars as pl
 
 __all__ = [
     "extract_features",
+    "extract_one",
     "extract_features_mc",
     "extract_features_ragged",
     "extract_features_df",

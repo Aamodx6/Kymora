@@ -3,21 +3,30 @@
 Protocol-compliant interleaved same-session evaluation on repository HEAD under Windows High Performance power scheme and AC online.
 - **Workload:** 1,000 series × 500 steps, float64 C-contiguous gaussian, 16 threads across all methods.
 - **Methodology:** 3 interleaved sessions; each session times Kymora, catch22, TSFEL, and tsfresh in the same environment.
+- **Cooldown:** 10s cooldown between competitor extraction blocks to prevent thermal throttling.
 
 ## Summary Ratios
 
-- **Kymora Headline Throughput:** **428,633 series/s** (median **2.33 ms**, 95% CI [367,067, 475,896] series/s)
-- **catch22 Speedup:** **84×** raw (**127×** per-feature; catch22 median 196.82 ms)
-- **TSFEL Speedup:** **1,177×** raw (**249×** per-feature; TSFEL median 2745.41 ms)
-- **tsfresh Speedup:** **10,502×** raw (**446×** per-feature; tsfresh median 24500.85 ms)
+- **Kymora Interleaved Throughput:** **514,245 series/s** (median **1.94 ms**, 95% CI [495,050, 529,605] series/s)
+- **Kymora Isolated Baseline:** **358,654 series/s** (median **2.79 ms**, divergence 43.4%)
+- **catch22 Speedup:** **95×** raw (**143×** per-feature; catch22 median 185.50 ms)
+- **TSFEL Speedup:** **1,291×** raw (**273×** per-feature; TSFEL median 2509.53 ms)
+- **tsfresh Speedup:** **12,106×** raw (**514×** per-feature; tsfresh median 23540.62 ms)
+
+## Concurrency Definitions ("16T")
+
+- **Kymora (16T):** 16 native Rayon work-stealing threads within the single Python process (zero defensive copies, zero IPC serialization).
+- **catch22 (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.
+- **TSFEL (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.
+- **tsfresh (16T):** `multiprocessing.Pool(16)` executing across 16 worker processes.
 
 ## Per-Session Breakdown
 
 | Session | Kymora (ms) | catch22 (ms) | TSFEL (ms) | tsfresh (ms) | Ratio catch22 | Ratio TSFEL | Ratio tsfresh |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Session 1 | 4.12 ms | 222.30 ms | 4099.49 ms | 23199.34 ms | **54.0×** | **995.5×** | **5633.4×** |
-| Session 2 | 2.00 ms | 198.87 ms | 2628.13 ms | 24500.85 ms | **99.6×** | **1316.0×** | **12268.2×** |
-| Session 3 | 2.13 ms | 195.42 ms | 2965.92 ms | 24690.93 ms | **91.8×** | **1394.0×** | **11604.5×** |
+| Session 1 | 1.97 ms | 180.81 ms | 4010.62 ms | 23540.62 ms | **91.8×** | **2036.3×** | **11952.0×** |
+| Session 2 | 1.91 ms | 191.78 ms | 2530.23 ms | 22932.28 ms | **100.5×** | **1325.6×** | **12014.0×** |
+| Session 3 | 1.97 ms | 173.16 ms | 2474.78 ms | 24881.42 ms | **87.9×** | **1256.3×** | **12630.8×** |
 
 ## Protocol Notes
 
