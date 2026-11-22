@@ -107,6 +107,48 @@ jobs:
           name: wheels-sdist
           path: dist
 
+  sdist-test:
+    name: sdist verify and install (ubuntu-latest, py3.12)
+    needs: [build-sdist]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: wheels-sdist
+          path: dist
+      - name: Verify sdist archive contents
+        shell: bash
+        run: |
+          tar -ztvf dist/kymora-*.tar.gz > sdist_contents.txt
+          cat sdist_contents.txt
+          for req in Cargo.toml Cargo.lock pyproject.toml LICENSE README.md src/lib.rs; do
+            if ! grep -q "$req" sdist_contents.txt; then
+              echo "FAIL: Required file $req missing in sdist"
+              exit 1
+            fi
+          done
+          echo "All required files present in sdist."
+      - name: Install from sdist
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5"
+          python -m pip install "polars>=0.20" || true
+          python -m pip install dist/kymora-*.tar.gz
+      - name: Verify clean install from sdist
+        shell: bash
+        run: |
+          cd "$(mktemp -d)"
+          python "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
+
   wheel-test:
     # Lite matrix (always): one supported Python per desktop OS, from the
     # matching built artifact. Installs from the wheel only — no Rust
@@ -142,21 +184,14 @@ jobs:
           # Dependencies come from PyPI; kymora itself must come from the
           # freshly built wheel, so install it with --no-index --no-deps.
           python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.24"
+          python -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
+          python -m pip install "polars>=0.20" || echo "polars not available on this platform"
           python -m pip install --no-index --no-deps --find-links dist kymora
-          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
-      - name: Smoke import outside the source tree
+      - name: Verify clean install (6 checks) outside source tree
         shell: bash
         run: |
           cd "$(mktemp -d)"
-          python -c "
-          import numpy as np, kymora
-          X = np.random.default_rng(0).standard_normal((64, 128))
-          f = kymora.extract_features(X)
-          assert f.shape == (64, len(kymora.feature_names())), f.shape
-          assert np.isfinite(f).all()
-          print('ok', kymora.__version__, f.shape)
-          "
+          python "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
       - name: Full test suite against the wheel
         shell: bash
         run: |
@@ -192,21 +227,14 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.24"
+          python -m pip install "numpy>=1.24" "scipy>=1.10" "scikit-learn>=1.2" "pandas>=1.5" "pytest>=7.0" "hypothesis>=6.100"
+          python -m pip install "polars>=0.20" || echo "polars not available on this platform"
           python -m pip install --no-index --no-deps --find-links dist kymora
-          python -m pip install "pytest>=7.0" "scipy>=1.10" "hypothesis>=6.100" "pandas>=1.5"
-      - name: Smoke import outside the source tree
+      - name: Verify clean install (6 checks) outside source tree
         shell: bash
         run: |
           cd "$(mktemp -d)"
-          python -c "
-          import numpy as np, kymora
-          X = np.random.default_rng(0).standard_normal((64, 128))
-          f = kymora.extract_features(X)
-          assert f.shape == (64, len(kymora.feature_names())), f.shape
-          assert np.isfinite(f).all()
-          print('ok', kymora.__version__, f.shape)
-          "
+          python "${GITHUB_WORKSPACE}/tools/verify_clean_install.py"
       - name: Full test suite against the wheel
         shell: bash
         run: |

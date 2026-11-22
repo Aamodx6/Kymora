@@ -92,6 +92,12 @@ def main() -> int:
     ap.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     ap.add_argument("--update-baseline", action="store_true")
     ap.add_argument("--ci", action="store_true")
+    ap.add_argument(
+        "--export-benchmark-json",
+        type=Path,
+        default=None,
+        help="Path to write customSmallerIsBetter JSON for github-action-benchmark",
+    )
     args = ap.parse_args()
 
     if args.runs < MIN_RUNS:
@@ -103,6 +109,22 @@ def main() -> int:
     if result["cv"] > 0.05:
         print(f"CV {result['cv']:.3f} > 0.05, re-running once")
         result = probe(args.runs, args.n_jobs)
+
+    if args.export_benchmark_json:
+        bench_data = [
+            {
+                "name": f"core33_{SHAPE[0]}x{SHAPE[1]}",
+                "unit": "ms",
+                "value": round(result["median_ms"], 4),
+                "range": round((result["q3_ms"] - result["q1_ms"]) / 2.0, 4),
+                "extra": f"runs={result['runs']}, cv={result['cv']:.3f}",
+            }
+        ]
+        args.export_benchmark_json.parent.mkdir(parents=True, exist_ok=True)
+        args.export_benchmark_json.write_text(
+            json.dumps(bench_data, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"exported benchmark JSON to {args.export_benchmark_json}")
 
     baseline: dict = {}
     if args.baseline.exists():

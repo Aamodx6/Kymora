@@ -346,6 +346,10 @@ def test_hypothesis_fast_matches_batch(w, interval, data):
         for name, s, b in zip(FAST_NAMES, got, want):
             if np.isnan(b):
                 assert np.isnan(s), name
+            elif w == 2 and name in TWO_POINT_EXACT:
+                exact = TWO_POINT_EXACT[name]
+                assert abs(s - exact) < TWO_POINT_BOUND, f"{name}: {s} vs {exact}"
+                assert abs(b - exact) < TWO_POINT_BOUND, f"batch {name}: {b}"
             else:
                 assert abs(s - b) <= ATOL + RTOL * abs(b), f"{name}: {s} vs {b}"
 

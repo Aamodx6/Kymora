@@ -289,6 +289,72 @@ jobs:
     with:
       full: ${{ github.event_name == 'push' }}
 
+  benchmark:
+    name: benchmark regression gate (ubuntu-latest, py3.12)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - uses: ./.github/actions/setup-venv
+      - run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install -e ".[test]"
+          maturin develop --release
+      - name: Run perf gate probe
+        run: python tools/perf_gate.py --ci --export-benchmark-json "${{ runner.temp }}/benchmark_results.json"
+      - name: Clean working tree before benchmark tracking
+        run: |
+          git checkout -- .
+          git clean -fd
+      - name: Store and track benchmark result
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
+        with:
+          name: Kymora Core33 1kx500 Benchmark
+          tool: 'customSmallerIsBetter'
+          output-file-path: ${{ runner.temp }}/benchmark_results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: ${{ github.ref == 'refs/heads/main' }}
+          alert-threshold: '107%'
+          comment-on-alert: true
+          fail-on-alert: ${{ github.ref == 'refs/heads/main' }}
+          gh-pages-branch: 'gh-pages'
+          benchmark-data-dir-path: 'dev/bench'
+          summary-always: true
+
+  test-freethreaded:
+    name: test freethreaded (py3.13t, ubuntu-latest)
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.13t"
+          cache: pip
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - name: Smoke test on free-threaded Python 3.13t (experimental)
+        continue-on-error: true
+        run: |
+          python -m pip install --upgrade pip maturin
+          python -m pip install "numpy>=2.1.0" pytest
+          maturin develop --release
+          python -c "import kymora; print('kymora on 3.13t:', kymora.__version__)"
+          python -m pytest tests/test_python_api.py -q
+
   ci-gate:
     # The ONLY required status check (see CONTRIBUTING.md). Aggregates every
     # job (including the wheels reusable-workflow call): fails when changes
@@ -296,7 +362,7 @@ jobs:
     # allows path-gated skips. Logic lives in tools/ci_gate.py (unit-tested
     # below and via --self-test).
     name: ci gate (all green)
-    needs: [changes, rust, test, test-macos-intel, parity, validation-report, typecheck, docs, hygiene, audit-pr, wheels]
+    needs: [changes, rust, test, test-macos-intel, parity, validation-report, typecheck, docs, hygiene, audit-pr, wheels, benchmark]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
