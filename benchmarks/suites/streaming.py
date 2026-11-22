@@ -144,7 +144,15 @@ def run_capacity(cap: int, threads: int) -> None:
     push_p50 = float(np.percentile(push_us, 50))
     push_p90 = float(np.percentile(push_us, 90))
     push_p99 = float(np.percentile(push_us, 99))
+    push_p999 = float(np.percentile(push_us, 99.9))
     push_max = float(np.max(push_us))
+
+    # Separate re-anchoring events: drift-guard rescan events taking > 2x p99
+    reanchor_threshold = max(push_p99 * 2.0, 1.5)
+    reanchor_events = push_us[push_us >= reanchor_threshold]
+    reanchor_p50 = float(np.percentile(reanchor_events, 50)) if len(reanchor_events) > 0 else push_max
+    reanchor_p99 = float(np.percentile(reanchor_events, 99)) if len(reanchor_events) > 0 else push_max
+    reanchor_max = float(np.max(reanchor_events)) if len(reanchor_events) > 0 else push_max
 
     _append(_record(f"{case_prefix}_push", "ok", [push_p50 / 1e6], None, {
         **base_extra, "measurement": "push_latency",
@@ -152,9 +160,17 @@ def run_capacity(cap: int, threads: int) -> None:
         "us_p50": push_p50,
         "us_p90": push_p90,
         "us_p99": push_p99,
+        "us_p999": push_p999,
         "us_max": push_max,
+        "reanchor_count": int(len(reanchor_events)),
+        "reanchor_p50_us": reanchor_p50,
+        "reanchor_p99_us": reanchor_p99,
+        "reanchor_max_us": reanchor_max,
     }))
-    print(f"    push: p50={push_p50:.3f} µs, p99={push_p99:.3f} µs, max={push_max:.3f} µs ({n_indiv} pushes)")
+    print(
+        f"    push: p50={push_p50:.3f} µs, p99={push_p99:.3f} µs, p99.9={push_p999:.3f} µs, "
+        f"max={push_max:.3f} µs | re-anchoring ({len(reanchor_events)} events): p50={reanchor_p50:.2f} µs, max={reanchor_max:.2f} µs"
+    )
 
     # ── 2. compute() latency: fast / all ──
     compute_stats_map = {}
@@ -333,7 +349,10 @@ def main() -> int:
         elif "_push" in cid:
             by_cap[cap]["push_p50"] = extra.get("us_p50")
             by_cap[cap]["push_p99"] = extra.get("us_p99")
+            by_cap[cap]["push_p999"] = extra.get("us_p999")
             by_cap[cap]["push_max"] = extra.get("us_max")
+            by_cap[cap]["reanchor_p50"] = extra.get("reanchor_p50_us")
+            by_cap[cap]["reanchor_max"] = extra.get("reanchor_max_us")
         elif "_compute_fast" in cid:
             by_cap[cap]["fast_p50"] = extra.get("us_p50")
             by_cap[cap]["fast_p99"] = extra.get("us_p99")
@@ -357,23 +376,25 @@ def main() -> int:
         "> [!NOTE]",
         "> **Complexity Contract:**",
         "> - Ingestion: **amortized $O(1)$ per-sample ingestion, worst-case $O(W)$ upon drift re-anchoring**.",
-        "> - Periodic re-anchoring passes over the window buffer (showing in max push latency).",
+        "> - Periodic re-anchoring passes over the window buffer (timed separately and showing in p99.9/max).",
         "> - Fast subset query: **$O(1)$ flat query latency** across all window capacities.",
         "",
         "## Measured Latency vs Window Capacity",
         "",
-        "| Window Capacity (W) | Gate Rel Diff | push p50 (p99 / max) (µs) | compute(fast) p50 (p99 / max) (µs) | compute(all) p50 (µs) | Naive Recompute p50 (µs) | Speedup (fast vs naive) |",
-        "|:---:|:---:|:---:|:---:|:---:|:---:|:---:|",
+        "| Window Capacity (W) | Gate Rel Diff | push p50 (p99 / p99.9) (µs) | Re-anchor Event p50 (max) (µs) | compute(fast) p50 (p99 / max) (µs) | compute(all) p50 (µs) | Naive Recompute p50 (µs) | Speedup (fast vs naive) |",
+        "|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|",
     ]
     for c in sorted(c for c in by_cap if isinstance(c, int)):
         d = by_cap[c]
         g = f"{d.get('gate_rel', 0.0):.2e}"
-        p_str = f"{d.get('push_p50', 0):.2f} ({d.get('push_p99', 0):.2f} / {d.get('push_max', 0):.1f}) µs"
+        p999_val = d.get('push_p999', d.get('push_p99', 0))
+        p_str = f"{d.get('push_p50', 0):.2f} ({d.get('push_p99', 0):.2f} / {p999_val:.2f}) µs"
+        re_str = f"{d.get('reanchor_p50', 0):.1f} ({d.get('reanchor_max', 0):.1f}) µs"
         f_str = f"{d.get('fast_p50', 0):.2f} ({d.get('fast_p99', 0):.2f} / {d.get('fast_max', 0):.1f}) µs"
         a_str = f"{d.get('all_p50', 0):.2f} µs"
         n_str = f"{d.get('naive_p50', 0):.2f} µs"
         sp = f"{d.get('speedup', 0):.1f}×" if d.get('speedup') else "—"
-        report_lines.append(f"| {c:,} | {g} | {p_str} | {f_str} | {a_str} | {n_str} | {sp} |")
+        report_lines.append(f"| {c:,} | {g} | {p_str} | {re_str} | {f_str} | {a_str} | {n_str} | {sp} |")
 
     OUT_REPORT.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
     (RESULTS_DIR / "STREAMING_REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")

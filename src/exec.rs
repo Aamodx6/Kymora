@@ -6,10 +6,33 @@ use crate::pipeline;
 use crate::plan::FeaturePlan;
 use crate::scratch::Scratch;
 use rayon::prelude::*;
+use std::sync::atomic::{AtomicU32, Ordering};
 
 pub const SERIAL_THRESHOLD: usize = 8;
 pub const MIN_ROWS_PER_TASK: usize = 16;
-pub const SERIAL_WORK_SIZE_THRESHOLD: usize = 50_000;
+pub const SERIAL_WORK_SIZE_THRESHOLD: usize = 8_000;
+
+static POOL_PID: AtomicU32 = AtomicU32::new(0);
+
+/// Check if the current process is a forked child of a process that already initialized/used a thread pool.
+pub fn is_forked_child() -> bool {
+    let pid = POOL_PID.load(Ordering::Relaxed);
+    pid != 0 && std::process::id() != pid
+}
+
+/// Record thread pool usage in the current process.
+pub fn record_pool_use() {
+    let _ = POOL_PID.compare_exchange(0, std::process::id(), Ordering::SeqCst, Ordering::SeqCst);
+}
+
+/// Determine whether a workload should execute in parallel or sequentially.
+pub fn should_run_parallel(n_rows: usize, total_points: usize) -> bool {
+    if is_forked_child() {
+        return false;
+    }
+    let pool_threads = rayon::current_num_threads();
+    pool_threads > 1 && n_rows >= pool_threads && total_points >= SERIAL_WORK_SIZE_THRESHOLD
+}
 
 /// Extract features into pre-allocated flat slice in row-major order (f64) using FeaturePlan.
 pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &mut [f64]) {
@@ -21,13 +44,13 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
     let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
     let total_points: usize = rows.iter().map(|r| r.len()).sum();
 
-    let pool_threads = rayon::current_num_threads();
-    if n_rows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
+    if !should_run_parallel(n_rows, total_points) {
         let mut scratch = Scratch::new(max_len);
         for (row, row_out) in rows.iter().zip(out_slice.chunks_exact_mut(n_cols)) {
             pipeline::run_plan(row, plan, &mut scratch, row_out);
         }
     } else {
+        record_pool_use();
         out_slice
             .par_chunks_exact_mut(n_cols)
             .with_min_len(MIN_ROWS_PER_TASK)
@@ -62,9 +85,7 @@ pub fn extract_into_slice_f32(
 
     let max_len = rows.iter().map(|r| r.len()).max().unwrap_or(0);
     let total_points: usize = rows.iter().map(|r| r.len()).sum();
-    let pool_threads = rayon::current_num_threads();
-
-    if n_rows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
+    if !should_run_parallel(n_rows, total_points) {
         let mut scratch = Scratch::new(max_len);
         match gather {
             None => {
@@ -83,6 +104,7 @@ pub fn extract_into_slice_f32(
             }
         }
     } else {
+        record_pool_use();
         out_slice
             .par_chunks_exact_mut(n_cols)
             .with_min_len(MIN_ROWS_PER_TASK)
@@ -119,8 +141,7 @@ pub fn extract_windows_plan_into_slice(
     }
 
     let total_points = n_windows * window;
-    let pool_threads = rayon::current_num_threads();
-    if n_windows < pool_threads || total_points < SERIAL_WORK_SIZE_THRESHOLD {
+    if !should_run_parallel(n_windows, total_points) {
         let mut scratch = Scratch::new(window);
         for i in 0..n_windows {
             let start = i * stride;
@@ -129,6 +150,7 @@ pub fn extract_windows_plan_into_slice(
             pipeline::run_plan(window_slice, plan, &mut scratch, row_out);
         }
     } else {
+        record_pool_use();
         out_slice
             .par_chunks_exact_mut(n_cols)
             .enumerate()

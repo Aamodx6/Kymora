@@ -150,8 +150,13 @@ where
     F: FnOnce() -> R + Send,
     R: Send,
 {
+    if crate::exec::is_forked_child() {
+        return f();
+    }
     match n_jobs {
-        Some(n) if n > 0 => {
+        Some(1) => f(),
+        Some(n) if n > 1 => {
+            crate::exec::record_pool_use();
             // Cached per-thread-count pools: building a rayon ThreadPool per
             // call cost ~200 us (measured 2026-10-06, 32x500 batch), which
             // dominated small calls outright (arch F2). The global pool
@@ -1376,5 +1381,15 @@ impl PyMultiStreamExtractor {
     #[staticmethod]
     pub fn fast_feature_names() -> Vec<&'static str> {
         features::multistream::MULTISTREAM_FAST_NAMES.to_vec()
+    }
+}
+
+/// Execution mode check: returns "sequential" or "parallel" for a given workload.
+#[pyfunction]
+pub fn _exec_mode(n_series: usize, length: usize) -> &'static str {
+    if crate::exec::should_run_parallel(n_series, n_series * length) {
+        "parallel"
+    } else {
+        "sequential"
     }
 }

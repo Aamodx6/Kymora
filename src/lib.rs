@@ -28,6 +28,7 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ffi::feature_names_mc, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::list_profiles, m)?)?;
     m.add_function(wrap_pyfunction!(ffi::describe_feature, m)?)?;
+    m.add_function(wrap_pyfunction!(ffi::_exec_mode, m)?)?;
     m.add_class::<ffi::PyStreamingExtractor>()?;
     m.add_class::<ffi::PyMultiStreamExtractor>()?;
     Ok(())

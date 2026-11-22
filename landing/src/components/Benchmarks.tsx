@@ -188,7 +188,7 @@ export const Benchmarks: React.FC = () => {
                       style={{ width: `${percent}%` }}
                     >
                       {item.isKymora && (
-                        <span className="truncate">Kymora (575k series/s, exploratory)</span>
+                        <span className="truncate">Kymora (429k series/s, exploratory)</span>
                       )}
                     </div>
                   </div>

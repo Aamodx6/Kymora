@@ -41,19 +41,19 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
 };
 
-/* Measured 2026-11-22, pooled medians under High Performance protocol;
-   artifacts benchmarks/results/HEADLINE_THROUGHPUT_REPORT.md and 2026-11-22_reproduce_readme/.
-   Kymora version label matches HEAD / 0.8.1 release. */
+/* Measured 2026-11-22, pooled medians under High Performance same-session protocol;
+   artifacts benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md and headline_same_session_ratios.json.
+   Kymora version label matches HEAD / 0.8.2 release. */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
     name: "Kymora",
-    version: "0.8.1",
+    version: "0.8.2",
     language: "Rust + PyO3",
     featuresCount: 33,
-    totalTimeMs: 1.74,
-    seriesPerSec: 575391,
-    msPerFeature: 0.0527,
+    totalTimeMs: 2.33,
+    seriesPerSec: 428633,
+    msPerFeature: 0.0707,
     multiplierVsKymora: 1.0,
     isKymora: true,
     notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
@@ -64,12 +64,12 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     version: "1.0.2",
     language: "C wrapper",
     featuresCount: 22,
-    totalTimeMs: 432.6,
-    seriesPerSec: 2312,
-    msPerFeature: 19.66,
-    multiplierVsKymora: 249.0,
+    totalTimeMs: 196.82,
+    seriesPerSec: 5081,
+    msPerFeature: 8.95,
+    multiplierVsKymora: 84.4,
     isKymora: false,
-    notes: "Per-series Python iteration loop overhead",
+    notes: "Per-series Python iteration loop overhead (16 threads)",
   },
   {
     id: "tsfel",
@@ -77,12 +77,12 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     version: "0.3.0",
     language: "Pure Python / NumPy",
     featuresCount: 156,
-    totalTimeMs: 2041.5,
-    seriesPerSec: 490,
-    msPerFeature: 13.09,
-    multiplierVsKymora: 1175.0,
+    totalTimeMs: 2745.41,
+    seriesPerSec: 364,
+    msPerFeature: 17.60,
+    multiplierVsKymora: 1177.0,
     isKymora: false,
-    notes: "Sequential python feature routines with heavy array copies",
+    notes: "Multi-core extraction with array copies (16 threads)",
   },
   {
     id: "tsfresh",
@@ -90,11 +90,11 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     version: "0.21.2",
     language: "Python + Multiprocessing",
     featuresCount: 777,
-    totalTimeMs: 14966.8,
-    seriesPerSec: 67,
-    msPerFeature: 19.26,
-    multiplierVsKymora: 8612.0,
+    totalTimeMs: 24500.85,
+    seriesPerSec: 41,
+    msPerFeature: 31.53,
+    multiplierVsKymora: 10502.0,
     isKymora: false,
-    notes: "Requires long DataFrame melt; IPC and pickle serialization cost",
+    notes: "Requires long DataFrame melt; IPC and pickle serialization cost (16 threads)",
   },
 ];

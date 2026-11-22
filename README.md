@@ -15,7 +15,7 @@
 > pip install kymora
 > ```
 
-> **Batch time-series feature extraction: 33 features at 1.74 ms median per 1,000 series x 500 steps (575,391 series/s; 249× catch22, 1,175× TSFEL, 8,612× tsfresh), with no copy of the input and 3.21 MiB worker scratch.**
+> **Batch time-series feature extraction: 33 features at 2.33 ms median per 1,000 series x 500 steps (428,633 series/s; 84.4× catch22, 1,177× TSFEL, 10,502× tsfresh), with no copy of the input and bounded O(T × L) worker scratch (~2.26–3.22 MiB at N ≤ 10k).**
 
 **Kymora** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
@@ -27,8 +27,8 @@
 
 Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Kymora eliminates that trade-off.
 
-* **Throughput (measured):** Pooled median **575,391 series/second** (1.74 ms; best run **799,680 series/second**) on an i7-13620H laptop, 10 cores / 16 threads under High Performance scheme — about **249×** `catch22` (373× per-feature), **1,175×** `TSFEL` (248× per-feature), and **8,612×** `tsfresh` (366× per-feature) raw time on the same machine (see Benchmarks and `CLAIMS.md`).
-* **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No copy of the input, no DataFrame melting, and predictable scratch memory (3.21 MiB for 10,000 series).
+* **Throughput (measured):** Pooled median **428,633 series/second** (2.33 ms; 95% bootstrap CI [367,067, 475,896] series/s, [2.10, 2.72] ms) across 3 same-session interleaved rounds on an i7-13620H laptop, 10 cores / 16 threads under High Performance scheme — about **84.4×** `catch22` (126.5× per-feature), **1,177×** `TSFEL` (248.9× per-feature), and **10,502×** `tsfresh` (446.0× per-feature) raw time on the same machine (see Benchmarks and `CLAIMS.md`).
+* **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No copy of the input, no DataFrame melting, and predictable worker scratch memory ($O(T \times L)$, ~2.26–3.22 MiB at $N \le 10,000$; does not scale with $N$).
 * **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
 * **Full Multi-Core Scaling (GIL-Free):** Releases Python's Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
 * **Real-Time Streaming Ready:** Maintain rolling windows with incremental state updates using the built-in `StreamingExtractor` — amortized $O(1)$ per-sample ingestion (worst-case $O(W)$ upon drift re-anchoring) plus a fast 12-feature tier with no sorting and no FFT.
@@ -175,7 +175,7 @@ for tick in incoming_data_feed:
 Choose the performance-to-breadth profile that fits your pipeline:
 
 * **`minimal` (10 features):** Centered moments, extrema, energy, zero crossings. Zero sorting and zero FFT overhead (~0.58 ms per 1,000 series; **1,716,444 series/s**, re-measured 2026-11-22).
-* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~1.90 ms median per 1,000 series on i7-13620H / 16 threads, re-measured 2026-11-22; a same-day repeat measured 2.53 ms — run-to-run spread, both artifacts committed; 0.0575 µs per series-feature).
+* **`core33` (33 features - Default):** Frozen authoritative v1.0 set spanning all temporal, quantile, and spectral domains (~1.90 ms median per 1,000 series on i7-13620H / 16 threads, re-measured 2026-11-22; pooled multi-session median 2.33 ms / 428,633 series/s across same-session interleaved rounds; 0.0575 µs per series-feature).
 * **`extended` (143 features):** Adds distribution statistics, crossings, nonlinear stats, PACF (Levinson-Durbin), full linear regression trend, and spectral aggregations.
 * **`full` (543 features):** Complete high-coverage bank including all 400 FFT coefficient parameters extracted directly from the precomputed spectrum with zero redundant transforms.
 
@@ -236,48 +236,42 @@ Efficiency drops past ~4–8 threads on this hybrid P+E-core laptop (oversubscri
 Each library times its **full default catalog** end to end, including the input reshaping it requires (tsfresh's long-format DataFrame, catch22/TSFEL's per-series loop):
 | Library | Features | Runtime (1k × 500) | Series / sec | Speedup (raw time) | Per-feature | Speedup (per-feature) |
 | :--- | :---: | :---: | :---: | :--- | :---: | :--- |
-| **Kymora (`core33`)** | **33** | **1.74 ms** | **575,391** | **Baseline (1.0×)** | **0.0527 µs** | **Baseline (1.0×)** |
-| `catch22` | 22 | 432.6 ms | 2,312 | **249× slower** | 19.66 µs | **373×** |
-| `TSFEL` | 156 | 2,041.5 ms | 490 | **1,175× slower** | 13.09 µs | **248×** |
-| `tsfresh` | 777 | 14,966.8 ms | 67 | **8,612× slower** | 19.26 µs | **366×** |
+| **Kymora (`core33`)** | **33** | **2.33 ms** | **428,633** | **Baseline (1.0×)** | **0.0707 µs** | **Baseline (1.0×)** |
+| `catch22` | 22 | 196.82 ms | 5,081 | **84.4× slower** | 8.95 µs | **126.5×** |
+| `TSFEL` | 156 | 2,745.41 ms | 364 | **1,177× slower** | 17.60 µs | **248.9×** |
+| `tsfresh` | 777 | 24,500.85 ms | 41 | **10,502× slower** | 31.53 µs | **446.0×** |
 
-Pooled medians: kymora over 360 runs across 3 interleaved sessions (median 1.74 ms, 95% CI [1.72, 1.76] ms; best 1.25 ms); competitors 8/10/7 runs; artifacts `benchmarks/results/HEADLINE_THROUGHPUT_REPORT.md` and `benchmarks/results/2026-11-22_reproduce_readme/`. Previous exploratory Silent session (1.84 ms / 542,682 series/s; best 1.57 ms / 636,943 series/s) recorded in `CLAIMS.md`. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is". Different feature counts mean different work — read both columns, and prefer the equal-feature table above for a like-for-like claim.
+Pooled medians: kymora over 3 interleaved sessions (median 2.33 ms, 95% CI [2.10, 2.72] ms; 428,633 series/s [367,067, 475,896]); competitors run multi-threaded (16 threads) in the same session rounds; artifacts `benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md` and `benchmarks/results/headline_same_session_ratios.json`. Per-session ratios: catch22 [54.0×, 99.6×, 91.8×], TSFEL [995.5×, 1,316.0×, 1,394.0×], tsfresh [5,633.4×, 12,268.2×, 11,604.5×]. Raw time answers "how long for the batch"; per-feature answers "how expensive each number is". Different feature counts mean different work — read both columns, and prefer the equal-feature table above for a like-for-like claim.
 
 #### Predictive utility on real-world datasets (UCR Archive)
 
-Speed is meaningless if features fail to predict well downstream. We evaluated Kymora `core33` against `catch22`, `TSFEL`, and `tsfresh` on canonical UCR univariate classification datasets (5-fold stratified CV, standard `RandomForestClassifier` and `RidgeClassifier`):
+Speed is meaningless if features fail to predict well downstream. We evaluated Kymora `core33` against `catch22`, `TSFEL`, and `tsfresh` on canonical UCR univariate classification datasets (matched set $n = 42$, canonical fixed train/test splits, 16 threads across all four libraries, standard `RandomForestClassifier` and `RidgeClassifier` with fold-isolated imputation and scaling):
 
 | Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `tsfresh` | 777 | 5 | **95.97%** | **95.27%** | 1.60 | 1.60 | 7,592.33 ms |
-| `TSFEL` | 156 | 8 | **95.55%** | **94.75%** | 1.75 | 1.50 | 3,037.06 ms |
-| **Kymora (`core33`)** | **33** | **8** | **92.34%** | **93.58%** | 2.88 | **2.25** | **0.81 ms** (ref) |
-| `catch22` | 22 | 8 | 93.73% | 90.47% | 2.38 | 3.25 | 60.68 ms |
+| `tsfresh` | 777 | 42 | **84.79%** | **82.39%** | **1.64** | **1.79** | 20,943.62 ms |
+| `TSFEL` | 156 | 42 | **81.00%** | **79.71%** | 2.33 | 2.26 | 942.67 ms |
+| **Kymora (`core33`)** | **33** | **42** | **79.96%** | **77.42%** | **2.71** | **2.64** | **1.26 ms** (ref) |
+| `catch22` | 22 | 42 | 79.83% | 75.75% | 2.79 | 2.98 | 159.40 ms |
 
-* On linear models (Ridge with fold-isolated `StandardScaler`), Kymora reaches **93.58% accuracy**, beating `catch22` (**90.47%**, Wilcoxon $p = 0.0156$) with an average rank of **2.25 vs 3.25**.
-* On tree models (Random Forest), Kymora achieves **92.34% accuracy** (within ~1.4% of catch22 and ~3.2% of tsfresh/TSFEL; on the 5 datasets evaluated by tsfresh, Kymora achieves 91.80% RF and 93.42% Ridge), while extracting features with a median per-dataset speedup of **80× vs catch22**, **5,344× vs TSFEL**, and **7,788× vs tsfresh**.
+* On linear models (Ridge with train-isolated `StandardScaler`), Kymora reaches **77.42% mean accuracy**, edging out `catch22` (**75.75%**) with an average rank of **2.64 vs 2.98** (head-to-head W/T/L 23/5/14, Holm-adjusted $p = 0.2016$).
+* On tree models (Random Forest), Kymora achieves **79.96% mean accuracy** (rank 2.71 vs catch22 2.79, head-to-head W/T/L 23/3/16, Holm-adjusted $p = 0.5554$, Critical Difference $CD = 0.72$), within ~1.0% of TSFEL (81.00%) and ~4.8% of tsfresh (84.79%), while extracting features with a median per-dataset speedup of **117.2× vs catch22**, **768.2× vs TSFEL**, and **17,217.0× vs tsfresh**.
 * Full per-dataset accuracy breakdown: [`benchmarks/results/DOWNSTREAM_UCR_REPORT.md`](benchmarks/results/DOWNSTREAM_UCR_REPORT.md).
 
 #### Where Kymora is slower
 
-Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_cause.json`, `benchmarks/results/L1_ROOT_CAUSE.md`, `B3_REPORT.md`):
+Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_cause.json`, `benchmarks/results/L1_ROOT_CAUSE.md`, `benchmarks/results/SMALL_BATCH_REPORT.md`):
 
-- **Tiny single-shot calls.** Against a hand-written numba baseline on the same 33 features (HEAD rerun 2026-10-05), kymora loses only at 1 × 100 — gaussian 1.78× [1.76,1.80], heavy_tailed 1.75× [1.74,1.76], random_walk 1.43× [1.42,1.45] (95% CIs exclude 1.0; classified call-overhead + quantile-stage). At 10 × 500 the rows are parity/noise (0.85×–1.08×) and the 1 × 100 sinusoid row is a kymora win with a clamped CI — all four are exploratory (noisy host, CI95 rel-widths 13–78%; the rerun recorded no env/CPU load or per-row CV), so no claim is made off them. Absolute medians at 1 × 100 are ~0.029 ms vs numba 0.016–0.020 ms.
-- **Thread wake at small n** (pre pool-cache, 0.8.0 prep). At 100 × 100, 16 threads made kymora ~27% *slower* than 1 thread (pool wake/join swamps ~12 µs/series of compute). Scaling efficiency at small batches is poor regardless of core count.
-- **Single-series tail latency at very short lengths** (pre pool-cache, 0.8.0 prep). At length 10, kymora wins the median (345.8 µs vs numpy's 1,317.6 µs) but loses the tail (p99 15.4 ms, max 29.1 ms) to wake jitter.
-- **Not a robust loss** (pre pool-cache, 0.8.0 prep): the 100 × 500 rows against the numba baseline are parity within noise (0.94×–0.99×, CI crosses 1.0).
+- **Tiny single-shot calls.** Against a hand-written numba baseline on the same 33 features, kymora loses only at 1 × 10 (p50 22.3 µs vs numba 1.3 µs) and 1 × 100 (p50 23.4 µs vs numba 11.8 µs, 1.98× loss), where Numba's JIT compiles inline loops without C-FFI wrapper overhead. At 10 × 500, Kymora wins 6.3× (117.8 µs vs 742.0 µs); at 100 × 100, Kymora wins 10.6× (143.2 µs vs 1518.0 µs); at 100 × 500, Kymora wins 21.2× (358.1 µs vs 7599.0 µs).
+- **Small-batch threshold:** Inline sequential caller execution below 8,000 points (`SERIAL_WORK_SIZE_THRESHOLD = 8000`) matches 1T and 16T execution and avoids Rayon thread wake jitter.
+- **Not a robust loss:** at ≥1,000 series, Kymora beats the numba baseline 6.0×–11.8× on identical features (equal-feature table above).
 
-Guidance: batch many series into one call, or use `StreamingExtractor` for one-series-at-a-time ingest. At ≥1,000 series the picture inverts — kymora beats the numba baseline 6.0×–11.8× on identical features (equal-feature table above).
+#### Memory footprint (re-measured on HEAD sweep $N = 1\text{k}..100\text{k}$, fresh-process peak RSS):
+* **Worker scratch is $O(T \times L)$ and does not scale with $N$:** Peak worker scratch across 16 Rayon worker threads is bounded at ~2.26–3.22 MiB at $N \le 10,000$ and reaches a 14.28 MiB RSS high-water mark at $N=100,000$.
+* **Zero defensive copies:** At $100,000 \times 500$, total process peak RSS is 406.77 MiB (input array 381.47 MiB + preallocated output matrix 25.18 MiB = 406.65 MiB, representing 99.97% of memory).
+* **tsfresh comparison:** tsfresh extraction overhead reaches **+293.2 MiB** at 1,000 × 500 and **+410.3 MiB** at 10,000 × 500 (totals 300.9 / 452.2 MiB) due to long-format DataFrame conversions.
 
-#### Memory footprint (re-measured 2026-11-22, fresh-process peak RSS):
-* **Matched Shape (10,000 × 500):**
-  * **Kymora (`core33`):** peak extraction overhead **+5.73 MiB** over bare interpreter (input 41.73 MiB, preallocated output matrix 2.52 MiB, worker scratch **3.21 MiB**; no copy of the input).
-  * **tsfresh (EfficientFCParameters, 777 features):** extraction peak **+410.3 MiB** (long-format DataFrame plus intermediate frames; total 452.2 MiB) — **71.6× larger** extraction overhead than Kymora.
-* **Large Scale (100,000 × 500):**
-  * **Kymora (`core33`):** +418.0 MiB peak over a bare interpreter — input 385.2 MiB, extraction overhead **+32.8 MiB** (25.2 MiB preallocated output matrix + ~7.6 MiB worker scratch; no copy of the input).
-  * **tsfresh:** multi-hour run — **PENDING**, tracked in `CLAIMS.md`.
-
-Artifact: `benchmarks/results/2026-11-22_remeasure/memory.jsonl` and measured scratch deltas.
+Artifact: `benchmarks/results/MEMORY_SWEEP_REPORT.md` (`memory_sweep_results.json`).
 
 
 ---

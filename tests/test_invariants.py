@@ -149,3 +149,51 @@ def test_serial_parallel_bit_identical(shape):
     # Verify bit-for-bit identity across every feature
     np.testing.assert_array_equal(out_serial, out_parallel)
 
+
+def test_exec_mode_contract():
+    """Verify _exec_mode correctly maps shapes to sequential vs parallel execution."""
+    # Small workloads (< 8,000 points) are sequential
+    assert kymora._core._exec_mode(1, 10) == "sequential"
+    assert kymora._core._exec_mode(1, 100) == "sequential"
+    assert kymora._core._exec_mode(10, 500) == "sequential"
+    # Workloads >= 8,000 points (with n_series >= 16) run parallel
+    assert kymora._core._exec_mode(100, 100) == "parallel"
+    assert kymora._core._exec_mode(100, 500) == "parallel"
+    assert kymora._core._exec_mode(1000, 500) == "parallel"
+
+
+def _worker_fn(shape):
+    import kymora
+    import numpy as np
+
+    # Verify fork fallback in child process
+    mode = kymora._core._exec_mode(shape[0], shape[1])
+    X = np.ones(shape, dtype=np.float64)
+    # Must complete cleanly without deadlocking Rayon pool
+    out = kymora.extract_features(X, n_jobs=4)
+    return mode, out.shape
+
+
+def test_multiprocessing_fork_safety():
+    """Verify that using thread pools in parent does not deadlock forked child processes."""
+    import multiprocessing
+
+    if not hasattr(os, "fork") or "fork" not in multiprocessing.get_all_start_methods():
+        pytest.skip("Fork start method only available on Unix/macOS")
+
+    # 1. Use thread pool in parent process first
+    rng = np.random.default_rng(42)
+    X_parent = np.ascontiguousarray(rng.standard_normal((100, 500)), dtype=np.float64)
+    _ = kymora.extract_features(X_parent, n_jobs=4)
+
+    # 2. Fork child process via fork context
+    ctx = multiprocessing.get_context("fork")
+    with ctx.Pool(processes=2) as pool:
+        res = pool.apply_async(_worker_fn, ((50, 100),))
+        mode, out_shape = res.get(timeout=10.0)
+
+    # Forked child must fall back to sequential and produce correct shape
+    assert mode == "sequential"
+    assert out_shape == (50, 33)
+
+

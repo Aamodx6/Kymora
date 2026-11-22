@@ -32,6 +32,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence
 
+from . import _core
+
+try:
+    from ._core import _exec_mode
+except ImportError:  # pragma: no cover
+    def _exec_mode(n_series: int, length: int) -> str:
+        return "parallel" if (n_series >= 16 and (n_series * length) >= 8000) else "sequential"
+
+    setattr(_core, "_exec_mode", _exec_mode)
+
 from ._core import (
     MultiStreamExtractor,
     StreamingExtractor,
