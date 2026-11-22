@@ -19,8 +19,8 @@ unchanged).
 ### Changed
 - Published benchmarks re-measured on the 0.8.0 release wheel: matched-feature
   ratios 6.0x-2,812.4x across four shapes (1,000 x 500 headline: numba 6.0x,
-  numpy 165.1x, TSFEL 1,089.1x, tsfresh 2,812.4x); raw time 1.84 ms /
-  542,682 series/s; profiles, thread scaling, and memory refreshed. README,
+  numpy 165.1x, TSFEL 1,089.1x, tsfresh 2,812.4x); pooled headline 1.94 ms /
+  514,245 series/s; profiles, thread scaling, and memory refreshed. README,
   docs/benchmarks.md, CLAIMS.md, the landing page, and the launch drafts now
   cite the 2026-11-22 artifacts; the 0.7.0 rows remain in CLAIMS as
   superseded.

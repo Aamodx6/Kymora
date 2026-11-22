@@ -1,23 +1,25 @@
-# Kymora (formerly Tsxtract)
+# Kymora
 ### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kymora.svg)](https://pypi.org/project/kymora/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/kymora)](https://pypi.org/project/kymora/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/Aamodx6/Kymora/actions/workflows/ci.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/ci.yml)
 [![Release](https://github.com/Aamodx6/Kymora/actions/workflows/release.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/release.yml)
 [![Nightly](https://github.com/Aamodx6/Kymora/actions/workflows/nightly.yml/badge.svg)](https://github.com/Aamodx6/Kymora/actions/workflows/nightly.yml)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://aamodx6.github.io/Kymora/)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.placeholder-blue)](https://zenodo.org)
 
 > [!NOTE]
-> **Kymora** was previously developed and released under the name **Tsxtract**. On PyPI, it is published and installed as [`kymora`](https://pypi.org/project/kymora/):
+> On PyPI, the package is published and installed as [`kymora`](https://pypi.org/project/kymora/):
 > ```bash
 > pip install kymora
 > ```
 
 > **Batch time-series feature extraction: 33 features at 1.94 ms median per 1,000 series x 500 steps (514,245 series/s; 95.4× catch22, 1,291× TSFEL, 12,106× tsfresh), with no copy of the input and bounded O(T × L) worker scratch (~2.29–3.33 MiB at N ≤ 10k).**
 
-**Kymora** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a zero-copy Rust engine with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
+**Kymora** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a native Rust engine (no copy of the input) with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
 [PyPI](https://pypi.org/project/kymora/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Real-Time Telemetry](#streaming-real-time-telemetry) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://aamodx6.github.io/Kymora/) • [Website](https://landing-drab-six-14.vercel.app)
 
@@ -28,7 +30,7 @@
 Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`) force a painful trade-off: **wait minutes to hours for feature extraction, or risk Out-Of-Memory (OOM) crashes from defensive copies.** Kymora eliminates that trade-off.
 
 * **Throughput (measured):** Pooled median **514,245 series/second** (1.94 ms; 95% bootstrap CI [495,050, 529,605] series/s, [1.89, 2.02] ms; isolated baseline 358,654 series/s / 2.79 ms) across 3 same-session interleaved rounds with inter-block cooldowns on an i7-13620H laptop, 10 cores / 16 threads under High Performance scheme — about **95.4×** `catch22` (143.1× per-feature), **1,291×** `TSFEL` (273.0× per-feature), and **12,106×** `tsfresh` (514.1× per-feature) raw time on the same machine (see Benchmarks and `CLAIMS.md`).
-* **Zero-Copy Ingestion:** Directly borrows contiguous NumPy buffer pointers via PyO3. No copy of the input, no DataFrame melting, and predictable worker scratch memory ($O(T \times L)$, ~2.29–3.33 MiB at $N \le 10,000$; does not scale with $N$).
+* **Direct Buffer Ingestion (No Input Copy):** Directly borrows contiguous NumPy buffer pointers via PyO3. No copy of the input, no DataFrame melting, and predictable worker scratch memory ($O(T \times L)$, ~2.29–3.33 MiB at $N \le 10,000$; does not scale with $N$).
 * **33 Curated, High-Signal Features:** Avoids the curse of dimensionality. Features are mathematically non-redundant ($|r| < 0.70$ for 83.3% of pairs), spanning distribution moments, quantiles, crossings, spectral power, and permutation entropy.
 * **Full Multi-Core Scaling (GIL-Free):** Releases Python's Global Interpreter Lock (GIL) across the entire computation region, saturating all CPU cores with Rayon's work-stealing scheduler.
 * **Real-Time Streaming Ready:** Maintain rolling windows with incremental state updates using the built-in `StreamingExtractor` — amortized $O(1)$ per-sample ingestion (worst-case $O(W)$ upon drift re-anchoring) plus a fast 12-feature tier with no sorting and no FFT.
@@ -37,7 +39,7 @@ Traditional Python time-series feature libraries (`tsfresh`, `TSFEL`, `catch22`)
 
 ### Key Features
 
-* **Zero-Copy Hybrid Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native-Rust multi-core loops without copying a single byte.
+* **Direct Native Architecture:** PyO3 bindings pass 2D NumPy pointer references directly into native-Rust multi-core loops without copying a single byte.
 * **Batch-First Parallelism:** Processes $N$ series in parallel across hardware threads instead of running serial Python loops.
 * **Dual API Support:** Extract raw 2D NumPy matrices for maximum speed, or labeled Pandas/Polars DataFrames for immediate exploratory analysis.
 * **Scikit-Learn Compatible:** Drop `KymoraTransformer` into any `sklearn.pipeline.Pipeline` or cross-validation grid search.
@@ -270,7 +272,7 @@ Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_ca
 
 #### Memory footprint (re-measured on HEAD sweep $N = 1\text{k}..100\text{k}$, fresh-process peak RSS):
 * **Worker scratch is $O(T \times L)$ and does not scale with $N$:** Peak worker scratch across 16 Rayon worker threads is bounded at 2.29–3.33 MiB at $N \le 10,000$ (0.20–2.52 MiB for 4 threads) and reaches a 25.38 MiB RSS high-water mark at $N=100,000$ due to OS physical page commit of large output arrays.
-* **Zero defensive copies:** At $100,000 \times 500$, total process peak RSS delta is 406.86 MiB (input array 381.47 MiB + preallocated output matrix 25.18 MiB = 406.65 MiB, representing 99.95% of memory).
+* **No defensive copies:** At $100,000 \times 500$, total process peak RSS delta is 406.86 MiB (input array 381.47 MiB + preallocated output matrix 25.18 MiB = 406.65 MiB, representing 99.95% of memory).
 * **tsfresh comparison:** tsfresh extraction overhead reaches **+293.2 MiB** at 1,000 × 500 and **+410.3 MiB** at 10,000 × 500 (totals 300.9 / 452.2 MiB) due to long-format DataFrame conversions.
 
 Artifact: `benchmarks/results/MEMORY_SWEEP_REPORT.md` (`memory_sweep_results.json`).

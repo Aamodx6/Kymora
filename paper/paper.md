@@ -89,10 +89,10 @@ parity-gated at ≤1e-9 before timing):
 | TSFEL | 13 | 3.92 | 2,213.69 | 564.6× |
 | tsfresh | 13 | 4.94 | 8,359.45 | 1,693.8× |
 
-As-is configs (33 vs up to 777 features): kymora 3.18 ms (314,450
-series/s, 0.0964 µs/series-feature) vs catch22 833.1 ms, TSFEL 2,541.6 ms,
-tsfresh 20,891.2 ms. The raw ratio compares different amounts of work;
-per-feature ratios are 393×/169×/279× respectively.
+As-is configs (33 vs up to 777 features): kymora 1.94 ms (514,245
+series/s, 0.0589 µs/series-feature; isolated baseline 358,654 series/s) vs catch22 185.50 ms, TSFEL 2,509.53 ms,
+tsfresh 23,540.62 ms. The raw ratio compares different amounts of work (95.4×, 1,291×, 12,106×);
+per-feature ratios are 143.1×, 273.0×, 514.1× respectively.
 
 Downstream utility (`benchmarks/results/downstream_report.md`): on four
 synthetic classification tasks, RandomForest over the 33 features reaches

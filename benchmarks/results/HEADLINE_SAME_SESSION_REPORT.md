@@ -15,7 +15,7 @@ Protocol-compliant interleaved same-session evaluation on repository HEAD under 
 
 ## Concurrency Definitions ("16T")
 
-- **Kymora (16T):** 16 native Rayon work-stealing threads within the single Python process (zero defensive copies, zero IPC serialization).
+- **Kymora (16T):** 16 native Rayon work-stealing threads within the single Python process (no copy of the input, zero IPC serialization).
 - **catch22 (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.
 - **TSFEL (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.
 - **tsfresh (16T):** `multiprocessing.Pool(16)` executing across 16 worker processes.

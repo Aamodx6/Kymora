@@ -5,7 +5,7 @@ Every public performance claim → artifact path → code state → conditions
 beside every headline number; laptop wording is "10 cores (6P+4E) /
 16 threads".
 
-## Measured — exploratory (single laptop, not fleet evidence; artifact: `benchmarks/results/F1_REPORT.md` + `F1_*` / `B_*` jsonl+env)
+## Superseded — 2026-10-04 exploratory (artifact: `benchmarks/results/F1_REPORT.md` + `F1_*` / `B_*` jsonl+env; replaced by 2026-11-22 re-baseline)
 
 Measured 2026-10-04: step-2 interleave (P1→H1→P2→H2) plus 3b bisect
 rounds (`B_040_R1/R2`, `B_PRE_R1c/R2`, `B_HEAD_R1/R2`; probe sets PA2/PB),
@@ -66,7 +66,7 @@ and `docs/internal/slowdown_0.4.0.md`.
 | Streaming (HEAD re-validation): push p50 0.20 µs flat across W (p99 0.20–0.30 µs, p99.9 0.30–0.50 µs); periodic drift re-anchoring timed separately: p50 3.6 µs (W=64), 4.1 µs (W=256), 16.7 µs (W=4096), 182.4 µs (W=65536; p99.9 315.7–330.2 µs; amortized O(1), worst-case O(W)). compute(fast) p50 0.30 µs flat across all W (p99 0.30–0.40 µs, max 0.8–3.9 µs); compute(all) p50 1.80 µs (W=64) to 1326.60 µs (W=65536) linear in W. End-to-end 86.8×–8566.4× vs naive recompute | `2026-11-22_streaming/STREAMING_PUSH_REPORT.md` (`streaming.jsonl`) | Single thread, W ∈ {64, 256, 4096, 65536}, parity-gated before timing; math.fsum and np.longdouble reference bounds verified |
 | Profiles: minimal 0.58 ms / core33 1.90 / extended 8.02 / full 9.44 (best 0.48 / 1.62 / 6.86 / 7.88); per-feature 0.0583 / 0.0575 / 0.0561 / 0.0174 µs; throughput 1,716,444 series/s (minimal), 526,912 series/s (core33), 124,635 series/s (extended), 105,982 series/s (full) | `remeasure_summary.json` profiles[] | 1,000×500, 16 threads |
 | Scaling: 1T 11.22 / 2T 5.83 / 4T 3.40 / 8T 2.22 / 16T 2.30 / 32T 2.09 ms; speedups 1.92× / 3.30× / 5.05× / 4.87× / 5.37×; η 96.1 / 82.6 / 63.1 / 30.5 / 16.8% | `remeasure_summary.json` scaling[] | core33, 1,000×500 |
-| Memory: kymora worker scratch is O(T × L) and bounded (2.29–3.33 MiB across 16T, 0.20–2.52 MiB across 4T at N ≤ 10k; 25.38 MiB peak RSS high-water mark at N=100k due to OS physical page commit; zero defensive copies of input). 100k×500 core33 peak RSS delta 406.86 MiB (input 381.47, output 25.18, scratch delta 25.38 MiB). tsfresh extraction peak +293.2 MiB @1k×500, +410.3 MiB @10k×500 | `MEMORY_SWEEP_REPORT.md` (`memory_sweep_results.json`) | 16T and 4T sweeps N=1k..100k; fresh-process peak RSS delta; tsfresh EfficientFCParameters, n_jobs=16 |
+| Memory: kymora worker scratch is O(T × L) and bounded (2.29–3.33 MiB across 16T, 0.20–2.52 MiB across 4T at N ≤ 10k; 25.38 MiB peak RSS high-water mark at N=100k due to OS physical page commit; no copy of the input). 100k×500 core33 peak RSS delta 406.86 MiB (input 381.47, output 25.18, scratch delta 25.38 MiB). tsfresh extraction peak +293.2 MiB @1k×500, +410.3 MiB @10k×500 | `MEMORY_SWEEP_REPORT.md` (`memory_sweep_results.json`) | 16T and 4T sweeps N=1k..100k; fresh-process peak RSS delta; tsfresh EfficientFCParameters, n_jobs=16 |
 | Profiling slowdown 0.3.2 → 0.4.0: probe step is +20.5% (~20–24%, 2.00 ms → 2.41 ms on 1k×500 probe). Shares are unprofiled architectural hypotheses: FeaturePlan bitflag dispatch (~6%), FFI safety and NaN handling (~4%), and scratch arena lifecycle (~5%) | `docs/internal/slowdown_0.4.0.md` | 1k×500 probe profiling, flamegraph analysis |
 | Where-slower (historical 2026-10-05): numba wins 1×100 by 1.43×–1.78× (95% CIs exclude 1.0); 10×500 rows parity/noise | `2026-10-05_l1_rerun/l1_root_cause.json` | 16 threads |
 
@@ -117,7 +117,7 @@ Artifacts: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`, `benchmarks/results/uc
 
 - tsfresh 100,000 × 500 memory cell (multi-hour run; README marks it PENDING).
 - Landing hero demo latencies were replaced with real catalog values in
-  8.4; `index.html` meta description (314k series/s) traces to the F1 pool
-  above. No landing figure is pending.
+  8.4; `index.html` meta description (514k series/s) traces to the 2026-11-22
+  headline. No landing figure is pending.
 - PyPI long_description syncs automatically (single-sourced from README at
   build time).

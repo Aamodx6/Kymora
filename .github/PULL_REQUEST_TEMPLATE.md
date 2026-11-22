@@ -10,6 +10,8 @@
 - [ ] `cargo test --no-default-features`, `cargo fmt --all -- --check`,
       `cargo clippy --no-default-features --all-targets -- -D warnings` pass
 - [ ] `python tools/validation_report.py` passes (feature behaviour unchanged)
+- [ ] `python tools/check_claims.py` and `python tools/check_repo_hygiene.py` pass
+- [ ] Claims touched? (If any numeric claim, throughput, or ratio moved, updated CLAIMS.md with artifact path + env.json; never soften a loss)
 - [ ] Version impact noted below per the CONTRIBUTING versioning table
       (feature order/length is public API)
 

@@ -1,0 +1,54 @@
+name: Benchmark discrepancy
+description: Report a benchmark result that does not match published claims or cannot be reproduced
+title: "[Benchmark]: "
+labels: ["benchmark", "reproducibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to test Kymora's benchmark claims.
+        Kymora maintains a strict numerical ledger in `CLAIMS.md`. Every published number
+        must be reproducible under the documented conditions. If your run diverges, please
+        provide full hardware and environment telemetry so we can investigate or correct the ledger.
+  - type: input
+    id: claim
+    attributes:
+      label: Disputed claim / table row
+      description: The specific claim in README.md, docs, or CLAIMS.md you are measuring
+      placeholder: "core33 headline throughput (514k series/s) or catch22 speedup ratio"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: kymora version & git commit
+      description: "`python -c \"import kymora; print(kymora.__version__)\"` and git commit SHA if built from source"
+      placeholder: "0.8.2"
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware & OS environment
+      description: CPU model (physical & logical core topology), RAM, OS, power profile (High Performance / AC online), Python version, NumPy version
+      placeholder: |
+        CPU: AMD Ryzen 9 7950X (16C/32T) or Intel i7-13620H (6P+4E/16T)
+        OS: Ubuntu 24.04 LTS (governor: performance)
+        Python: 3.12.3, NumPy 2.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: measured
+    attributes:
+      label: Measured numbers
+      description: Your measured latency (p50/p99/min/max), throughput (series/s), or speedup ratios
+    validations:
+      required: true
+  - type: textarea
+    id: script
+    attributes:
+      label: Reproduction script / command
+      description: Exact command or script used (e.g., `bash reproduce.sh` or `python benchmarks/suites/run_same_session_ratios.py`)
+      render: bash
+    validations:
+      required: true

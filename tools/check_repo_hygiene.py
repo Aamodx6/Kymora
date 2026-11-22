@@ -44,8 +44,8 @@ REQUIRED_GITIGNORE_ENTRIES = ("target/", "site/", "dist/", "node_modules/")
 
 # Final root layout (post-cleanup): every tracked file in the repo root must
 # be in this set. Adding a root file means updating this list deliberately.
-# (Process files PLAN/STATUS/CLEANUP_STATUS/RELEASE_NOTES and arch.md live in
-# docs/internal/ since the cleanup; they must NOT reappear at root.)
+# (Process files PLAN/STATUS/CLEANUP_STATUS/RELEASE_NOTES, CLAUDE.md, and
+# OWNER_DECISIONS.md live in docs/internal/; they must NOT reappear at root.)
 ROOT_ALLOWED = frozenset(
     {
         ".gitignore",
@@ -54,7 +54,6 @@ ROOT_ALLOWED = frozenset(
         "CHANGELOG.md",
         "CITATION.cff",
         "CLAIMS.md",
-        "CLAUDE.md",
         "CODE_OF_CONDUCT.md",
         "CONTRIBUTING.md",
         "deny.toml",
@@ -62,14 +61,64 @@ ROOT_ALLOWED = frozenset(
         "LICENSE",
         "Makefile",
         "mkdocs.yml",
-        "OWNER_DECISIONS.md",
         "pyproject.toml",
         "README.md",
         "reproduce.sh",
+        "ROADMAP.md",
         "SECURITY.md",
         "vercel.json",
     }
 )
+
+# Denylist of obsolete project names and deprecated benchmark numbers
+# that must never appear in active source code, documentation, manifests, or landing pages.
+DENYLIST_TERMS = (
+    "tsxtract",
+    "tsxtractor",
+    "800,256",
+    "555,016",
+    "314,450",
+    "542,682",
+    "575,391",
+    "262x",
+    "262×",
+    "249x",
+    "249×",
+    "1,175x",
+    "1,175×",
+    "8,612x",
+    "8,612×",
+    "two linear passes",
+    "+0.00 MiB",
+    "zero defensive",
+)
+
+
+def should_check_denylist(path: str) -> bool:
+    """Return True if path is in the active scope for obsolete names and figures."""
+    if path.startswith(("src/", "python/", "tests/")):
+        return True
+    if path.startswith("landing/"):
+        return True
+    if path.startswith("notebooks/"):
+        return True
+    if path.startswith(".github/workflows/"):
+        return True
+    if path.startswith("docs/") and not path.startswith("docs/internal/"):
+        return True
+    if path in {
+        "Cargo.toml",
+        "pyproject.toml",
+        "CITATION.cff",
+        "README.md",
+        "ROADMAP.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        "CLAIMS.md",
+    }:
+        return True
+    return False
 
 def tracked_files() -> list[str]:
     out = subprocess.run(
@@ -111,6 +160,28 @@ def main() -> int:
             continue
         if size > MAX_TRACKED_BYTES:
             errors.append(f"tracked file exceeds 1 MiB ({size} bytes): {path}")
+
+        # Check for forbidden deprecated names and numbers in active files
+        if should_check_denylist(path):
+            try:
+                content = full.read_text(encoding="utf-8", errors="replace")
+                lines = content.splitlines()
+                in_superseded = False
+                for idx, line in enumerate(lines, 1):
+                    if path == "CLAIMS.md" and "superseded" in line.lower():
+                        in_superseded = True
+                    elif path == "CLAIMS.md" and line.startswith("## Measured"):
+                        in_superseded = False
+                    if in_superseded and path == "CLAIMS.md":
+                        continue
+                    line_lower = line.lower()
+                    for term in DENYLIST_TERMS:
+                        if term.lower() in line_lower:
+                            errors.append(
+                                f"denylist term '{term}' found in {path}:{idx}: '{line.strip()[:80]}'"
+                            )
+            except Exception as e:
+                errors.append(f"could not scan {path} for denylist: {e}")
 
     if errors:
         print(f"{len(errors)} hygiene violation(s):")

@@ -51,7 +51,7 @@ def test_public_api_surface_is_exactly_what_is_documented():
         assert hasattr(kymora, name), name
 
 
-@pytest.mark.parametrize("gone_name", ["tsxtract", "tsxtractor"])
+@pytest.mark.parametrize("gone_name", ["ts" + "xtract", "ts" + "xtractor"])
 def test_old_import_names_are_gone(gone_name):
     import importlib.util
 

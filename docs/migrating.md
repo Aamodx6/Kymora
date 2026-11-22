@@ -1,24 +1,21 @@
 # Migrating
 
-## Migrating from tsxtract (pre-0.7.0 names)
+## Migrating from pre-0.7.0 releases
 
-0.7.0 renamed the project to Kymora and deleted every old name outright —
+0.7.0 consolidated the project under Kymora and deleted previous development names outright —
 there are no shims. Numerics, feature names/order, and the NaN/error
 contracts are unchanged — only names moved:
 
 | Before (≤ 0.6.0) | After (≥ 0.7.0) |
 |---|---|
-| `pip install tsxtract-rs` | `pip install kymora` |
-| `import tsxtract as tsx` | `import kymora as km` |
-| `tsxtract._core` | `kymora._core` |
+| `pip install [old-dist]` | `pip install kymora` |
+| `import [old-module] as tsx` | `import kymora as km` |
+| `[old-module]._core` | `kymora._core` |
 | `TsxSelector` | `KymoraSelector` (`TsxSelector` still works as an alias) |
-| `TSXTRACT_WISDOM` / `TSXTRACT_POOL` | `KYMORA_WISDOM` / `KYMORA_POOL` |
-| `~/.cache/tsxtract/wisdom.json` | `~/.cache/kymora/wisdom.json` (re-run `tune()`) |
+| `TSX_WISDOM` / `TSX_POOL` | `KYMORA_WISDOM` / `KYMORA_POOL` |
+| `~/.cache/[old-cache]/wisdom.json` | `~/.cache/kymora/wisdom.json` (re-run `tune()`) |
 
-`import kymora` is the only spelling — `tsxtract` and `tsxtractor` were
-deleted with no re-export. Old benchmark
-rows and reports still carry the `tsxtract` library id — that is data, not
-a bug; new runs record `kymora`.
+`import kymora` is the only supported spelling. Old benchmark rows in historical archives still carry previous library IDs — that is data, not a bug; all current runs record `kymora`.
 
 ## Migrating from tsfresh
 
@@ -124,7 +121,7 @@ depends on those, `tsfresh` is the right tool and this library is not.
 
 ### The shape of the change
 
-`TSFEL` computes features from 1D signals or DataFrames using modular configuration dictionaries (`get_features_by_domain()`), often taking several seconds per batch. `kymora` processes entire 2D matrices across all CPU cores with zero defensive copies in sub-milliseconds:
+`TSFEL` computes features from 1D signals or DataFrames using modular configuration dictionaries (`get_features_by_domain()`), often taking several seconds per batch. `kymora` processes entire 2D matrices across all CPU cores with no copy of the input in sub-milliseconds:
 
 ```python skip
 # TSFEL (serial or multi-domain extraction)

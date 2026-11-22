@@ -18,7 +18,7 @@ export interface BenchmarkItem {
   totalTimeMs: number; // in milliseconds
   seriesPerSec: number;
   msPerFeature: number;
-  multiplierVsKymora: number; // e.g. 1 for baseline, 262 for 262x slower
+  multiplierVsKymora: number; // e.g. 1 for baseline, 95 for 95x slower
   isKymora: boolean;
   notes: string;
 }

@@ -5,8 +5,8 @@
 **What do I install?** `pip install kymora`, then `import kymora`.
 The distribution, import, crate, and repo are all one name now.
 
-**What about `tsxtract` / `tsxtractor`?** Deleted old names — no shims, no
-aliases. `import kymora` is the only spelling.
+**What about older package names?** All former development names are deleted — no shims, no
+aliases. `import kymora` is the only supported spelling.
 
 **Which Python versions?** 3.10–3.13, via prebuilt wheels (no Rust needed).
 See [Install](install.md).
