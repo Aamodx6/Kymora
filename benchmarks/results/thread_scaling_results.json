@@ -1,0 +1,264 @@
+{
+  "timestamp": "2026-11-22 16:37:23",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+  "logical_cpus": 16,
+  "shape": [
+    1000,
+    500
+  ],
+  "thread_scaling": [
+    {
+      "threads": 1,
+      "min_len": null,
+      "median_ms": 10.387,
+      "min_ms": 9.4454,
+      "max_ms": 11.5604,
+      "q1_ms": 9.9873,
+      "q3_ms": 10.5722,
+      "stdev_ms": 0.4091,
+      "speedup": 1.0,
+      "efficiency_pct": 100.0
+    },
+    {
+      "threads": 2,
+      "min_len": null,
+      "median_ms": 5.5527,
+      "min_ms": 5.089,
+      "max_ms": 6.0472,
+      "q1_ms": 5.3968,
+      "q3_ms": 5.6716,
+      "stdev_ms": 0.242,
+      "speedup": 1.8706214994507178,
+      "efficiency_pct": 93.53107497253589
+    },
+    {
+      "threads": 4,
+      "min_len": null,
+      "median_ms": 3.0257,
+      "min_ms": 2.8421,
+      "max_ms": 3.3251,
+      "q1_ms": 2.9769,
+      "q3_ms": 3.0914,
+      "stdev_ms": 0.1091,
+      "speedup": 3.432924612486367,
+      "efficiency_pct": 85.82311531215917
+    },
+    {
+      "threads": 6,
+      "min_len": null,
+      "median_ms": 2.3212,
+      "min_ms": 2.0511,
+      "max_ms": 2.8387,
+      "q1_ms": 2.2232,
+      "q3_ms": 2.5248,
+      "stdev_ms": 0.217,
+      "speedup": 4.4748405996898155,
+      "efficiency_pct": 74.58067666149692
+    },
+    {
+      "threads": 8,
+      "min_len": null,
+      "median_ms": 2.0092,
+      "min_ms": 1.8084,
+      "max_ms": 2.3983,
+      "q1_ms": 1.9564,
+      "q3_ms": 2.0634,
+      "stdev_ms": 0.1256,
+      "speedup": 5.169719291260203,
+      "efficiency_pct": 64.62149114075254
+    },
+    {
+      "threads": 10,
+      "min_len": null,
+      "median_ms": 1.898,
+      "min_ms": 1.6955,
+      "max_ms": 2.247,
+      "q1_ms": 1.7507,
+      "q3_ms": 2.0668,
+      "stdev_ms": 0.1847,
+      "speedup": 5.472602739726028,
+      "efficiency_pct": 54.72602739726028
+    },
+    {
+      "threads": 12,
+      "min_len": null,
+      "median_ms": 1.9425,
+      "min_ms": 1.713,
+      "max_ms": 2.1749,
+      "q1_ms": 1.8135,
+      "q3_ms": 2.0062,
+      "stdev_ms": 0.1365,
+      "speedup": 5.347232947232948,
+      "efficiency_pct": 44.560274560274564
+    },
+    {
+      "threads": 14,
+      "min_len": null,
+      "median_ms": 1.9461,
+      "min_ms": 1.7344,
+      "max_ms": 2.2473,
+      "q1_ms": 1.8276,
+      "q3_ms": 1.9959,
+      "stdev_ms": 0.1296,
+      "speedup": 5.337341349365398,
+      "efficiency_pct": 38.12386678118141
+    },
+    {
+      "threads": 16,
+      "min_len": null,
+      "median_ms": 1.8135,
+      "min_ms": 1.5272,
+      "max_ms": 2.2418,
+      "q1_ms": 1.7383,
+      "q3_ms": 1.9288,
+      "stdev_ms": 0.1565,
+      "speedup": 5.727598566308244,
+      "efficiency_pct": 35.797491039426525
+    }
+  ],
+  "chunk_scaling_16t": [
+    {
+      "threads": 16,
+      "min_len": 1,
+      "median_ms": 1.8624,
+      "min_ms": 1.7398,
+      "max_ms": 2.6468,
+      "q1_ms": 1.8164,
+      "q3_ms": 1.9677,
+      "stdev_ms": 0.2094
+    },
+    {
+      "threads": 16,
+      "min_len": 2,
+      "median_ms": 1.8812,
+      "min_ms": 1.7165,
+      "max_ms": 2.1371,
+      "q1_ms": 1.8048,
+      "q3_ms": 1.9682,
+      "stdev_ms": 0.1201
+    },
+    {
+      "threads": 16,
+      "min_len": 4,
+      "median_ms": 1.9111,
+      "min_ms": 1.6273,
+      "max_ms": 3.1194,
+      "q1_ms": 1.801,
+      "q3_ms": 2.0313,
+      "stdev_ms": 0.3206
+    },
+    {
+      "threads": 16,
+      "min_len": 8,
+      "median_ms": 1.9019,
+      "min_ms": 1.5617,
+      "max_ms": 2.426,
+      "q1_ms": 1.8294,
+      "q3_ms": 2.0039,
+      "stdev_ms": 0.1856
+    },
+    {
+      "threads": 16,
+      "min_len": 16,
+      "median_ms": 1.9984,
+      "min_ms": 1.7205,
+      "max_ms": 2.2674,
+      "q1_ms": 1.8682,
+      "q3_ms": 2.119,
+      "stdev_ms": 0.153
+    },
+    {
+      "threads": 16,
+      "min_len": 32,
+      "median_ms": 1.8548,
+      "min_ms": 1.5339,
+      "max_ms": 2.1443,
+      "q1_ms": 1.7536,
+      "q3_ms": 1.8824,
+      "stdev_ms": 0.1682
+    },
+    {
+      "threads": 16,
+      "min_len": 64,
+      "median_ms": 1.9788,
+      "min_ms": 1.7944,
+      "max_ms": 2.4425,
+      "q1_ms": 1.902,
+      "q3_ms": 2.1124,
+      "stdev_ms": 0.1759
+    }
+  ],
+  "chunk_scaling_8t": [
+    {
+      "threads": 8,
+      "min_len": 1,
+      "median_ms": 2.2766,
+      "min_ms": 1.989,
+      "max_ms": 2.5793,
+      "q1_ms": 2.2107,
+      "q3_ms": 2.3207,
+      "stdev_ms": 0.1425
+    },
+    {
+      "threads": 8,
+      "min_len": 2,
+      "median_ms": 2.0835,
+      "min_ms": 1.9036,
+      "max_ms": 2.4658,
+      "q1_ms": 1.9526,
+      "q3_ms": 2.1464,
+      "stdev_ms": 0.1506
+    },
+    {
+      "threads": 8,
+      "min_len": 4,
+      "median_ms": 2.3898,
+      "min_ms": 1.8432,
+      "max_ms": 2.8667,
+      "q1_ms": 2.1836,
+      "q3_ms": 2.6107,
+      "stdev_ms": 0.329
+    },
+    {
+      "threads": 8,
+      "min_len": 8,
+      "median_ms": 2.5232,
+      "min_ms": 2.0021,
+      "max_ms": 3.1799,
+      "q1_ms": 2.3534,
+      "q3_ms": 2.6608,
+      "stdev_ms": 0.2766
+    },
+    {
+      "threads": 8,
+      "min_len": 16,
+      "median_ms": 2.0911,
+      "min_ms": 1.8977,
+      "max_ms": 2.7534,
+      "q1_ms": 1.971,
+      "q3_ms": 2.2104,
+      "stdev_ms": 0.189
+    },
+    {
+      "threads": 8,
+      "min_len": 32,
+      "median_ms": 2.4662,
+      "min_ms": 2.0152,
+      "max_ms": 2.7639,
+      "q1_ms": 2.2335,
+      "q3_ms": 2.5769,
+      "stdev_ms": 0.2108
+    },
+    {
+      "threads": 8,
+      "min_len": 64,
+      "median_ms": 2.2556,
+      "min_ms": 1.9511,
+      "max_ms": 2.538,
+      "q1_ms": 2.1367,
+      "q3_ms": 2.3435,
+      "stdev_ms": 0.1635
+    }
+  ]
+}
