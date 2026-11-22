@@ -1,8 +1,9 @@
 """Kymora — fast time-series feature extraction with a Rust core.
 
 Extracts curated statistical, temporal, spectral, multichannel, and multi-view
-features from batches of time series. The Rust core takes zero-copy views of
-numpy buffers, releases the GIL, and parallelizes across series with Rayon.
+features from batches of time series. The Rust core borrows contiguous
+numpy buffers directly (no copy of the input), releases the GIL, and
+parallelizes across series with Rayon.
 
 Usage:
     import numpy as np, kymora

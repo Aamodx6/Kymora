@@ -1,0 +1,22 @@
+{
+  "title": "Kymora: High-Throughput Batch and Streaming Time-Series Feature Extraction with a Native Rust Computational Core",
+  "description": "Kymora is a batch-oriented Python time-series feature extraction library with a Rust core: contiguous NumPy buffer ingestion (no copy of the input), GIL release across the parallel region, Rayon work-stealing across the series dimension, and a curated 33-feature low-redundancy catalog computed through fused single-traversal passes.",
+  "creators": [
+    {
+      "name": "Kumar, Aamod",
+      "affiliation": "Independent Researcher, Uttar Pradesh, India"
+    }
+  ],
+  "access_right": "open",
+  "license": "MIT",
+  "upload_type": "software",
+  "keywords": [
+    "time-series",
+    "feature-extraction",
+    "rust",
+    "pyo3",
+    "numpy",
+    "machine-learning",
+    "signal-processing"
+  ]
+}
