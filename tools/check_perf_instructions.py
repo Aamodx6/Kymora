@@ -55,7 +55,6 @@ def run_callgrind(binary: Path, workload: str, out_file: Path) -> int:
     cmd = [
         "valgrind",
         "--tool=callgrind",
-        "--instr-atstart=no",
         f"--callgrind-out-file={out_file}",
         str(binary),
         workload,

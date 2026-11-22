@@ -12,10 +12,17 @@ use _core::exec::extract_plan_into_slice;
 use _core::plan::FeaturePlan;
 
 #[cfg(all(target_os = "linux", target_arch = "x86_64"))]
-#[inline(always)]
+#[inline(never)]
 unsafe fn valgrind_client_request(request: usize) -> usize {
-    let args: [usize; 6] = [request, 0, 0, 0, 0, 0];
+    let mut args = [0usize; 6];
+    std::ptr::write_volatile(&mut args[0], request);
+    std::ptr::write_volatile(&mut args[1], 0);
+    std::ptr::write_volatile(&mut args[2], 0);
+    std::ptr::write_volatile(&mut args[3], 0);
+    std::ptr::write_volatile(&mut args[4], 0);
+    std::ptr::write_volatile(&mut args[5], 0);
     let res: usize;
+    let mut dummy_rdi: usize = 0;
     std::arch::asm!(
         "rol rdi, 3",
         "rol rdi, 13",
@@ -24,7 +31,7 @@ unsafe fn valgrind_client_request(request: usize) -> usize {
         "xchg rbx, rbx",
         in("rax") args.as_ptr(),
         inout("rdx") 0usize => res,
-        options(nostack, preserves_flags)
+        inout("rdi") dummy_rdi,
     );
     res
 }
