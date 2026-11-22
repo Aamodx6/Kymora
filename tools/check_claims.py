@@ -17,6 +17,7 @@ CHECK_FILES = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "docs" / "benchmarks.md",
     REPO_ROOT / "docs" / "index.md",
+    REPO_ROOT / "paper" / "paper.md",
     # Landing page source files
     *(REPO_ROOT / "landing" / "src").glob("**/*.tsx"),
     *(REPO_ROOT / "landing" / "src").glob("**/*.ts"),
