@@ -82,9 +82,6 @@ fn run_workload(n_rows: usize, n_steps: usize, plan: &FeaturePlan) -> f64 {
         callgrind_start();
     }
     extract_plan_into_slice(&rows, plan, &mut out);
-    unsafe {
-        callgrind_stop();
-    }
 
     std::hint::black_box(&out);
     // Return checksum

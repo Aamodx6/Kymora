@@ -26,28 +26,32 @@ THRESHOLD_PCT = 2.0  # Max allowed regression percentage
 
 def parse_callgrind_summary(out_file: Path) -> int:
     """Extract instruction read count (Ir) from callgrind output file."""
-    if not out_file.exists():
-        raise FileNotFoundError(f"Callgrind output {out_file} not found")
-    content = out_file.read_text(encoding="utf-8", errors="replace")
-    for line in content.splitlines():
-        if line.startswith("summary:"):
-            # summary: <Ir> ...
-            parts = line.split()
-            if len(parts) >= 2 and parts[1].isdigit():
-                val = int(parts[1])
-                if val <= 0:
-                    raise ValueError(f"Non-positive instruction count ({val}) in {out_file}")
-                return val
-    # Fallback: search for 'events: Ir' and total
-    for line in content.splitlines():
-        if line.startswith("totals:"):
-            parts = line.split()
-            if len(parts) >= 2 and parts[1].isdigit():
-                val = int(parts[1])
-                if val <= 0:
-                    raise ValueError(f"Non-positive instruction count ({val}) in {out_file}")
-                return val
-    raise ValueError(f"Could not parse instruction count from {out_file}")
+    candidates = [out_file]
+    candidates.extend(sorted(out_file.parent.glob(f"{out_file.name}.*")))
+    for target in candidates:
+        if not target.exists():
+            continue
+        content = target.read_text(encoding="utf-8", errors="replace")
+        for line in content.splitlines():
+            if line.startswith("summary:"):
+                parts = line.split()
+                if len(parts) >= 2 and parts[1].isdigit():
+                    val = int(parts[1])
+                    if val > 0:
+                        return val
+        for line in content.splitlines():
+            if line.startswith("totals:"):
+                parts = line.split()
+                if len(parts) >= 2 and parts[1].isdigit():
+                    val = int(parts[1])
+                    if val > 0:
+                        return val
+
+    # Print debug info if primary file exists
+    if out_file.exists():
+        content = out_file.read_text(encoding="utf-8", errors="replace")
+        print(f"Debug {out_file} (header):\n{content[:500]}", file=sys.stderr)
+    raise ValueError(f"Could not find positive instruction count in {out_file} (checked: {[str(c) for c in candidates]})")
 
 
 def run_callgrind(binary: Path, workload: str, out_file: Path) -> int:
@@ -65,6 +69,8 @@ def run_callgrind(binary: Path, workload: str, out_file: Path) -> int:
     if proc.returncode != 0:
         print(f"Error running callgrind on {binary} {workload}:\n{proc.stderr}", file=sys.stderr)
         raise RuntimeError(f"Valgrind call failed with code {proc.returncode}")
+    if proc.stdout:
+        print(f"[{workload}] {proc.stdout.strip()}")
     return parse_callgrind_summary(out_file)
 
 
