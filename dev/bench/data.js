@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795346189801,
+  "lastUpdate": 1795347561857,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -62,6 +62,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0496",
             "unit": "ms",
             "extra": "runs=30, cv=0.024"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "46985fbe0cef362971a56ed292194c20c1c5b219",
+          "message": "docs: documentation expansion, when-not-to-use guide, and interactive quickstart (Phase 4) (#28)\n\n* docs: expand documentation site, when-not-to-use guide, and interactive quickstart (Phase 4)\n\n* docs: add skip flag to optional dependency and illustrative snippets in quickstart\n\n* ci: add pull-requests write permission and disable comment-on-alert in benchmark gate",
+          "timestamp": "2026-11-22T17:07:55+05:30",
+          "tree_id": "dccb98087470b48443c993130edec6ed3dca61d0",
+          "url": "https://github.com/Aamodx6/Kymora/commit/46985fbe0cef362971a56ed292194c20c1c5b219"
+        },
+        "date": 1795347561527,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.8312,
+            "range": "0.048",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.048"
           }
         ]
       }
