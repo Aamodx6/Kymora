@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795345420276,
+  "lastUpdate": 1795346189801,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -31,6 +31,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0568",
             "unit": "ms",
             "extra": "runs=30, cv=0.016"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dc75aadb3de361bf5a76925d41ed207d6d0f544e",
+          "message": "docs(scaling): investigate hybrid P/E-core scaling plateau, sweep chunk sizes, and harden single-thread execution (#27)",
+          "timestamp": "2026-11-22T16:45:18+05:30",
+          "tree_id": "4e8ab062c20759a3681de062ca453461b3244bad",
+          "url": "https://github.com/Aamodx6/Kymora/commit/dc75aadb3de361bf5a76925d41ed207d6d0f544e"
+        },
+        "date": 1795346189349,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 6.4137,
+            "range": "0.0496",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.024"
           }
         ]
       }
