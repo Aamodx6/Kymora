@@ -12,6 +12,16 @@ pub const SERIAL_THRESHOLD: usize = 8;
 pub const MIN_ROWS_PER_TASK: usize = 16;
 pub const SERIAL_WORK_SIZE_THRESHOLD: usize = 8_000;
 
+/// Get chunking threshold: reads `KYMORA_MIN_ROWS_PER_TASK` env var if set, otherwise defaults to 16.
+pub fn get_min_rows_per_task() -> usize {
+    if let Ok(val) = std::env::var("KYMORA_MIN_ROWS_PER_TASK") {
+        if let Ok(m) = val.trim().parse::<usize>() {
+            return m.max(1);
+        }
+    }
+    MIN_ROWS_PER_TASK
+}
+
 static POOL_PID: AtomicU32 = AtomicU32::new(0);
 
 /// Check if the current process is a forked child of a process that already initialized/used a thread pool.
@@ -66,7 +76,7 @@ pub fn extract_plan_into_slice(rows: &[&[f64]], plan: &FeaturePlan, out_slice: &
         record_pool_use();
         out_slice
             .par_chunks_exact_mut(n_cols)
-            .with_min_len(MIN_ROWS_PER_TASK)
+            .with_min_len(get_min_rows_per_task())
             .zip(rows.par_iter())
             .for_each_init(
                 || Scratch::new(max_len),
@@ -119,7 +129,7 @@ pub fn extract_into_slice_f32(
         record_pool_use();
         out_slice
             .par_chunks_exact_mut(n_cols)
-            .with_min_len(MIN_ROWS_PER_TASK)
+            .with_min_len(get_min_rows_per_task())
             .zip(rows.par_iter())
             .for_each_init(
                 || Scratch::new(max_len),
@@ -167,7 +177,7 @@ pub fn extract_windows_plan_into_slice(
         out_slice
             .par_chunks_exact_mut(n_cols)
             .enumerate()
-            .with_min_len(MIN_ROWS_PER_TASK)
+            .with_min_len(get_min_rows_per_task())
             .for_each_init(
                 || Scratch::new(window),
                 |scratch, (i, row_out)| {

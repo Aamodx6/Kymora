@@ -162,8 +162,7 @@ where
         return f();
     }
     match n_jobs {
-        Some(1) => f(),
-        Some(n) if n > 1 => {
+        Some(n) if n >= 1 => {
             crate::exec::record_pool_use();
             // Cached per-thread-count pools: building a rayon ThreadPool per
             // call cost ~200 us (measured 2026-10-06, 32x500 batch), which
