@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795347561857,
+  "lastUpdate": 1795348022177,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -93,6 +93,37 @@ window.BENCHMARK_DATA = {
             "range": "0.048",
             "unit": "ms",
             "extra": "runs=30, cv=0.048"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "42c5c51f16284ece3629f37878d48bf5dfda29f6",
+          "message": "docs(wasm): add WebAssembly feasibility spike report and blockers analysis (Phase 5) (#29)",
+          "timestamp": "2026-11-22T17:16:04+05:30",
+          "tree_id": "747d55022af8413307f99afad4dd5151ad0ccaa7",
+          "url": "https://github.com/Aamodx6/Kymora/commit/42c5c51f16284ece3629f37878d48bf5dfda29f6"
+        },
+        "date": 1795348021663,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 3.3312,
+            "range": "0.0797",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.028"
           }
         ]
       }
