@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795348841179,
+  "lastUpdate": 1795349346835,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -155,6 +155,37 @@ window.BENCHMARK_DATA = {
             "range": "0.5124",
             "unit": "ms",
             "extra": "runs=30, cv=0.156"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "53c7427633de5921850f8397653666cf612f1df1",
+          "message": "chore(release): add Zenodo metadata, check_versions tool, and CI verification (Phase 8) (#32)",
+          "timestamp": "2026-11-22T17:37:40+05:30",
+          "tree_id": "b9dc126cee33fd05654dcdc683b108525a12513f",
+          "url": "https://github.com/Aamodx6/Kymora/commit/53c7427633de5921850f8397653666cf612f1df1"
+        },
+        "date": 1795349346222,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.8176,
+            "range": "0.0494",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.050"
           }
         ]
       }
