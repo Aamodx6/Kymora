@@ -76,9 +76,30 @@ def run_tsfresh(df_long: pd.DataFrame) -> float:
     return (time.perf_counter_ns() - t0) / 1e6
 
 
+def get_cpu_telemetry() -> dict[str, Any]:
+    import psutil
+    res = {}
+    try:
+        freq = psutil.cpu_freq()
+        if freq:
+            res["cpu_freq_current_mhz"] = float(freq.current)
+            res["cpu_freq_max_mhz"] = float(freq.max)
+    except Exception:
+        pass
+    try:
+        if hasattr(psutil, "sensors_temperatures"):
+            temps = psutil.sensors_temperatures()
+            if temps:
+                res["cpu_temp"] = temps
+    except Exception:
+        pass
+    return res
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--allow-suboptimal", action="store_true", help="Bypass strict power check")
+    parser.add_argument("--cooldown", type=float, default=90.0, help="Cooldown sleep in seconds between extractor blocks")
     args = parser.parse_args()
 
     print("=" * 80)
@@ -109,6 +130,15 @@ def main():
     run_kymora(X[:50])
     run_catch22(X[:20])
 
+    # Isolated Kymora-alone baseline (50 passes)
+    print("\nMeasuring isolated Kymora-alone baseline (50 passes)...")
+    km_alone_times = []
+    for _ in range(50):
+        km_alone_times.append(run_kymora(X))
+    med_km_alone = float(np.median(km_alone_times))
+    sps_alone = float(N_SERIES / (med_km_alone / 1000.0))
+    print(f"  Isolated Kymora median: {med_km_alone:.3f} ms ({sps_alone:,.0f} series/s)")
+
     session_records = []
     all_times = {
         "kymora": [],
@@ -116,6 +146,7 @@ def main():
         "tsfel": [],
         "tsfresh": [],
     }
+    telemetry_log = []
 
     for s_idx in range(1, N_SESSIONS + 1):
         print(f"\n{'='*30} Session {s_idx}/{N_SESSIONS} {'='*30}")
@@ -124,31 +155,47 @@ def main():
         s_tsfel = []
         s_tsfresh = []
 
-        # Run interleaved rounds per session
+        # Run interleaved rounds per session with cooldown
         print("  Running interleaved extraction...")
-        # Kymora (fast: run 15 passes)
+        # 1. Kymora (fast: run 15 passes)
+        tel_pre_km = get_cpu_telemetry()
         for _ in range(15):
             s_km.append(run_kymora(X))
         med_km = float(np.median(s_km))
         print(f"    Kymora median:   {med_km:.3f} ms ({N_SERIES/(med_km/1000):,.0f} series/s)")
+        if args.cooldown > 0:
+            print(f"    [Cooldown {args.cooldown:.0f}s after Kymora...]")
+            time.sleep(args.cooldown)
 
-        # catch22 (moderate: run 3 passes)
+        # 2. catch22 (moderate: run 3 passes)
+        tel_pre_c22 = get_cpu_telemetry()
         for _ in range(3):
             s_c22.append(run_catch22(X))
         med_c22 = float(np.median(s_c22))
         print(f"    catch22 median:  {med_c22:.2f} ms")
+        if args.cooldown > 0:
+            print(f"    [Cooldown {args.cooldown:.0f}s after catch22...]")
+            time.sleep(args.cooldown)
 
-        # TSFEL (expensive: run 2 passes)
+        # 3. TSFEL (expensive: run 2 passes)
+        tel_pre_tsfel = get_cpu_telemetry()
         for _ in range(2):
             s_tsfel.append(run_tsfel(X, tsfel_cfg))
         med_tsfel = float(np.median(s_tsfel))
         print(f"    TSFEL median:    {med_tsfel:.2f} ms")
+        if args.cooldown > 0:
+            print(f"    [Cooldown {args.cooldown:.0f}s after TSFEL...]")
+            time.sleep(args.cooldown)
 
-        # tsfresh (heavyweight: run 1 pass per session)
+        # 4. tsfresh (heavyweight: run 1 pass per session)
+        tel_pre_tsfresh = get_cpu_telemetry()
         t_tsf = run_tsfresh(df_long)
         s_tsfresh.append(t_tsf)
         med_tsfresh = float(np.median(s_tsfresh))
         print(f"    tsfresh median:  {med_tsfresh:.2f} ms")
+        if args.cooldown > 0 and s_idx < N_SESSIONS:
+            print(f"    [Cooldown {args.cooldown:.0f}s after tsfresh before next session...]")
+            time.sleep(args.cooldown)
 
         # Compute per-session ratios
         r_c22 = med_c22 / med_km
@@ -164,15 +211,21 @@ def main():
             "ratio_catch22": r_c22,
             "ratio_tsfel": r_tsfel,
             "ratio_tsfresh": r_tsfresh,
+            "telemetry": {
+                "km": tel_pre_km,
+                "c22": tel_pre_c22,
+                "tsfel": tel_pre_tsfel,
+                "tsfresh": tel_pre_tsfresh,
+            },
         }
         session_records.append(s_rec)
+        telemetry_log.append(s_rec["telemetry"])
         all_times["kymora"].extend(s_km)
         all_times["catch22"].extend(s_c22)
         all_times["tsfel"].extend(s_tsfel)
         all_times["tsfresh"].extend(s_tsfresh)
 
         print(f"  Session {s_idx} Ratios: catch22 {r_c22:.1f}× | TSFEL {r_tsfel:.1f}× | tsfresh {r_tsfresh:.1f}×")
-        time.sleep(1.0)
 
     # Compute pooled metrics across all sessions
     pooled_med_km = float(np.median(all_times["kymora"]))
@@ -195,11 +248,18 @@ def main():
     sps_ci_lo = float(N_SERIES / (km_ci_hi / 1000.0))
     sps_ci_hi = float(N_SERIES / (km_ci_lo / 1000.0))
 
+    divergence = abs(med_km_alone - pooled_med_km) / pooled_med_km
+
     summary = {
         "n_sessions": N_SESSIONS,
         "n_series": N_SERIES,
         "length": LENGTH,
         "threads": THREADS,
+        "kymora_alone": {
+            "median_ms": med_km_alone,
+            "series_per_sec": sps_alone,
+            "divergence_vs_interleaved": divergence,
+        },
         "pooled_medians_ms": {
             "kymora": pooled_med_km,
             "catch22": pooled_med_c22,
@@ -219,7 +279,14 @@ def main():
             "tsfel": pf_tsfel,
             "tsfresh": pf_tsfresh,
         },
+        "concurrency_definitions": {
+            "kymora": "16 native Rayon work-stealing threads in single process (0 copies, 0 IPC)",
+            "catch22": "joblib.Parallel(n_jobs=16) across 16 worker processes",
+            "tsfel": "joblib.Parallel(n_jobs=16) across 16 worker processes",
+            "tsfresh": "multiprocessing.Pool(16) across 16 worker processes",
+        },
         "session_records": session_records,
+        "telemetry_log": telemetry_log,
     }
 
     # Write JSON artifact
@@ -236,13 +303,22 @@ def main():
         "Protocol-compliant interleaved same-session evaluation on repository HEAD under Windows High Performance power scheme and AC online.",
         f"- **Workload:** {N_SERIES:,} series × {LENGTH} steps, float64 C-contiguous gaussian, {THREADS} threads across all methods.",
         f"- **Methodology:** {N_SESSIONS} interleaved sessions; each session times Kymora, catch22, TSFEL, and tsfresh in the same environment.",
+        f"- **Cooldown:** {args.cooldown:.0f}s cooldown between competitor extraction blocks to prevent thermal throttling.",
         "",
         "## Summary Ratios",
         "",
-        f"- **Kymora Headline Throughput:** **{pooled_sps:,.0f} series/s** (median **{pooled_med_km:.2f} ms**, 95% CI [{sps_ci_lo:,.0f}, {sps_ci_hi:,.0f}] series/s)",
+        f"- **Kymora Interleaved Throughput:** **{pooled_sps:,.0f} series/s** (median **{pooled_med_km:.2f} ms**, 95% CI [{sps_ci_lo:,.0f}, {sps_ci_hi:,.0f}] series/s)",
+        f"- **Kymora Isolated Baseline:** **{sps_alone:,.0f} series/s** (median **{med_km_alone:.2f} ms**, divergence {divergence*100:.1f}%)",
         f"- **catch22 Speedup:** **{pooled_r_c22:,.0f}×** raw (**{pf_c22:,.0f}×** per-feature; catch22 median {pooled_med_c22:.2f} ms)",
         f"- **TSFEL Speedup:** **{pooled_r_tsfel:,.0f}×** raw (**{pf_tsfel:,.0f}×** per-feature; TSFEL median {pooled_med_tsfel:.2f} ms)",
         f"- **tsfresh Speedup:** **{pooled_r_tsfresh:,.0f}×** raw (**{pf_tsfresh:,.0f}×** per-feature; tsfresh median {pooled_med_tsfresh:.2f} ms)",
+        "",
+        "## Concurrency Definitions (\"16T\")",
+        "",
+        "- **Kymora (16T):** 16 native Rayon work-stealing threads within the single Python process (zero defensive copies, zero IPC serialization).",
+        "- **catch22 (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.",
+        "- **TSFEL (16T):** `joblib.Parallel(n_jobs=16)` executing across 16 worker processes.",
+        "- **tsfresh (16T):** `multiprocessing.Pool(16)` executing across 16 worker processes.",
         "",
         "## Per-Session Breakdown",
         "",

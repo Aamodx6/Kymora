@@ -26,7 +26,7 @@ pub fn record_pool_use() {
 }
 
 /// Dynamic work size threshold: reads `KYMORA_SERIAL_THRESHOLD` environment variable if set,
-/// otherwise dynamically scales with hardware/pool thread count (500 points per thread, min 5,000).
+/// otherwise dynamically scales with hardware/pool thread count (500 points per thread, min 8,000).
 pub fn get_serial_work_threshold() -> usize {
     if let Ok(val) = std::env::var("KYMORA_SERIAL_THRESHOLD") {
         if let Ok(thresh) = val.trim().parse::<usize>() {
@@ -34,7 +34,7 @@ pub fn get_serial_work_threshold() -> usize {
         }
     }
     let pool_threads = rayon::current_num_threads();
-    (pool_threads * 500).max(5_000)
+    (pool_threads * 500).max(8_000)
 }
 
 /// Determine whether a workload should execute in parallel or sequentially.
