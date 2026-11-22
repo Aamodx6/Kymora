@@ -89,7 +89,7 @@ No honest benchmark omits the losses (full analysis in
 
 - **Tiny single-shot calls:** Against a hand-written Numba baseline on the same 33 features, Kymora loses at 1 × 10 (p50 5.90 µs vs Numba 3.00 µs) and 1 × 100 with standard `extract_features` (p50 7.50 µs vs Numba 14.40 µs steady-state; first-call 35.2 µs), where Numba JIT compiles inline loops. With dedicated `kymora.extract_one(x)`, single-call latency drops to **3.90 µs** (p99 6.40 µs; target <8 µs achieved by bypassing GIL release and caching thread-local scratchpads). We keep the Numba 1×10 loss in the ledger honestly.
 - **Small-batch threshold:** Inline sequential caller execution below 8,000 points (`SERIAL_WORK_SIZE_THRESHOLD = 8000`, configurable via `KYMORA_SERIAL_THRESHOLD`) matches 1T and 16T execution and avoids Rayon thread wake jitter.
-- **Batch inflection:** At 10 × 500, Kymora wins 2.4× (103.5 µs vs 247.3 µs); at 100 × 100, Kymora wins 2.4× (156.8 µs vs 375.3 µs); at 100 × 500, Kymora wins 3.0× (396.5 µs vs 1,195.2 µs); at ≥1,000 series, Kymora beats the Numba baseline 6.0×–11.8× on identical features (equal-feature table above).
+- **Batch inflection:** At 10 × 500, Kymora wins 2.4× (103.5 µs vs 247.3 µs); at 100 × 100, Kymora wins 2.4× (156.8 µs vs 375.3 µs); at 100 × 500, Kymora wins 3.0× (396.5 µs vs 1,195.2 µs); at ≥1,000 series, Kymora is 6.0×–11.8× faster than the Numba baseline on identical features (equal-feature table above).
 
 ## Reproducing every figure
 

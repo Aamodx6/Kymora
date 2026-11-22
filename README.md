@@ -79,7 +79,7 @@ import kymora as km
 # 1,000 series of 500 time-steps (float64)
 X = np.random.randn(1000, 500)
 
-# Extract 33 features (zero-copy, multi-threaded)
+# Extract 33 features (direct buffer borrowing, multi-threaded)
 features = km.extract_features(X)
 
 print("Output shape:", features.shape)      # (1000, 33)
@@ -268,7 +268,7 @@ Honest losses, with evidence (`benchmarks/results/2026-10-05_l1_rerun/l1_root_ca
 
 - **Tiny single-shot calls:** Against a hand-written Numba baseline on the same 33 features, Kymora loses at 1 × 10 (p50 5.90 µs vs Numba 3.00 µs) and 1 × 100 with standard `extract_features` (p50 7.50 µs vs Numba 14.40 µs steady-state; first-call 35.2 µs), where Numba JIT compiles inline loops. With dedicated `kymora.extract_one(x)`, single-call latency drops to **3.90 µs** (p99 6.40 µs; target <8 µs achieved by bypassing GIL release and caching thread-local scratchpads). We keep the Numba 1×10 loss in the ledger honestly.
 - **Small-batch threshold:** Inline sequential caller execution below 8,000 points (`SERIAL_WORK_SIZE_THRESHOLD = 8000`, configurable via `KYMORA_SERIAL_THRESHOLD`) matches 1T and 16T execution and avoids Rayon thread wake jitter.
-- **Batch inflection:** At 10 × 500, Kymora wins 2.4× (103.5 µs vs 247.3 µs); at 100 × 100, Kymora wins 2.4× (156.8 µs vs 375.3 µs); at 100 × 500, Kymora wins 3.0× (396.5 µs vs 1,195.2 µs); at ≥1,000 series, Kymora beats the Numba baseline 6.0×–11.8× on identical features (equal-feature table above).
+- **Batch inflection:** At 10 × 500, Kymora wins 2.4× (103.5 µs vs 247.3 µs); at 100 × 100, Kymora wins 2.4× (156.8 µs vs 375.3 µs); at 100 × 500, Kymora wins 3.0× (396.5 µs vs 1,195.2 µs); at ≥1,000 series, Kymora is 6.0×–11.8× faster than the Numba baseline on identical features (equal-feature table above).
 
 #### Memory footprint (re-measured on HEAD sweep $N = 1\text{k}..100\text{k}$, fresh-process peak RSS):
 * **Worker scratch is $O(T \times L)$ and does not scale with $N$:** Peak worker scratch across 16 Rayon worker threads is bounded at 2.29–3.33 MiB at $N \le 10,000$ (0.20–2.52 MiB for 4 threads) and reaches a 25.38 MiB RSS high-water mark at $N=100,000$ due to OS physical page commit of large output arrays.

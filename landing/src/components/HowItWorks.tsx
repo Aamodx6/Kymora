@@ -14,7 +14,7 @@ export const HowItWorks: React.FC = () => {
 
         {/* 4 Cards Workflow Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1: Connect read-only / Zero-copy */}
+          {/* Card 1: Connect read-only / Direct buffer borrowing */}
           <div className="flex flex-col gap-5 group">
             {/* Visual Box Art */}
             <div className="rounded-xl border border-[#D8D9D2] bg-white p-4 h-[168px] flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
@@ -29,7 +29,7 @@ export const HowItWorks: React.FC = () => {
                 <div className="flex items-center gap-3 text-[13px]">
                   <span className="text-[#6B6D65] w-14 font-sans">Memory</span>
                   <span className="font-mono text-[11px] px-2 py-0.5 rounded-[4px] bg-[#F2F3EF] text-[#000000] font-medium border border-[#E2E3DC]">
-                    zero-copy FFI
+                    direct borrowing
                   </span>
                   <span className="ml-auto flex items-center gap-1 text-[11px] text-[#6B6D65]">
                     <svg className="w-3 h-3 text-[#6B6D65]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -65,7 +65,7 @@ export const HowItWorks: React.FC = () => {
                 </h3>
               </div>
               <p className="font-sans text-[13.5px] text-[#50524B] leading-[1.45]">
-                Point Kymora at NumPy buffers, Polars Series, or Arrow memory with zero-copy views. No serialization or IPC overhead.
+                Point Kymora at NumPy buffers, Polars Series, or Arrow memory with direct buffer borrowing. No serialization or IPC overhead.
               </p>
             </div>
           </div>
