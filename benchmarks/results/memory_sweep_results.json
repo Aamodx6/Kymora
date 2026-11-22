@@ -2,41 +2,91 @@
   {
     "n_series": 1000,
     "length": 500,
+    "threads": 16,
     "input_mib": 3.814697265625,
     "output_mib": 0.25177001953125,
-    "scratch_overhead_mib": 2.26171875,
-    "total_peak_delta_mib": 9.69140625
+    "scratch_overhead_mib": 2.453125,
+    "total_peak_delta_mib": 9.81640625
   },
   {
     "n_series": 5000,
     "length": 500,
+    "threads": 16,
     "input_mib": 19.073486328125,
     "output_mib": 1.25885009765625,
-    "scratch_overhead_mib": 2.32421875,
-    "total_peak_delta_mib": 21.40234375
+    "scratch_overhead_mib": 2.28515625,
+    "total_peak_delta_mib": 21.36328125
   },
   {
     "n_series": 10000,
     "length": 500,
+    "threads": 16,
     "input_mib": 38.14697265625,
     "output_mib": 2.5177001953125,
-    "scratch_overhead_mib": 3.22265625,
-    "total_peak_delta_mib": 41.375
+    "scratch_overhead_mib": 3.33203125,
+    "total_peak_delta_mib": 41.484375
   },
   {
     "n_series": 50000,
     "length": 500,
+    "threads": 16,
     "input_mib": 190.73486328125,
     "output_mib": 12.5885009765625,
-    "scratch_overhead_mib": 14.01171875,
-    "total_peak_delta_mib": 204.75390625
+    "scratch_overhead_mib": 13.875,
+    "total_peak_delta_mib": 204.6171875
   },
   {
     "n_series": 100000,
     "length": 500,
+    "threads": 16,
     "input_mib": 381.4697265625,
     "output_mib": 25.177001953125,
-    "scratch_overhead_mib": 25.2890625,
-    "total_peak_delta_mib": 406.765625
+    "scratch_overhead_mib": 25.3828125,
+    "total_peak_delta_mib": 406.859375
+  },
+  {
+    "n_series": 1000,
+    "length": 500,
+    "threads": 4,
+    "input_mib": 3.814697265625,
+    "output_mib": 0.25177001953125,
+    "scratch_overhead_mib": 0.19921875,
+    "total_peak_delta_mib": 4.015625
+  },
+  {
+    "n_series": 5000,
+    "length": 500,
+    "threads": 4,
+    "input_mib": 19.073486328125,
+    "output_mib": 1.25885009765625,
+    "scratch_overhead_mib": 1.2890625,
+    "total_peak_delta_mib": 20.3671875
+  },
+  {
+    "n_series": 10000,
+    "length": 500,
+    "threads": 4,
+    "input_mib": 38.14697265625,
+    "output_mib": 2.5177001953125,
+    "scratch_overhead_mib": 2.5234375,
+    "total_peak_delta_mib": 40.67578125
+  },
+  {
+    "n_series": 50000,
+    "length": 500,
+    "threads": 4,
+    "input_mib": 190.73486328125,
+    "output_mib": 12.5885009765625,
+    "scratch_overhead_mib": 13.3671875,
+    "total_peak_delta_mib": 204.109375
+  },
+  {
+    "n_series": 100000,
+    "length": 500,
+    "threads": 4,
+    "input_mib": 381.4697265625,
+    "output_mib": 25.177001953125,
+    "scratch_overhead_mib": 25.17578125,
+    "total_peak_delta_mib": 406.65625
   }
 ]

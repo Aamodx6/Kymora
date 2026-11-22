@@ -141,7 +141,7 @@ def main():
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(records, f, indent=2)
 
-    save_env(RESULTS_DIR / "env.json", suite="threshold_sweep", load_start=load_start)
+    save_env(RESULTS_DIR / "env.json", extra={"suite": "threshold_sweep", "load_start": load_start, "load_end": snapshot_load()})
 
     # Markdown Report
     lines = [

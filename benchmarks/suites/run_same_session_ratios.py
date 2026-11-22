@@ -17,6 +17,7 @@ import json
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -294,7 +295,14 @@ def main():
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
-    save_env(RESULTS_DIR / "env.json", extra={"load_start": load_start, "load_end": snapshot_load()})
+    save_env(
+        RESULTS_DIR / "env.json",
+        extra={
+            "load_start": load_start,
+            "load_end": snapshot_load(),
+            "cpu_telemetry_rounds": telemetry_log,
+        },
+    )
 
     # Format Markdown Report
     lines = [

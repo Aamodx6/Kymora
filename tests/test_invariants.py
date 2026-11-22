@@ -202,6 +202,29 @@ def test_multiprocessing_fork_safety():
     np.testing.assert_array_equal(out_parent1, out_parent2)
 
 
+def test_multiprocessing_spawn_safety():
+    """Verify that parent process using Rayon thread pool can spawn child that safely calls extract_features."""
+    import multiprocessing
+
+    # 1. Parent process uses thread pool in parallel mode first
+    rng = np.random.default_rng(42)
+    X_parent = np.ascontiguousarray(rng.standard_normal((100, 500)), dtype=np.float64)
+    out_parent1 = kymora.extract_features(X_parent, n_jobs=4)
+    assert out_parent1.shape == (100, 33)
+
+    # 2. Spawn child process via spawn context
+    ctx = multiprocessing.get_context("spawn")
+    with ctx.Pool(processes=2) as pool:
+        res = pool.apply_async(_worker_fn, ((100, 500),))
+        mode, out_shape = res.get(timeout=15.0)
+
+    assert out_shape == (100, 33)
+
+    # 3. Parent continues to use the pool safely after child terminates
+    out_parent2 = kymora.extract_features(X_parent, n_jobs=4)
+    np.testing.assert_array_equal(out_parent1, out_parent2)
+
+
 def test_extract_one_contract():
     """Verify kymora.extract_one produces bit-identical results to extract_features."""
     rng = np.random.default_rng(123)

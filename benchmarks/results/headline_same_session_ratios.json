@@ -3,61 +3,182 @@
   "n_series": 1000,
   "length": 500,
   "threads": 16,
-  "pooled_medians_ms": {
-    "kymora": 2.333,
-    "catch22": 196.8225,
-    "tsfel": 2745.41,
-    "tsfresh": 24500.8479
+  "kymora_alone": {
+    "median_ms": 2.7882,
+    "series_per_sec": 358654.3289577505,
+    "divergence_vs_interleaved": 0.4338167232335697
   },
-  "pooled_series_per_sec": 428632.6618088298,
+  "pooled_medians_ms": {
+    "kymora": 1.9446,
+    "catch22": 185.4967,
+    "tsfel": 2509.5339,
+    "tsfresh": 23540.6198
+  },
+  "pooled_series_per_sec": 514244.5747197367,
   "ci95_series_per_sec": [
-    367066.76944536215,
-    475895.8739827726
+    495049.50495049503,
+    529604.9147336087
   ],
   "ci95_kymora_ms": [
-    2.1013,
-    2.7243
+    1.8882,
+    2.02
   ],
   "pooled_ratios_raw": {
-    "catch22": 84.3645520788684,
-    "tsfel": 1176.7723960565793,
-    "tsfresh": 10501.863651950278
+    "catch22": 95.39067160341457,
+    "tsfel": 1290.5141931502621,
+    "tsfresh": 12105.636017690013
   },
   "pooled_ratios_per_feature": {
-    "catch22": 126.5468281183026,
-    "tsfel": 248.93262224273792,
-    "tsfresh": 446.02509718707745
+    "catch22": 143.08600740512185,
+    "tsfel": 272.99338701255544,
+    "tsfresh": 514.138981446294
+  },
+  "concurrency_definitions": {
+    "kymora": "16 native Rayon work-stealing threads in single process (0 copies, 0 IPC)",
+    "catch22": "joblib.Parallel(n_jobs=16) across 16 worker processes",
+    "tsfel": "joblib.Parallel(n_jobs=16) across 16 worker processes",
+    "tsfresh": "multiprocessing.Pool(16) across 16 worker processes"
   },
   "session_records": [
     {
       "session": 1,
-      "median_km_ms": 4.1182,
-      "median_c22_ms": 222.3024,
-      "median_tsfel_ms": 4099.48755,
-      "median_tsfresh_ms": 23199.3399,
-      "ratio_catch22": 53.98047690738672,
-      "ratio_tsfel": 995.4561580302073,
-      "ratio_tsfresh": 5633.368923316012
+      "median_km_ms": 1.9696,
+      "median_c22_ms": 180.8111,
+      "median_tsfel_ms": 4010.6195499999994,
+      "median_tsfresh_ms": 23540.6198,
+      "ratio_catch22": 91.80092404549147,
+      "ratio_tsfel": 2036.2609413078794,
+      "ratio_tsfresh": 11951.979995938262,
+      "telemetry": {
+        "km": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "c22": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfel": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfresh": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        }
+      }
     },
     {
       "session": 2,
-      "median_km_ms": 1.9971,
-      "median_c22_ms": 198.8696,
-      "median_tsfel_ms": 2628.1257,
-      "median_tsfresh_ms": 24500.8479,
-      "ratio_catch22": 99.5791898252466,
-      "ratio_tsfel": 1315.9710079615443,
-      "ratio_tsfresh": 12268.212858645034
+      "median_km_ms": 1.9088,
+      "median_c22_ms": 191.7779,
+      "median_tsfel_ms": 2530.22855,
+      "median_tsfresh_ms": 22932.2839,
+      "ratio_catch22": 100.47040025146688,
+      "ratio_tsfel": 1325.5598019698239,
+      "ratio_tsfresh": 12013.979411148364,
+      "telemetry": {
+        "km": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "c22": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfel": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfresh": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        }
+      }
     },
     {
       "session": 3,
-      "median_km_ms": 2.1277,
-      "median_c22_ms": 195.4155,
-      "median_tsfel_ms": 2965.923,
-      "median_tsfresh_ms": 24690.9284,
-      "ratio_catch22": 91.84353997274053,
-      "ratio_tsfel": 1393.9573248108286,
-      "ratio_tsfresh": 11604.51586219862
+      "median_km_ms": 1.9699,
+      "median_c22_ms": 173.1577,
+      "median_tsfel_ms": 2474.77915,
+      "median_tsfresh_ms": 24881.4186,
+      "ratio_catch22": 87.90177166353622,
+      "ratio_tsfel": 1256.2968424793137,
+      "ratio_tsfresh": 12630.802883395098,
+      "telemetry": {
+        "km": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "c22": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfel": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        },
+        "tsfresh": {
+          "cpu_freq_current_mhz": 2400.0,
+          "cpu_freq_max_mhz": 2400.0
+        }
+      }
+    }
+  ],
+  "telemetry_log": [
+    {
+      "km": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "c22": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfel": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfresh": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      }
+    },
+    {
+      "km": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "c22": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfel": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfresh": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      }
+    },
+    {
+      "km": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "c22": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfel": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      },
+      "tsfresh": {
+        "cpu_freq_current_mhz": 2400.0,
+        "cpu_freq_max_mhz": 2400.0
+      }
     }
   ]
 }
