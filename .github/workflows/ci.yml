@@ -385,10 +385,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y valgrind
       - name: Build HEAD instruction benchmark
         run: |
-          cargo build --release --bench core33_instructions --no-default-features
-          mkdir -p /tmp/bench-bins
-          HEAD_BIN=$(find target/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
+          HEAD_BIN=$(cargo build --release --bench core33_instructions --no-default-features --message-format=json | jq -r 'select(.target.name=="core33_instructions" and .executable!=null) | .executable' | tail -n 1)
+          if [ -z "$HEAD_BIN" ] || [ ! -f "$HEAD_BIN" ]; then
+            HEAD_BIN=$(find target/release/deps/ -type f -name "core33_instructions-*" ! -name "*.*" | head -n 1)
+          fi
           echo "Found HEAD binary at: $HEAD_BIN"
+          mkdir -p /tmp/bench-bins
           cp "$HEAD_BIN" /tmp/bench-bins/head-bench
       - name: Build BASE instruction benchmark
         id: build-base
@@ -403,8 +405,10 @@ jobs:
             echo "Base ref does not contain benches/core33_instructions.rs (historical baseline unavailable)"
             echo "base_built=false" >> "$GITHUB_OUTPUT"
           else
-            CARGO_TARGET_DIR=target-base cargo build --release --bench core33_instructions --no-default-features
-            BASE_BIN=$(find target-base/release/ -type f \( -name "core33_instructions" -o -name "core33_instructions-*" \) ! -name "*.*" | head -n 1)
+            BASE_BIN=$(CARGO_TARGET_DIR=target-base cargo build --release --bench core33_instructions --no-default-features --message-format=json | jq -r 'select(.target.name=="core33_instructions" and .executable!=null) | .executable' | tail -n 1)
+            if [ -z "$BASE_BIN" ] || [ ! -f "$BASE_BIN" ]; then
+              BASE_BIN=$(find target-base/release/deps/ -type f -name "core33_instructions-*" ! -name "*.*" | head -n 1)
+            fi
             if [ -n "$BASE_BIN" ] && [ -f "$BASE_BIN" ]; then
               echo "Found BASE binary at: $BASE_BIN"
               cp "$BASE_BIN" /tmp/bench-bins/base-bench

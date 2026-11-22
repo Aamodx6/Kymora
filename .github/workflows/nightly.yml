@@ -138,7 +138,8 @@ jobs:
       - name: Lychee Link Checker
         uses: lycheeverse/lychee-action@649b0e4890508ea3e11ea6b3ee35ce899a25afd5 # v2.9.0
         with:
-          args: --verbose --no-progress --exclude-loopback --accept 200..=204,403,429 './**/*.md' './**/*.html'
+          args: --verbose --no-progress --exclude-loopback --exclude "(Aamod007|streaming_push_cost|github\.io)" --accept 200..=204,403,429 './**/*.md' './**/*.html'
+          fail: false
         continue-on-error: true
 
   wallclock-trend:

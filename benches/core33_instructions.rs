@@ -22,7 +22,6 @@ unsafe fn valgrind_client_request(request: usize) -> usize {
     std::ptr::write_volatile(&mut args[4], 0);
     std::ptr::write_volatile(&mut args[5], 0);
     let res: usize;
-    let mut dummy_rdi: usize = 0;
     std::arch::asm!(
         "rol rdi, 3",
         "rol rdi, 13",
@@ -31,7 +30,7 @@ unsafe fn valgrind_client_request(request: usize) -> usize {
         "xchg rbx, rbx",
         in("rax") args.as_ptr(),
         inout("rdx") 0usize => res,
-        inout("rdi") dummy_rdi,
+        inout("rdi") 0usize => _,
     );
     res
 }
