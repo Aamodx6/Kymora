@@ -19,7 +19,7 @@ Technical readiness is **100% GREEN**. Automated operations must now **STOP** at
 | Area | Check / Gate | Status | Evidence / Artifact Link | Notes |
 |---|---|---|---|---|
 | **Hygiene** | Root directory cleanliness | **GREEN** | `tools/check_repo_hygiene.py` | Root strictly restricted to standard distribution files. |
-| **Hygiene** | Stale name & number denylist | **GREEN** | `tools/check_repo_hygiene.py` | 0 occurrences of `tsxtract`, `542,682`, `262x`, `zero defensive`, etc. |
+| **Hygiene** | Stale name & number denylist | **GREEN** | `tools/check_repo_hygiene.py` | 0 occurrences of deprecated names, unpooled throughputs, or banned phrases. |
 | **Versions** | Cross-manifest version sync | **GREEN** | `tools/check_versions.py` | Exact `0.8.2` match across Cargo.toml, pyproject dynamic, CITATION, Zenodo, docs. |
 | **Evidence** | Numeric claims traceability | **GREEN** | `tools/check_claims.py` | All 136 numbers in docs/README trace 100% to `CLAIMS.md`. |
 | **Banned Phrases** | Terminology audit | **GREEN** | Local script audit (`re.search`) | 0 unpermitted hits for `zero-copy`, `beats`, `outperforms`. |
