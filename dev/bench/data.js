@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795353926922,
+  "lastUpdate": 1795358641772,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -279,6 +279,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0562",
             "unit": "ms",
             "extra": "runs=30, cv=0.015"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9c6d4dc1e94a8c774f88343808f124e7f8e4f42d",
+          "message": "ci: fix and harden CI gates, instruction benchmarks, wheels, and deploy gating (#37)\n\n* ci: fix and harden CI gates, wheel testing, deploy gating, and benchmarks\n\n* ci: fix rust macos link flags, bench binary search path, and 3.13t venv\n\n* ci: update 3.13t documentation step, action SHAs in nightly, and launch readiness doc\n\n* fix(ci): address CodeRabbit review findings across benchmarks, CI workflows, and live audit\n\n* fix(bench,nightly): fix valgrind client request, robust instruction collection, and lychee args\n\n* fix(ci,bench): use cargo compiler-artifact json to find benchmark binary and clean up lychee\n\n* fix(bench): allow Callgrind to record and dump workload stats naturally on exit\n\n* fix(bench): remove unused callgrind_stop helper to satisfy clippy\n\n* test: deliberate failure to prove ci-gate triggers\n\n* Revert \"test: deliberate failure to prove ci-gate triggers\"\n\nThis reverts commit 1b81f47899022aa84cf852144e775546ebee595b.",
+          "timestamp": "2026-11-22T20:12:54+05:30",
+          "tree_id": "2c36f19a9e350d5a7fa3a3ebda0642f0c34609ea",
+          "url": "https://github.com/Aamodx6/Kymora/commit/9c6d4dc1e94a8c774f88343808f124e7f8e4f42d"
+        },
+        "date": 1795358640995,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 3.4183,
+            "range": "0.025",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.021"
           }
         ]
       }
