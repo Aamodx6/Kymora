@@ -51,6 +51,7 @@ from .tune import tune
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
     import pandas as pd
+    import polars as pl
 
 __all__ = [
     "extract_features",

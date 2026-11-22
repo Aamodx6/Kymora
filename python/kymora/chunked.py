@@ -103,7 +103,7 @@ def extract_features_chunked(
 
         elif ext == ".parquet":
             try:
-                import pyarrow.parquet as pq
+                import pyarrow.parquet as pq  # type: ignore[import-untyped,import-not-found]
             except ImportError as exc:
                 raise ImportError(
                     "Parquet chunked extraction requires pyarrow: pip install pyarrow"
