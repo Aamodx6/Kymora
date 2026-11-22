@@ -50,7 +50,7 @@ export const Features: React.FC = () => {
     },
     {
       number: '05',
-      title: 'Zero-Copy NumPy Interop',
+      title: 'Direct NumPy Buffer Borrowing',
       tag: 'PyO3 memory buffers',
       description:
         'Binds directly to contiguous C-order float64 numpy arrays without copying memory into Rust. Input validation enforces contiguous layouts at zero runtime penalty.',

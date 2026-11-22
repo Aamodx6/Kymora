@@ -327,7 +327,7 @@ export const Hero: React.FC = () => {
               <strong className="font-bold text-[#000000]">
                 The time-series extractor that shows its work.
               </strong>{' '}
-              Kymora maps zero-copy views into NumPy buffers, releases the GIL, and computes 33 features at 1.74 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
+              Kymora borrows contiguous NumPy buffers directly (no copy of the input), releases the GIL, and computes 33 features at 1.94 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}
@@ -369,7 +369,7 @@ export const Hero: React.FC = () => {
                 <rect x="3" y="7" width="10" height="7" rx="1.5" />
                 <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
               </svg>
-              <span>Zero-copy memory safety. No data ever leaves your process.</span>
+              <span>Direct buffer borrowing memory safety. No data ever leaves your process.</span>
             </div>
 
             {/* Popover Card: Cleanly docked in Left Column with authentic Framer styling */}
@@ -449,7 +449,7 @@ export const Hero: React.FC = () => {
                       <rect x="3" y="7" width="10" height="7" rx="1.5" />
                       <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" />
                     </svg>
-                    <span>Zero-copy FFI</span>
+                    <span>Direct buffer borrowing</span>
                   </div>
                 </div>
 

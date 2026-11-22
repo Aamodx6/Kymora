@@ -56,7 +56,7 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     msPerFeature: 0.0589,
     multiplierVsKymora: 1.0,
     isKymora: true,
-    notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
+    notes: "Direct buffer borrowing (no copy of the input), GIL-released Rayon parallel compute",
   },
   {
     id: "catch22",

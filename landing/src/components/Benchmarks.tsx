@@ -43,7 +43,7 @@ export const Benchmarks: React.FC = () => {
           </h2>
           <p className="mt-4 font-sans text-base sm:text-lg text-body leading-relaxed">
             Standard Python time-series packages compute features using sequential loops or Python-level
-            multiprocessing. Kymora uses Rust zero-copy buffers and multi-threaded Rayon work-stealing.
+            multiprocessing. Kymora borrows buffers directly with no copy of the input and uses multi-threaded Rayon work-stealing.
           </p>
         </div>
 

@@ -102,7 +102,7 @@ pipe.fit(X, y)
 
 ## Supervised Feature Selection in Scikit-Learn
 
-Select statistically significant, non-redundant features using FDR control and correlation clustering:
+Select informative, non-redundant features using FDR control and correlation clustering:
 
 ```python
 from sklearn.pipeline import Pipeline
