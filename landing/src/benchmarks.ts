@@ -1,12 +1,12 @@
 /**
  * Benchmark Datasets for Kymora Landing Page
  *
- * Measured 2026-10-04 (EXPLORATORY single-machine numbers — see CLAIMS.md).
- * Artifact: benchmarks/results/F1_REPORT.md (10 interleaved rounds).
+ * Measured 2026-11-22 (EXPLORATORY single-machine numbers — see CLAIMS.md).
+ * Artifact: benchmarks/results/2026-11-22_reproduce_readme/ (subprocess runs).
  * Reference command:
  *   python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500
  * Tested on: 1,000 series x 500 steps, i7-13620H laptop, 10 cores (6P+4E) /
- * 16 threads, Windows 11, Performance plan, AC online, float64 C-contiguous.
+ * 16 threads, Windows 11, AC online, power scheme recorded in env.json, float64 C-contiguous.
  */
 
 export interface BenchmarkItem {
@@ -41,18 +41,18 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
 };
 
-/* Measured 2026-10-04, pooled medians; artifact benchmarks/results/F1_REPORT.md.
-   Kymora version label matches the artifact-era code (0.7.0). */
+/* Measured 2026-11-22, pooled medians; artifact benchmarks/results/2026-11-22_reproduce_readme/.
+   Kymora version label matches the artifact-era code (0.8.0). */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
     name: "Kymora",
-    version: "0.7.0",
+    version: "0.8.0",
     language: "Rust + PyO3",
     featuresCount: 33,
-    totalTimeMs: 3.18,
-    seriesPerSec: 314450,
-    msPerFeature: 0.0964,
+    totalTimeMs: 1.84,
+    seriesPerSec: 542682,
+    msPerFeature: 0.0558,
     multiplierVsKymora: 1.0,
     isKymora: true,
     notes: "Zero-copy NumPy view, GIL-released Rayon parallel compute",
@@ -60,26 +60,26 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "catch22",
     name: "catch22 (pycatch22)",
-    version: "0.5.0",
+    version: "1.0.2",
     language: "C wrapper",
     featuresCount: 22,
-    totalTimeMs: 833.1,
-    seriesPerSec: 1200,
-    msPerFeature: 37.87,
-    multiplierVsKymora: 262.0,
+    totalTimeMs: 432.6,
+    seriesPerSec: 2312,
+    msPerFeature: 19.66,
+    multiplierVsKymora: 235.0,
     isKymora: false,
     notes: "Per-series Python iteration loop overhead",
   },
   {
     id: "tsfel",
     name: "TSFEL (all domains)",
-    version: "0.2.0",
+    version: "0.3.0",
     language: "Pure Python / NumPy",
     featuresCount: 156,
-    totalTimeMs: 2541.6,
-    seriesPerSec: 393,
-    msPerFeature: 16.29,
-    multiplierVsKymora: 799.2,
+    totalTimeMs: 2041.5,
+    seriesPerSec: 490,
+    msPerFeature: 13.09,
+    multiplierVsKymora: 1108.0,
     isKymora: false,
     notes: "Sequential python feature routines with heavy array copies",
   },
@@ -89,10 +89,10 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     version: "0.21.2",
     language: "Python + Multiprocessing",
     featuresCount: 777,
-    totalTimeMs: 20891.2,
-    seriesPerSec: 48,
-    msPerFeature: 26.89,
-    multiplierVsKymora: 6570.0,
+    totalTimeMs: 14966.8,
+    seriesPerSec: 67,
+    msPerFeature: 19.26,
+    multiplierVsKymora: 8122.0,
     isKymora: false,
     notes: "Requires long DataFrame melt; IPC and pickle serialization cost",
   },

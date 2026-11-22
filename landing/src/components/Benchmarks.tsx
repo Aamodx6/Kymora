@@ -188,7 +188,7 @@ export const Benchmarks: React.FC = () => {
                       style={{ width: `${percent}%` }}
                     >
                       {item.isKymora && (
-                        <span className="truncate">Kymora (314k series/s, exploratory)</span>
+                        <span className="truncate">Kymora (543k series/s, exploratory)</span>
                       )}
                     </div>
                   </div>
@@ -217,9 +217,9 @@ export const Benchmarks: React.FC = () => {
             <p className="mt-1.5">
               Raw totals compare 33 features against up to 777 — read the
               per-feature column, and the like-for-like equal-feature table in
-              the README (TSFEL 13: 564.6×, tsfresh 13: 1,693.8×, numba 33:
-              3.4×, all parity-gated). Kymora loses small-batch cases to numba
-              (up to ~40× at 1×100: fixed dispatch overhead), scaling stops near
+              the README (TSFEL 13: 1,089.1×, tsfresh 13: 2,812.4×, numba 33:
+              6.0×, all parity-gated). Kymora loses small-batch cases to numba
+              (1.4×–1.8× at 1×100: fixed dispatch overhead), scaling stops near
               physical cores, and these are single-machine exploratory numbers.
               Full claim→artifact map: CLAIMS.md in the repo.
             </p>

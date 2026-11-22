@@ -1,6 +1,6 @@
 # r/Python draft (DO NOT POST YET)
 
-Title: Kymora 0.8.0: batch time-series feature extraction with a Rust core (3.4×–1,694× on matched features)
+Title: Kymora 0.8.0: batch time-series feature extraction with a Rust core (6.0×–2,812× on matched features)
 
 Body:
 
@@ -26,8 +26,8 @@ multichannel input, NaN-in → NaN-row contract, `nan_policy="raise"` and
 `contiguous="copy"` opt-ins.
 
 Equal-feature results (only identically-defined features timed,
-1,000 × 500, medians + 95% CIs): 3.4× vs a numba baseline, 61× vs numpy,
-565× vs TSFEL, 1,694× vs tsfresh.
+1,000 × 500, medians + 95% CIs): 6.0× vs a numba baseline, 165× vs numpy,
+1,089× vs TSFEL, 2,812× vs tsfresh.
 
 Limitations: single-machine numbers (reproduce with `./reproduce.sh`;
 artifacts in `benchmarks/results/`); loses tiny-batch cases to numba;

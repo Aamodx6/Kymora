@@ -22,9 +22,9 @@ computed value (per series-feature), and who computes *the same work*
 fastest (matched features, definitions verified first). On 1,000 × 500
 (i7-13620H, 16 threads, pooled medians + 95% CIs):
 
-- matched: 3.4× vs numba, 61× vs numpy, 565× vs TSFEL, 1,694× vs tsfresh
-- raw as-is: 3.18 ms vs catch22 833 ms, TSFEL 2,542 ms, tsfresh 20,891 ms
-- per series-feature: 0.096 µs vs 37.9 / 16.3 / 26.9 µs
+- matched: 6.0× vs numba, 165× vs numpy, 1,089× vs TSFEL, 2,812× vs tsfresh
+- raw as-is: 1.84 ms vs catch22 433 ms, TSFEL 2,042 ms, tsfresh 14,967 ms
+- per series-feature: 0.056 µs vs 19.7 / 13.1 / 19.3 µs
 
 The streaming side was the harder numerics problem. Rolling moments from
 raw power sums cancel catastrophically on offset series, so the extractor
@@ -34,7 +34,7 @@ match batch output to 1e-9, with the one ill-conditioned corner
 
 Limitations, because they matter more than the wins: single-machine
 exploratory numbers (`./reproduce.sh` regenerates everything; artifacts in
-`benchmarks/results/`); numba wins tiny batches by up to ~40×; scaling
+`benchmarks/results/`); numba wins tiny batches (1.4×–1.8× at 1×100); scaling
 stops at physical cores; float32 covers core33-class features only.
 
 Links: repo (https://github.com/Aamodx6/Kymora), docs

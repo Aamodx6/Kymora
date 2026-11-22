@@ -27,8 +27,8 @@ passes, shared intermediates, Rayon across series. Thread-pool
 construction per call (~200 µs) turned out to dominate small calls, so
 pools are now cached per thread count.
 
-Matched-feature numbers (1,000 × 500, i7-13620H/16 threads): 3.4× vs
-numba, 61× vs numpy, 565× vs TSFEL, 1,694× vs tsfresh — all like-for-like,
+Matched-feature numbers (1,000 × 500, i7-13620H/16 threads): 6.0× vs
+numba, 165× vs numpy, 1,089× vs TSFEL, 2,812× vs tsfresh — all like-for-like,
 parity-gated, in `benchmarks/results/` with a claim→artifact map.
 
 Repo: https://github.com/Aamodx6/Kymora (`pip install kymora`, abi3

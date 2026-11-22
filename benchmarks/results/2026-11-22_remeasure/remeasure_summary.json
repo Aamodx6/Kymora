@@ -1,0 +1,165 @@
+{
+  "generated": "2026-11-22T10:29:47.444469",
+  "profiles": [
+    {
+      "profile": "minimal",
+      "n_features": 10,
+      "median_ms": 0.5825999978696927,
+      "best_ms": 0.48290000268025324,
+      "series_per_s": 1716443.5352841609,
+      "us_per_series": 0.5825999978696927,
+      "us_per_series_feature": 0.058259999786969274,
+      "status": "ok"
+    },
+    {
+      "profile": "core33",
+      "n_features": 33,
+      "median_ms": 1.8978499974764418,
+      "best_ms": 1.6248000029008836,
+      "series_per_s": 526912.0327368829,
+      "us_per_series": 1.8978499974764418,
+      "us_per_series_feature": 0.0575106059841346,
+      "status": "ok"
+    },
+    {
+      "profile": "extended",
+      "n_features": 143,
+      "median_ms": 8.023449998290744,
+      "best_ms": 6.862599999294616,
+      "series_per_s": 124634.66466582737,
+      "us_per_series": 8.023449998290744,
+      "us_per_series_feature": 0.056108041946089114,
+      "status": "ok"
+    },
+    {
+      "profile": "full",
+      "n_features": 543,
+      "median_ms": 9.435550000489457,
+      "best_ms": 7.880999997723848,
+      "series_per_s": 105982.16319643543,
+      "us_per_series": 9.435550000489457,
+      "us_per_series_feature": 0.01737670349998058,
+      "status": "ok"
+    }
+  ],
+  "scaling": [
+    {
+      "threads": 1,
+      "median_ms": 11.215700000320794,
+      "speedup": 1.0,
+      "efficiency": 1.0,
+      "status": "ok"
+    },
+    {
+      "threads": 2,
+      "median_ms": 5.833850002090912,
+      "speedup": 1.922521147492817,
+      "efficiency": 0.9612605737464085,
+      "status": "ok"
+    },
+    {
+      "threads": 4,
+      "median_ms": 3.3960999971895944,
+      "speedup": 3.302523485645954,
+      "efficiency": 0.8256308714114885,
+      "status": "ok"
+    },
+    {
+      "threads": 8,
+      "median_ms": 2.2229000023799017,
+      "speedup": 5.045526109277493,
+      "efficiency": 0.6306907636596866,
+      "status": "ok"
+    },
+    {
+      "threads": 16,
+      "median_ms": 2.3011499979475047,
+      "speedup": 4.873954331670931,
+      "efficiency": 0.3046221457294332,
+      "status": "ok"
+    },
+    {
+      "threads": 32,
+      "median_ms": 2.0886500024062116,
+      "speedup": 5.369832182222892,
+      "efficiency": 0.16780725569446536,
+      "status": "ok"
+    }
+  ],
+  "memory": [
+    {
+      "lib": "kymora",
+      "n_series": 100000,
+      "length": 500,
+      "profile": "core33",
+      "n_features": 33,
+      "input_mb": 385.2265625,
+      "extraction_peak_extra_mb": 32.7890625,
+      "peak_total_mb": 418.015625,
+      "output_mb_exact": 25.177001953125,
+      "status": "ok"
+    },
+    {
+      "lib": "kymora",
+      "n_series": 10000,
+      "length": 500,
+      "profile": "core33",
+      "n_features": 33,
+      "input_mb": 41.84375,
+      "extraction_peak_extra_mb": 10.04296875,
+      "peak_total_mb": 51.88671875,
+      "output_mb_exact": 2.5177001953125,
+      "status": "ok"
+    },
+    {
+      "lib": "kymora",
+      "n_series": 10000,
+      "length": 500,
+      "profile": "extended",
+      "n_features": 143,
+      "input_mb": 42.03515625,
+      "extraction_peak_extra_mb": 18.4609375,
+      "peak_total_mb": 60.49609375,
+      "output_mb_exact": 10.9100341796875,
+      "status": "ok"
+    },
+    {
+      "lib": "kymora",
+      "n_series": 1000,
+      "length": 500,
+      "profile": "full",
+      "n_features": 543,
+      "input_mb": 7.5625,
+      "extraction_peak_extra_mb": 10.75390625,
+      "peak_total_mb": 18.31640625,
+      "output_mb_exact": 4.14276123046875,
+      "status": "ok"
+    },
+    {
+      "lib": "tsfresh",
+      "n_series": 1000,
+      "length": 500,
+      "profile": null,
+      "n_features": 777,
+      "input_mb": 7.68359375,
+      "extraction_peak_extra_mb": 293.21484375,
+      "peak_total_mb": 300.8984375,
+      "output_mb_exact": 5.92803955078125,
+      "status": "ok",
+      "fc": "efficient"
+    },
+    {
+      "lib": "tsfresh",
+      "n_series": 10000,
+      "length": 500,
+      "profile": null,
+      "n_features": 777,
+      "input_mb": 41.8671875,
+      "extraction_peak_extra_mb": 410.30859375,
+      "peak_total_mb": 452.17578125,
+      "output_mb_exact": 59.2803955078125,
+      "status": "ok",
+      "fc": "efficient"
+    }
+  ]
+}

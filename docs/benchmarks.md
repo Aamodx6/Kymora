@@ -38,30 +38,30 @@ pipeline ever sees.
 ## A measured run
 
 1,000 series × 500 steps, i7-13620H laptop, 10 cores (6P+4E) / 16 threads,
-Windows 11, Performance plan, AC online (artifacts:
-`benchmarks/results/F1_REPORT.md` for raw + competitor rounds, 2026-10-04;
-`EQUAL_FEATURE_REPORT.md` + `2026-10-05_equal_feature/` for matched,
-2026-10-05; exploratory single-machine numbers):
+Windows 11, AC online, power scheme `Silent` recorded in `env.json` (artifacts:
+`2026-11-22_reproduce_readme/` for raw + competitor rounds, 2026-11-22;
+`EQUAL_FEATURE_REPORT.md` + `2026-11-22_equal_feature/` for matched,
+2026-11-22; exploratory single-machine numbers):
 
 | library | features | total time | series/s | µs/series-feature |
 |---|---:|---:|---:|---:|
-| **kymora** | 33 | **3.18 ms** | 314,450 | 0.0964 |
-| `catch22` (pycatch22) | 22 | 833.1 ms | 1,200 | 37.87 |
-| `TSFEL` (all domains) | 156 | 2,541.6 ms | 393 | 16.29 |
-| `tsfresh` (EfficientFCParameters) | 777 | 20,891.2 ms | 48 | 26.89 |
+| **kymora** | 33 | **1.84 ms** | 542,682 | 0.0558 |
+| `catch22` (pycatch22) | 22 | 432.6 ms | 2,312 | 19.66 |
+| `TSFEL` (all domains) | 156 | 2,041.5 ms | 490 | 13.09 |
+| `tsfresh` (EfficientFCParameters) | 777 | 14,966.8 ms | 67 | 19.26 |
 
-Raw ratios (262×/799×/6,570×) compare 33 against up to 777 features — read
-the per-feature column (393×/169×/279×) next to them, and the matched table
+Raw ratios (235×/1,108×/8,122×) compare 33 against up to 777 features — read
+the per-feature column (352×/234×/345×) next to them, and the matched table
 below for the like-for-like view.
 
 ### Equal-feature (like-for-like, 1,000 × 500, 16 threads)
 
 | Library | Equal features | Kymora med (ms) | Library med (ms) | Ratio (95% CI) |
 | :--- | :---: | :---: | :---: | :--- |
-| numba baseline | 33 | 4.72 | 16.05 | **3.4× slower** [3.1, 3.9] |
-| numpy baseline | 33 | 4.68 | 285.50 | **61.0× slower** [60.0, 62.0] |
-| TSFEL | 13 | 3.92 | 2,213.69 | **564.6× slower** [509.7, 781.4] |
-| tsfresh | 13 | 4.94 | 8,359.45 | **1,693.8× slower** [1,645.5, 1,900.1] |
+| numba baseline | 33 | 2.24 | 13.34 | **6.0× slower** [5.7, 6.5] |
+| numpy baseline | 33 | 2.19 | 361.33 | **165.1× slower** [157.2, 170.5] |
+| TSFEL | 13 | 1.97 | 2,145.73 | **1,089.1× slower** [1,007.3, 1,132.2] |
+| tsfresh | 13 | 2.34 | 6,580.57 | **2,812.4× slower** [2,584.3, 2,914.1] |
 
 The batch gap has two independent causes. One is parallelism plus a single
 FFI crossing instead of a thousand Python calls. The other is that all 33
@@ -79,7 +79,7 @@ No honest benchmark omits the losses (full analysis in
 `benchmarks/results/L1_ROOT_CAUSE.md`):
 
 - Tiny calls (a handful of series): fixed per-call overhead (~70 µs
-  dispatch floor) dominates; numba/numpy win up to ~40× at 1×100.
+  dispatch floor) dominates; numba/numpy win that case (1.4×–1.8× measured).
 - The numba baseline wins small-batch throughput cases (10×500 and below).
 - Oversubscribing threads past the physical core count adds nothing on
   hybrid laptops (see [Performance](performance.md)).

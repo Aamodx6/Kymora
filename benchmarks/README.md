@@ -32,6 +32,8 @@ make report            # REPORT.md + results.json from latest run
 `results/` contains **frozen evidence** (tracked in git — never delete or
 regenerate in place): `L1_ROOT_CAUSE.md`, `l1_root_cause.json`,
 `B3_REPORT.md`, `F1_REPORT.md`, `EQUAL_FEATURE_REPORT.md`,
-`STREAMING_PUSH_REPORT.md`, plus the dated run directories cited by
-`CLAIMS.md`. Stray `*.log` / root-level `*.jsonl` outputs are scratch:
+`STREAMING_PUSH_REPORT.md`, `2026-11-22_BENCH_REPORT.md`, plus the dated run
+directories cited by `CLAIMS.md`. `EQUAL_FEATURE_REPORT.md` is the one
+file the suite rewrites itself: `equal_feature.py bench` regenerates it
+from the newest run. Stray `*.log` / root-level `*.jsonl` outputs are scratch:
 re-runnable via the suites above.
