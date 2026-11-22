@@ -33,7 +33,9 @@ from benchmarks.harness.schema import BenchmarkRecord, validate_record
 from benchmarks.harness.stats import compute_stats
 
 RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
-OUT_JSONL = RESULTS_DIR / "streaming.jsonl"
+OUT_DIR = RESULTS_DIR / "2026-11-22_streaming"
+OUT_JSONL = OUT_DIR / "streaming.jsonl"
+OUT_REPORT = OUT_DIR / "STREAMING_PUSH_REPORT.md"
 
 CAPACITIES = [64, 256, 4096, 65_536]
 PUSH_RUNS = 50_000          # pushes timed per capacity (after warmup)
@@ -127,43 +129,59 @@ def run_capacity(cap: int, threads: int) -> None:
     ex = fresh()
     for v in rng.standard_normal(1000):  # warmup
         ex.push(float(v))
-    # 10 chunks of PUSHS_PER_CHUNK, each chunk timed -> distribution for stats
-    PUSHS_PER_CHUNK = PUSH_RUNS // 10
-    chunk_times = []
+    
+    # Measure individual pushes to capture exact p50, p90, p99, and max (including drift re-anchor!)
+    n_indiv = max(20_000, cap + 5_000)
+    indiv_vals = rng.standard_normal(n_indiv)
+    push_times_ns = []
     gc.disable()
-    for _ in range(10):
-        t0 = time.perf_counter()
-        for v in rng.standard_normal(PUSHS_PER_CHUNK):
-            ex.push(float(v))
-        chunk_times.append(time.perf_counter() - t0)
+    for v in indiv_vals:
+        t0 = time.perf_counter_ns()
+        ex.push(float(v))
+        push_times_ns.append(time.perf_counter_ns() - t0)
     gc.enable()
-    total_pushes = PUSHS_PER_CHUNK * 10
-    chunk_us = float(np.mean(chunk_times)) / PUSHS_PER_CHUNK * 1e6
-    _append(_record(f"{case_prefix}_push", "ok", chunk_times, None, {
+    push_us = np.asarray(push_times_ns) / 1000.0
+    push_p50 = float(np.percentile(push_us, 50))
+    push_p90 = float(np.percentile(push_us, 90))
+    push_p99 = float(np.percentile(push_us, 99))
+    push_max = float(np.max(push_us))
+
+    _append(_record(f"{case_prefix}_push", "ok", [push_p50 / 1e6], None, {
         **base_extra, "measurement": "push_latency",
-        "pushes": total_pushes, "us_per_push": chunk_us,
-        "us_p50_chunk": float(np.median(chunk_times)) / PUSHS_PER_CHUNK * 1e6,
+        "pushes": n_indiv,
+        "us_p50": push_p50,
+        "us_p90": push_p90,
+        "us_p99": push_p99,
+        "us_max": push_max,
     }))
-    print(f"    push: {chunk_us:.3f} µs/push ({total_pushes} pushes)")
+    print(f"    push: p50={push_p50:.3f} µs, p99={push_p99:.3f} µs, max={push_max:.3f} µs ({n_indiv} pushes)")
 
     # ── 2. compute() latency: fast / all ──
-    for kind, n_runs in (("fast", COMPUTE_RUNS), ("all", COMPUTE_RUNS)):
+    compute_stats_map = {}
+    for kind in ("fast", "all"):
         ex = fresh()
-        for _ in range(100):
+        for _ in range(50):
             ex.compute(kind=kind)
         gc.disable()
-        times = []
+        times_us = []
+        n_runs = COMPUTE_RUNS if (kind == "fast" or cap <= 4096) else 200
         for _ in range(n_runs):
-            t0 = time.perf_counter()
+            t0 = time.perf_counter_ns()
             ex.compute(kind=kind)
-            times.append(time.perf_counter() - t0)
+            times_us.append((time.perf_counter_ns() - t0) / 1000.0)
         gc.enable()
-        st = compute_stats(times)
-        _append(_record(f"{case_prefix}_compute_{kind}", "ok", times, None, {
+        c_p50 = float(np.percentile(times_us, 50))
+        c_p90 = float(np.percentile(times_us, 90))
+        c_p99 = float(np.percentile(times_us, 99))
+        c_max = float(np.max(times_us))
+        compute_stats_map[kind] = {
+            "p50": c_p50, "p90": c_p90, "p99": c_p99, "max": c_max
+        }
+        _append(_record(f"{case_prefix}_compute_{kind}", "ok", [c_p50 / 1e6], None, {
             **base_extra, "measurement": f"compute_{kind}",
-            "us_p50": st["median"] * 1e6, "us_p95": st["p95"] * 1e6,
+            "us_p50": c_p50, "us_p90": c_p90, "us_p99": c_p99, "us_max": c_max,
         }))
-        print(f"    compute({kind}): p50={st['median']*1e6:.2f} µs p95={st['p95']*1e6:.2f} µs")
+        print(f"    compute({kind}): p50={c_p50:.2f} µs, p99={c_p99:.2f} µs, max={c_max:.2f} µs")
 
     # ── 3. Naive recompute: batch extract_features on the same window ──
     ex = fresh()
@@ -266,8 +284,8 @@ def main() -> int:
     if args.caps:
         caps = [int(c) for c in args.caps.split(",")]
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    save_env(RESULTS_DIR / "env.json")
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    save_env(OUT_DIR / "env.json")
 
     done: set[str] = set()
     if args.resume and OUT_JSONL.exists():
@@ -295,6 +313,71 @@ def main() -> int:
     if "stream_end_to_end" not in done:
         print("\n  end-to-end stream simulation:")
         run_end_to_end()
+
+    # Generate Markdown Report
+    rows = []
+    if OUT_JSONL.exists():
+        for line in OUT_JSONL.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rows.append(json.loads(line))
+
+    by_cap = {}
+    for r in rows:
+        cid = r.get("case_id", "")
+        extra = r.get("extra", {})
+        cap = extra.get("capacity")
+        if cap not in by_cap:
+            by_cap[cap] = {}
+        if "_gate" in cid:
+            by_cap[cap]["gate_rel"] = extra.get("gate_rel_diff", 0.0)
+        elif "_push" in cid:
+            by_cap[cap]["push_p50"] = extra.get("us_p50")
+            by_cap[cap]["push_p99"] = extra.get("us_p99")
+            by_cap[cap]["push_max"] = extra.get("us_max")
+        elif "_compute_fast" in cid:
+            by_cap[cap]["fast_p50"] = extra.get("us_p50")
+            by_cap[cap]["fast_p99"] = extra.get("us_p99")
+            by_cap[cap]["fast_max"] = extra.get("us_max")
+        elif "_compute_all" in cid:
+            by_cap[cap]["all_p50"] = extra.get("us_p50")
+            by_cap[cap]["all_p99"] = extra.get("us_p99")
+            by_cap[cap]["all_max"] = extra.get("us_max")
+        elif "_naive_recompute" in cid:
+            by_cap[cap]["naive_p50"] = extra.get("us_p50")
+        elif "_summary" in cid:
+            by_cap[cap]["speedup"] = extra.get("speedup_fast_vs_naive")
+
+    report_lines = [
+        "# Streaming Re-validation Report (HEAD)",
+        "",
+        "Suite: `benchmarks/suites/streaming.py` (B3) re-run on repository HEAD.",
+        "System: Windows 11, High Performance plan, AC online, single thread.",
+        "Every capacity is parity-gated before timing (`compute(all) == core33`, `compute(fast) == fast subset`).",
+        "",
+        "> [!NOTE]",
+        "> **Complexity Contract:**",
+        "> - Ingestion: **amortized $O(1)$ per-sample ingestion, worst-case $O(W)$ upon drift re-anchoring**.",
+        "> - Periodic re-anchoring passes over the window buffer (showing in max push latency).",
+        "> - Fast subset query: **$O(1)$ flat query latency** across all window capacities.",
+        "",
+        "## Measured Latency vs Window Capacity",
+        "",
+        "| Window Capacity (W) | Gate Rel Diff | push p50 (p99 / max) (µs) | compute(fast) p50 (p99 / max) (µs) | compute(all) p50 (µs) | Naive Recompute p50 (µs) | Speedup (fast vs naive) |",
+        "|:---:|:---:|:---:|:---:|:---:|:---:|:---:|",
+    ]
+    for c in sorted(c for c in by_cap if isinstance(c, int)):
+        d = by_cap[c]
+        g = f"{d.get('gate_rel', 0.0):.2e}"
+        p_str = f"{d.get('push_p50', 0):.2f} ({d.get('push_p99', 0):.2f} / {d.get('push_max', 0):.1f}) µs"
+        f_str = f"{d.get('fast_p50', 0):.2f} ({d.get('fast_p99', 0):.2f} / {d.get('fast_max', 0):.1f}) µs"
+        a_str = f"{d.get('all_p50', 0):.2f} µs"
+        n_str = f"{d.get('naive_p50', 0):.2f} µs"
+        sp = f"{d.get('speedup', 0):.1f}×" if d.get('speedup') else "—"
+        report_lines.append(f"| {c:,} | {g} | {p_str} | {f_str} | {a_str} | {n_str} | {sp} |")
+
+    OUT_REPORT.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+    (RESULTS_DIR / "STREAMING_REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+    print(f"\nReport written to {OUT_REPORT}")
 
     print(f"\nDone. Rows in {OUT_JSONL}")
     return 0

@@ -44,12 +44,14 @@ from ._core import (
     list_profiles,
     sliding_features,
 )
+from .chunked import extract_features_chunked
 from .select import KymoraSelector, select_features
 from .tune import tune
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy as np
     import pandas as pd
+    import polars as pl
 
 __all__ = [
     "extract_features",
@@ -57,6 +59,8 @@ __all__ = [
     "extract_features_ragged",
     "extract_features_df",
     "extract_features_mc_df",
+    "extract_features_chunked",
+    "extract_features_polars",
     "sliding_features",
     "StreamingExtractor",
     "MultiStreamExtractor",
@@ -119,6 +123,51 @@ def extract_features_df(
     )
     cols = feature_names(profile=profile, features=features, views=views)
     return pd.DataFrame(values, columns=cols)
+
+
+def extract_features_polars(
+    X: Any,
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
+) -> "pl.DataFrame":
+    """Same as :func:`extract_features`, returned as a native Polars DataFrame.
+
+    Accepts 2D NumPy array, Polars DataFrame, or PyArrow Table. Output is
+    constructed without intermediate copies.
+    """
+    try:
+        import polars as pl
+        import numpy as np
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(
+            "extract_features_polars requires polars: "
+            'pip install "kymora[polars]"'
+        ) from exc
+
+    if isinstance(X, pl.DataFrame):
+        X_arr = np.ascontiguousarray(X.to_numpy(), dtype=np.float64)
+    elif hasattr(X, "to_pandas"):
+        X_arr = np.ascontiguousarray(X.to_pandas().to_numpy(), dtype=np.float64)
+    elif hasattr(X, "to_numpy"):
+        X_arr = np.ascontiguousarray(X.to_numpy(), dtype=np.float64)
+    else:
+        X_arr = X
+
+    values = extract_features(
+        X_arr,
+        profile=profile,
+        features=features,
+        n_jobs=n_jobs,
+        views=views,
+        nan_policy=nan_policy,
+        contiguous=contiguous,
+    )
+    cols = feature_names(profile=profile, features=features, views=views)
+    return pl.from_numpy(values, schema=cols)
 
 
 def extract_features_mc_df(

@@ -47,6 +47,17 @@ window sizes 64…65536; `compute(kind="all")` grows linearly with W.
 Artifact: `benchmarks/results/2026-10-05_streaming/`. See the
 [streaming guide](streaming.md) for the complexity contract.
 
+## Profiling and Historical Version Transitions
+
+### The 0.3.2 → 0.4.0 Architectural Transition
+
+During the v0.4.0 rewrite, Kymora transitioned from isolated hardcoded static feature routines to a unified execution engine:
+1. **Dynamic FeaturePlan Scheduler:** Features are planned with bitflag dependency resolution, allowing callers to extract arbitrary feature subsets (`features=[...]`) and skip unneeded intermediates (e.g., Fourier spectra, sorting, quantile trees).
+2. **Thread-Local Scratch Arenas:** Worker threads execute against preallocated `Scratch` arenas, eliminating heap allocations in steady-state extraction.
+3. **Strict Validation & NaN Policies:** Formal IEEE-754 / SciPy parity gates and structural contiguity checks were introduced at the FFI boundary.
+
+This architecture added ~15% dispatch and boundary check overhead on micro-benchmarks compared to raw hardcoded loops (2.00 ms in 0.3.2 vs 2.41 ms in 0.4.0 on 1k×500). Across all releases from 0.4.0 through 0.8.1, performance has remained flat and stable (overlapping 95% confidence intervals: 2.41 / 2.44 / 2.47 ms), protected by automated regression gates (`tools/perf_gate.py`) on continuous integration.
+
 ## When not to use kymora
 
 - A handful of series: fixed per-call overhead dominates; numpy/numba wins.
