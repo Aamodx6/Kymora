@@ -31,7 +31,7 @@ All numerical claims in this release are backed by frozen artifacts, hardware te
 
 ### 4. Memory Bounds & Buffer Borrowing
 - **Worker Scratch**: Bounded at **2.29–3.33 MiB** across 16 threads (0.20–2.52 MiB across 4 threads) for $N \le 10,000$.
-- **Direct Buffer Borrowing**: Zero defensive copies of input data — borrows contiguous C-order NumPy arrays directly into Rust slices.
+- **Direct Buffer Borrowing**: No copy of the input is made — borrows contiguous C-order NumPy arrays directly into Rust slices.
 - Peak RSS delta at $100,000 \times 500$ is **406.86 MiB** (input buffer 381.47 MiB + output buffer 25.18 MiB + scratch/OS page commit 25.38 MiB).
 
 ---
