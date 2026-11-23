@@ -16,9 +16,13 @@ Outputs:
 from __future__ import annotations
 
 import json
+import sys
 import time
 import warnings
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -33,9 +37,16 @@ import kymora
 from kymora.datasets import load_dataset
 import tsfel
 
+try:
+    from tsfresh import extract_features as tsf_extract
+    from tsfresh.feature_extraction import MinimalFCParameters, EfficientFCParameters
+    HAS_TSFRESH = True
+except ImportError:
+    HAS_TSFRESH = False
+
 warnings.filterwarnings("ignore")
 
-DATASETS = ["GunPoint", "ECG200", "ItalyPowerDemand", "ArrowHead"]
+DATASETS = ["GunPoint", "ECG200", "ItalyPowerDemand", "Coffee"]
 
 PAIRINGS = [
     ("mean", "0_Mean"),
@@ -68,16 +79,41 @@ def get_tsfel_matched_cfg():
 
 def extract_tsfel(X: np.ndarray, cfg: dict, threads: int = -1) -> np.ndarray:
     def _row(r):
-        return tsfel.time_series_features_extractor(cfg, r, verbose=0).to_numpy().ravel()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return tsfel.time_series_features_extractor(cfg, r, verbose=0).to_numpy().ravel()
     out = Parallel(n_jobs=threads)(delayed(_row)(X[i]) for i in range(len(X)))
     return np.nan_to_num(np.array(out), nan=0.0, posinf=0.0, neginf=0.0)
 
 
 def extract_tsfel_df(X: np.ndarray, cfg: dict, threads: int = -1) -> pd.DataFrame:
     def _row(r):
-        return tsfel.time_series_features_extractor(cfg, r, verbose=0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return tsfel.time_series_features_extractor(cfg, r, verbose=0)
     dfs = Parallel(n_jobs=threads)(delayed(_row)(X[i]) for i in range(len(X)))
     return pd.concat(dfs, ignore_index=True)
+
+
+def extract_tsfresh(X: np.ndarray, fc_parameters, n_jobs: int = 4) -> np.ndarray:
+    if not HAS_TSFRESH:
+        return np.zeros((len(X), 1))
+    n_series, n_steps = X.shape
+    long_df = pd.DataFrame({
+        "id": np.repeat(np.arange(n_series), n_steps),
+        "time": np.tile(np.arange(n_steps), n_series),
+        "val": X.ravel(),
+    })
+    out_df = tsf_extract(
+        long_df,
+        column_id="id",
+        column_sort="time",
+        column_value="val",
+        default_fc_parameters=fc_parameters,
+        n_jobs=n_jobs,
+        disable_progressbar=True,
+    )
+    return np.nan_to_num(out_df.to_numpy(), nan=0.0, posinf=0.0, neginf=0.0)
 
 
 def run_benchmark():
@@ -115,6 +151,15 @@ def run_benchmark():
 
         print(f"    [Equal 13 Feats] Kymora: {t_km_eq:6.2f} ms | TSFEL: {t_ts_eq:8.2f} ms | Speedup: {speedup:6.1f}x")
 
+        t_tsfresh_eq = 0.0
+        speedup_tsfresh = 0.0
+        if HAS_TSFRESH:
+            t0 = time.perf_counter()
+            _ = extract_tsfresh(X_all, MinimalFCParameters(), n_jobs=4)
+            t_tsfresh_eq = (time.perf_counter() - t0) * 1000.0
+            speedup_tsfresh = t_tsfresh_eq / t_km_eq if t_km_eq > 0 else 0
+            print(f"    [tsfresh minimal] Time: {t_tsfresh_eq:8.2f} ms | Kymora Speedup: {speedup_tsfresh:6.1f}x")
+
         # Parity check
         worst_rel = 0.0
         for km_name, ts_name in PAIRINGS:
@@ -134,6 +179,11 @@ def run_benchmark():
             ("TSFEL (statistical)", lambda arr: extract_tsfel(arr, tsfel_cfg_stat)),
             ("TSFEL (all)", lambda arr: extract_tsfel(arr, tsfel_cfg_all)),
         ]
+        if HAS_TSFRESH:
+            extractors.extend([
+                ("tsfresh (minimal)", lambda arr: extract_tsfresh(arr, MinimalFCParameters(), n_jobs=4)),
+                ("tsfresh (efficient)", lambda arr: extract_tsfresh(arr, EfficientFCParameters(), n_jobs=4)),
+            ])
 
         dataset_evals = []
         for label, ext_fn in extractors:
@@ -175,16 +225,23 @@ def run_benchmark():
             "equal_features": {
                 "kymora_ms": t_km_eq,
                 "tsfel_ms": t_ts_eq,
-                "speedup": speedup,
+                "tsfresh_ms": t_tsfresh_eq,
+                "speedup_vs_tsfel": speedup,
+                "speedup_vs_tsfresh": speedup_tsfresh,
                 "worst_rel_error": worst_rel,
             },
             "evaluations": dataset_evals,
         }
 
     # Save to Kymora/benchmarks/results/
-    out_path = Path(__file__).resolve().parent / "results" / "kymora_vs_tsfel_real_benchmark.json"
+    out_path = Path(__file__).resolve().parent / "results" / "kymora_vs_tsfel_tsfresh_real_benchmark.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2)
+
+    # Backwards-compatible file
+    legacy_path = Path(__file__).resolve().parent / "results" / "kymora_vs_tsfel_real_benchmark.json"
+    with open(legacy_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
     print(f"\n[SUCCESS] Real-world benchmark telemetry saved to {out_path}")

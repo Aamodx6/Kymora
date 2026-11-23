@@ -71,7 +71,7 @@ overhead you can optimise away.
 
 ### Head-to-Head Real-World Empirical Benchmarks vs TSFEL
 
-To guarantee real-world industry fidelity, we evaluated Kymora head-to-head against TSFEL across canonical real-world empirical time series from the UCR Time Series Archive (16 threads, Python 3.14.6; artifact: [`benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md)):
+To guarantee real-world industry fidelity, we evaluated Kymora head-to-head against TSFEL and tsfresh across canonical real-world empirical time series from the UCR Time Series Archive (16 threads, Python 3.14.6; artifacts: [`KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md) and [`KYMORA_VS_TSFEL_TSFRESH_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_TSFRESH_BENCHMARK_REPORT.md)):
 
 | Real Dataset | Domain / Signal | Series Length ($L$) | Kymora Latency | TSFEL Latency | Real Data Speedup | Numerical Parity Error |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
