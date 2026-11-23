@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Any
 import numpy as np
 import pandas as pd
 
 
 def correlated_features(
-    features: Union[pd.DataFrame, np.ndarray],
+    features: Any,
     threshold: float = 0.95,
-) -> Union[pd.DataFrame, np.ndarray]:
+) -> Any:
     """Prune collinear features using greedy Pearson correlation clustering.
 
     Parameters
@@ -25,14 +25,12 @@ def correlated_features(
     pd.DataFrame or np.ndarray
         Cleaned feature matrix with redundant collinear features removed.
     """
-    is_df = isinstance(features, pd.DataFrame)
-    if is_df:
-        df = features
-        cols = list(df.columns)
-        mat = df.to_numpy()
+    if isinstance(features, pd.DataFrame):
+        mat = features.to_numpy()
+        is_df = True
     else:
         mat = np.asarray(features)
-        cols = [f"feat_{i}" for i in range(mat.shape[1])]
+        is_df = False
 
     if mat.shape[1] <= 1:
         return features
@@ -60,5 +58,5 @@ def correlated_features(
     kept_indices = [i for i in range(n_feats) if i not in dropped_indices]
 
     if is_df:
-        return df.iloc[:, kept_indices]
+        return features.iloc[:, kept_indices]
     return mat[:, kept_indices]

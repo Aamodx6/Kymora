@@ -33,6 +33,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence
 
+import numpy as np
+
 from . import _core
 
 try:
@@ -221,7 +223,10 @@ def extract_features(
         Extracted feature matrix (n_series, n_features) of float64.
     """
     if domain is not None:
-        return extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+        res = extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+        if hasattr(res, "to_numpy"):
+            return res.to_numpy()
+        return np.asarray(res)
 
     if features is not None:
         try:
@@ -243,7 +248,10 @@ def extract_features(
             for f in features:
                 if f not in known:
                     raise ValueError(f"unknown feature '{f}'") from e
-            return extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+            res_cust = extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+            if hasattr(res_cust, "to_numpy"):
+                return res_cust.to_numpy()
+            return np.asarray(res_cust)
 
     return _extract_features_core(
         X,
@@ -276,8 +284,20 @@ def extract_features_df(
     Columns are :func:`feature_names` in order; the index is a plain
     ``RangeIndex`` over the input series.
     """
+    try:
+        import pandas as pd
+    except ImportError as exc:  # pragma: no cover - depends on environment
+        raise ImportError(
+            "extract_features_df requires pandas. "
+            "Install it with `pip install pandas` or `pip install \"kymora[pandas]\"`."
+        ) from exc
+
     if domain is not None:
-        return extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
+        res = extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
+        if isinstance(res, pd.DataFrame):
+            return res
+        cols = feature_names(domain=domain, features=features)
+        return pd.DataFrame(res, columns=cols)
 
     if features is not None:
         all_full = set(_feature_names_core("full"))
@@ -287,15 +307,11 @@ def extract_features_df(
             for f in features:
                 if f not in known:
                     raise ValueError(f"unknown feature '{f}'")
-            return extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
-
-    try:
-        import pandas as pd
-    except ImportError as exc:  # pragma: no cover - depends on environment
-        raise ImportError(
-            "extract_features_df requires pandas, which kymora does not "
-            'install by default. Install it with: pip install "kymora[pandas]"'
-        ) from exc
+            res_cust = extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
+            if isinstance(res_cust, pd.DataFrame):
+                return res_cust
+            cols = feature_names(features=features)
+            return pd.DataFrame(res_cust, columns=cols)
 
     values: Any = extract_features(
         X,

@@ -223,7 +223,7 @@ def compute_derived_features(
     # 5. Mel-Frequency Cepstral Coefficients (MFCC)
     mfcc_reqs = {f"mfcc_{i}" for i in range(12)}
     if mfcc_reqs & requested or "mfcc" in requested:
-        import scipy.fft
+        import scipy.fft  # type: ignore[import-untyped]
         pre_emphasis = 0.97
         cep_lifter = 22
         nfft = 512
@@ -301,7 +301,12 @@ def compute_derived_features(
         for i in range(1, 10)
     } | {"wavelet_entropy"}
     if wavelet_reqs & requested or any("wavelet" in r for r in requested):
-        import pywt
+        try:
+            import pywt  # type: ignore[import-untyped]
+            has_pywt = True
+        except ImportError:
+            has_pywt = False
+
         widths = np.arange(1, 10)
         n_scales = len(widths)
         we = np.zeros((N, n_scales))
@@ -310,11 +315,31 @@ def compute_derived_features(
         wvar = np.zeros((N, n_scales))
         went = np.zeros(N)
 
+        def _native_ricker_cwt(sig: np.ndarray, scales: np.ndarray) -> np.ndarray:
+            L_sig = len(sig)
+            c_list = []
+            for a in scales:
+                pts = min(int(10 * a), L_sig)
+                if pts % 2 == 0:
+                    pts += 1
+                vec = np.arange(0, pts) - (pts - 1.0) / 2.0
+                vec_sq = vec ** 2
+                wsq = float(a ** 2)
+                A = 2.0 / (np.sqrt(3.0 * a) * (np.pi ** 0.25))
+                wav = A * (1.0 - vec_sq / wsq) * np.exp(-vec_sq / (2.0 * wsq))
+                c = np.convolve(sig, wav, mode="same")
+                c_list.append(c)
+            return np.array(c_list)
+
         for row_idx in range(N):
             sig = X[row_idx]
             if np.all(sig == 0):
                 continue
-            coeffs, _ = pywt.cwt(sig, widths, "mexh", sampling_period=1.0 / fs)
+            if has_pywt:
+                coeffs, _ = pywt.cwt(sig, widths, "mexh", sampling_period=1.0 / fs)
+            else:
+                coeffs = _native_ricker_cwt(sig, widths)
+
             we[row_idx] = np.sqrt(np.sum(coeffs ** 2, axis=1) / coeffs.shape[1])
             wam[row_idx] = np.abs(np.mean(coeffs, axis=1))
             wstd[row_idx] = np.std(coeffs, axis=1)

@@ -20,15 +20,15 @@ from .features import (
 
 
 def extract_by_domain(
-    X: Union[np.ndarray, Sequence[float], Sequence[Sequence[float]]],
-    domain: Optional[str] = "all",
+    X: Any,
+    domain: Optional[Union[str, Sequence[str]]] = "all",
     features: Optional[Sequence[str]] = None,
     n_jobs: Optional[int] = None,
     fs: float = 100.0,
     as_df: bool = False,
     return_df: bool = False,
     **kwargs: Any,
-) -> Union[np.ndarray, pd.DataFrame]:
+) -> Any:
     """Extract features filtered by scientific domain.
 
     Combines Kymora's ultra-fast Rust SIMD core with vectorized domain calculators.
@@ -66,7 +66,7 @@ def extract_by_domain(
 
     if features is not None:
         target_features = list(features)
-    else:
+    elif isinstance(domain, str):
         domain_clean = domain.lower()
         if domain_clean in ("all", "*"):
             target_features = []
@@ -76,6 +76,18 @@ def extract_by_domain(
             target_features = list(ALL_DOMAINS[domain_clean])
         else:
             raise ValueError(f"Unknown domain '{domain}'. Valid domains: {list(ALL_DOMAINS.keys()) + ['all']}")
+    elif domain is not None:
+        target_features = []
+        for d in domain:
+            d_clean = d.lower()
+            if d_clean in ALL_DOMAINS:
+                target_features.extend(ALL_DOMAINS[d_clean])
+            else:
+                raise ValueError(f"Unknown domain '{d}'. Valid domains: {list(ALL_DOMAINS.keys())}")
+    else:
+        target_features = []
+        for d in ["statistical", "temporal", "spectral", "fractal"]:
+            target_features.extend(ALL_DOMAINS[d])
 
     # Identify native core features vs derived features
     native_names = set(_core.feature_names("full"))
@@ -226,10 +238,12 @@ def time_series_features_extractor(
 
     if is_multichannel_columns:
         n_times, n_channels = arr.shape
-        channel_dfs = []
+        channel_dfs: List[pd.DataFrame] = []
         for ch in range(n_channels):
             ch_sig = arr[:, ch : ch + 1].T
             df_ch = extract_by_domain(ch_sig, features=requested_features, fs=fs, as_df=True)
+            if not isinstance(df_ch, pd.DataFrame):
+                df_ch = pd.DataFrame(df_ch, columns=requested_features)
             df_ch.columns = [f"{ch}_{col}" for col in df_ch.columns]
             channel_dfs.append(df_ch)
         return pd.concat(channel_dfs, axis=1)
@@ -238,7 +252,9 @@ def time_series_features_extractor(
         arr = arr.reshape(1, -1)
 
     df_out = extract_by_domain(arr, features=requested_features, fs=fs, as_df=True)
-    return df_out
+    if isinstance(df_out, pd.DataFrame):
+        return df_out
+    return pd.DataFrame(df_out, columns=requested_features)
 
 
 # Convenience alias matching TSFEL calc_features naming
