@@ -4,18 +4,73 @@
     "n_test": 150,
     "length": 150,
     "equal_features": {
-      "kymora_ms": 1.7282999997405568,
-      "tsfel_ms": 3049.0711000002193,
-      "tsfresh_ms": 4053.35070000001,
-      "speedup_vs_tsfel": 1764.202453542747,
-      "speedup_vs_tsfresh": 2345.28189585632,
-      "worst_rel_error": 7.499999999999999
+      "kymora_ms": 3.2468000008520903,
+      "tsfel_ms": 2761.6101000003255,
+      "tsfresh_ms": 3270.265000001018,
+      "speedup_vs_tsfel": 850.5636624601357,
+      "speedup_vs_tsfresh": 1007.2271156655074,
+      "worst_rel_error": 7.499999999999999,
+      "worst_rel_error_feature": "mean"
+    },
+    "parity_details": {
+      "mean": {
+        "tsfel_name": "0_Mean",
+        "max_rel_error": 7.499999999999999
+      },
+      "std": {
+        "tsfel_name": "0_Standard deviation",
+        "max_rel_error": 5.569711893919183e-16
+      },
+      "var": {
+        "tsfel_name": "0_Variance",
+        "max_rel_error": 1.1176741931374966e-15
+      },
+      "min": {
+        "tsfel_name": "0_Min",
+        "max_rel_error": 0.0
+      },
+      "max": {
+        "tsfel_name": "0_Max",
+        "max_rel_error": 0.0
+      },
+      "median": {
+        "tsfel_name": "0_Median",
+        "max_rel_error": 5.199817920340199e-16
+      },
+      "skewness": {
+        "tsfel_name": "0_Skewness",
+        "max_rel_error": 1.03751609482252e-13
+      },
+      "kurtosis": {
+        "tsfel_name": "0_Kurtosis",
+        "max_rel_error": 5.409874459907135e-13
+      },
+      "abs_energy": {
+        "tsfel_name": "0_Absolute energy",
+        "max_rel_error": 1.3352480972071487e-15
+      },
+      "root_mean_square": {
+        "tsfel_name": "0_Root mean square",
+        "max_rel_error": 6.683654258868223e-16
+      },
+      "mean_abs_change": {
+        "tsfel_name": "0_Mean absolute diff",
+        "max_rel_error": 1.2356514157509092e-15
+      },
+      "mean_change": {
+        "tsfel_name": "0_Mean diff",
+        "max_rel_error": 2.0185873310185807e-09
+      },
+      "zero_crossings": {
+        "tsfel_name": "0_Zero crossing rate",
+        "max_rel_error": 0.0
+      }
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.5425999990839045,
+        "extract_time_ms": 1.8103000002156477,
         "rf_acc": 0.84,
         "rf_f1": 0.8385939741750359,
         "ridge_acc": 0.82
@@ -23,7 +78,7 @@
       {
         "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 1.561799999763025,
+        "extract_time_ms": 1.7128999988926807,
         "rf_acc": 0.9666666666666667,
         "rf_f1": 0.9666651851193386,
         "ridge_acc": 0.9466666666666667
@@ -31,7 +86,7 @@
       {
         "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 1.7502999999123858,
+        "extract_time_ms": 2.2095000003901077,
         "rf_acc": 0.9533333333333334,
         "rf_f1": 0.9532814238042269,
         "ridge_acc": 0.9266666666666666
@@ -39,7 +94,7 @@
       {
         "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 262.3139999996056,
+        "extract_time_ms": 207.02839999830758,
         "rf_acc": 0.88,
         "rf_f1": 0.8794642857142857,
         "ridge_acc": 0.86
@@ -47,7 +102,7 @@
       {
         "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 593.5747000003175,
+        "extract_time_ms": 514.8954999986017,
         "rf_acc": 0.96,
         "rf_f1": 0.9599928876244666,
         "ridge_acc": 0.9733333333333334
@@ -55,7 +110,7 @@
       {
         "extractor": "tsfresh (minimal)",
         "n_features": 10,
-        "extract_time_ms": 7755.92879999931,
+        "extract_time_ms": 6388.561699999627,
         "rf_acc": 0.7666666666666667,
         "rf_f1": 0.765823631740934,
         "ridge_acc": 0.6533333333333333
@@ -63,7 +118,7 @@
       {
         "extractor": "tsfresh (efficient)",
         "n_features": 777,
-        "extract_time_ms": 11639.901200000168,
+        "extract_time_ms": 10422.751699999935,
         "rf_acc": 0.96,
         "rf_f1": 0.9599928876244666,
         "ridge_acc": 0.9466666666666667
@@ -75,18 +130,73 @@
     "n_test": 100,
     "length": 96,
     "equal_features": {
-      "kymora_ms": 1.3038000015512807,
-      "tsfel_ms": 174.47149999861722,
-      "tsfresh_ms": 3338.7134999993577,
-      "speedup_vs_tsfel": 133.81768660149442,
-      "speedup_vs_tsfresh": 2560.7558644170167,
-      "worst_rel_error": 2.868074848284915e-06
+      "kymora_ms": 0.9492999997746665,
+      "tsfel_ms": 165.41529999994964,
+      "tsfresh_ms": 3468.0896000008943,
+      "speedup_vs_tsfel": 174.2497630245591,
+      "speedup_vs_tsfresh": 3653.3125469547117,
+      "worst_rel_error": 2.868074848284915e-06,
+      "worst_rel_error_feature": "mean"
+    },
+    "parity_details": {
+      "mean": {
+        "tsfel_name": "0_Mean",
+        "max_rel_error": 2.868074848284915e-06
+      },
+      "std": {
+        "tsfel_name": "0_Standard deviation",
+        "max_rel_error": 5.580255036656761e-16
+      },
+      "var": {
+        "tsfel_name": "0_Variance",
+        "max_rel_error": 1.1219095833342733e-15
+      },
+      "min": {
+        "tsfel_name": "0_Min",
+        "max_rel_error": 0.0
+      },
+      "max": {
+        "tsfel_name": "0_Max",
+        "max_rel_error": 0.0
+      },
+      "median": {
+        "tsfel_name": "0_Median",
+        "max_rel_error": 4.771725525317129e-16
+      },
+      "skewness": {
+        "tsfel_name": "0_Skewness",
+        "max_rel_error": 2.0933175426049836e-13
+      },
+      "kurtosis": {
+        "tsfel_name": "0_Kurtosis",
+        "max_rel_error": 9.298336708914188e-14
+      },
+      "abs_energy": {
+        "tsfel_name": "0_Absolute energy",
+        "max_rel_error": 1.047115612335257e-15
+      },
+      "root_mean_square": {
+        "tsfel_name": "0_Root mean square",
+        "max_rel_error": 5.580255039916264e-16
+      },
+      "mean_abs_change": {
+        "tsfel_name": "0_Mean absolute diff",
+        "max_rel_error": 9.892904170608925e-16
+      },
+      "mean_change": {
+        "tsfel_name": "0_Mean diff",
+        "max_rel_error": 1.2278471930375832e-13
+      },
+      "zero_crossings": {
+        "tsfel_name": "0_Zero crossing rate",
+        "max_rel_error": 0.0
+      }
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.117200001317542,
+        "extract_time_ms": 3.0339000004460104,
         "rf_acc": 0.83,
         "rf_f1": 0.8062678062678064,
         "ridge_acc": 0.83
@@ -94,7 +204,7 @@
       {
         "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 0.6358999999065418,
+        "extract_time_ms": 0.9795000005397014,
         "rf_acc": 0.85,
         "rf_f1": 0.8340524394291404,
         "ridge_acc": 0.82
@@ -102,7 +212,7 @@
       {
         "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 0.987600000371458,
+        "extract_time_ms": 0.9365999994770391,
         "rf_acc": 0.91,
         "rf_f1": 0.9017359973796266,
         "ridge_acc": 0.85
@@ -110,7 +220,7 @@
       {
         "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 198.58360000034736,
+        "extract_time_ms": 187.04369999977644,
         "rf_acc": 0.83,
         "rf_f1": 0.8092245539221188,
         "ridge_acc": 0.75
@@ -118,7 +228,7 @@
       {
         "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 503.38489999921876,
+        "extract_time_ms": 595.9321000009368,
         "rf_acc": 0.87,
         "rf_f1": 0.8597778017473843,
         "ridge_acc": 0.79
@@ -126,7 +236,7 @@
       {
         "extractor": "tsfresh (minimal)",
         "n_features": 10,
-        "extract_time_ms": 6676.840199999788,
+        "extract_time_ms": 6388.750399999481,
         "rf_acc": 0.69,
         "rf_f1": 0.6408295678368672,
         "ridge_acc": 0.73
@@ -134,7 +244,7 @@
       {
         "extractor": "tsfresh (efficient)",
         "n_features": 777,
-        "extract_time_ms": 10947.491999999329,
+        "extract_time_ms": 10093.148400001155,
         "rf_acc": 0.87,
         "rf_f1": 0.8580631073261273,
         "ridge_acc": 0.87
@@ -146,18 +256,73 @@
     "n_test": 1029,
     "length": 24,
     "equal_features": {
-      "kymora_ms": 1.5513999987888383,
-      "tsfel_ms": 643.6925000016345,
-      "tsfresh_ms": 3898.8840999991226,
-      "speedup_vs_tsfel": 414.91072612102516,
-      "speedup_vs_tsfresh": 2513.1391665869155,
-      "worst_rel_error": 21.375
+      "kymora_ms": 1.5596000012010336,
+      "tsfel_ms": 715.7277000005706,
+      "tsfresh_ms": 3563.7339999993856,
+      "speedup_vs_tsfel": 458.91747848768614,
+      "speedup_vs_tsfresh": 2285.0307753622637,
+      "worst_rel_error": 21.375,
+      "worst_rel_error_feature": "mean"
+    },
+    "parity_details": {
+      "mean": {
+        "tsfel_name": "0_Mean",
+        "max_rel_error": 21.375
+      },
+      "std": {
+        "tsfel_name": "0_Standard deviation",
+        "max_rel_error": 3.402304586558962e-16
+      },
+      "var": {
+        "tsfel_name": "0_Variance",
+        "max_rel_error": 6.950961576805635e-16
+      },
+      "min": {
+        "tsfel_name": "0_Min",
+        "max_rel_error": 0.0
+      },
+      "max": {
+        "tsfel_name": "0_Max",
+        "max_rel_error": 0.0
+      },
+      "median": {
+        "tsfel_name": "0_Median",
+        "max_rel_error": 1.073745734531642e-14
+      },
+      "skewness": {
+        "tsfel_name": "0_Skewness",
+        "max_rel_error": 1.6205130590023432e-12
+      },
+      "kurtosis": {
+        "tsfel_name": "0_Kurtosis",
+        "max_rel_error": 4.671387723482367e-13
+      },
+      "abs_energy": {
+        "tsfel_name": "0_Absolute energy",
+        "max_rel_error": 6.178632447352521e-16
+      },
+      "root_mean_square": {
+        "tsfel_name": "0_Root mean square",
+        "max_rel_error": 3.402304548472266e-16
+      },
+      "mean_abs_change": {
+        "tsfel_name": "0_Mean absolute diff",
+        "max_rel_error": 4.2330471504523016e-16
+      },
+      "mean_change": {
+        "tsfel_name": "0_Mean diff",
+        "max_rel_error": 1.0
+      },
+      "zero_crossings": {
+        "tsfel_name": "0_Zero crossing rate",
+        "max_rel_error": 0.0
+      }
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 0.9033999995153863,
+        "extract_time_ms": 0.7394999993266538,
         "rf_acc": 0.8688046647230321,
         "rf_f1": 0.8681947091915012,
         "ridge_acc": 0.9076773566569485
@@ -165,7 +330,7 @@
       {
         "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 1.0469000008015428,
+        "extract_time_ms": 0.8080000006884802,
         "rf_acc": 0.9416909620991254,
         "rf_f1": 0.941678568999524,
         "ridge_acc": 0.8892128279883382
@@ -173,7 +338,7 @@
       {
         "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 1.740800000334275,
+        "extract_time_ms": 1.5521000004810048,
         "rf_acc": 0.9611273080660836,
         "rf_f1": 0.961122865346834,
         "ridge_acc": 0.9047619047619048
@@ -181,7 +346,7 @@
       {
         "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 767.3219999996945,
+        "extract_time_ms": 702.1960000001854,
         "rf_acc": 0.7531584062196307,
         "rf_f1": 0.752550556691661,
         "ridge_acc": 0.608357628765792
@@ -189,7 +354,7 @@
       {
         "extractor": "TSFEL (all)",
         "n_features": 143,
-        "extract_time_ms": 2614.05250000098,
+        "extract_time_ms": 2592.160199999853,
         "rf_acc": 0.9504373177842566,
         "rf_f1": 0.950435632623571,
         "ridge_acc": 0.8824101068999028
@@ -197,7 +362,7 @@
       {
         "extractor": "tsfresh (minimal)",
         "n_features": 10,
-        "extract_time_ms": 8585.065499999473,
+        "extract_time_ms": 8539.097599999877,
         "rf_acc": 0.7152575315840622,
         "rf_f1": 0.714583642971351,
         "ridge_acc": 0.6005830903790087
@@ -205,7 +370,7 @@
       {
         "extractor": "tsfresh (efficient)",
         "n_features": 777,
-        "extract_time_ms": 29872.20780000098,
+        "extract_time_ms": 26473.423299999922,
         "rf_acc": 0.9523809523809523,
         "rf_f1": 0.9523780739475829,
         "ridge_acc": 0.93488824101069
@@ -217,18 +382,73 @@
     "n_test": 28,
     "length": 286,
     "equal_features": {
-      "kymora_ms": 0.9069000007002614,
-      "tsfel_ms": 78.19369999924675,
-      "tsfresh_ms": 3398.988199998712,
-      "speedup_vs_tsfel": 86.22086221068432,
-      "speedup_vs_tsfresh": 3747.919503114112,
-      "worst_rel_error": 6.820839548740747e-11
+      "kymora_ms": 1.1897000003955327,
+      "tsfel_ms": 98.59300000061921,
+      "tsfresh_ms": 4160.215200001403,
+      "speedup_vs_tsfel": 82.87215261649203,
+      "speedup_vs_tsfresh": 3496.8607200288143,
+      "worst_rel_error": 6.820839548740747e-11,
+      "worst_rel_error_feature": "skewness"
+    },
+    "parity_details": {
+      "mean": {
+        "tsfel_name": "0_Mean",
+        "max_rel_error": 6.726626383582601e-12
+      },
+      "std": {
+        "tsfel_name": "0_Standard deviation",
+        "max_rel_error": 6.267318108996252e-16
+      },
+      "var": {
+        "tsfel_name": "0_Variance",
+        "max_rel_error": 1.326736005113055e-15
+      },
+      "min": {
+        "tsfel_name": "0_Min",
+        "max_rel_error": 0.0
+      },
+      "max": {
+        "tsfel_name": "0_Max",
+        "max_rel_error": 0.0
+      },
+      "median": {
+        "tsfel_name": "0_Median",
+        "max_rel_error": 3.913844946009676e-16
+      },
+      "skewness": {
+        "tsfel_name": "0_Skewness",
+        "max_rel_error": 6.820839548740747e-11
+      },
+      "kurtosis": {
+        "tsfel_name": "0_Kurtosis",
+        "max_rel_error": 2.8623524996377823e-15
+      },
+      "abs_energy": {
+        "tsfel_name": "0_Absolute energy",
+        "max_rel_error": 1.1961894501871915e-15
+      },
+      "root_mean_square": {
+        "tsfel_name": "0_Root mean square",
+        "max_rel_error": 6.290026843574284e-16
+      },
+      "mean_abs_change": {
+        "tsfel_name": "0_Mean absolute diff",
+        "max_rel_error": 1.0169530136491238e-15
+      },
+      "mean_change": {
+        "tsfel_name": "0_Mean diff",
+        "max_rel_error": 7.519367509820491e-14
+      },
+      "zero_crossings": {
+        "tsfel_name": "0_Zero crossing rate",
+        "max_rel_error": 0.0
+      }
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.682000000073458,
+        "extract_time_ms": 2.880100000766106,
         "rf_acc": 0.75,
         "rf_f1": 0.7496807151979565,
         "ridge_acc": 0.6428571428571429
@@ -236,7 +456,7 @@
       {
         "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 1.4169000005495036,
+        "extract_time_ms": 1.7740999992383877,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
         "ridge_acc": 0.9642857142857143
@@ -244,7 +464,7 @@
       {
         "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 2.602399999886984,
+        "extract_time_ms": 2.360100001169485,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
         "ridge_acc": 0.9642857142857143
@@ -252,7 +472,7 @@
       {
         "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 79.52930000101333,
+        "extract_time_ms": 85.92159999898286,
         "rf_acc": 0.6071428571428571,
         "rf_f1": 0.6025806451612903,
         "ridge_acc": 0.6071428571428571
@@ -260,7 +480,7 @@
       {
         "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 1070.9917999993195,
+        "extract_time_ms": 1126.7374999988533,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
         "ridge_acc": 1.0
@@ -268,7 +488,7 @@
       {
         "extractor": "tsfresh (minimal)",
         "n_features": 10,
-        "extract_time_ms": 6919.6136999999,
+        "extract_time_ms": 7030.385199999728,
         "rf_acc": 0.5714285714285714,
         "rf_f1": 0.5508021390374331,
         "ridge_acc": 0.7142857142857143
@@ -276,7 +496,7 @@
       {
         "extractor": "tsfresh (efficient)",
         "n_features": 777,
-        "extract_time_ms": 8794.711799999277,
+        "extract_time_ms": 9499.422199998662,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
         "ridge_acc": 0.9642857142857143
