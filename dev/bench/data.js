@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795472894661,
+  "lastUpdate": 1795473934884,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -434,6 +434,37 @@ window.BENCHMARK_DATA = {
             "range": "0.4353",
             "unit": "ms",
             "extra": "runs=30, cv=0.117"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c2b83f5d7bd34538a523807cf60c178b88e5e836",
+          "message": "fix(benchmarks): address CodeRabbit review suggestions and add tsrocket comparison (#44)",
+          "timestamp": "2026-11-24T04:14:11+05:30",
+          "tree_id": "4e4b2b6d288aa997875de62c65e81851164adeaf",
+          "url": "https://github.com/Aamodx6/Kymora/commit/c2b83f5d7bd34538a523807cf60c178b88e5e836"
+        },
+        "date": 1795473934334,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 6.1981,
+            "range": "0.0758",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.017"
           }
         ]
       }
