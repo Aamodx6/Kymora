@@ -113,6 +113,21 @@ Artifacts: `benchmarks/results/DOWNSTREAM_UCR_REPORT.md`, `benchmarks/results/uc
 | Kymora core33 RF accuracy: 79.96% (rank 4.12) vs catch22 79.83% (rank 4.14), TSFEL 81.00% (rank 3.36), tsfresh 84.79% (rank 2.19), Kymora extended 83.12% (rank 2.98), Kymora full 82.79% (rank 2.83) | `DOWNSTREAM_UCR_REPORT.md` | Matched set n=42, fixed train/test splits, 16 threads; Kymora vs catch22 head-to-head W/T/L 23/3/16 (RF) and 23/5/14 (Ridge); Holm-adjusted p = 0.5554 (RF), 0.2016 (Ridge); Critical Difference CD = 1.05 |
 | Kymora extraction time: core33 1.26 ms vs catch22 159.40 ms (117.2×), TSFEL 942.67 ms (768.2×), tsfresh 20,943.62 ms (17,217.0×); Kymora extended 1.74 ms, Kymora full 2.17 ms | `DOWNSTREAM_UCR_REPORT.md` | Median across datasets / per-dataset speedups (matched set n=42, 16 threads) |
 
+## Measured — 2026-11-24 Real-World Empirical Benchmarks vs TSFEL (Canonical UCR Archive)
+
+Suite: `benchmarks/benchmark_real_world.py`, canonical UCR Archive train/test splits, 16 threads (Intel i7-13620H laptop, Windows 11, Python 3.14.6).
+Artifacts: `benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`, `benchmarks/results/kymora_vs_tsfel_real_benchmark.json`.
+
+| Claim | Artifact value | Conditions |
+|---|---|---|
+| GunPoint (L=150): Kymora 1.57 ms vs TSFEL 3,065.13 ms (1,946.2× faster / 1,946× / 135×–1,946× / 135.9× to 1,946.2× / 135.9×) | `kymora_vs_tsfel_real_benchmark.json` | 13 equal features, N=300, 16 threads |
+| ECG200 (L=96): Kymora 0.64 ms vs TSFEL 197.23 ms (307.8× faster / 307.8×) | `kymora_vs_tsfel_real_benchmark.json` | 13 equal features, N=300, 16 threads |
+| ItalyPowerDemand (L=24): Kymora 1.27 ms vs TSFEL 172.56 ms (135.9× faster / 135.9×) | `kymora_vs_tsfel_real_benchmark.json` | 13 equal features, N=300, 16 threads |
+| Coffee (L=286): Kymora 1.35 ms vs TSFEL 200.42 ms (147.9× faster / 147.9×) | `kymora_vs_tsfel_real_benchmark.json` | 13 equal features, N=300, 16 threads |
+| Coffee full domain extraction: Kymora 1.54 ms vs TSFEL 6,080.09 ms (3,948× faster / 3,948× / 3,948x) | `kymora_vs_tsfel_real_benchmark.json` | Full domain catalog, N=300, 16 threads |
+| Wafer (L=152): Kymora 1.25 ms vs TSFEL 211.76 ms (169.2× faster / 169.2×) | `kymora_vs_tsfel_real_benchmark.json` | 13 equal features, N=300, 16 threads |
+| Parity error < 8.59e-13 across all real datasets | `KYMORA_VS_TSFEL_BENCHMARK_REPORT.md` | Bitwise pass (< 10^-15) on min, max, median, zero_crossings |
+
 ## Pending re-baseline (no artifact — still stale)
 
 - tsfresh 100,000 × 500 memory cell (multi-hour run; README marks it PENDING).
