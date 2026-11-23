@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795439722227,
+  "lastUpdate": 1795470166732,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -341,6 +341,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0956",
             "unit": "ms",
             "extra": "runs=30, cv=0.034"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "868cc62b531f332e2fa23b704ab94521664cf5b5",
+          "message": "Merge pull request #40 from Aamodx6/feat/tsfel-compatibility-and-real-world-benchmarks\n\nfeat: TSFEL-compatible architecture, real-world benchmarks, and landing page updates",
+          "timestamp": "2026-11-24T03:11:08+05:30",
+          "tree_id": "2284ae80fc73399c24f4eddc479ccf319a3a0840",
+          "url": "https://github.com/Aamodx6/Kymora/commit/868cc62b531f332e2fa23b704ab94521664cf5b5"
+        },
+        "date": 1795470166395,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.0326,
+            "range": "0.0511",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.018"
           }
         ]
       }
