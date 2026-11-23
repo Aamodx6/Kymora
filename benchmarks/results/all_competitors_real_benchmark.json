@@ -1,0 +1,770 @@
+{
+  "metadata": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.6",
+    "cpu_count": 16,
+    "kymora_version": "0.8.2"
+  },
+  "datasets": {
+    "GunPoint": {
+      "n_train": 50,
+      "n_test": 150,
+      "length": 150,
+      "equal_features": {
+        "kymora_ms": 2.2820999984105583,
+        "tsfel_ms": 3005.3680000000895,
+        "tsfresh_ms": 12115.721000000121,
+        "speedup_vs_tsfel": 1316.930897898109,
+        "speedup_vs_tsfresh": 5309.022833547392,
+        "worst_rel_error": 7.499999999999999,
+        "worst_rel_error_feature": "mean"
+      },
+      "parity_details": {
+        "mean": {
+          "tsfel_name": "0_Mean",
+          "max_rel_error": 7.499999999999999
+        },
+        "std": {
+          "tsfel_name": "0_Standard deviation",
+          "max_rel_error": 5.569711893919183e-16
+        },
+        "var": {
+          "tsfel_name": "0_Variance",
+          "max_rel_error": 1.1176741931374966e-15
+        },
+        "min": {
+          "tsfel_name": "0_Min",
+          "max_rel_error": 0.0
+        },
+        "max": {
+          "tsfel_name": "0_Max",
+          "max_rel_error": 0.0
+        },
+        "median": {
+          "tsfel_name": "0_Median",
+          "max_rel_error": 5.199817920340199e-16
+        },
+        "skewness": {
+          "tsfel_name": "0_Skewness",
+          "max_rel_error": 8.67154724222979e-14
+        },
+        "kurtosis": {
+          "tsfel_name": "0_Kurtosis",
+          "max_rel_error": 6.182713668465774e-13
+        },
+        "abs_energy": {
+          "tsfel_name": "0_Absolute energy",
+          "max_rel_error": 1.3352480972071487e-15
+        },
+        "root_mean_square": {
+          "tsfel_name": "0_Root mean square",
+          "max_rel_error": 6.683654258868223e-16
+        },
+        "mean_abs_change": {
+          "tsfel_name": "0_Mean absolute diff",
+          "max_rel_error": 1.2356514157509092e-15
+        },
+        "mean_change": {
+          "tsfel_name": "0_Mean diff",
+          "max_rel_error": 2.0185873310185807e-09
+        },
+        "zero_crossings": {
+          "tsfel_name": "0_Zero crossing rate",
+          "max_rel_error": 0.0
+        }
+      },
+      "evaluations": [
+        {
+          "extractor": "Kymora (core33)",
+          "engine": "Rust / Rayon",
+          "n_features": 33,
+          "extract_time_ms": 1.3109999999869615,
+          "relative_to_kymora_core": 1.0,
+          "rf_acc": 0.84,
+          "rf_f1": 0.8385939741750359,
+          "ridge_acc": 0.82
+        },
+        {
+          "extractor": "Kymora (extended)",
+          "engine": "Rust / Rayon",
+          "n_features": 143,
+          "extract_time_ms": 1.304899999013287,
+          "relative_to_kymora_core": 0.9953470625677078,
+          "rf_acc": 0.9666666666666667,
+          "rf_f1": 0.9666651851193386,
+          "ridge_acc": 0.9466666666666667
+        },
+        {
+          "extractor": "Kymora (full)",
+          "engine": "Rust / Rayon",
+          "n_features": 543,
+          "extract_time_ms": 1.4293000003817724,
+          "relative_to_kymora_core": 1.0902364610190598,
+          "rf_acc": 0.9533333333333334,
+          "rf_f1": 0.9532814238042269,
+          "ridge_acc": 0.9266666666666666
+        },
+        {
+          "extractor": "catch22 (pycatch22)",
+          "engine": "C Core / Python loop",
+          "n_features": 22,
+          "extract_time_ms": 60.9439999989263,
+          "relative_to_kymora_core": 46.48665141077988,
+          "rf_acc": 0.98,
+          "rf_f1": 0.9799991110716032,
+          "ridge_acc": 0.9333333333333333
+        },
+        {
+          "extractor": "antropy (complexity)",
+          "engine": "Python / Numba loop",
+          "n_features": 8,
+          "extract_time_ms": 196.88479999967967,
+          "relative_to_kymora_core": 150.1790999249716,
+          "rf_acc": 0.8933333333333333,
+          "rf_f1": 0.8933143669985775,
+          "ridge_acc": 0.9333333333333333
+        },
+        {
+          "extractor": "sktime (Catch22)",
+          "engine": "Python / sktime wrapper",
+          "n_features": 22,
+          "extract_time_ms": 1074.8268999996071,
+          "relative_to_kymora_core": 819.8527078644522,
+          "rf_acc": 0.96,
+          "rf_f1": 0.959971535314001,
+          "ridge_acc": 0.94
+        },
+        {
+          "extractor": "TSFEL (statistical)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 31,
+          "extract_time_ms": 234.85419999997248,
+          "relative_to_kymora_core": 179.14126621076142,
+          "rf_acc": 0.88,
+          "rf_f1": 0.8794642857142857,
+          "ridge_acc": 0.86
+        },
+        {
+          "extractor": "TSFEL (all)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 162,
+          "extract_time_ms": 513.2185999991634,
+          "relative_to_kymora_core": 391.4710907736595,
+          "rf_acc": 0.96,
+          "rf_f1": 0.9599928876244666,
+          "ridge_acc": 0.9733333333333334
+        },
+        {
+          "extractor": "numba (parallel JIT)",
+          "engine": "Python / Numba prange",
+          "n_features": 10,
+          "extract_time_ms": 0.23209999926621094,
+          "relative_to_kymora_core": 0.17704042659688732,
+          "rf_acc": 0.7066666666666667,
+          "rf_f1": 0.7047772410091251,
+          "ridge_acc": 0.6933333333333334
+        },
+        {
+          "extractor": "numpy (vectorized)",
+          "engine": "Python / NumPy vectorized",
+          "n_features": 12,
+          "extract_time_ms": 0.7872999995015562,
+          "relative_to_kymora_core": 0.6005339431803098,
+          "rf_acc": 0.8066666666666666,
+          "rf_f1": 0.805203528726882,
+          "ridge_acc": 0.6533333333333333
+        },
+        {
+          "extractor": "tsfresh (minimal)",
+          "engine": "Python / multiprocessing",
+          "n_features": 10,
+          "extract_time_ms": 26124.030900000434,
+          "relative_to_kymora_core": 19926.79702537014,
+          "rf_acc": 0.7666666666666667,
+          "rf_f1": 0.765823631740934,
+          "ridge_acc": 0.6533333333333333
+        },
+        {
+          "extractor": "tsfresh (efficient)",
+          "engine": "Python / multiprocessing",
+          "n_features": 777,
+          "extract_time_ms": 25293.030400000134,
+          "relative_to_kymora_core": 19292.92936708748,
+          "rf_acc": 0.96,
+          "rf_f1": 0.9599928876244666,
+          "ridge_acc": 0.9466666666666667
+        }
+      ]
+    },
+    "ECG200": {
+      "n_train": 100,
+      "n_test": 100,
+      "length": 96,
+      "equal_features": {
+        "kymora_ms": 0.9570999991410645,
+        "tsfel_ms": 193.56169999991835,
+        "tsfresh_ms": 10430.293299999903,
+        "speedup_vs_tsfel": 202.23769739173284,
+        "speedup_vs_tsfresh": 10897.80932960027,
+        "worst_rel_error": 2.868074848284915e-06,
+        "worst_rel_error_feature": "mean"
+      },
+      "parity_details": {
+        "mean": {
+          "tsfel_name": "0_Mean",
+          "max_rel_error": 2.868074848284915e-06
+        },
+        "std": {
+          "tsfel_name": "0_Standard deviation",
+          "max_rel_error": 5.580255036656761e-16
+        },
+        "var": {
+          "tsfel_name": "0_Variance",
+          "max_rel_error": 1.1219095833342733e-15
+        },
+        "min": {
+          "tsfel_name": "0_Min",
+          "max_rel_error": 0.0
+        },
+        "max": {
+          "tsfel_name": "0_Max",
+          "max_rel_error": 0.0
+        },
+        "median": {
+          "tsfel_name": "0_Median",
+          "max_rel_error": 4.771725525317129e-16
+        },
+        "skewness": {
+          "tsfel_name": "0_Skewness",
+          "max_rel_error": 1.7792291342175363e-13
+        },
+        "kurtosis": {
+          "tsfel_name": "0_Kurtosis",
+          "max_rel_error": 7.659226365053361e-14
+        },
+        "abs_energy": {
+          "tsfel_name": "0_Absolute energy",
+          "max_rel_error": 1.047115612335257e-15
+        },
+        "root_mean_square": {
+          "tsfel_name": "0_Root mean square",
+          "max_rel_error": 5.580255039916264e-16
+        },
+        "mean_abs_change": {
+          "tsfel_name": "0_Mean absolute diff",
+          "max_rel_error": 9.892904170608925e-16
+        },
+        "mean_change": {
+          "tsfel_name": "0_Mean diff",
+          "max_rel_error": 1.2278471930375832e-13
+        },
+        "zero_crossings": {
+          "tsfel_name": "0_Zero crossing rate",
+          "max_rel_error": 0.0
+        }
+      },
+      "evaluations": [
+        {
+          "extractor": "Kymora (core33)",
+          "engine": "Rust / Rayon",
+          "n_features": 33,
+          "extract_time_ms": 9.679100001449115,
+          "relative_to_kymora_core": 1.0,
+          "rf_acc": 0.83,
+          "rf_f1": 0.8062678062678064,
+          "ridge_acc": 0.83
+        },
+        {
+          "extractor": "Kymora (extended)",
+          "engine": "Rust / Rayon",
+          "n_features": 143,
+          "extract_time_ms": 0.9910000007948838,
+          "relative_to_kymora_core": 0.1023855524425324,
+          "rf_acc": 0.85,
+          "rf_f1": 0.8340524394291404,
+          "ridge_acc": 0.82
+        },
+        {
+          "extractor": "Kymora (full)",
+          "engine": "Rust / Rayon",
+          "n_features": 543,
+          "extract_time_ms": 1.3409000002866378,
+          "relative_to_kymora_core": 0.13853560765834466,
+          "rf_acc": 0.91,
+          "rf_f1": 0.9017359973796266,
+          "ridge_acc": 0.85
+        },
+        {
+          "extractor": "catch22 (pycatch22)",
+          "engine": "C Core / Python loop",
+          "n_features": 22,
+          "extract_time_ms": 36.50780000134546,
+          "relative_to_kymora_core": 3.7718176272463,
+          "rf_acc": 0.83,
+          "rf_f1": 0.8186666666666667,
+          "ridge_acc": 0.79
+        },
+        {
+          "extractor": "antropy (complexity)",
+          "engine": "Python / Numba loop",
+          "n_features": 8,
+          "extract_time_ms": 169.67949999889242,
+          "relative_to_kymora_core": 17.530503866422364,
+          "rf_acc": 0.79,
+          "rf_f1": 0.7676734152007965,
+          "ridge_acc": 0.74
+        },
+        {
+          "extractor": "sktime (Catch22)",
+          "engine": "Python / sktime wrapper",
+          "n_features": 22,
+          "extract_time_ms": 453.33039999968605,
+          "relative_to_kymora_core": 46.83600747298977,
+          "rf_acc": 0.85,
+          "rf_f1": 0.841621792841305,
+          "ridge_acc": 0.78
+        },
+        {
+          "extractor": "TSFEL (statistical)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 31,
+          "extract_time_ms": 187.03110000024026,
+          "relative_to_kymora_core": 19.323191202925763,
+          "rf_acc": 0.83,
+          "rf_f1": 0.8092245539221188,
+          "ridge_acc": 0.75
+        },
+        {
+          "extractor": "TSFEL (all)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 162,
+          "extract_time_ms": 490.9451999992598,
+          "relative_to_kymora_core": 50.72219523775532,
+          "rf_acc": 0.87,
+          "rf_f1": 0.8597778017473843,
+          "ridge_acc": 0.79
+        },
+        {
+          "extractor": "numba (parallel JIT)",
+          "engine": "Python / Numba prange",
+          "n_features": 10,
+          "extract_time_ms": 0.3569000000425149,
+          "relative_to_kymora_core": 0.036873263008862525,
+          "rf_acc": 0.71,
+          "rf_f1": 0.6442154336891179,
+          "ridge_acc": 0.75
+        },
+        {
+          "extractor": "numpy (vectorized)",
+          "engine": "Python / NumPy vectorized",
+          "n_features": 12,
+          "extract_time_ms": 0.5786999990959885,
+          "relative_to_kymora_core": 0.05978861660788171,
+          "rf_acc": 0.78,
+          "rf_f1": 0.7472426470588236,
+          "ridge_acc": 0.76
+        },
+        {
+          "extractor": "tsfresh (minimal)",
+          "engine": "Python / multiprocessing",
+          "n_features": 10,
+          "extract_time_ms": 22710.481100000834,
+          "relative_to_kymora_core": 2346.342231881137,
+          "rf_acc": 0.69,
+          "rf_f1": 0.6408295678368672,
+          "ridge_acc": 0.73
+        },
+        {
+          "extractor": "tsfresh (efficient)",
+          "engine": "Python / multiprocessing",
+          "n_features": 777,
+          "extract_time_ms": 24728.667600000335,
+          "relative_to_kymora_core": 2554.851958993921,
+          "rf_acc": 0.87,
+          "rf_f1": 0.8580631073261273,
+          "ridge_acc": 0.87
+        }
+      ]
+    },
+    "ItalyPowerDemand": {
+      "n_train": 67,
+      "n_test": 1029,
+      "length": 24,
+      "equal_features": {
+        "kymora_ms": 1.6223000002355548,
+        "tsfel_ms": 739.1867999995156,
+        "tsfresh_ms": 10721.956200000932,
+        "speedup_vs_tsfel": 455.6412500105943,
+        "speedup_vs_tsfresh": 6609.108178785752,
+        "worst_rel_error": 21.375,
+        "worst_rel_error_feature": "mean"
+      },
+      "parity_details": {
+        "mean": {
+          "tsfel_name": "0_Mean",
+          "max_rel_error": 21.375
+        },
+        "std": {
+          "tsfel_name": "0_Standard deviation",
+          "max_rel_error": 3.402304586558962e-16
+        },
+        "var": {
+          "tsfel_name": "0_Variance",
+          "max_rel_error": 6.950961576805635e-16
+        },
+        "min": {
+          "tsfel_name": "0_Min",
+          "max_rel_error": 0.0
+        },
+        "max": {
+          "tsfel_name": "0_Max",
+          "max_rel_error": 0.0
+        },
+        "median": {
+          "tsfel_name": "0_Median",
+          "max_rel_error": 1.073745734531642e-14
+        },
+        "skewness": {
+          "tsfel_name": "0_Skewness",
+          "max_rel_error": 1.6262605756623036e-12
+        },
+        "kurtosis": {
+          "tsfel_name": "0_Kurtosis",
+          "max_rel_error": 6.436872801752096e-13
+        },
+        "abs_energy": {
+          "tsfel_name": "0_Absolute energy",
+          "max_rel_error": 6.178632447352521e-16
+        },
+        "root_mean_square": {
+          "tsfel_name": "0_Root mean square",
+          "max_rel_error": 3.402304548472266e-16
+        },
+        "mean_abs_change": {
+          "tsfel_name": "0_Mean absolute diff",
+          "max_rel_error": 4.2330471504523016e-16
+        },
+        "mean_change": {
+          "tsfel_name": "0_Mean diff",
+          "max_rel_error": 1.0
+        },
+        "zero_crossings": {
+          "tsfel_name": "0_Zero crossing rate",
+          "max_rel_error": 0.0
+        }
+      },
+      "evaluations": [
+        {
+          "extractor": "Kymora (core33)",
+          "engine": "Rust / Rayon",
+          "n_features": 33,
+          "extract_time_ms": 0.8470000011584489,
+          "relative_to_kymora_core": 1.0,
+          "rf_acc": 0.8688046647230321,
+          "rf_f1": 0.8681947091915012,
+          "ridge_acc": 0.9076773566569485
+        },
+        {
+          "extractor": "Kymora (extended)",
+          "engine": "Rust / Rayon",
+          "n_features": 143,
+          "extract_time_ms": 0.8145000010699732,
+          "relative_to_kymora_core": 0.9616292797591203,
+          "rf_acc": 0.9416909620991254,
+          "rf_f1": 0.941678568999524,
+          "ridge_acc": 0.8892128279883382
+        },
+        {
+          "extractor": "Kymora (full)",
+          "engine": "Rust / Rayon",
+          "n_features": 543,
+          "extract_time_ms": 1.4596000000892673,
+          "relative_to_kymora_core": 1.7232585573706733,
+          "rf_acc": 0.9611273080660836,
+          "rf_f1": 0.961122865346834,
+          "ridge_acc": 0.9047619047619048
+        },
+        {
+          "extractor": "catch22 (pycatch22)",
+          "engine": "C Core / Python loop",
+          "n_features": 22,
+          "extract_time_ms": 57.74269999892567,
+          "relative_to_kymora_core": 68.17319943323555,
+          "rf_acc": 0.8639455782312925,
+          "rf_f1": 0.8635268171793647,
+          "ridge_acc": 0.8134110787172012
+        },
+        {
+          "extractor": "antropy (complexity)",
+          "engine": "Python / Numba loop",
+          "n_features": 8,
+          "extract_time_ms": 705.308699998568,
+          "relative_to_kymora_core": 832.7139303824221,
+          "rf_acc": 0.8124392614188533,
+          "rf_f1": 0.8111199349466687,
+          "ridge_acc": 0.8454810495626822
+        },
+        {
+          "extractor": "sktime (Catch22)",
+          "engine": "Python / sktime wrapper",
+          "n_features": 22,
+          "extract_time_ms": 2236.960700000054,
+          "relative_to_kymora_core": 2641.039783873134,
+          "rf_acc": 0.8969873663751214,
+          "rf_f1": 0.8969163944837597,
+          "ridge_acc": 0.8435374149659864
+        },
+        {
+          "extractor": "TSFEL (statistical)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 31,
+          "extract_time_ms": 662.4047000004794,
+          "relative_to_kymora_core": 782.0598572544309,
+          "rf_acc": 0.7531584062196307,
+          "rf_f1": 0.752550556691661,
+          "ridge_acc": 0.608357628765792
+        },
+        {
+          "extractor": "TSFEL (all)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 143,
+          "extract_time_ms": 2355.329399999391,
+          "relative_to_kymora_core": 2780.7903149681083,
+          "rf_acc": 0.9504373177842566,
+          "rf_f1": 0.950435632623571,
+          "ridge_acc": 0.8824101068999028
+        },
+        {
+          "extractor": "numba (parallel JIT)",
+          "engine": "Python / Numba prange",
+          "n_features": 10,
+          "extract_time_ms": 0.5846000003657537,
+          "relative_to_kymora_core": 0.6902007078703559,
+          "rf_acc": 0.685131195335277,
+          "rf_f1": 0.6851285189718482,
+          "ridge_acc": 0.6501457725947521
+        },
+        {
+          "extractor": "numpy (vectorized)",
+          "engine": "Python / NumPy vectorized",
+          "n_features": 12,
+          "extract_time_ms": 0.8867999986250652,
+          "relative_to_kymora_core": 1.046989371206826,
+          "rf_acc": 0.7521865889212828,
+          "rf_f1": 0.7521407081694051,
+          "ridge_acc": 0.6802721088435374
+        },
+        {
+          "extractor": "tsfresh (minimal)",
+          "engine": "Python / multiprocessing",
+          "n_features": 10,
+          "extract_time_ms": 22531.763000000865,
+          "relative_to_kymora_core": 26601.845300099158,
+          "rf_acc": 0.7152575315840622,
+          "rf_f1": 0.714583642971351,
+          "ridge_acc": 0.6005830903790087
+        },
+        {
+          "extractor": "tsfresh (efficient)",
+          "engine": "Python / multiprocessing",
+          "n_features": 777,
+          "extract_time_ms": 37209.90610000081,
+          "relative_to_kymora_core": 43931.4121004823,
+          "rf_acc": 0.9523809523809523,
+          "rf_f1": 0.9523780739475829,
+          "ridge_acc": 0.93488824101069
+        }
+      ]
+    },
+    "Coffee": {
+      "n_train": 28,
+      "n_test": 28,
+      "length": 286,
+      "equal_features": {
+        "kymora_ms": 0.7891000004747184,
+        "tsfel_ms": 79.48990000113554,
+        "tsfresh_ms": 10854.587600000741,
+        "speedup_vs_tsfel": 100.73488778775166,
+        "speedup_vs_tsfresh": 13755.655295235938,
+        "worst_rel_error": 7.244866708144386e-11,
+        "worst_rel_error_feature": "skewness"
+      },
+      "parity_details": {
+        "mean": {
+          "tsfel_name": "0_Mean",
+          "max_rel_error": 6.726626383582601e-12
+        },
+        "std": {
+          "tsfel_name": "0_Standard deviation",
+          "max_rel_error": 6.267318108996252e-16
+        },
+        "var": {
+          "tsfel_name": "0_Variance",
+          "max_rel_error": 1.326736005113055e-15
+        },
+        "min": {
+          "tsfel_name": "0_Min",
+          "max_rel_error": 0.0
+        },
+        "max": {
+          "tsfel_name": "0_Max",
+          "max_rel_error": 0.0
+        },
+        "median": {
+          "tsfel_name": "0_Median",
+          "max_rel_error": 3.913844946009676e-16
+        },
+        "skewness": {
+          "tsfel_name": "0_Skewness",
+          "max_rel_error": 7.244866708144386e-11
+        },
+        "kurtosis": {
+          "tsfel_name": "0_Kurtosis",
+          "max_rel_error": 2.8623524996377823e-15
+        },
+        "abs_energy": {
+          "tsfel_name": "0_Absolute energy",
+          "max_rel_error": 1.1961894501871915e-15
+        },
+        "root_mean_square": {
+          "tsfel_name": "0_Root mean square",
+          "max_rel_error": 6.290026843574284e-16
+        },
+        "mean_abs_change": {
+          "tsfel_name": "0_Mean absolute diff",
+          "max_rel_error": 1.0169530136491238e-15
+        },
+        "mean_change": {
+          "tsfel_name": "0_Mean diff",
+          "max_rel_error": 7.519367509820491e-14
+        },
+        "zero_crossings": {
+          "tsfel_name": "0_Zero crossing rate",
+          "max_rel_error": 0.0
+        }
+      },
+      "evaluations": [
+        {
+          "extractor": "Kymora (core33)",
+          "engine": "Rust / Rayon",
+          "n_features": 33,
+          "extract_time_ms": 1.2640999993891455,
+          "relative_to_kymora_core": 1.0,
+          "rf_acc": 0.75,
+          "rf_f1": 0.7496807151979565,
+          "ridge_acc": 0.6428571428571429
+        },
+        {
+          "extractor": "Kymora (extended)",
+          "engine": "Rust / Rayon",
+          "n_features": 143,
+          "extract_time_ms": 1.3711999999941327,
+          "relative_to_kymora_core": 1.084724310305151,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 0.9642857142857143
+        },
+        {
+          "extractor": "Kymora (full)",
+          "engine": "Rust / Rayon",
+          "n_features": 543,
+          "extract_time_ms": 1.9607000012911158,
+          "relative_to_kymora_core": 1.5510639998723124,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 0.9642857142857143
+        },
+        {
+          "extractor": "catch22 (pycatch22)",
+          "engine": "C Core / Python loop",
+          "n_features": 22,
+          "extract_time_ms": 36.86850000121922,
+          "relative_to_kymora_core": 29.165809682015094,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 0.9285714285714286
+        },
+        {
+          "extractor": "antropy (complexity)",
+          "engine": "Python / Numba loop",
+          "n_features": 8,
+          "extract_time_ms": 95.0118000000657,
+          "relative_to_kymora_core": 75.16161699705602,
+          "rf_acc": 0.5,
+          "rf_f1": 0.5,
+          "ridge_acc": 0.5357142857142857
+        },
+        {
+          "extractor": "sktime (Catch22)",
+          "engine": "Python / sktime wrapper",
+          "n_features": 22,
+          "extract_time_ms": 151.8368000015471,
+          "relative_to_kymora_core": 120.11454795895862,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 1.0
+        },
+        {
+          "extractor": "TSFEL (statistical)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 31,
+          "extract_time_ms": 76.54879999972763,
+          "relative_to_kymora_core": 60.55596870241161,
+          "rf_acc": 0.6071428571428571,
+          "rf_f1": 0.6025806451612903,
+          "ridge_acc": 0.6071428571428571
+        },
+        {
+          "extractor": "TSFEL (all)",
+          "engine": "Python / SciPy / Numba",
+          "n_features": 162,
+          "extract_time_ms": 1039.0442999996594,
+          "relative_to_kymora_core": 821.9636899784508,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 1.0
+        },
+        {
+          "extractor": "numba (parallel JIT)",
+          "engine": "Python / Numba prange",
+          "n_features": 10,
+          "extract_time_ms": 0.2798999994411133,
+          "relative_to_kymora_core": 0.22142235549115588,
+          "rf_acc": 0.6785714285714286,
+          "rf_f1": 0.6748387096774193,
+          "ridge_acc": 0.75
+        },
+        {
+          "extractor": "numpy (vectorized)",
+          "engine": "Python / NumPy vectorized",
+          "n_features": 12,
+          "extract_time_ms": 0.48100000094564166,
+          "relative_to_kymora_core": 0.3805078721446694,
+          "rf_acc": 0.6071428571428571,
+          "rf_f1": 0.5942028985507246,
+          "ridge_acc": 0.5357142857142857
+        },
+        {
+          "extractor": "tsfresh (minimal)",
+          "engine": "Python / multiprocessing",
+          "n_features": 10,
+          "extract_time_ms": 22662.61510000004,
+          "relative_to_kymora_core": 17927.865762954953,
+          "rf_acc": 0.5714285714285714,
+          "rf_f1": 0.5508021390374331,
+          "ridge_acc": 0.7142857142857143
+        },
+        {
+          "extractor": "tsfresh (efficient)",
+          "engine": "Python / multiprocessing",
+          "n_features": 777,
+          "extract_time_ms": 22674.918299999263,
+          "relative_to_kymora_core": 17937.598537264872,
+          "rf_acc": 1.0,
+          "rf_f1": 1.0,
+          "ridge_acc": 0.9642857142857143
+        }
+      ]
+    }
+  }
+}
