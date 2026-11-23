@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795473934884,
+  "lastUpdate": 1795475554167,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -465,6 +465,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0758",
             "unit": "ms",
             "extra": "runs=30, cv=0.017"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "10ee2fabbdd11c4518666df24aa7af3fc62d5fbe",
+          "message": "bench(competitors): add comprehensive multi-competitor benchmarks and evaluation report (#45)",
+          "timestamp": "2026-11-24T04:41:16+05:30",
+          "tree_id": "9d4e51826bbdd5b1be30814eab1009ec98e7bd2e",
+          "url": "https://github.com/Aamodx6/Kymora/commit/10ee2fabbdd11c4518666df24aa7af3fc62d5fbe"
+        },
+        "date": 1795475553718,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 3.1931,
+            "range": "0.0582",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.108"
           }
         ]
       }
