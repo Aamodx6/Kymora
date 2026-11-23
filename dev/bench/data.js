@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795471282542,
+  "lastUpdate": 1795472894661,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -403,6 +403,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0275",
             "unit": "ms",
             "extra": "runs=30, cv=0.022"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d93da8c1962ff6907a7b32eaf52f0da90c092936",
+          "message": "feat(benchmarks): add real-world benchmark telemetry and report for tsfresh and TSFEL (#43)",
+          "timestamp": "2026-11-24T03:56:39+05:30",
+          "tree_id": "fab21889ed6c506377811cd5c19511cf415c070e",
+          "url": "https://github.com/Aamodx6/Kymora/commit/d93da8c1962ff6907a7b32eaf52f0da90c092936"
+        },
+        "date": 1795472893794,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.9689,
+            "range": "0.4353",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.117"
           }
         ]
       }
