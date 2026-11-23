@@ -1,5 +1,5 @@
 # Kymora
-### High-Performance Time-Series Feature Extraction. Rust Core. Python Ease.
+### High-Performance Time Series Feature Extraction Library. Rust Core. Python Ease.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kymora.svg)](https://pypi.org/project/kymora/)
@@ -19,7 +19,7 @@
 
 > **Batch time-series feature extraction: 33 features at 1.94 ms median per 1,000 series x 500 steps (514,245 series/s; 95.4× catch22, 1,291× TSFEL, 12,106× tsfresh), with no copy of the input and bounded O(T × L) worker scratch (~2.29–3.33 MiB at N ≤ 10k).**
 
-**Kymora** is a minimalistic, dependency-light time-series feature extraction library designed to make extracting statistical, temporal, and spectral features across large datasets fast and memory-efficient. It combines a native Rust engine (no copy of the input) with a clean, Scikit-Learn-compatible Python interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
+**Kymora** is a high-performance **Time Series Feature Extraction Library** for Python, powered by a native Rust engine (no copy of the input) with a clean, Scikit-Learn-compatible interface—ideal for machine learning pipelines, quantitative finance, real-time sensor telemetry, and high-throughput research.
 
 [PyPI](https://pypi.org/project/kymora/) • [Features](#key-features) • [Installation](#installation) • [Quickstart](#quickstart) • [Benchmarks](#benchmarks) • [Streaming & Real-Time Telemetry](#streaming-real-time-telemetry) • [Scikit-Learn Integration](#scikit-learn-pipeline) • [Documentation](https://aamodx6.github.io/Kymora/) • [Website](https://landing-drab-six-14.vercel.app)
 
