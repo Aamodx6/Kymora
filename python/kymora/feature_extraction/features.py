@@ -302,9 +302,10 @@ def compute_derived_features(
     } | {"wavelet_entropy"}
     if wavelet_reqs & requested or any("wavelet" in r for r in requested):
         try:
-            import pywt  # type: ignore[import-untyped]
+            import importlib
+            pywt = importlib.import_module("pywt")
             has_pywt = True
-        except ImportError:
+        except (ImportError, ModuleNotFoundError):
             has_pywt = False
 
         widths = np.arange(1, 10)

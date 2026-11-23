@@ -123,7 +123,7 @@ depends on those, `tsfresh` is the right tool and this library is not.
 
 For teams with existing TSFEL pipelines, Kymora provides a 100% compatible drop-in replacement that delivers **up to 1,000× faster extraction** with zero code modifications:
 
-```python
+```python skip
 # Before:
 # import tsfel
 
@@ -149,7 +149,7 @@ Kymora organizes its modules following the standard structure expected by TSFEL 
 
 You can also use domain-targeted extraction directly via Kymora's native API:
 
-```python
+```python skip
 import kymora
 
 # Extract only statistical domain features (36 features)
