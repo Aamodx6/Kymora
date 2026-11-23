@@ -1,261 +1,285 @@
 {
   "GunPoint": {
-    "N_train": 100,
-    "N_test": 200,
+    "n_train": 50,
+    "n_test": 150,
     "length": 150,
     "equal_features": {
-      "kymora_ms": 1.5749000003779656,
-      "tsfel_ms": 3065.129700000398,
-      "speedup": 1946.2376654167165
+      "kymora_ms": 1.7282999997405568,
+      "tsfel_ms": 3049.0711000002193,
+      "tsfresh_ms": 4053.35070000001,
+      "speedup_vs_tsfel": 1764.202453542747,
+      "speedup_vs_tsfresh": 2345.28189585632,
+      "worst_rel_error": 7.499999999999999
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 6.079400000089663,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.5425999990839045,
+        "rf_acc": 0.84,
+        "rf_f1": 0.8385939741750359,
+        "ridge_acc": 0.82
       },
       {
-        "extractor": "Kymora (extended 143)",
+        "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 1.4330000003610621,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.561799999763025,
+        "rf_acc": 0.9666666666666667,
+        "rf_f1": 0.9666651851193386,
+        "ridge_acc": 0.9466666666666667
       },
       {
-        "extractor": "Kymora (full 543)",
+        "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 2.435499999592139,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.7502999999123858,
+        "rf_acc": 0.9533333333333334,
+        "rf_f1": 0.9532814238042269,
+        "ridge_acc": 0.9266666666666666
       },
       {
-        "extractor": "TSFEL (statistical 31)",
+        "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 284.5907000000807,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 262.3139999996056,
+        "rf_acc": 0.88,
+        "rf_f1": 0.8794642857142857,
+        "ridge_acc": 0.86
       },
       {
-        "extractor": "TSFEL (all 162)",
+        "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 990.5223000005208,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 593.5747000003175,
+        "rf_acc": 0.96,
+        "rf_f1": 0.9599928876244666,
+        "ridge_acc": 0.9733333333333334
+      },
+      {
+        "extractor": "tsfresh (minimal)",
+        "n_features": 10,
+        "extract_time_ms": 7755.92879999931,
+        "rf_acc": 0.7666666666666667,
+        "rf_f1": 0.765823631740934,
+        "ridge_acc": 0.6533333333333333
+      },
+      {
+        "extractor": "tsfresh (efficient)",
+        "n_features": 777,
+        "extract_time_ms": 11639.901200000168,
+        "rf_acc": 0.96,
+        "rf_f1": 0.9599928876244666,
+        "ridge_acc": 0.9466666666666667
       }
     ]
   },
   "ECG200": {
-    "N_train": 100,
-    "N_test": 200,
+    "n_train": 100,
+    "n_test": 100,
     "length": 96,
     "equal_features": {
-      "kymora_ms": 0.6407999999282765,
-      "tsfel_ms": 197.23189999967872,
-      "speedup": 307.79010615130227
+      "kymora_ms": 1.3038000015512807,
+      "tsfel_ms": 174.47149999861722,
+      "tsfresh_ms": 3338.7134999993577,
+      "speedup_vs_tsfel": 133.81768660149442,
+      "speedup_vs_tsfresh": 2560.7558644170167,
+      "worst_rel_error": 2.868074848284915e-06
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.6656999996484956,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.117200001317542,
+        "rf_acc": 0.83,
+        "rf_f1": 0.8062678062678064,
+        "ridge_acc": 0.83
       },
       {
-        "extractor": "Kymora (extended 143)",
+        "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 0.9541999997964012,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 0.6358999999065418,
+        "rf_acc": 0.85,
+        "rf_f1": 0.8340524394291404,
+        "ridge_acc": 0.82
       },
       {
-        "extractor": "Kymora (full 543)",
+        "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 1.4530999997077743,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 0.987600000371458,
+        "rf_acc": 0.91,
+        "rf_f1": 0.9017359973796266,
+        "ridge_acc": 0.85
       },
       {
-        "extractor": "TSFEL (statistical 31)",
+        "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 211.96249999957217,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 198.58360000034736,
+        "rf_acc": 0.83,
+        "rf_f1": 0.8092245539221188,
+        "ridge_acc": 0.75
       },
       {
-        "extractor": "TSFEL (all 162)",
+        "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 887.2743000001719,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 503.38489999921876,
+        "rf_acc": 0.87,
+        "rf_f1": 0.8597778017473843,
+        "ridge_acc": 0.79
+      },
+      {
+        "extractor": "tsfresh (minimal)",
+        "n_features": 10,
+        "extract_time_ms": 6676.840199999788,
+        "rf_acc": 0.69,
+        "rf_f1": 0.6408295678368672,
+        "ridge_acc": 0.73
+      },
+      {
+        "extractor": "tsfresh (efficient)",
+        "n_features": 777,
+        "extract_time_ms": 10947.491999999329,
+        "rf_acc": 0.87,
+        "rf_f1": 0.8580631073261273,
+        "ridge_acc": 0.87
       }
     ]
   },
   "ItalyPowerDemand": {
-    "N_train": 100,
-    "N_test": 200,
+    "n_train": 67,
+    "n_test": 1029,
     "length": 24,
     "equal_features": {
-      "kymora_ms": 1.2696999992840574,
-      "tsfel_ms": 172.55979999936244,
-      "speedup": 135.90596211440757
+      "kymora_ms": 1.5513999987888383,
+      "tsfel_ms": 643.6925000016345,
+      "tsfresh_ms": 3898.8840999991226,
+      "speedup_vs_tsfel": 414.91072612102516,
+      "speedup_vs_tsfresh": 2513.1391665869155,
+      "worst_rel_error": 21.375
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.2255000001459848,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 0.9033999995153863,
+        "rf_acc": 0.8688046647230321,
+        "rf_f1": 0.8681947091915012,
+        "ridge_acc": 0.9076773566569485
       },
       {
-        "extractor": "Kymora (extended 143)",
+        "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 0.74399999994057,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.0469000008015428,
+        "rf_acc": 0.9416909620991254,
+        "rf_f1": 0.941678568999524,
+        "ridge_acc": 0.8892128279883382
       },
       {
-        "extractor": "Kymora (full 543)",
+        "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 1.4131999996607192,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.740800000334275,
+        "rf_acc": 0.9611273080660836,
+        "rf_f1": 0.961122865346834,
+        "ridge_acc": 0.9047619047619048
       },
       {
-        "extractor": "TSFEL (statistical 31)",
+        "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 232.50850000022183,
-        "rf_acc": 0.99,
-        "rf_f1": 0.99,
-        "ridge_acc": 0.98
+        "extract_time_ms": 767.3219999996945,
+        "rf_acc": 0.7531584062196307,
+        "rf_f1": 0.752550556691661,
+        "ridge_acc": 0.608357628765792
       },
       {
-        "extractor": "TSFEL (all 162)",
+        "extractor": "TSFEL (all)",
         "n_features": 143,
-        "extract_time_ms": 824.808800000028,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 2614.05250000098,
+        "rf_acc": 0.9504373177842566,
+        "rf_f1": 0.950435632623571,
+        "ridge_acc": 0.8824101068999028
+      },
+      {
+        "extractor": "tsfresh (minimal)",
+        "n_features": 10,
+        "extract_time_ms": 8585.065499999473,
+        "rf_acc": 0.7152575315840622,
+        "rf_f1": 0.714583642971351,
+        "ridge_acc": 0.6005830903790087
+      },
+      {
+        "extractor": "tsfresh (efficient)",
+        "n_features": 777,
+        "extract_time_ms": 29872.20780000098,
+        "rf_acc": 0.9523809523809523,
+        "rf_f1": 0.9523780739475829,
+        "ridge_acc": 0.93488824101069
       }
     ]
   },
   "Coffee": {
-    "N_train": 100,
-    "N_test": 200,
+    "n_train": 28,
+    "n_test": 28,
     "length": 286,
     "equal_features": {
-      "kymora_ms": 1.3548999995691702,
-      "tsfel_ms": 200.41850000052364,
-      "speedup": 147.92124884807183
+      "kymora_ms": 0.9069000007002614,
+      "tsfel_ms": 78.19369999924675,
+      "tsfresh_ms": 3398.988199998712,
+      "speedup_vs_tsfel": 86.22086221068432,
+      "speedup_vs_tsfresh": 3747.919503114112,
+      "worst_rel_error": 6.820839548740747e-11
     },
     "evaluations": [
       {
         "extractor": "Kymora (core33)",
         "n_features": 33,
-        "extract_time_ms": 1.5423000004375353,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 1.682000000073458,
+        "rf_acc": 0.75,
+        "rf_f1": 0.7496807151979565,
+        "ridge_acc": 0.6428571428571429
       },
       {
-        "extractor": "Kymora (extended 143)",
+        "extractor": "Kymora (extended)",
         "n_features": 143,
-        "extract_time_ms": 2.5313000005553477,
+        "extract_time_ms": 1.4169000005495036,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "ridge_acc": 0.9642857142857143
       },
       {
-        "extractor": "Kymora (full 543)",
+        "extractor": "Kymora (full)",
         "n_features": 543,
-        "extract_time_ms": 2.9470999998011393,
+        "extract_time_ms": 2.602399999886984,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "ridge_acc": 0.9642857142857143
       },
       {
-        "extractor": "TSFEL (statistical 31)",
+        "extractor": "TSFEL (statistical)",
         "n_features": 31,
-        "extract_time_ms": 234.48220000045694,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extract_time_ms": 79.52930000101333,
+        "rf_acc": 0.6071428571428571,
+        "rf_f1": 0.6025806451612903,
+        "ridge_acc": 0.6071428571428571
       },
       {
-        "extractor": "TSFEL (all 162)",
+        "extractor": "TSFEL (all)",
         "n_features": 162,
-        "extract_time_ms": 6080.086300000403,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
-      }
-    ]
-  },
-  "Wafer": {
-    "N_train": 100,
-    "N_test": 200,
-    "length": 152,
-    "equal_features": {
-      "kymora_ms": 1.2516999995568767,
-      "tsfel_ms": 211.76239999931568,
-      "speedup": 169.17983548316946
-    },
-    "evaluations": [
-      {
-        "extractor": "Kymora (core33)",
-        "n_features": 33,
-        "extract_time_ms": 1.722699999845645,
+        "extract_time_ms": 1070.9917999993195,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
         "ridge_acc": 1.0
       },
       {
-        "extractor": "Kymora (extended 143)",
-        "n_features": 143,
-        "extract_time_ms": 1.622499999939464,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "extractor": "tsfresh (minimal)",
+        "n_features": 10,
+        "extract_time_ms": 6919.6136999999,
+        "rf_acc": 0.5714285714285714,
+        "rf_f1": 0.5508021390374331,
+        "ridge_acc": 0.7142857142857143
       },
       {
-        "extractor": "Kymora (full 543)",
-        "n_features": 543,
-        "extract_time_ms": 1.5966999999363907,
+        "extractor": "tsfresh (efficient)",
+        "n_features": 777,
+        "extract_time_ms": 8794.711799999277,
         "rf_acc": 1.0,
         "rf_f1": 1.0,
-        "ridge_acc": 1.0
-      },
-      {
-        "extractor": "TSFEL (statistical 31)",
-        "n_features": 31,
-        "extract_time_ms": 227.7753999997003,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
-      },
-      {
-        "extractor": "TSFEL (all 162)",
-        "n_features": 162,
-        "extract_time_ms": 775.9933999996065,
-        "rf_acc": 1.0,
-        "rf_f1": 1.0,
-        "ridge_acc": 1.0
+        "ridge_acc": 0.9642857142857143
       }
     ]
   }
