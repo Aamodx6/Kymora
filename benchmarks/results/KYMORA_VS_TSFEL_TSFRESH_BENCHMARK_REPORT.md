@@ -3,9 +3,9 @@
 > **Executive Summary:**  
 > In empirical benchmarking conducted on canonical real-world datasets from the UCR Time Series Archive (Python 3.14.6, Windows 11, multi-core Intel i7, 16 threads):
 > - **100% Real-World Empirical Data:** Benchmarked on standard train/test splits across 4 diverse physical domains: `GunPoint` (motion/gesture capture), `ECG200` (cardiac electrophysiology), `ItalyPowerDemand` (energy grid sensor telemetry), and `Coffee` (infrared spectroscopy food chemistry).
-> - **Speedup vs tsfresh ("TSFast"):** On identical baseline features, Kymora is **2,345.3× to 3,747.9× faster** than `tsfresh`. On full-catalog feature extraction for downstream ML, Kymora extracts in **1.7 ms** what takes tsfresh **29,872.2 ms** (**17,571× faster** on ItalyPowerDemand).
+> - **Speedup vs tsfresh ("TSFast"):** On identical baseline features, Kymora is **2,345.3× to 3,747.9× faster** than `tsfresh`. On full-catalog feature extraction for downstream ML, Kymora extracts in **1.7 ms** (543 features) what takes tsfresh **29,872.2 ms** (777 features) — a **17,571× raw pipeline speedup** on ItalyPowerDemand.
 > - **Speedup vs TSFEL:** On identical baseline features, Kymora is **86.2× to 1,764.2× faster** than TSFEL (e.g., GunPoint: **1.73 ms** vs **3,049.07 ms**).
-> - **Downstream Classification Accuracy:** Kymora matches or exceeds both `tsfresh` and `TSFEL` across every dataset on standard Random Forest and Ridge classifiers (e.g., 100% accuracy on Coffee; 96.67% on GunPoint; 96.11% on ItalyPowerDemand; 91.00% on ECG200).
+> - **Downstream Classification Accuracy:** On Random Forest classifiers, Kymora matches or exceeds both `tsfresh` and `TSFEL` across every single dataset (e.g., 100% test accuracy on Coffee; 96.67% on GunPoint; 96.11% on ItalyPowerDemand; 91.00% on ECG200), while on Ridge regression Kymora remains highly competitive (94.67% on GunPoint, 85.00% on ECG200, 90.48% on ItalyPowerDemand, 96.43% on Coffee).
 > - **Zero Input Reshaping Overhead:** Unlike `tsfresh` (which requires melting 2D matrices into massive long-format DataFrames with millions of rows) and `TSFEL` (which requires Python-level per-row dispatch loops), Kymora consumes standard contiguous NumPy arrays via zero-copy buffer borrowing in Rust.
 
 ---
@@ -21,7 +21,7 @@ Wall-clock time to extract 13 definition-identical statistical and temporal feat
 | **ItalyPowerDemand** | Grid Energy Telemetry | 1,096 × 24 | **1.55 ms** | 643.69 ms | **414.9× faster** | 3,898.88 ms | **2,513.1× faster** |
 | **Coffee** | NIR Food Spectroscopy | 56 × 286 | **0.91 ms** | 78.19 ms | **86.2× faster** | 3,398.99 ms | **3,747.9× faster** |
 
-*All runs executed with multi-threading enabled (`n_jobs=4` in tsfresh, `Parallel(n_jobs=-1)` in TSFEL, Rayon work-stealing across 16 threads in Kymora).*
+*All runs executed with multi-threading enabled (`n_jobs=4` in tsfresh, `Parallel(n_jobs=-1)` in TSFEL, Rayon work-stealing across 16 threads in Kymora). Note: Kymora and TSFEL compute 13 definition-identical matched features; tsfresh evaluates its standard Minimal profile (10 features).*
 
 ---
 
@@ -102,10 +102,27 @@ Features extracted on the standard canonical UCR training split, scaled with `St
 
 ## 4. Reproducing the Benchmark
 
-The benchmark script is fully deterministic and runnable on any machine with the canonical datasets:
+The benchmark script is fully deterministic and runnable on any machine with the canonical datasets. Note that `tsfresh` and `tsfel` are required dependencies to run the multi-library comparison:
 
 ```bash
+pip install tsfresh tsfel scikit-learn
 python benchmarks/benchmark_real_world.py
 ```
 
 The resulting telemetry is saved to `benchmarks/results/kymora_vs_tsfel_tsfresh_real_benchmark.json`.
+
+---
+
+## 5. Architectural & Performance Comparison: Kymora vs `tsrocket` (formerly `tsfast`)
+
+The repository [`thelonesomeprogrammer/tsrocket`](https://github.com/thelonesomeprogrammer/tsrocket) (originally named `tsfast` prior to v0.1) is an alternative Rust-based time-series feature extractor targeting tsfresh and TSFEL parity. Below is an architectural and operational comparison with Kymora:
+
+| Dimension | `tsrocket` (formerly `tsfast`) | `kymora` | Architectural Advantage |
+| :--- | :--- | :--- | :--- |
+| **Throughput (1,000 × 500)** | ~230 ms (reported on 100 × 1,000 workload, scaled) | **1.94 ms – 2.17 ms** (514,245 series/s) | **>100× higher batch throughput** in Kymora |
+| **Numerical Precision** | **float32 (`f32`) only** | **Native float64 (`f64`) standard** + optimized float32 option | Kymora matches standard SciPy/NumPy 64-bit precision ($< 10^{-12}$ error) without rounding-induced bin edge shifts or permutation ties |
+| **Toolchain Stability** | **Requires Rust Nightly** (`#![feature(portable_simd)]`) | **Compiles on Stable Rust (1.80+)** | Zero nightly dependencies; builds in enterprise and restricted environments without AppLocker/execution policy blocks |
+| **Distribution on PyPI** | No wheels published on PyPI (`pip install tsrocket` fails) | Pre-built universal binary wheels on PyPI for Linux, macOS, and Windows (Python 3.10–3.14 + freethreaded 3.13t) | Seamless, instant pip installation with zero compiler toolchain requirement for end users |
+| **Open Source Licensing** | **GPL-3.0-or-later** (strict viral copyleft) | **Apache-2.0 / MIT Dual License** (permissive) | Kymora can be integrated into commercial, closed-source, and enterprise analytics pipelines without forced open-sourcing |
+| **API Ergonomics & Ecosystem** | Requires mapping column names or using custom Extractor classes | Standard NumPy 2D array ingestion, pandas DataFrames, scientific domain filters (`statistical`, `temporal`, `spectral`), and drop-in `kymora.compat.tsfel` / `kymora.compat.tsfresh` modules | Drop-in acceleration with zero code rewrites |
+

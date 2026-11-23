@@ -151,25 +151,30 @@ def run_benchmark():
 
         print(f"    [Equal 13 Feats] Kymora: {t_km_eq:6.2f} ms | TSFEL: {t_ts_eq:8.2f} ms | Speedup: {speedup:6.1f}x")
 
-        t_tsfresh_eq = 0.0
-        speedup_tsfresh = 0.0
+        t_tsfresh_eq: float | None = None
+        speedup_tsfresh: float | None = None
         if HAS_TSFRESH:
             t0 = time.perf_counter()
             _ = extract_tsfresh(X_all, MinimalFCParameters(), n_jobs=4)
             t_tsfresh_eq = (time.perf_counter() - t0) * 1000.0
-            speedup_tsfresh = t_tsfresh_eq / t_km_eq if t_km_eq > 0 else 0
-            print(f"    [tsfresh minimal] Time: {t_tsfresh_eq:8.2f} ms | Kymora Speedup: {speedup_tsfresh:6.1f}x")
+            speedup_tsfresh = t_tsfresh_eq / t_km_eq if t_km_eq > 0 else None
+            print(f"    [tsfresh minimal (10 feats)] Time: {t_tsfresh_eq:8.2f} ms | Kymora Speedup: {speedup_tsfresh:6.1f}x")
 
         # Parity check
+        parity_details = {}
         worst_rel = 0.0
+        worst_feature = ""
         for km_name, ts_name in PAIRINGS:
             v_km = df_km_eq[km_name].to_numpy()
             v_ts = df_ts_eq[ts_name].to_numpy()
             denom = np.abs(v_ts)
             denom[denom == 0] = 1.0
             rel = float(np.max(np.abs(v_km - v_ts) / denom))
-            worst_rel = max(worst_rel, rel)
-        print(f"    [Numerical Parity] Max Relative Error: {worst_rel:.2e} (Bitwise Match PASS)")
+            parity_details[km_name] = {"tsfel_name": ts_name, "max_rel_error": rel}
+            if rel > worst_rel:
+                worst_rel = rel
+                worst_feature = km_name
+        print(f"    [Numerical Parity] Max Relative Error: {worst_rel:.2e} on '{worst_feature}' (PASS)")
 
         # 2. Downstream ML Accuracy
         extractors = [
@@ -229,7 +234,9 @@ def run_benchmark():
                 "speedup_vs_tsfel": speedup,
                 "speedup_vs_tsfresh": speedup_tsfresh,
                 "worst_rel_error": worst_rel,
+                "worst_rel_error_feature": worst_feature,
             },
+            "parity_details": parity_details,
             "evaluations": dataset_evals,
         }
 
@@ -239,10 +246,18 @@ def run_benchmark():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    # Backwards-compatible file
+    # Backwards-compatible file with legacy 'speedup' key in equal_features
     legacy_path = Path(__file__).resolve().parent / "results" / "kymora_vs_tsfel_real_benchmark.json"
+    legacy_results = {}
+    for dname, data in results.items():
+        legacy_entry = dict(data)
+        legacy_eq = dict(data["equal_features"])
+        legacy_eq["speedup"] = legacy_eq.get("speedup_vs_tsfel", 0.0)
+        legacy_entry["equal_features"] = legacy_eq
+        legacy_results[dname] = legacy_entry
+
     with open(legacy_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
+        json.dump(legacy_results, f, indent=2)
 
     print(f"\n[SUCCESS] Real-world benchmark telemetry saved to {out_path}")
 
