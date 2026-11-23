@@ -83,3 +83,31 @@ Cost classes: `A` fused reductions, `B` order statistics, `C` spectral/FFT,
 | 30 | `dominant_frequency` | C | Needs(PASS1 | SPECTRUM) | — |
 | 31 | `spectral_centroid` | C | Needs(PASS1 | SPECTRUM) | — |
 | 32 | `spectral_entropy` | C | Needs(PASS1 | SPECTRUM) | — |
+
+---
+
+## Domain & Specialized Feature Catalog
+
+In addition to the Core33, Extended (143), and Full (543) profiles, Kymora provides domain-targeted extraction supporting acoustic and biomedical signal processing:
+
+### 1. Statistical Domain (36 features)
+Central moments, quantiles, absolute energy, root mean square, interquartile range, median absolute deviation (MAD), and higher-order $c_3$ cumulants (`c3__lag_1`, `c3__lag_2`, `c3__lag_3`).
+
+### 2. Temporal Domain (23 features)
+Zero-crossing rates, mean absolute change, central second derivatives, turning points, strike lengths, and multi-lag autocorrelations.
+
+### 3. Spectral Domain (75 features)
+FFT power spectrum centroids, dominant frequency, spectral entropy, variance, skew, spread, and energy ratios.
+
+### 4. Acoustic Mel-Frequency Cepstral Coefficients (MFCC, 12 features)
+`mfcc_0` through `mfcc_11`: Mel-scale triangular filterbank energies with Type-II discrete cosine transform (DCT) and sinusoidal liftering. Matches TSFEL's acoustic definition with **0.00 bitwise error**.
+
+### 5. Linear Prediction Cepstral Coefficients (LPCC, 12 features)
+`lpcc_0` through `lpcc_11`: Autoregressive linear prediction via $O(p^2)$ Levinson-Durbin recursion followed by cepstral recurrence.
+
+### 6. Continuous Wavelet Transform (CWT, 37 features)
+Dyadic Ricker (Mexican hat) continuous wavelet transform across scales $s \in [1, 2, 4, 8, 16, 32, 64, 128, 256]$:
+* Wavelet energy per scale: `wavelet_energy_scale_1` ... `wavelet_energy_scale_256`
+* Wavelet absolute mean per scale: `wavelet_abs_mean_scale_1` ... `wavelet_abs_mean_scale_256`
+* Wavelet variance per scale: `wavelet_var_scale_1` ... `wavelet_var_scale_256`
+* Wavelet Shannon entropy across scales: `wavelet_entropy` (matches TSFEL with **0.00 error**).

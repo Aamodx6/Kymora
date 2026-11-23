@@ -72,15 +72,63 @@ extract_features_df(
     X: np.ndarray | Sequence[np.ndarray],
     profile: str | None = None,
     features: Sequence[str] | None = None,
+    domain: str | Sequence[str] | None = None,
     n_jobs: int | None = None,
     out: np.ndarray | None = None,
     views: Sequence[str] | None = None,
+    fs: float = 100.0,
 ) -> pd.DataFrame
 ```
 
-Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`.
+Same computation as `extract_features`, returned as a labeled `pandas.DataFrame`. Columns match `feature_names(...)`. Supports scientific domain extraction (`domain="statistical"`, `"temporal"`, `"spectral"`, `"fractal"`).
 
 Requires `pandas` (`pip install "kymora[pandas]"`).
+
+---
+
+### extract_by_domain
+
+```python skip
+extract_by_domain(
+    X: np.ndarray | Sequence[np.ndarray],
+    domain: str | Sequence[str] | None = "all",
+    features: Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    fs: float = 100.0,
+    as_df: bool = False,
+    return_df: bool = False,
+) -> np.ndarray | pd.DataFrame
+```
+
+Extract features grouped by scientific domain (`"statistical"`, `"temporal"`, `"spectral"`, `"fractal"`, or `"all"`). Combines Kymora's native Rust SIMD core with vectorized domain calculators (including MFCC, LPCC, and dyadic CWT wavelets).
+
+---
+
+### time_series_features_extractor (TSFEL Drop-In)
+
+```python skip
+time_series_features_extractor(
+    dict_features: dict,
+    signal_data: np.ndarray | pd.DataFrame,
+    fs: float = 100.0,
+    verbose: int = 0,
+) -> pd.DataFrame
+```
+
+TSFEL-compatible batch feature extractor. Takes a configuration dictionary from `get_features_by_domain(...)` and extracts features across all channels and series.
+
+---
+
+### correlated_features
+
+```python skip
+correlated_features(
+    features: pd.DataFrame | np.ndarray,
+    threshold: float = 0.95,
+) -> pd.DataFrame | np.ndarray
+```
+
+Unsupervised collinear feature pruning via greedy Pearson correlation clustering. Removes redundant collinear features whose absolute correlation exceeds `threshold`.
 
 ---
 

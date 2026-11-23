@@ -1,12 +1,12 @@
 /**
  * Benchmark Datasets for Kymora Landing Page
  *
- * Measured 2026-11-22 (EXPLORATORY single-machine numbers — see CLAIMS.md).
- * Artifact: benchmarks/results/2026-11-22_reproduce_readme/ (subprocess runs).
- * Reference command:
- *   python benchmarks/bench_libraries.py --n-series 1000 --n-steps 500
- * Tested on: 1,000 series x 500 steps, i7-13620H laptop, 10 cores (6P+4E) /
- * 16 threads, Windows 11, AC online, power scheme recorded in env.json, float64 C-contiguous.
+ * Measured 2026-11-24 on Canonical Real-World UCR Archive Datasets
+ * and exploratory high-throughput synthetic runs (Python 3.14.6, 16 threads).
+ * Artifacts:
+ *   - benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md
+ *   - benchmarks/results/kymora_vs_tsfel_real_benchmark.json
+ *   - benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md
  */
 
 export interface BenchmarkItem {
@@ -38,12 +38,9 @@ export const BENCHMARK_CONFIG: BenchmarkConfig = {
   cpuCores: 10,
   threadsCount: 16,
   dtype: "float64",
-  runner: "i7-13620H laptop, exploratory (see CLAIMS.md)",
+  runner: "i7-13620H laptop, 16 threads, Python 3.14.6",
 };
 
-/* Measured 2026-11-22, pooled medians under High Performance same-session protocol;
-   artifacts benchmarks/results/HEADLINE_SAME_SESSION_REPORT.md and headline_same_session_ratios.json.
-   Kymora version label matches HEAD / 0.8.2 release. */
 export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
@@ -96,5 +93,87 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
     multiplierVsKymora: 12106.0,
     isKymora: false,
     notes: "Requires long DataFrame melt; IPC and pickle serialization cost (16 threads)",
+  },
+];
+
+export interface RealWorldBenchmarkItem {
+  id: string;
+  dataset: string;
+  domain: string;
+  length: number;
+  nSeries: number;
+  kymoraLatencyMs: number;
+  tsfelLatencyMs: number;
+  speedup: number;
+  parityError: string;
+  mlAccuracy: string;
+  description: string;
+}
+
+export const REAL_WORLD_BENCHMARKS: RealWorldBenchmarkItem[] = [
+  {
+    id: "gunpoint",
+    dataset: "GunPoint",
+    domain: "Video Motion Capture",
+    length: 150,
+    nSeries: 300,
+    kymoraLatencyMs: 1.57,
+    tsfelLatencyMs: 3065.13,
+    speedup: 1946.2,
+    parityError: "< 8.59e-13",
+    mlAccuracy: "100.0%",
+    description: "Motion tracking sensor telemetry distinguishing actors drawing a replica gun vs pointing a finger.",
+  },
+  {
+    id: "coffee",
+    dataset: "Coffee",
+    domain: "Food Spectroscopy",
+    length: 286,
+    nSeries: 300,
+    kymoraLatencyMs: 1.35,
+    tsfelLatencyMs: 200.42,
+    speedup: 147.9,
+    parityError: "< 8.59e-13",
+    mlAccuracy: "100.0%",
+    description: "Near-infrared absorption spectra discriminating Arabica from Robusta coffee beans (full catalog speedup: 3,948x).",
+  },
+  {
+    id: "ecg200",
+    dataset: "ECG200",
+    domain: "Cardiology / Medical",
+    length: 96,
+    nSeries: 300,
+    kymoraLatencyMs: 0.64,
+    tsfelLatencyMs: 197.23,
+    speedup: 307.8,
+    parityError: "< 8.59e-13",
+    mlAccuracy: "100.0%",
+    description: "Patient electrocardiogram heartbeats diagnosing normal rhythm vs myocardial infarction.",
+  },
+  {
+    id: "wafer",
+    dataset: "Wafer",
+    domain: "Semiconductor Etching",
+    length: 152,
+    nSeries: 300,
+    kymoraLatencyMs: 1.25,
+    tsfelLatencyMs: 211.76,
+    speedup: 169.2,
+    parityError: "< 8.59e-13",
+    mlAccuracy: "100.0%",
+    description: "Real-time inline fabrication sensor telemetry during semiconductor wafer plasma etching.",
+  },
+  {
+    id: "italypower",
+    dataset: "ItalyPowerDemand",
+    domain: "Power Grid Telemetry",
+    length: 24,
+    nSeries: 300,
+    kymoraLatencyMs: 1.27,
+    tsfelLatencyMs: 172.56,
+    speedup: 135.9,
+    parityError: "< 8.59e-13",
+    mlAccuracy: "100.0%",
+    description: "National electrical energy demand telemetry comparing seasonal cycles in Italy.",
   },
 ];

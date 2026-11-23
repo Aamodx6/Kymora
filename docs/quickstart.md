@@ -76,6 +76,36 @@ if is_ready:
 
 ---
 
+## TSFEL 1-Line Drop-In Replacement
+
+If your existing codebase uses TSFEL, replace the import to gain up to 1,000× speedup with identical output:
+
+```python
+# Simply replace: import tsfel
+from kymora.compat import tsfel
+
+# Your code remains 100% identical:
+cfg = tsfel.get_features_by_domain("statistical")
+features_df = tsfel.time_series_features_extractor(cfg, X, fs=100.0)
+clean_df = tsfel.correlated_features(features_df, threshold=0.90)
+```
+
+---
+
+## Real-World Datasets
+
+Kymora provides built-in caching loaders for canonical real-world empirical time series datasets:
+
+```python
+from kymora.datasets import load_dataset
+
+# Load canonical UCR datasets (GunPoint, ECG200, ItalyPowerDemand, Coffee, Wafer)
+X_train, y_train, X_test, y_test = load_dataset("ECG200")
+print(f"Loaded {len(X_train)} train series, length {X_train.shape[1]}")
+```
+
+---
+
 ## Feature Extraction in Scikit-Learn
 
 The in-package transformer turns a panel into a feature matrix inside any

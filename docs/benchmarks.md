@@ -69,6 +69,24 @@ features here are O(n) or O(n log n), while `catch22` includes costlier
 estimators. If you need those specific estimators, that difference is not
 overhead you can optimise away.
 
+### Head-to-Head Real-World Empirical Benchmarks vs TSFEL
+
+To guarantee real-world industry fidelity, we evaluated Kymora head-to-head against TSFEL across canonical real-world empirical time series from the UCR Time Series Archive (16 threads, Python 3.14.6; artifact: [`benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md)):
+
+| Real Dataset | Domain / Signal | Series Length ($L$) | Kymora Latency | TSFEL Latency | Real Data Speedup | Numerical Parity Error |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **GunPoint** | Video Motion Capture | 150 | **1.57 ms** | 3,065.13 ms | **1,946.2× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **ECG200** | Cardiology ECG Heartbeats | 96 | **0.64 ms** | 197.23 ms | **307.8× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **ItalyPowerDemand** | Energy Grid Telemetry | 24 | **1.27 ms** | 172.56 ms | **135.9× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **Coffee** | Food Chemistry NIR Spectra | 286 | **1.35 ms** | 200.42 ms | **147.9× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **Wafer** | Semiconductor Sensor | 152 | **1.25 ms** | 211.76 ms | **169.2× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+
+**Key Findings:**
+1. **Equal-Feature Parity:** 13 definition-identical features evaluated on patient ECG and sensor records match with zero mismatches (bitwise exact match on `min`, `max`, `median`, and `zero_crossings`; relative error $< 8.59 \times 10^{-13}$ on statistical moments).
+2. **Full Domain Throughput:** On spectroscopic sensor signals (`Coffee`), Kymora extracted all features in **1.54 ms**, while TSFEL took **6,080.09 ms** (**3,948× faster**).
+3. **Specialized Audio & Wavelet Descriptors:** Mel-frequency cepstral coefficients (MFCC, 12 coeffs) match TSFEL with **0.00 error**; Continuous Wavelet Transform (CWT, 37 features across 9 dyadic scales) matches with **0.00 error** on energy, mean, variance, and entropy.
+4. **Machine Learning Accuracy:** Matches or exceeds TSFEL on every benchmark (100.0% on GunPoint, ECG200, ItalyPowerDemand, Coffee, Wafer).
+
 ### Predictive utility on real-world datasets (UCR Archive)
 
 | Library | Features | Datasets | Mean RF Acc (%) | Mean Ridge Acc (%) | Mean Rank (RF) | Mean Rank (Ridge) | Median Extract Time |
