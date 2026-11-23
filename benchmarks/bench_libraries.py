@@ -1,4 +1,4 @@
-"""Batch-throughput benchmark: kymora vs tsfresh vs catch22 vs TSFEL.
+"""Batch-throughput benchmark: kymora vs tsfresh vs catch22 vs TSFEL vs tsfeatures vs antropy vs sktime vs numba vs numpy.
 
 What this measures: wall-clock time to turn a batch of `n_series` equal-length
 series into one feature row per series, which is the shape of work a feature
@@ -229,6 +229,238 @@ def bench_tsfel(X: np.ndarray) -> Result:
     )
 
 
+def bench_tsfeatures(X: np.ndarray) -> Result:
+    try:
+        import pandas as pd
+        from tsfeatures import tsfeatures
+    except ImportError as exc:
+        return Result("tsfeatures (Rob Hyndman)", None, None, skipped=str(exc))
+
+    n_series, n_steps = X.shape
+    dates = pd.date_range("2020-01-01", periods=n_steps, freq="D")
+    df = pd.DataFrame(
+        {
+            "unique_id": np.repeat(np.arange(n_series), n_steps),
+            "ds": np.tile(dates, n_series),
+            "y": X.ravel(),
+        }
+    )
+
+    def run():
+        return tsfeatures(df, freq=7)
+
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=1, max_runs=2)
+    return Result(
+        library="tsfeatures (Rob Hyndman)",
+        n_features=int(out.shape[1]),  # type: ignore[union-attr]
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
+        runs=runs,
+        raw_times=times,
+        notes="Python port of R tsfeatures, multiprocessing pool",
+    )
+
+
+def bench_antropy(X: np.ndarray) -> Result:
+    try:
+        import antropy as ant
+    except ImportError as exc:
+        return Result("antropy (complexity/entropy)", None, None, skipped=str(exc))
+
+    def run():
+        results = []
+        for row in X:
+            results.append(
+                [
+                    ant.perm_entropy(row, normalize=True),
+                    ant.spectral_entropy(row, sf=100, method="fft", normalize=True),
+                    ant.sample_entropy(row),
+                    ant.svd_entropy(row, normalize=True),
+                    ant.app_entropy(row),
+                    ant.petrosian_fd(row),
+                    ant.katz_fd(row),
+                    ant.higuchi_fd(row),
+                ]
+            )
+        return np.array(results)
+
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=1, max_runs=2)
+    return Result(
+        library="antropy (complexity/entropy)",
+        n_features=int(out.shape[1]),  # type: ignore[union-attr]
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
+        runs=runs,
+        raw_times=times,
+        notes="Python/Numba, single-threaded loop for entropy/fractal dimensions",
+    )
+
+
+def bench_sktime(X: np.ndarray) -> Result:
+    try:
+        from sktime.transformations.series.catch22 import Catch22
+    except ImportError as exc:
+        return Result("sktime (Catch22)", None, None, skipped=str(exc))
+
+    transformer = Catch22()
+    X_3d = X[:, np.newaxis, :]
+
+    def run():
+        return transformer.fit_transform(X_3d)
+
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=1, max_runs=2)
+    return Result(
+        library="sktime (Catch22 transformer)",
+        n_features=int(out.shape[1]),  # type: ignore[union-attr]
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
+        runs=runs,
+        raw_times=times,
+        notes="sktime panel wrapper over catch22",
+    )
+
+
+def bench_numba(X: np.ndarray) -> Result:
+    try:
+        import numba
+    except ImportError as exc:
+        return Result("numba (parallel JIT baseline)", None, None, skipped=str(exc))
+
+    @numba.njit(parallel=True, fastmath=True)
+    def _extract_numba(data):
+        n, m = data.shape
+        out = np.empty((n, 10), dtype=np.float64)
+        for i in numba.prange(n):
+            s = 0.0
+            for j in range(m):
+                s += data[i, j]
+            mean = s / m
+            var = 0.0
+            for j in range(m):
+                diff = data[i, j] - mean
+                var += diff * diff
+            var /= m
+            std = np.sqrt(var)
+            skew = 0.0
+            kurt = 0.0
+            if std > 1e-12:
+                for j in range(m):
+                    diff = (data[i, j] - mean) / std
+                    skew += diff * diff * diff
+                    kurt += diff * diff * diff * diff
+                skew /= m
+                kurt = kurt / m - 3.0
+
+            mn = data[i, 0]
+            mx = data[i, 0]
+            abs_energy = 0.0
+            zc = 0
+            for j in range(m):
+                val = data[i, j]
+                if val < mn:
+                    mn = val
+                if val > mx:
+                    mx = val
+                abs_energy += val * val
+                if j > 0 and (
+                    (data[i, j] >= 0.0 and data[i, j - 1] < 0.0)
+                    or (data[i, j] < 0.0 and data[i, j - 1] >= 0.0)
+                ):
+                    zc += 1
+
+            out[i, 0] = mean
+            out[i, 1] = std
+            out[i, 2] = var
+            out[i, 3] = mn
+            out[i, 4] = mx
+            out[i, 5] = skew
+            out[i, 6] = kurt
+            out[i, 7] = abs_energy
+            out[i, 8] = np.sqrt(abs_energy / m)
+            out[i, 9] = float(zc)
+        return out
+
+    _extract_numba(X[: min(2, len(X))])
+
+    def run():
+        return _extract_numba(X)
+
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=3, max_runs=10)
+    return Result(
+        library="numba (parallel JIT baseline)",
+        n_features=int(out.shape[1]),  # type: ignore[union-attr]
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
+        runs=runs,
+        raw_times=times,
+        notes="Numba @njit(parallel=True, fastmath=True) 10 features",
+    )
+
+
+def bench_numpy(X: np.ndarray) -> Result:
+    def run():
+        mean = np.mean(X, axis=1)
+        std = np.std(X, axis=1)
+        var = np.var(X, axis=1)
+        mn = np.min(X, axis=1)
+        mx = np.max(X, axis=1)
+        median = np.median(X, axis=1)
+        ptp = mx - mn
+        abs_energy = np.sum(X * X, axis=1)
+        rms = np.sqrt(abs_energy / X.shape[1])
+        diff = np.diff(X, axis=1)
+        mean_abs_change = np.mean(np.abs(diff), axis=1)
+        mean_change = np.mean(diff, axis=1)
+        zc = np.sum((X[:, :-1] * X[:, 1:]) < 0, axis=1)
+        return np.column_stack(
+            [
+                mean,
+                std,
+                var,
+                mn,
+                mx,
+                median,
+                ptp,
+                abs_energy,
+                rms,
+                mean_abs_change,
+                mean_change,
+                zc,
+            ]
+        )
+
+    out, med, iqr, mean, std, mn, mx, runs, times = timed(run, min_runs=3, max_runs=10)
+    return Result(
+        library="numpy (vectorized baseline)",
+        n_features=int(out.shape[1]),  # type: ignore[union-attr]
+        seconds=med,
+        iqr_seconds=iqr,
+        mean_seconds=mean,
+        std_seconds=std,
+        min_seconds=mn,
+        max_seconds=mx,
+        runs=runs,
+        raw_times=times,
+        notes="Pure vectorized NumPy 12 basic features",
+    )
+
+
 def render_markdown(report: Report) -> str:
     ran = [r for r in report.results if r.seconds is not None]
     baseline = next((r for r in ran if r.library.startswith("kymora")), None)
@@ -291,7 +523,17 @@ def main() -> int:
     ap.add_argument(
         "--only",
         nargs="*",
-        choices=["kymora", "tsfresh", "catch22", "tsfel"],
+        choices=[
+            "kymora",
+            "catch22",
+            "tsfel",
+            "tsfresh",
+            "tsfeatures",
+            "antropy",
+            "sktime",
+            "numba",
+            "numpy",
+        ],
         default=None,
         help="run a subset (default: all available)",
     )
@@ -306,6 +548,11 @@ def main() -> int:
         "catch22": bench_catch22,
         "tsfel": bench_tsfel,
         "tsfresh": bench_tsfresh,
+        "tsfeatures": bench_tsfeatures,
+        "antropy": bench_antropy,
+        "sktime": bench_sktime,
+        "numba": bench_numba,
+        "numpy": bench_numpy,
     }
     selected = args.only or list(benchmarks)
 

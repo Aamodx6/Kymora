@@ -1,0 +1,177 @@
+{
+  "n_series": 100,
+  "n_steps": 200,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.14.6",
+  "cpu_count": 16,
+  "results": [
+    {
+      "library": "kymora 0.8.2",
+      "n_features": 33,
+      "seconds": 0.000299500000437547,
+      "iqr_seconds": 5.3974998991179746e-05,
+      "mean_seconds": 0.00028869000016129576,
+      "std_seconds": 4.91495361161911e-05,
+      "min_seconds": 0.00020229999972798396,
+      "max_seconds": 0.0003691000001708744,
+      "skipped": null,
+      "notes": "Rust core, rayon across series, zero-copy input",
+      "runs": 10,
+      "raw_times": [
+        0.0003302000004623551,
+        0.00028170000041427556,
+        0.00029680000079679303,
+        0.00021240000023681205,
+        0.0003691000001708744,
+        0.00030220000007830095,
+        0.0003073999996558996,
+        0.0003240999994886806,
+        0.00020229999972798396,
+        0.0002607000005809823
+      ],
+      "per_feature_ms": 0.009075757589016575
+    },
+    {
+      "library": "catch22 (pycatch22)",
+      "n_features": 22,
+      "seconds": 0.034410700000080396,
+      "iqr_seconds": 0.001025100000333623,
+      "mean_seconds": 0.035012966666423985,
+      "std_seconds": 0.0009391037797550955,
+      "min_seconds": 0.03428899999926216,
+      "max_seconds": 0.036339199999929406,
+      "skipped": null,
+      "notes": "C core, single-threaded Python loop over series",
+      "runs": 3,
+      "raw_times": [
+        0.036339199999929406,
+        0.034410700000080396,
+        0.03428899999926216
+      ],
+      "per_feature_ms": 1.5641227272763818
+    },
+    {
+      "library": "antropy (complexity/entropy)",
+      "n_features": 8,
+      "seconds": 0.11149514999942767,
+      "iqr_seconds": 0.0005538499999602209,
+      "mean_seconds": 0.11149514999942767,
+      "std_seconds": 0.0005538499999602209,
+      "min_seconds": 0.11094129999946745,
+      "max_seconds": 0.11204899999938789,
+      "skipped": null,
+      "notes": "Python/Numba, single-threaded loop for entropy/fractal dimensions",
+      "runs": 2,
+      "raw_times": [
+        0.11204899999938789,
+        0.11094129999946745
+      ],
+      "per_feature_ms": 13.936893749928458
+    },
+    {
+      "library": "sktime (Catch22 transformer)",
+      "n_features": 22,
+      "seconds": 0.2337977500001216,
+      "iqr_seconds": 0.004186249999293068,
+      "mean_seconds": 0.2337977500001216,
+      "std_seconds": 0.004186249999293068,
+      "min_seconds": 0.22961150000082853,
+      "max_seconds": 0.23798399999941466,
+      "skipped": null,
+      "notes": "sktime panel wrapper over catch22",
+      "runs": 2,
+      "raw_times": [
+        0.22961150000082853,
+        0.23798399999941466
+      ],
+      "per_feature_ms": 10.627170454550981
+    },
+    {
+      "library": "numba (parallel JIT baseline)",
+      "n_features": 10,
+      "seconds": 3.5150000257999636e-05,
+      "iqr_seconds": 1.0175001079915091e-05,
+      "mean_seconds": 3.906000038114144e-05,
+      "std_seconds": 1.2560589025531877e-05,
+      "min_seconds": 2.5000001187436283e-05,
+      "max_seconds": 7.050000021990854e-05,
+      "skipped": null,
+      "notes": "Numba @njit(parallel=True, fastmath=True) 10 features",
+      "runs": 10,
+      "raw_times": [
+        4.9899999794433825e-05,
+        3.330000072310213e-05,
+        4.5000000682193786e-05,
+        3.49000001733657e-05,
+        2.8000000384054147e-05,
+        2.5000001187436283e-05,
+        7.050000021990854e-05,
+        3.620000097726006e-05,
+        3.5400000342633575e-05,
+        3.239999932702631e-05
+      ],
+      "per_feature_ms": 0.0035150000257999636
+    },
+    {
+      "library": "numpy (vectorized baseline)",
+      "n_features": 12,
+      "seconds": 0.0004474499992284109,
+      "iqr_seconds": 3.290000086053624e-05,
+      "mean_seconds": 0.00045344999998633286,
+      "std_seconds": 2.0813613710335493e-05,
+      "min_seconds": 0.0004222999996272847,
+      "max_seconds": 0.00048270000115735456,
+      "skipped": null,
+      "notes": "Pure vectorized NumPy 12 basic features",
+      "runs": 10,
+      "raw_times": [
+        0.00047230000018316787,
+        0.00044749999869964086,
+        0.00044329999946057796,
+        0.00048270000115735456,
+        0.0004377999994176207,
+        0.0004284000006009592,
+        0.0004222999996272847,
+        0.00047140000060608145,
+        0.0004814000003534602,
+        0.0004473999997571809
+      ],
+      "per_feature_ms": 0.03728749993570091
+    },
+    {
+      "library": "TSFEL (all domains)",
+      "n_features": 156,
+      "seconds": 0.8149973499994303,
+      "iqr_seconds": 0.005663450000611192,
+      "mean_seconds": 0.8149973499994303,
+      "std_seconds": 0.005663450000611192,
+      "min_seconds": 0.8093338999988191,
+      "max_seconds": 0.8206608000000415,
+      "skipped": null,
+      "notes": "Python/numba, per-series extractor calls",
+      "runs": 2,
+      "raw_times": [
+        0.8093338999988191,
+        0.8206608000000415
+      ],
+      "per_feature_ms": 5.224341987175835
+    },
+    {
+      "library": "tsfresh (EfficientFCParameters)",
+      "n_features": 777,
+      "seconds": 6.365824700000303,
+      "iqr_seconds": 0.0,
+      "mean_seconds": 6.365824700000303,
+      "std_seconds": 0.0,
+      "min_seconds": 6.365824700000303,
+      "max_seconds": 6.365824700000303,
+      "skipped": null,
+      "notes": "includes the long-format reshape, its required input form",
+      "runs": 1,
+      "raw_times": [
+        6.365824700000303
+      ],
+      "per_feature_ms": 8.192824581724972
+    }
+  ]
+}
