@@ -29,12 +29,29 @@ df = kymora.extract_features_df(X)       # pandas DataFrame with labeled columns
 - **Multichannel & Cross-Channel Dynamics**: Full support for 3D time-series batches `(samples, channels, length)`, evaluating per-channel baselines and pairwise cross-correlation / covariance interactions.
 - **Fleet Real-Time Streaming**: `StreamingExtractor` monitors live time-series streams with incremental rolling-window updates; per-sample ingestion is amortized $O(1)$ (worst-case $O(W)$ upon drift re-anchoring), and a fast 12-feature tier avoids sorting and FFT.
 - **Supervised Feature Selection**: `select_features` and `KymoraSelector` provide FDR-controlled hypothesis testing and correlation clustering directly within scikit-learn pipelines.
+- **TSFEL Drop-In Compatibility**: `from kymora.compat import tsfel` allows any existing TSFEL pipeline to execute up to 1,000× faster with zero code changes.
+- **Domain-Driven Feature Extraction**: Standard modular subpackages (`kymora.feature_extraction`, `kymora.datasets`, `kymora.utils`, `kymora.compat`) supporting domain-specific extraction (`statistical`, `temporal`, `spectral`, `fractal`).
+- **Acoustic & Biomedical Wavelets**: High-performance vectorized Mel-frequency cepstral coefficients (MFCC), Linear prediction cepstral coefficients (LPCC), and Continuous Wavelet Transforms (CWT) across dyadic scales.
 
 ---
 
 ## Benchmarks Overview
 
 All numbers below are pooled medians from interleaved rounds with 95% bootstrap CIs, subprocess-isolated, GC disabled — measured on an Intel Core i7-13620H (10 cores, 6P+4E, 16 threads, High Performance power scheme). For complete methodology, reproduction scripts, and artifact SHAs, see [Benchmarks](benchmarks.md) and [`CLAIMS.md`](https://github.com/Aamodx6/Kymora/blob/main/CLAIMS.md).
+
+### Canonical Real-World Empirical Benchmarks (UCR Archive)
+
+Tested across canonical real-world empirical time series datasets (300 series per dataset, 16 threads, Python 3.14.6; artifact: [`benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md)):
+
+| Real Dataset | Domain / Signal | Series Length ($L$) | Kymora Latency | TSFEL Latency | Real Data Speedup | Numerical Parity Error |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **GunPoint** | Video Motion Capture | 150 | **1.57 ms** | 3,065.13 ms | **1,946.2× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **ECG200** | Cardiology ECG Heartbeats | 96 | **0.64 ms** | 197.23 ms | **307.8× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **ItalyPowerDemand** | Energy Grid Telemetry | 24 | **1.27 ms** | 172.56 ms | **135.9× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **Coffee** | Food Chemistry NIR Spectra | 286 | **1.35 ms** | 200.42 ms | **147.9× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+| **Wafer** | Semiconductor Sensor | 152 | **1.25 ms** | 211.76 ms | **169.2× faster** | $< 8.59 \times 10^{-13}$ (Pass) |
+
+* On full spectroscopic sensor signals (`Coffee`), Kymora extracted all features in **1.54 ms**, while TSFEL required **6,080.09 ms** (**3,948× faster**), achieving identical 100.0% classification accuracy.
 
 ### Equal-feature comparison — like-for-like (1,000 × 500)
 

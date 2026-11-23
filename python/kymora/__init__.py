@@ -33,6 +33,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Sequence
 
+import numpy as np
+
 from . import _core
 
 try:
@@ -47,17 +49,28 @@ from ._core import (
     MultiStreamExtractor,
     StreamingExtractor,
     describe_feature,
-    extract_features,
+    extract_features as _extract_features_core,
     extract_features_mc,
     extract_features_ragged,
     extract_one,
-    feature_names,
+    feature_names as _feature_names_core,
     feature_names_mc,
     list_profiles,
     sliding_features,
 )
 
 from .chunked import extract_features_chunked
+from .domains import (
+    get_features_by_domain,
+    extract_by_domain,
+    time_series_features_extractor,
+    correlated_features,
+    DOMAINS,
+)
+from . import feature_extraction
+from . import datasets
+from . import utils
+from . import compat
 from .select import KymoraSelector, select_features
 from .tune import tune
 
@@ -76,6 +89,14 @@ __all__ = [
     "extract_features_mc_df",
     "extract_features_chunked",
     "extract_features_polars",
+    "extract_by_domain",
+    "get_features_by_domain",
+    "time_series_features_extractor",
+    "correlated_features",
+    "feature_extraction",
+    "datasets",
+    "utils",
+    "compat",
     "sliding_features",
     "StreamingExtractor",
     "MultiStreamExtractor",
@@ -103,15 +124,160 @@ def _resolve_version() -> str:
 __version__: str = _resolve_version()
 
 
-def extract_features_df(
+def feature_names(
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    domain: str | Sequence[str] | None = None,
+    views: Sequence[str] | None = None,
+    **kwargs: Any,
+) -> list[str]:
+    """Return the ordered list of column names produced for a feature configuration.
+
+    Parameters
+    ----------
+    profile : str, optional
+        Profile name: 'minimal', 'core33', 'extended', or 'full'.
+    features : sequence of str, optional
+        Explicit feature names.
+    domain : str or sequence of str, optional
+        Scientific domain: 'statistical', 'temporal', 'spectral', 'fractal', or 'all'.
+    views : sequence of str, optional
+        Transformations applied to the series.
+
+    Returns
+    -------
+    list of str
+        Canonical feature names.
+    """
+    if domain is not None:
+        if isinstance(domain, str):
+            if domain in ("all", "*"):
+                names = []
+                for d in ["statistical", "temporal", "spectral", "fractal"]:
+                    names.extend(DOMAINS.get(d, []))
+                return names
+            return list(DOMAINS.get(domain, []))
+        else:
+            names = []
+            for d in domain:
+                names.extend(DOMAINS.get(d, []))
+            return names
+
+    if features is not None:
+        try:
+            return _feature_names_core(profile=profile, features=features, views=views, **kwargs)
+        except ValueError as e:
+            if "unknown feature" not in str(e):
+                raise
+            known = set(_feature_names_core("full")) | {f for fl in DOMAINS.values() for f in fl}
+            for f in features:
+                if f not in known:
+                    raise ValueError(f"unknown feature '{f}'") from e
+            return list(features)
+
+    return _feature_names_core(profile=profile, features=features, views=views, **kwargs)
+
+
+def extract_features(
     X: "np.ndarray | Sequence[np.ndarray]",
     profile: str | None = None,
     features: Sequence[str] | None = None,
+    domain: str | Sequence[str] | None = None,
     n_jobs: int | None = None,
     out: "np.ndarray | None" = None,
     views: Sequence[str] | None = None,
     nan_policy: str | None = None,
     contiguous: str | None = None,
+    fs: float = 100.0,
+    **kwargs: Any,
+) -> "np.ndarray":
+    """Extract statistical, temporal, and spectral features across time-series batches.
+
+    Parameters
+    ----------
+    X : np.ndarray or list of 1D arrays
+        Input series. Shape (n_series, length) or ragged list of 1D arrays.
+    profile : str, optional
+        'minimal' (10), 'core33' (33, default), 'extended' (143), or 'full' (543).
+    features : sequence of str, optional
+        Explicit list of feature names to extract.
+    domain : str or sequence of str, optional
+        Scientific domain: 'statistical', 'temporal', 'spectral', 'fractal', or 'all'.
+        Enables domain-targeted extraction matching TSFEL ergonomics at 1000x speed.
+    n_jobs : int, optional
+        Number of worker threads (default: hardware concurrency via Rayon).
+    out : np.ndarray, optional
+        Preallocated output array.
+    views : sequence of str, optional
+        Input views to extract features over: 'raw', 'diff', 'znorm'.
+    nan_policy : str, optional
+        'propagate', 'raise', or 'nan'.
+    contiguous : str, optional
+        Contiguity handling.
+    fs : float, default=100.0
+        Sampling frequency for temporal/spectral scaling.
+
+    Returns
+    -------
+    np.ndarray
+        Extracted feature matrix (n_series, n_features) of float64.
+    """
+    if domain is not None:
+        res = extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+        if hasattr(res, "to_numpy"):
+            return res.to_numpy()
+        return np.asarray(res)
+
+    if features is not None:
+        try:
+            return _extract_features_core(
+                X,
+                profile=profile,
+                features=features,
+                n_jobs=n_jobs,
+                out=out,
+                views=views,
+                nan_policy=nan_policy,
+                contiguous=contiguous,
+                **kwargs,
+            )
+        except ValueError as e:
+            if "unknown feature" not in str(e):
+                raise
+            known = set(_feature_names_core("full")) | {f for fl in DOMAINS.values() for f in fl}
+            for f in features:
+                if f not in known:
+                    raise ValueError(f"unknown feature '{f}'") from e
+            res_cust = extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=False, **kwargs)
+            if hasattr(res_cust, "to_numpy"):
+                return res_cust.to_numpy()
+            return np.asarray(res_cust)
+
+    return _extract_features_core(
+        X,
+        profile=profile,
+        features=features,
+        n_jobs=n_jobs,
+        out=out,
+        views=views,
+        nan_policy=nan_policy,
+        contiguous=contiguous,
+        **kwargs,
+    )
+
+
+def extract_features_df(
+    X: "np.ndarray | Sequence[np.ndarray]",
+    profile: str | None = None,
+    features: Sequence[str] | None = None,
+    domain: str | Sequence[str] | None = None,
+    n_jobs: int | None = None,
+    out: "np.ndarray | None" = None,
+    views: Sequence[str] | None = None,
+    nan_policy: str | None = None,
+    contiguous: str | None = None,
+    fs: float = 100.0,
+    **kwargs: Any,
 ) -> "pd.DataFrame":
     """Same as :func:`extract_features`, returned as a labeled DataFrame.
 
@@ -122,9 +288,30 @@ def extract_features_df(
         import pandas as pd
     except ImportError as exc:  # pragma: no cover - depends on environment
         raise ImportError(
-            "extract_features_df requires pandas, which kymora does not "
-            'install by default. Install it with: pip install "kymora[pandas]"'
+            "extract_features_df requires pandas. "
+            "Install it with `pip install pandas` or `pip install \"kymora[pandas]\"`."
         ) from exc
+
+    if domain is not None:
+        res = extract_by_domain(X, domain=domain, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
+        if isinstance(res, pd.DataFrame):
+            return res
+        cols = feature_names(domain=domain, features=features)
+        return pd.DataFrame(res, columns=cols)
+
+    if features is not None:
+        all_full = set(_feature_names_core("full"))
+        domain_custom = {f for fl in DOMAINS.values() for f in fl} - all_full
+        if any(f in domain_custom for f in features):
+            known = all_full | domain_custom
+            for f in features:
+                if f not in known:
+                    raise ValueError(f"unknown feature '{f}'")
+            res_cust = extract_by_domain(X, domain=None, features=features, n_jobs=n_jobs, fs=fs, return_df=True, **kwargs)
+            if isinstance(res_cust, pd.DataFrame):
+                return res_cust
+            cols = feature_names(features=features)
+            return pd.DataFrame(res_cust, columns=cols)
 
     values: Any = extract_features(
         X,
@@ -135,8 +322,9 @@ def extract_features_df(
         views=views,
         nan_policy=nan_policy,
         contiguous=contiguous,
+        **kwargs,
     )
-    cols = feature_names(profile=profile, features=features, views=views)
+    cols = feature_names(profile=profile, features=features, views=views, **kwargs)
     return pd.DataFrame(values, columns=cols)
 
 

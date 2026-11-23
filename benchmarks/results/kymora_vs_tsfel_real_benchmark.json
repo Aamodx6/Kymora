@@ -1,0 +1,262 @@
+{
+  "GunPoint": {
+    "N_train": 100,
+    "N_test": 200,
+    "length": 150,
+    "equal_features": {
+      "kymora_ms": 1.5749000003779656,
+      "tsfel_ms": 3065.129700000398,
+      "speedup": 1946.2376654167165
+    },
+    "evaluations": [
+      {
+        "extractor": "Kymora (core33)",
+        "n_features": 33,
+        "extract_time_ms": 6.079400000089663,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (extended 143)",
+        "n_features": 143,
+        "extract_time_ms": 1.4330000003610621,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (full 543)",
+        "n_features": 543,
+        "extract_time_ms": 2.435499999592139,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (statistical 31)",
+        "n_features": 31,
+        "extract_time_ms": 284.5907000000807,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (all 162)",
+        "n_features": 162,
+        "extract_time_ms": 990.5223000005208,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      }
+    ]
+  },
+  "ECG200": {
+    "N_train": 100,
+    "N_test": 200,
+    "length": 96,
+    "equal_features": {
+      "kymora_ms": 0.6407999999282765,
+      "tsfel_ms": 197.23189999967872,
+      "speedup": 307.79010615130227
+    },
+    "evaluations": [
+      {
+        "extractor": "Kymora (core33)",
+        "n_features": 33,
+        "extract_time_ms": 1.6656999996484956,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (extended 143)",
+        "n_features": 143,
+        "extract_time_ms": 0.9541999997964012,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (full 543)",
+        "n_features": 543,
+        "extract_time_ms": 1.4530999997077743,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (statistical 31)",
+        "n_features": 31,
+        "extract_time_ms": 211.96249999957217,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (all 162)",
+        "n_features": 162,
+        "extract_time_ms": 887.2743000001719,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      }
+    ]
+  },
+  "ItalyPowerDemand": {
+    "N_train": 100,
+    "N_test": 200,
+    "length": 24,
+    "equal_features": {
+      "kymora_ms": 1.2696999992840574,
+      "tsfel_ms": 172.55979999936244,
+      "speedup": 135.90596211440757
+    },
+    "evaluations": [
+      {
+        "extractor": "Kymora (core33)",
+        "n_features": 33,
+        "extract_time_ms": 1.2255000001459848,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (extended 143)",
+        "n_features": 143,
+        "extract_time_ms": 0.74399999994057,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (full 543)",
+        "n_features": 543,
+        "extract_time_ms": 1.4131999996607192,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (statistical 31)",
+        "n_features": 31,
+        "extract_time_ms": 232.50850000022183,
+        "rf_acc": 0.99,
+        "rf_f1": 0.99,
+        "ridge_acc": 0.98
+      },
+      {
+        "extractor": "TSFEL (all 162)",
+        "n_features": 143,
+        "extract_time_ms": 824.808800000028,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      }
+    ]
+  },
+  "Coffee": {
+    "N_train": 100,
+    "N_test": 200,
+    "length": 286,
+    "equal_features": {
+      "kymora_ms": 1.3548999995691702,
+      "tsfel_ms": 200.41850000052364,
+      "speedup": 147.92124884807183
+    },
+    "evaluations": [
+      {
+        "extractor": "Kymora (core33)",
+        "n_features": 33,
+        "extract_time_ms": 1.5423000004375353,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (extended 143)",
+        "n_features": 143,
+        "extract_time_ms": 2.5313000005553477,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (full 543)",
+        "n_features": 543,
+        "extract_time_ms": 2.9470999998011393,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (statistical 31)",
+        "n_features": 31,
+        "extract_time_ms": 234.48220000045694,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (all 162)",
+        "n_features": 162,
+        "extract_time_ms": 6080.086300000403,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      }
+    ]
+  },
+  "Wafer": {
+    "N_train": 100,
+    "N_test": 200,
+    "length": 152,
+    "equal_features": {
+      "kymora_ms": 1.2516999995568767,
+      "tsfel_ms": 211.76239999931568,
+      "speedup": 169.17983548316946
+    },
+    "evaluations": [
+      {
+        "extractor": "Kymora (core33)",
+        "n_features": 33,
+        "extract_time_ms": 1.722699999845645,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (extended 143)",
+        "n_features": 143,
+        "extract_time_ms": 1.622499999939464,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "Kymora (full 543)",
+        "n_features": 543,
+        "extract_time_ms": 1.5966999999363907,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (statistical 31)",
+        "n_features": 31,
+        "extract_time_ms": 227.7753999997003,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      },
+      {
+        "extractor": "TSFEL (all 162)",
+        "n_features": 162,
+        "extract_time_ms": 775.9933999996065,
+        "rf_acc": 1.0,
+        "rf_f1": 1.0,
+        "ridge_acc": 1.0
+      }
+    ]
+  }
+}
