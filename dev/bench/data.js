@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795470166732,
+  "lastUpdate": 1795471282542,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -372,6 +372,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0511",
             "unit": "ms",
             "extra": "runs=30, cv=0.018"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "38ebb0a90ee960f414a8152478c81361733310eb",
+          "message": "feat(seo): optimize keywords, metadata, and structured data for time series search discoverability (#41)",
+          "timestamp": "2026-11-24T03:29:41+05:30",
+          "tree_id": "2a8a5b727f9c89cfdf4180d7e5a13911c67a0620",
+          "url": "https://github.com/Aamodx6/Kymora/commit/38ebb0a90ee960f414a8152478c81361733310eb"
+        },
+        "date": 1795471281916,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 6.1183,
+            "range": "0.0275",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.022"
           }
         ]
       }
