@@ -181,3 +181,27 @@ def test_pandas_is_not_imported_by_importing_kymora():
     ]
     assert not module_level, module_level
     assert importlib.util.find_spec("kymora._core") is not None
+
+
+def test_import_kymora_without_pandas():
+    """Verify kymora can be imported and execute features with zero pandas dependency."""
+    import os
+    import subprocess
+    import sys
+
+    repo_python = str(Path(__file__).resolve().parent.parent / "python")
+    env = dict(os.environ)
+    env["PYTHONPATH"] = (
+        f"{repo_python}{os.pathsep}{env.get('PYTHONPATH', '')}"
+        if env.get("PYTHONPATH")
+        else repo_python
+    )
+
+    cmd = [
+        sys.executable,
+        "-c",
+        "import sys; sys.modules['pandas'] = None; import kymora as km; import numpy as np; "
+        "assert km.extract_features(np.random.randn(2, 50)).shape == (2, 33)",
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True, env=env)
+    assert res.returncode == 0, f"Import without pandas failed: {res.stderr}"

@@ -6,7 +6,6 @@ import warnings
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
-import pandas as pd
 
 from .. import _core
 from .features import (
@@ -17,6 +16,17 @@ from .features import (
     FRACTAL_CORE,
     compute_derived_features,
 )
+
+
+def _get_pandas():
+    try:
+        import pandas as pd
+
+        return pd
+    except ImportError as e:
+        raise ImportError(
+            "DataFrame support requires pandas. Install it with: pip install 'kymora[pandas]'"
+        ) from e
 
 
 def extract_by_domain(
@@ -119,11 +129,15 @@ def extract_by_domain(
 
     if not arrays:
         empty = np.empty((N, 0), dtype=np.float64)
-        return pd.DataFrame(empty) if to_df else empty
+        if to_df:
+            pd = _get_pandas()
+            return pd.DataFrame(empty)
+        return empty
 
     res_matrix = np.column_stack(arrays)
 
     if to_df:
+        pd = _get_pandas()
         return pd.DataFrame(res_matrix, columns=cols)
     return res_matrix
 
@@ -169,7 +183,7 @@ def time_series_features_extractor(
         dict_features = {dict_features: {}}
 
     # Normalize input array
-    if isinstance(signal, pd.DataFrame):
+    if hasattr(signal, "to_numpy"):
         arr = signal.to_numpy()
     else:
         arr = np.asarray(signal, dtype=np.float64)
@@ -236,9 +250,10 @@ def time_series_features_extractor(
 
     requested_features = list(dict.fromkeys(requested_features))
 
+    pd = _get_pandas()
     if is_multichannel_columns:
         n_times, n_channels = arr.shape
-        channel_dfs: List[pd.DataFrame] = []
+        channel_dfs: List[Any] = []
         for ch in range(n_channels):
             ch_sig = arr[:, ch : ch + 1].T
             df_ch = extract_by_domain(ch_sig, features=requested_features, fs=fs, as_df=True)

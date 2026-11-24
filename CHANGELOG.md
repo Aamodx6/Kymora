@@ -10,6 +10,17 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
+## [0.8.3] - 2026-11-24
+
+Zero-dependency core installation fix and release pipeline attestation update.
+
+### Fixed
+- Core installation purity: removed top-level `pandas` imports from `kymora.domains`,
+  `kymora.feature_extraction.calc_features`, and `kymora.utils.correlation`. `kymora` can
+  now be imported and executed in clean environments with only `numpy` installed.
+- Release workflow provenance: updated `actions/attest-build-provenance` action pin to
+  `v4.2.2` (`4d101475d8b20a2381f78447822ac1eab6504dd8`) for reliable SLSA attestations.
+
 ## [0.8.2] - 2026-11-24
 
 Release hardening, small-batch execution fast path, multi-session throughput
