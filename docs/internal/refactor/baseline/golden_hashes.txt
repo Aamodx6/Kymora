@@ -1,3 +1,0 @@
-tests/golden/core33_names.json: 00f1f9f8374ddb1bdeef980bd5f61d21767ec74f4bd34bb43eedf919592ad4f4
-tests/golden/core33_output.json: 34f7aa40dcd6032858ec028b8de0a68eedc23b6ff00c4bce55339c81a03c4e94
-tests/fixtures/tsfresh_777_names.json: a61b2525a1d6069342fa0f2fdb1936b2323a7f006235cd6b19bcc04d609c89dd
