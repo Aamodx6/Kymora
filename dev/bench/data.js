@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795520297677,
+  "lastUpdate": 1795521132333,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -558,6 +558,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0502",
             "unit": "ms",
             "extra": "runs=30, cv=0.015"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "460b7e9985c86c55c890ad6405226ee299ab6b36",
+          "message": "chore: remove obsolete internal docs, draft issues, and refactor logs (#50)",
+          "timestamp": "2026-11-24T17:20:50+05:30",
+          "tree_id": "6e8876fcc05200d844e5395f083798b35c0333d0",
+          "url": "https://github.com/Aamodx6/Kymora/commit/460b7e9985c86c55c890ad6405226ee299ab6b36"
+        },
+        "date": 1795521131724,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 3.4998,
+            "range": "0.3038",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.107"
           }
         ]
       }
