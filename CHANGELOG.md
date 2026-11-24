@@ -10,12 +10,13 @@ Versioning note specific to this project: the order and length of
 feature is a **major** version change; appending a new feature at the end is a
 **minor** one. See [CONTRIBUTING.md](CONTRIBUTING.md#versioning-policy).
 
-## [0.8.2] - 2026-11-22
+## [0.8.2] - 2026-11-24
 
 Release hardening, small-batch execution fast path, multi-session throughput
-protocol, reproducible benchmarking suite, and archival citation metadata.
-Numerics, feature names/order, and the NaN/error contracts are unchanged
-(`feature_names()` sha256 `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`).
+protocol, reproducible benchmarking suite, TSFEL-compatible subpackage APIs,
+canonical real-world UCR benchmark telemetry, and comprehensive multi-competitor
+ecosystem evaluations. Numerics, feature names/order, and the NaN/error contracts
+are unchanged (`feature_names()` sha256 `8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e`).
 
 ### Added
 - `kymora.extract_one(x)`: minimal-validation single-series fast path bypassing batch
@@ -25,6 +26,15 @@ Numerics, feature names/order, and the NaN/error contracts are unchanged
   caller thread with zero Rayon pool dispatch overhead when `n_series * len < THRESH`
   (default 8,000 points, configurable via `KYMORA_SERIAL_THRESHOLD` environment variable)
   or when `n_series < threads`. Verified bit-identical to parallel dispatch.
+- `kymora.feature_extraction` and `kymora.domains` subpackages providing drop-in
+  compatibility with TSFEL workflows (`get_features_by_domain`, `time_series_features_extractor`,
+  `spectral`, `temporal`, `statistical`).
+- Canonical real-world empirical UCR benchmarks (`GunPoint`, `ECG200`, `ItalyPowerDemand`, `Coffee`)
+  measuring equal-feature speedups (100.7×–1,316.9× vs TSFEL, 5,309.0×–13,755.7× vs tsfresh) and
+  downstream classification accuracy.
+- Comprehensive multi-competitor benchmark suite (`benchmarks/benchmark_all_competitors.py`,
+  `benchmarks/results/ALL_COMPETITORS_BENCHMARK_REPORT.md`) evaluating Kymora vs `tsfresh`,
+  `TSFEL`, `pycatch22`, `antropy`, `sktime`, `tsfeatures`, `numba`, `numpy`, and `tsrocket`.
 - `kymora._core._exec_mode(n_series, length)`: runtime introspection helper reporting
   `"sequential"` or `"parallel"` dispatch mode.
 - One-command benchmark reproduction script `reproduce.sh` automating environment
