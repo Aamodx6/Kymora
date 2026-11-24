@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795521132333,
+  "lastUpdate": 1795528729012,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -620,6 +620,35 @@ window.BENCHMARK_DATA = {
             "range": "0.5959",
             "unit": "ms",
             "extra": "runs=30, cv=0.109"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Aamod",
+            "username": "Aamodx6",
+            "email": "119789532+Aamodx6@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "29bba3447e07ef35dcd37ac94833fda89e2c2703",
+          "message": "chore(scripts): keep verify_release isolated venv in repo root for Windows WDAC compatibility (#48)",
+          "timestamp": "2026-11-24T13:25:02Z",
+          "url": "https://github.com/Aamodx6/Kymora/commit/29bba3447e07ef35dcd37ac94833fda89e2c2703"
+        },
+        "date": 1795528728590,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.812,
+            "range": "0.0356",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.018"
           }
         ]
       }
