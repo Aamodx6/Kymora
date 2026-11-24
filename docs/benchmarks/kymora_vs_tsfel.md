@@ -13,7 +13,7 @@ While TSFEL pioneered modular feature extraction across statistical, temporal, a
 | **Engine / Backend** | Rust (`rayon`, AVX2/NEON) | Python (`numpy`, `scipy`) | Native parallel compiled machine code |
 | **Throughput (1k × 500)** | **514,245 series/sec** | 398 series/sec | **1,291× faster** |
 | **Median Extraction Time** | **1.94 ms** | 2,509.53 ms | **1,291× lower latency** |
-| **Normalized per-feature** | 0.0589 ms / feat | 16.09 ms / feat | **273× faster per feature** |
+| **Normalized per-feature** | 0.0589 µs / feat | 16.09 µs / feat | **273× faster per feature** |
 | **Memory Allocation** | **0 copy** (direct buffer borrow) | Repeated array allocations | Bounded $O(T \times L)$ scratch |
 | **Streaming / Rolling** | Built-in `StreamingExtractor` | None (batch only) | Online $O(1)$ amortized updates |
 | **Scikit-Learn Pipeline** | Native `KymoraTransformer` | Custom wrappers needed | Direct `Pipeline` and `GridSearchCV` |
@@ -45,14 +45,14 @@ import kymora.feature_extraction as kfe
 cfg = kd.get_features_by_domain("statistical")
 
 # Drop-in extraction (runs 1,000x faster)
-features = kfe.extract_features(X, domain="statistical")
+features = kfe.extract_by_domain(X, domain="statistical")
 ```
 
 ---
 
 ## Canonical Real-World Benchmark (UCR Archive)
 
-On real-world telemetry from the UCR Time Series Archive (tested across GunPoint, Coffee, and ECG200):
+Measured on the 14 statistical domain features across canonical fixed train/test splits from the UCR Time Series Archive (i7-13620H laptop, 16 threads, Python 3.14; artifact: [`benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md`](https://github.com/Aamodx6/Kymora/blob/main/benchmarks/results/KYMORA_VS_TSFEL_BENCHMARK_REPORT.md)):
 
 | Dataset | Shape | TSFEL Time | Kymora Time | Speedup |
 | :--- | :---: | :---: | :---: | :---: |

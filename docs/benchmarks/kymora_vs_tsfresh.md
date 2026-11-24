@@ -13,11 +13,11 @@ While tsfresh extracts hundreds of exploratory features, its architecture requir
 | **Engine / Backend** | Rust + Rayon work-stealing | Python multiprocessing + IPC | Native multi-core CPU saturation |
 | **Extraction Time (1k × 500)** | **1.94 ms** | 23,540.62 ms (23.5 sec) | **12,106× faster** |
 | **Throughput** | **514,245 series/sec** | 42 series/sec | **12,106× throughput** |
-| **Normalized per-feature** | 0.0589 ms / feat | 30.30 ms / feat | **514× faster per feature** |
-| **Memory Overhead (10k × 500)** | **~2.29–3.33 MiB scratch** | **+410.3 MiB** | Bounded $O(T \times L)$ worker footprint |
+| **Normalized per-feature** | 0.0589 µs / feat | 30.30 µs / feat | **514× faster per feature** |
+| **Worker Scratch Memory** | **~2.29–3.33 MiB scratch** | **+410.3 MiB** | Bounded $O(T \times L)$ worker footprint |
 | **Input Format** | Direct 2D NumPy array | Long DataFrame melt required | No data transformation needed |
 | **GIL Behavior** | Fully released across execution | Subject to Python serialization | Full CPU thread utilization |
-| **Downstream RF Accuracy** | **83.12%** (`extended` profile) | **84.79%** (777 features) | Closes accuracy gap at 10,000× speed |
+| **Downstream RF Accuracy** | **79.96%** (`core33`, 1.94 ms) / **83.12%** (`extended`, 8.02 ms) | **84.79%** (777 feats, 23,540 ms) | Closes accuracy gap within ~1.7% at ~2,935× speed |
 
 ---
 
@@ -40,7 +40,7 @@ import kymora as km
 # Direct 2D array ingestion - zero copies:
 features = km.extract_features(X)  # X is shape (10000, 500)
 ```
-Total process memory overhead is bounded to tiny thread-local scratchpads (2–3 MiB), preventing OOM crashes on large datasets.
+Worker scratch memory overhead is bounded to thread-local scratchpads (~2.29–3.33 MiB across 16 Rayon threads at $N \le 10,000$), so total process memory is dominated almost entirely by the contiguous input buffer and preallocated output matrix without intermediate DataFrame duplication.
 
 ---
 

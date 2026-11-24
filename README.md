@@ -1,5 +1,5 @@
 # Time Series Feature Extraction Library — Kymora
-### High-Performance Python & Rust Time Series Feature Extraction. Up to 1,000× Faster than TSFEL, tsfresh, and catch22.
+### High-Performance Python & Rust Time Series Feature Extraction. Up to 1,000× Faster than TSFEL and tsfresh, and 95× Faster than catch22.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kymora.svg)](https://pypi.org/project/kymora/)
@@ -362,7 +362,7 @@ Kymora deliberately computes 33 high-signal, non-redundant features spanning all
 - **vs. TSFast:** Kymora provides zero-copy contiguous buffer ingestion, streaming rolling-window extractors (`StreamingExtractor`), and complete scikit-learn pipeline support (`KymoraTransformer`).
 
 #### Can I use Kymora as a drop-in replacement for TSFEL?
-Yes. Kymora provides `kymora.feature_extraction` and `kymora.domains` subpackages with `extract_features`, `get_features_by_domain`, and `calc_features` functions matching TSFEL's subpackage API structure with zero rewrites.
+Yes. Kymora provides `kymora.feature_extraction` and `kymora.domains` subpackages with `extract_by_domain`, `get_features_by_domain`, and `calc_features` functions matching TSFEL's subpackage API structure. Existing TSFEL code needs only import changes.
 
 #### How do I install Kymora?
 Install precompiled binary wheels directly from PyPI (Linux, macOS, and Windows supported; no compiler required):

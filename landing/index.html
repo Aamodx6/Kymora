@@ -95,7 +95,7 @@
                 "name": "How does Kymora compare to TSFEL, tsfresh, and catch22?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Kymora is 95.4x faster than catch22, 1,291x faster than TSFEL, and 12,106x faster than tsfresh on equivalent benchmarks, processing batches natively with GIL-released Rayon multi-threading and zero input buffer copying."
+                  "text": "On standard 1,000 series × 500 step benchmarks, Kymora computes its 33-feature catalog 95.4× faster than catch22 (22 features), 1,291× faster than TSFEL (156 features), and 12,106× faster than tsfresh (777 features), processing batches natively with GIL-released Rayon multi-threading and zero input buffer copying."
                 }
               },
               {
@@ -111,7 +111,7 @@
                 "name": "Can Kymora replace TSFEL in existing machine learning pipelines?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. Kymora provides drop-in TSFEL compatibility modules (kymora.domains, kymora.feature_extraction) and a Scikit-Learn KymoraTransformer with matching feature sets."
+                  "text": "Yes. Kymora provides TSFEL compatibility subpackages (kymora.domains, kymora.feature_extraction) and a Scikit-Learn KymoraTransformer for 2D batch inputs. For sliding windowing pipelines, use Kymora's dedicated StreamingExtractor."
                 }
               }
             ]

@@ -339,7 +339,7 @@ export const Hero: React.FC = () => {
               <strong className="font-bold text-[#000000]">
                 The high-performance Time Series Feature Extraction Library.
               </strong>{' '}
-              Kymora extracts 33 curated features at 514,000+ series/second—up to 1,000× faster than TSFEL and tsfresh with zero copy of input arrays and GIL-released Rayon parallel compute. Every number links back to the rows it came from.
+              Kymora extracts 33 curated features at 514,000+ series/second—up to 1,000× faster than TSFEL and tsfresh with direct contiguous buffer borrowing and GIL-released Rayon parallel compute. Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}
