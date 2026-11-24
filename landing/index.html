@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kymora · High-Performance Time Series Feature Extraction Library</title>
+    <title>Kymora · Time Series Feature Extraction Library (Python &amp; Rust)</title>
     <meta
       name="description"
-      content="High-throughput Python time-series feature extraction powered by a fast Rust core and Rayon parallelization. 33 curated features, 514,245 series/s on a laptop."
+      content="High-performance Time Series Feature Extraction Library for Python and Rust. 514,000+ series/s, zero-copy buffer borrowing, 33 curated features, 1,000x faster than TSFEL and tsfresh."
     />
     <meta name="author" content="Aamod Kumar" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta
       name="keywords"
-      content="time series feature extraction library, time series feature extraction, tsfel, tsfresh, catch22, time series classification, feature engineering, signal processing, rust python time series, mfcc, wavelet, kymora"
+      content="time series feature extraction library, time series feature extraction, python time series feature extraction, fast time series features, tsfel alternative, tsfresh alternative, catch22 python, tsfast, time series classification, feature engineering, signal processing, rust python time series, kymora"
     />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230B0C0A'><path d='M2 13h4l3-9 5 18 3-9h5'/></svg>" />
     <link rel="canonical" href="https://landing-drab-six-14.vercel.app/" />
@@ -77,6 +77,44 @@
               "name": "Aamod Kumar",
               "url": "https://github.com/Aamodx6"
             }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://landing-drab-six-14.vercel.app/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is Kymora?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Kymora is a high-performance Time Series Feature Extraction Library for Python, powered by a native Rust core. It computes 33 non-redundant time series features directly from NumPy arrays without memory copies at over 514,000 series per second."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does Kymora compare to TSFEL, tsfresh, and catch22?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "On standard 1,000 series × 500 step benchmarks, Kymora computes its 33-feature catalog 95.4× faster than catch22 (22 features), 1,291× faster than TSFEL (156 features), and 12,106× faster than tsfresh (777 features), processing batches natively with GIL-released Rayon multi-threading and zero input buffer copying."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I install Kymora?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Run 'pip install kymora'. Precompiled binary wheels are available on PyPI for Linux, macOS, and Windows with no Rust compiler required."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can Kymora replace TSFEL in existing machine learning pipelines?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Kymora provides TSFEL compatibility subpackages (kymora.domains, kymora.feature_extraction) and a Scikit-Learn KymoraTransformer for 2D batch inputs. For sliding windowing pipelines, use Kymora's dedicated StreamingExtractor."
+                }
+              }
+            ]
           }
         ]
       }

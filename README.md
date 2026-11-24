@@ -1,5 +1,5 @@
-# Kymora
-### High-Performance Time Series Feature Extraction Library. Rust Core. Python Ease.
+# Time Series Feature Extraction Library — Kymora
+### High-Performance Python & Rust Time Series Feature Extraction. Up to 1,000× Faster than TSFEL and tsfresh, and 95× Faster than catch22.
 
 [![PyPI - Version](https://img.shields.io/pypi/v/kymora.svg?color=blue)](https://pypi.org/project/kymora/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kymora.svg)](https://pypi.org/project/kymora/)
@@ -350,6 +350,28 @@ Kymora deliberately computes 33 high-signal, non-redundant features spanning all
 
 ---
 
+### Frequently Asked Questions (FAQ)
+
+#### What is Kymora?
+**Kymora** is a high-performance **Time Series Feature Extraction Library** for Python, powered by a native Rust engine. It extracts 33 mathematically non-redundant time series features directly from NumPy arrays without memory copies, achieving throughputs exceeding 514,000 series/second on modern multi-core processors.
+
+#### How does Kymora compare to TSFEL, tsfresh, and catch22?
+- **vs. TSFEL:** Kymora is **1,291× faster** in raw wall-clock time and **273× faster per feature**, while maintaining complete domain parity across statistical, temporal, and spectral features.
+- **vs. tsfresh:** Kymora is **12,106× faster**, eliminating expensive DataFrame melting, pickle serialization, and IPC multiprocessing overhead.
+- **vs. catch22:** Kymora is **95× faster** by processing batches natively with Rayon work-stealing parallelism instead of serial single-series Python iteration.
+- **vs. TSFast:** Kymora provides zero-copy contiguous buffer ingestion, streaming rolling-window extractors (`StreamingExtractor`), and complete scikit-learn pipeline support (`KymoraTransformer`).
+
+#### Can I use Kymora as a drop-in replacement for TSFEL?
+Yes. Kymora provides `kymora.feature_extraction` and `kymora.domains` subpackages with `extract_by_domain`, `get_features_by_domain`, and `calc_features` functions matching TSFEL's subpackage API structure. Existing TSFEL code needs only import changes.
+
+#### How do I install Kymora?
+Install precompiled binary wheels directly from PyPI (Linux, macOS, and Windows supported; no compiler required):
+```bash
+pip install kymora
+```
+
+---
+
 ### Contributing
 
 Contributions, bug reports, and PRs are welcome!
@@ -361,4 +383,4 @@ Please check [`CONTRIBUTING.md`](https://github.com/Aamodx6/Kymora/blob/main/CON
 
 Distributed under the **MIT License**. See [`LICENSE`](https://github.com/Aamodx6/Kymora/blob/main/LICENSE) for details.
 
-*Built with Rust and Python by [Aamod](https://github.com/Aamod007).*
+*Built with Rust and Python by [Aamod](https://github.com/Aamodx6).*

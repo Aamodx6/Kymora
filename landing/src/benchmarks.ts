@@ -45,7 +45,7 @@ export const BENCHMARK_DATA: BenchmarkItem[] = [
   {
     id: "kymora",
     name: "Kymora",
-    version: "0.8.2",
+    version: "0.8.3",
     language: "Rust + PyO3",
     featuresCount: 33,
     totalTimeMs: 1.94,
