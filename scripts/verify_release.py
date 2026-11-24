@@ -126,7 +126,7 @@ print("All smoke checks passed.")
 
 
 def test_in_isolated_venv(wheel_or_source: str, expected_version: str) -> bool:
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with tempfile.TemporaryDirectory(dir=str(REPO_ROOT), prefix=".venv_verify_") as tmpdir:
         venv_dir = Path(tmpdir) / "test_venv"
         print(f"Creating isolated venv at {venv_dir}...")
         res = subprocess.run([sys.executable, "-m", "venv", str(venv_dir)], capture_output=True)
@@ -172,7 +172,7 @@ def test_in_isolated_venv(wheel_or_source: str, expected_version: str) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Verify Kymora release artifacts and installation")
-    parser.add_argument("--version", default="0.8.2", help="Expected release version (default: 0.8.2)")
+    parser.add_argument("--version", default="0.8.3", help="Expected release version (default: 0.8.3)")
     parser.add_argument("--dist-dir", type=Path, default=REPO_ROOT / "dist", help="Path to dist directory")
     parser.add_argument("--install", choices=["pypi", "testpypi", "wheel"], default=None, help="Test install in venv")
     parser.add_argument("--wheel-path", type=str, default=None, help="Explicit path to wheel for testing")
