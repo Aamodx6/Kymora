@@ -1,11 +1,11 @@
 # API Reference
 
-Complete Python API specification for `kymora` v0.8.2.
+Complete Python API specification for `kymora` v0.8.3.
 
 ```python
 import kymora
 
-kymora.__version__  # "0.8.2"
+kymora.__version__  # "0.8.3"
 ```
 
 The package ships full type annotations and a `py.typed` marker for mypy and language servers.

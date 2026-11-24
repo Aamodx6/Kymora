@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 import numpy as np
-import pandas as pd
 
 
 def correlated_features(
@@ -25,12 +24,11 @@ def correlated_features(
     pd.DataFrame or np.ndarray
         Cleaned feature matrix with redundant collinear features removed.
     """
-    if isinstance(features, pd.DataFrame):
+    is_df = hasattr(features, "iloc") and hasattr(features, "to_numpy")
+    if is_df:
         mat = features.to_numpy()
-        is_df = True
     else:
         mat = np.asarray(features)
-        is_df = False
 
     if mat.shape[1] <= 1:
         return features
