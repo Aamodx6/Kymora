@@ -1,4 +1,0 @@
-feature_names: 33
-sha256: 8a1e27942b370ec886130db4f19ca973b2a1b36ea17823723c9d7afd1431af2e
-first: ['mean', 'std', 'var']
-last: ['dominant_frequency', 'spectral_centroid', 'spectral_entropy']

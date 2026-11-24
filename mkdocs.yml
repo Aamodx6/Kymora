@@ -8,8 +8,6 @@ edit_uri: edit/main/docs/
 
 exclude_docs: |
   internal/*
-  launch/*
-  arch_audit.md
 
 theme:
   name: material
