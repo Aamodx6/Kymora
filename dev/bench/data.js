@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795475554167,
+  "lastUpdate": 1795514044003,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -496,6 +496,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0582",
             "unit": "ms",
             "extra": "runs=30, cv=0.108"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "355a5eeacba5ce0121c23202b721911413cb3029",
+          "message": "chore(release): bump version to 0.8.3 and make pandas import lazy (#47)\n\n* chore(release): bump version to 0.8.3 and make pandas import lazy\n\n* fix(types): guard pandas type annotation in calc_features under TYPE_CHECKING\n\n* fix(test): remove manual PYTHONPATH override in test_import_kymora_without_pandas so wheel-test works",
+          "timestamp": "2026-11-24T15:22:16+05:30",
+          "tree_id": "46abc260c37432922de50740e8d90a9188e4d5fa",
+          "url": "https://github.com/Aamodx6/Kymora/commit/355a5eeacba5ce0121c23202b721911413cb3029"
+        },
+        "date": 1795514043242,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 5.9088,
+            "range": "0.0584",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.020"
           }
         ]
       }
