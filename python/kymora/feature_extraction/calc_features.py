@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import warnings
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 import numpy as np
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 from .. import _core
 from .features import (
