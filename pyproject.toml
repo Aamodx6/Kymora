@@ -14,14 +14,19 @@ authors = [{ name = "Aamod Kumar" }]
 requires-python = ">=3.10"
 dependencies = ["numpy>=2.2.6"]
 keywords = [
+    "time-series-feature-extraction-library",
     "time-series-feature-extraction",
     "time-series",
+    "time-series-analysis",
     "feature-extraction",
+    "feature-engineering",
+    "signal-processing",
     "tsfel",
     "tsfresh",
     "catch22",
-    "feature-engineering",
-    "signal-processing",
+    "tsfast",
+    "tsfresh-alternative",
+    "tsfel-alternative",
     "machine-learning",
     "rust",
 ]
@@ -51,7 +56,8 @@ docs = ["mkdocs>=1.6.1", "mkdocs-material>=9.7.7"]
 dev-parity = ["tsfresh>=0.21.2", "tsfel>=0.2.0", "pycatch22>=1.0.2"]
 
 [project.urls]
-Homepage = "https://github.com/Aamodx6/Kymora"
+Homepage = "https://landing-drab-six-14.vercel.app"
+Documentation = "https://aamodx6.github.io/Kymora/"
 Repository = "https://github.com/Aamodx6/Kymora"
 Issues = "https://github.com/Aamodx6/Kymora/issues"
 Changelog = "https://github.com/Aamodx6/Kymora/blob/main/CHANGELOG.md"

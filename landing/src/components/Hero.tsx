@@ -295,6 +295,18 @@ export const Hero: React.FC = () => {
   return (
     <section className="relative overflow-hidden pt-12 sm:pt-16 md:pt-20 lg:pt-24 pb-12 md:pb-16 lg:pb-20 font-sans">
       <div className="relative z-10 mx-auto max-w-[1248px] px-4 sm:px-6 lg:px-8">
+        {/* Category Badge with Semantic Keywords */}
+        <div className="mb-3 flex items-center gap-2">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-black/10 bg-white text-xs font-mono font-medium text-black shadow-xs">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Time Series Feature Extraction Library · Rust Core &amp; Python Ease</span>
+          </span>
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-100 text-emerald-800">
+            v0.8.3 on PyPI
+          </span>
+        </div>
+        <h1 className="sr-only">Kymora — High-Performance Time Series Feature Extraction Library in Rust and Python</h1>
+
         {/* 1. Large Two-Line Headline spanning full width across the top */}
         <div className="mb-6 lg:mb-8 w-full">
           <RowType
@@ -325,9 +337,9 @@ export const Hero: React.FC = () => {
             {/* Copy Lead */}
             <p className="text-[15px] sm:text-[15.5px] text-[#50524B] leading-[1.48] max-w-md">
               <strong className="font-bold text-[#000000]">
-                The time-series extractor that shows its work.
+                The high-performance Time Series Feature Extraction Library.
               </strong>{' '}
-              Kymora borrows contiguous NumPy buffers directly (no copy of the input), releases the GIL, and computes 33 features at 1.94 ms median per 1,000 series x 500 steps on an i7-13620H laptop (10 cores / 16 threads, exploratory — see Benchmarks). Every number links back to the rows it came from.
+              Kymora extracts 33 curated features at 514,000+ series/second—up to 1,000× faster than TSFEL and tsfresh with zero copy of input arrays and GIL-released Rayon parallel compute. Every number links back to the rows it came from.
             </p>
 
             {/* Action Buttons */}

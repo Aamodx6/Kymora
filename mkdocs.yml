@@ -1,5 +1,5 @@
-site_name: kymora
-site_description: High-performance Time Series Feature Extraction Library in Rust and Python.
+site_name: Kymora · Time Series Feature Extraction Library
+site_description: High-performance Time Series Feature Extraction Library in Rust and Python. Up to 1,000x faster alternative to TSFEL, tsfresh, and catch22.
 site_author: Aamod Kumar
 site_url: https://aamodx6.github.io/Kymora/
 repo_url: https://github.com/Aamodx6/Kymora
@@ -49,6 +49,8 @@ nav:
     - Parity matrix: parity_matrix.md
   - Benchmarks:
     - Benchmarks: benchmarks.md
+    - Kymora vs TSFEL: benchmarks/kymora_vs_tsfel.md
+    - Kymora vs tsfresh: benchmarks/kymora_vs_tsfresh.md
     - Feature mapping: benchmarks/feature_mapping.md
   - Project:
     - Contributing: contributing.md
