@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795514044003,
+  "lastUpdate": 1795520297677,
   "repoUrl": "https://github.com/Aamodx6/Kymora",
   "entries": {
     "Kymora Core33 1kx500 Benchmark": [
@@ -527,6 +527,37 @@ window.BENCHMARK_DATA = {
             "range": "0.0584",
             "unit": "ms",
             "extra": "runs=30, cv=0.020"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "119789532+Aamodx6@users.noreply.github.com",
+            "name": "Aamod",
+            "username": "Aamodx6"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7971cd2af33d842322e320a4e8c0606ff56b0d42",
+          "message": "feat(seo): scale search discovery across repository, landing website, and documentation (#49)\n\n* feat(seo): scale search discovery across repository, website, and documentation\n\n* docs(benchmarks): address CodeRabbit review feedback on units, compatibility, and precision",
+          "timestamp": "2026-11-24T17:06:59+05:30",
+          "tree_id": "f40ce192dac966b8043065a5f36bd2c9e8a9cc27",
+          "url": "https://github.com/Aamodx6/Kymora/commit/7971cd2af33d842322e320a4e8c0606ff56b0d42"
+        },
+        "date": 1795520297019,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "core33_1000x500",
+            "value": 4.8381,
+            "range": "0.0502",
+            "unit": "ms",
+            "extra": "runs=30, cv=0.015"
           }
         ]
       }
