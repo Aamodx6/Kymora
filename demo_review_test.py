@@ -1,7 +1,8 @@
-# Sample utility function for review agent demonstration
+# Updated test utility for review agent demo
 
-def fetch_user_data(user_id: int):
-    # Missing docstring and missing test coverage
-    # Security note: demo safe query pattern
-    query = f"SELECT * FROM users WHERE id = {user_id}"
-    return query
+def process_payment(amount: float, customer_id: int):
+    # Todo: add unit tests
+    # Flagged for quality review
+    # Potential SQL risk:
+    raw_query = f"SELECT * FROM accounts WHERE id = {customer_id}"
+    return raw_query
