@@ -1,7 +1,7 @@
-# Automated PR review demo test
+# Automated PR review demo test v2
 
 def process_payment(amount: float, customer_id: int):
-    # TODO: add input validation and unit tests
-    # Potential SQL injection risk:
+    # TODO: add input validation and tests
+    # CRITICAL: direct SQL interpolation
     raw_query = f"SELECT * FROM accounts WHERE id = {customer_id} AND active = 1"
     return raw_query
