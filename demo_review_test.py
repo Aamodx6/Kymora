@@ -1,8 +1,7 @@
-# Updated test utility for review agent demo
+# Automated PR review demo test
 
 def process_payment(amount: float, customer_id: int):
-    # Todo: add unit tests
-    # Flagged for quality review
-    # Potential SQL risk:
-    raw_query = f"SELECT * FROM accounts WHERE id = {customer_id}"
+    # TODO: add input validation and unit tests
+    # Potential SQL injection risk:
+    raw_query = f"SELECT * FROM accounts WHERE id = {customer_id} AND active = 1"
     return raw_query
