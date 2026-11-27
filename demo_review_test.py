@@ -1,4 +1,4 @@
-# Automated PR review live demo
+# Automated PR review live run
 
 def process_payment(amount: float, customer_id: int):
     # TODO: add input validation and tests
